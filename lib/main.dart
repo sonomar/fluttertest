@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import './home_screen.dart';
+import './collection_screen.dart';
+import './scan_screen.dart';
+import './community_screen.dart';
+import './profile_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -118,61 +123,6 @@ class _MyHomePageState extends State<MyHomePage> {
         showSelectedLabels: true,
         showUnselectedLabels: true,
       ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Home Screen'),
-    );
-  }
-}
-
-class CollectionScreen extends StatelessWidget {
-  const CollectionScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Collection Screen'),
-    );
-  }
-}
-
-class ScanScreen extends StatelessWidget {
-  const ScanScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Scan Screen'),
-    );
-  }
-}
-
-class CommunityScreen extends StatelessWidget {
-  const CommunityScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Community Screen'),
-    );
-  }
-}
-
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Profile Screen'),
     );
   }
 }
