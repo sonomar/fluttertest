@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import './home_screen.dart';
+import './collection_screen.dart';
+import './scan_screen.dart';
+import './community_screen.dart';
+import './profile_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -55,19 +60,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
+  int _currentIndex = 0;
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const CollectionScreen(),
+    const ScanScreen(),
+    const CommunityScreen(),
+    const ProfileScreen(),
+  ];
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -86,39 +86,42 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      body: _screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        type: BottomNavigationBarType.fixed,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.house_outlined),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.apps),
+            label: 'Collection',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code_scanner_outlined, size: 40),
+            label: 'Scan',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.public),
+            label: 'Community',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle_outlined),
+            label: 'Profile',
+          ),
+        ],
+        unselectedIconTheme: const IconThemeData(color: Colors.black),
+        selectedItemColor: Colors.amber[800],
+        unselectedItemColor: Colors.black,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
