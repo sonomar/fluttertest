@@ -25,13 +25,12 @@ CREATE TABLE Category (
 CREATE TABLE Project (
     ProjectId SERIAL PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
-    Attributed TEXT[] NOT NULL,
+    Attributed JSON NOT NULL,
     CreatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UpdatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     Location VARCHAR(255),
     Active BOOLEAN NOT NULL DEFAULT TRUE
 );
-
 -- Collectible Table
 CREATE TABLE Collectible (
     CollectibleId SERIAL PRIMARY KEY,
@@ -39,10 +38,10 @@ CREATE TABLE Collectible (
     CategoryId INT NOT NULL,
     ProjectId INT NOT NULL,
     Description TEXT,
-    ImageRef TEXT[],
-    VidRef TEXT[],
-    QRRef TEXT[],
-    EmbedRef TEXT[],
+    ImageRef JSON,
+    VidRef JSON,
+    QRRef JSON,
+    EmbedRef JSON,
     CreatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UpdatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     Active BOOLEAN NOT NULL DEFAULT TRUE,
