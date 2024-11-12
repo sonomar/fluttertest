@@ -35,8 +35,8 @@ CREATE TABLE Project (
 CREATE TABLE Collectible (
     CollectibleId SERIAL PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
-    CategoryId INT NOT NULL,
-    ProjectId INT NOT NULL,
+    CategoryId BIGINT UNSIGNED NOT NULL,
+    ProjectId BIGINT UNSIGNED NOT NULL,
     Description TEXT,
     ImageRef JSON,
     VidRef JSON,
@@ -52,9 +52,9 @@ CREATE TABLE Collectible (
 -- UserCollectible Table (Join Table)
 CREATE TABLE UserCollectible (
     UserCollectibleId SERIAL PRIMARY KEY,
-    OwnerId INT NOT NULL,
-    CollectibleId INT NOT NULL,
-    PreviousOwnerId INT,
+    OwnerId BIGINT UNSIGNED NOT NULL,
+    CollectibleId BIGINT UNSIGNED NOT NULL,
+    PreviousOwnerId BIGINT UNSIGNED,
     Mint INT NOT NULL,
     CreatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UpdatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -80,8 +80,8 @@ CREATE TABLE Sponsor (
 -- CollectibleSponsor Table (Join Table)
 CREATE TABLE CollectibleSponsor (
     CollectibleSponsorId SERIAL PRIMARY KEY,
-    CollectibleId INT NOT NULL,
-    SponsorId INT NOT NULL,
+    CollectibleId BIGINT UNSIGNED NOT NULL,
+    SponsorId BIGINT UNSIGNED NOT NULL,
     SponsorMessage TEXT,
     Active BOOLEAN NOT NULL DEFAULT TRUE,
     FOREIGN KEY (CollectibleId) REFERENCES Collectible(CollectibleId) ON DELETE CASCADE ON UPDATE CASCADE,
