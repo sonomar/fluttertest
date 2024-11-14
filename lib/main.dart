@@ -4,6 +4,7 @@ import './collection_screen.dart';
 import './scan_screen.dart';
 import './community_screen.dart';
 import './profile_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -68,6 +69,29 @@ class _MyHomePageState extends State<MyHomePage> {
     const CommunityScreen(),
     const ProfileScreen(),
   ];
+
+  var _username = 'Guest';
+
+  @override
+  void initState() {
+    super.initState();
+    _setUsername();
+  }
+
+  Future<void> _setUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _username = prefs.setString('username', _username) as String;
+    });
+  }
+
+  Future<void> _getUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _username = prefs.getString('username') as String;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
