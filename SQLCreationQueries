@@ -1,0 +1,89 @@
+#CREATE DATABASE kloopocar;
+#USE kloopocar;
+
+-- User Table
+CREATE TABLE User (
+    UserId SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    deviceId VARCHAR(255),
+    CreatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UpdatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    Email VARCHAR(255),
+    UserType ENUM('unregistered', 'username', 'email', 'admin') DEFAULT 'unregistered',
+    Active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- Category Table
+CREATE TABLE Category (
+    CategoryId SERIAL PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    CreatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UpdatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Project Table
+CREATE TABLE Project (
+    ProjectId SERIAL PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Attributed JSON NOT NULL,
+    CreatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UpdatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    Location VARCHAR(255),
+    Active BOOLEAN NOT NULL DEFAULT TRUE
+);
+-- Collectible Table
+CREATE TABLE Collectible (
+    CollectibleId SERIAL PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    CategoryId BIGINT UNSIGNED NOT NULL,
+    ProjectId BIGINT UNSIGNED NOT NULL,
+    Description TEXT,
+    ImageRef JSON,
+    VidRef JSON,
+    QRRef JSON,
+    EmbedRef JSON,
+    CreatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UpdatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    Active BOOLEAN NOT NULL DEFAULT TRUE,
+    FOREIGN KEY (CategoryId) REFERENCES Category(CategoryId) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ProjectId) REFERENCES Project(ProjectId) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- UserCollectible Table (Join Table)
+CREATE TABLE UserCollectible (
+    UserCollectibleId SERIAL PRIMARY KEY,
+    OwnerId BIGINT UNSIGNED NOT NULL,
+    CollectibleId BIGINT UNSIGNED NOT NULL,
+    PreviousOwnerId BIGINT UNSIGNED,
+    Mint INT NOT NULL,
+    CreatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UpdatedDt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    Active BOOLEAN NOT NULL DEFAULT TRUE,
+    FOREIGN KEY (OwnerId) REFERENCES User(UserId) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (CollectibleId) REFERENCES Collectible(CollectibleId) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (PreviousOwnerId) REFERENCES User(UserId) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Sponsor Table
+CREATE TABLE Sponsor (
+    SponsorId SERIAL PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Description TEXT,
+    LocationCity VARCHAR(255),
+    LocationCountry VARCHAR(255),
+    LondonZip VARCHAR(20),
+    PrimaryContactName VARCHAR(255),
+    PrimaryContactEmail VARCHAR(255),
+    PrimaryContactPhone BIGINT
+);
+
+-- CollectibleSponsor Table (Join Table)
+CREATE TABLE CollectibleSponsor (
+    CollectibleSponsorId SERIAL PRIMARY KEY,
+    CollectibleId BIGINT UNSIGNED NOT NULL,
+    SponsorId BIGINT UNSIGNED NOT NULL,
+    SponsorMessage TEXT,
+    Active BOOLEAN NOT NULL DEFAULT TRUE,
+    FOREIGN KEY (CollectibleId) REFERENCES Collectible(CollectibleId) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (SponsorId) REFERENCES Sponsor(SponsorId) ON DELETE CASCADE ON UPDATE CASCADE
+);

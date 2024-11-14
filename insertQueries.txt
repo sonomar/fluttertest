@@ -1,0 +1,50 @@
+--User
+INSERT INTO User (username, deviceId, Email, UserType, Active)
+VALUES
+('admin', 'admindevice', 'admin@kloopocar.com', 'admin', TRUE),
+('user1', 'device123', 'user1@example.com', 'username', TRUE),
+('user2', 'device456', 'user2@example.com', 'email', TRUE);
+
+--Category
+INSERT INTO Category (Name)
+VALUES
+('Art'),
+('Music'),
+('Literature');
+
+
+--Project
+INSERT INTO Project (Name, Attributed, Location, Active)
+VALUES
+('Kloopocar', '["Composer1", "Composer2"]', 'London', TRUE),
+('Project A', '["Artist1", "Artist2"]', 'New York', TRUE),
+('Project B', '["Composer1", "Composer2"]', 'London', TRUE);
+
+
+-Collectible
+INSERT INTO Collectible (Name, CategoryId, ProjectId, Description, ImageRef, VidRef, QRRef, EmbedRef, Active)
+VALUES
+('Car 1', 1, 1, 'A beautiful car art', '["image1.jpg", "image2.png"]', '["video1.mp4"]', '["qr1.png"]', '["embed1.html"]', TRUE),
+('Painting 1', 1, 1, 'A beautiful painting', '["image1.jpg", "image2.png"]', '["video1.mp4"]', '["qr1.png"]', '["embed1.html"]', TRUE),
+('Song 1', 2, 2, 'A catchy song', '["song1.jpg"]', '["song1.mp3"]', NULL, '["embed2.html"]', TRUE);
+
+
+--UserCollectible
+INSERT INTO UserCollectible (OwnerId, CollectibleId, PreviousOwnerId, Mint, Active)
+VALUES
+(2, 1, 1, 1, TRUE),
+(3, 2, 1, 2, TRUE);
+
+
+--Sponsor
+INSERT INTO Sponsor (Name, Description, LocationCity, LocationCountry, LondonZip, PrimaryContactName, PrimaryContactEmail, PrimaryContactPhone)
+VALUES
+('Sponsor A', 'A generous sponsor', 'New York', 'USA', '10001', 'John Doe', 'johndoe@sponsor.com', 1234567890),
+('Sponsor B', 'Another great sponsor', 'London', 'UK', 'WC2H 7DG', 'Jane Smith', 'janesmith@sponsor.com', 9876543210);
+
+
+--CollectibleSponsor
+INSERT INTO CollectibleSponsor (CollectibleId, SponsorId, SponsorMessage, Active)
+VALUES
+(1, 1, 'A special message from Sponsor A', TRUE),
+(2, 2, 'A kind message from Sponsor B', TRUE);
