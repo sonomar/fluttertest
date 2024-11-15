@@ -7,9 +7,9 @@ This section deals with how to create a lambda function for the backend
 
 - [The link to follow steps to create and deploy the lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/python-package.html)
 
-- [Secrets]([https://docs.flutter.dev/get-started/codelab](https://eu-central-1.console.aws.amazon.com/secretsmanager/listsecrets?region=eu-central-1))
+- [Secrets](https://eu-central-1.console.aws.amazon.com/secretsmanager/listsecrets?region=eu-central-1)
   
-- [RDS database]([https://docs.flutter.dev/get-started/codelab](https://eu-central-1.console.aws.amazon.com/rds/home?region=eu-central-1#databases:))
+- [RDS database](https://eu-central-1.console.aws.amazon.com/rds/home?region=eu-central-1#databases:)
   
 - [SecretManagerReadAndWrite](https://us-east-1.console.aws.amazon.com/iam/home?region=eu-central-1#/policies/details/arn%3Aaws%3Aiam%3A%3Aaws%3Apolicy%2FSecretsManagerReadWrite?section=entities_attached)
   
