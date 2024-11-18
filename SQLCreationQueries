@@ -87,3 +87,6 @@ CREATE TABLE CollectibleSponsor (
     FOREIGN KEY (CollectibleId) REFERENCES Collectible(CollectibleId) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (SponsorId) REFERENCES Sponsor(SponsorId) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+ALTER TABLE User
+ADD CONSTRAINT UC_User UNIQUE (username, Email, deviceId);
