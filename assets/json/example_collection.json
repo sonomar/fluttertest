@@ -1,46 +1,43 @@
 {
-  "collectibles": [
+  "collections": [
     {
-      "collectibleId": 1,
-      "name": "item-test1",
-      "category": 1,
-      "collection": 1,
-      "description": "this is item test 1",
+      "collectionId": 1,
+      "name": "collection-test1",
+      "description": "this is collection test 1",
       "imageRef": "assets/images/paint.jpg",
       "vidRef": "assets/images/paint.jpg",
       "QRRef": "assets/images/paint.jpg",
       "EmbedRef": "assets/images/paint.jpg",
       "createdDt": "2024-11-18 10:36:22.640",
       "updatedDt": "2024-11-18 10:36:22.640",
-      "active": true
+      "active": true,
+      "child": "collectibles"
     },
     {
-      "collectibleId": 2,
-      "name": "item-test2",
-      "category": 1,
-      "collection": 1,
-      "description": "this is item test 2",
+      "collectionId": 2,
+      "name": "collection-test2",
+      "description": "this is collection test 2",
       "imageRef": "assets/images/car1.jpg",
       "vidRef": "assets/images/car1.jpg",
       "QRRef": "assets/images/car1.jpg",
       "EmbedRef": "assets/images/car1.jpg",
       "createdDt": "2024-11-18 10:36:22.640",
       "updatedDt": "2024-11-18 10:36:22.640",
-      "active": true
+      "active": true,
+      "child": "other2"
     },
     {
-      "collectibleId": 3,
-      "name": "item-test3",
-      "category": 1,
-      "collection": 1,
-      "description": "this is item test 3",
+      "collectionId": 3,
+      "name": "collection-test3",
+      "description": "this is collection test 3",
       "imageRef": "assets/images/car2.jpg",
       "vidRef": "assets/images/car2.jpg",
       "QRRef": "assets/images/car2.jpg",
       "EmbedRef": "assets/images/car2.jpg",
       "createdDt": "2024-11-18 10:36:22.640",
       "updatedDt": "2024-11-18 10:36:22.640",
-      "active": true
+      "active": true,
+      "child": "other"
     }
   ]
 }
