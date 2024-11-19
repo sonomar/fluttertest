@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import './collectible.dart';
 import 'dart:convert';
 
 class Collection extends StatefulWidget {
@@ -32,6 +33,7 @@ class _CollectionState extends State<Collection> {
 
   @override
   Widget build(BuildContext context) {
+    print("HELLO EVERYONE, THIS IS THE ${_items}");
     return ListView(padding: const EdgeInsets.all(8), children: [
       Column(children: [
         for (int i = 0; i < _items.length; i++) ...[
@@ -42,7 +44,16 @@ class _CollectionState extends State<Collection> {
           ]),
           Material(
               child: InkWell(
-            onTap: () {}, // Image tapped
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => Collectible(
+                        selectedCollectible: _items[
+                            i]) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
+                    ),
+              );
+            }, // Image tapped
             splashColor: Colors.white10, // Splash color over image
             child: Ink.image(
               fit: BoxFit.cover, // Fixes border issues
