@@ -43,7 +43,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
           ]),
           InkWell(
             onTap: () {
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => Collection(
