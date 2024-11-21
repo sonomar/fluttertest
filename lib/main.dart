@@ -4,7 +4,8 @@ import './collection_screen.dart';
 import './scan_screen.dart';
 import './community_screen.dart';
 import './profile_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,16 +35,17 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        fontFamily: 'ChakraPetch',
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Kloppocar App Home'),
+      home: const MyHomePage(
+          title: 'Kloppocar App Home', qrcode: 'Scan a Collectible!'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({super.key, required this.title, required this.qrcode});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -55,42 +57,48 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
+  final String qrcode;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+late List<Widget> _screens;
+
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const CollectionScreen(),
-    const ScanScreen(),
-    const CommunityScreen(),
-    const ProfileScreen(),
-  ];
 
-  var _username = 'Guest';
+  final PageStorageBucket bucket = PageStorageBucket();
+
+  // var _username = 'Guest';
 
   @override
   void initState() {
     super.initState();
-    _setUsername();
+    // _setUsername();
+
+    _screens = [
+      HomeScreen(key: const PageStorageKey('home'), qrcode: widget.qrcode),
+      const CollectionScreen(key: PageStorageKey('collection')),
+      const ScanScreen(key: PageStorageKey('scan')),
+      const CommunityScreen(key: PageStorageKey('community')),
+      const ProfileScreen(key: PageStorageKey('profile')),
+    ];
   }
 
-  Future<void> _setUsername() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _username = prefs.setString('username', _username) as String;
-    });
-  }
+  // Future<void> _setUsername() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     _username = prefs.setString('username', _username) as String;
+  //   });
+  // }
 
-  Future<void> _getUsername() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _username = prefs.getString('username') as String;
-    });
-  }
+  // Future<void> _getUsername() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     _username = prefs.getString('username') as String;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -101,16 +109,10 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      body: PageStorage(
+        bucket: bucket,
+        child: _screens[_currentIndex],
       ),
-      body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

@@ -11,7 +11,6 @@ class Collectible extends StatefulWidget {
 class _CollectibleState extends State<Collectible> {
   @override
   Widget build(BuildContext context) {
-    // ignore: avoid_print
     return Scaffold(
         appBar: AppBar(
             leading: IconButton(
@@ -21,25 +20,29 @@ class _CollectibleState extends State<Collectible> {
             title: Text(widget.selectedCollectible["name"])),
         body: ListView(padding: const EdgeInsets.all(8), children: [
           Column(children: [
-            Row(children: [
-              Text(widget.selectedCollectible["name"],
-                  style: const TextStyle(
-                      fontSize: 30, fontWeight: FontWeight.w700))
-            ]),
+            Text(widget.selectedCollectible["name"],
+                style:
+                    const TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
             Material(
+                borderRadius: BorderRadius.circular(25.0),
                 child: InkWell(
-              onTap: () {}, // Image tapped
-              splashColor: Colors.white10, // Splash color over image
-              child: Ink.image(
-                fit: BoxFit.cover, // Fixes border issues
-                width: 100,
-                height: 100,
-                image: const AssetImage("assets/images/car2.jpg"),
-              ),
-            )),
+                  borderRadius: BorderRadius.circular(25.0),
+                  onTap: () {}, // Image tapped
+                  splashColor: Colors.white10, // Splash color over image
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      image: const DecorationImage(
+                        image: AssetImage("assets/images/car2.jpg"),
+                        fit: BoxFit.cover,
+                      ),
+                    ), // Fixes border issues
+                    height: 400,
+                  ),
+                )),
             Text(widget.selectedCollectible["description"],
                 style:
-                    const TextStyle(fontSize: 30, fontWeight: FontWeight.w700))
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w700))
           ])
         ]));
   }

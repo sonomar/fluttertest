@@ -33,37 +33,45 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(padding: const EdgeInsets.all(8), children: [
-      Column(children: [
-        for (int i = 0; i < _collections.length; i++) ...[
-          Row(children: [
-            Text(_collections[i]["name"],
-                style:
-                    const TextStyle(fontSize: 30, fontWeight: FontWeight.w700))
-          ]),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Collection(
-                        selectedCollection: _collections[
-                            i]) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text("Collections"),
+        ),
+        body: GridView.count(
+            primary: false,
+            padding: const EdgeInsets.all(20),
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            crossAxisCount: 2,
+            children: <Widget>[
+              for (int i = 0; i < _collections.length; i++) ...[
+                Column(children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Collection(
+                                selectedCollection: _collections[
+                                    i]) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
+                            ),
+                      );
+                    }, // Image tapped
+                    splashColor: Colors.white10, // Splash color over image
+                    child: Ink.image(
+                      fit: BoxFit.cover, // Fixes border issues
+                      height: 150,
+                      image: AssetImage(_collections[i]["imageRef"]),
                     ),
-              );
-            }, // Image tapped
-            splashColor: Colors.white10, // Splash color over image
-            child: Ink.image(
-              fit: BoxFit.cover, // Fixes border issues
-              width: 100,
-              height: 100,
-              image: AssetImage(_collections[i]["imageRef"]),
-            ),
-          ),
-          Text(_collections[i]["description"],
-              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w700))
-        ]
-      ])
-    ]);
+                  ),
+                  Text(_collections[i]["name"],
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.w700)),
+                  Text(_collections[i]["description"],
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w700))
+                ])
+              ]
+            ]));
   }
 }
