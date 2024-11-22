@@ -16,3 +16,10 @@ This section deals with how to create a lambda function for the backend
 - [Video link for Lambda function](https://www.youtube.com/watch?v=3Ar1ABlD_Vs&t=99s&ab_channel=TinyTechnicalTutorials)
 
 
+
+
+aws cognito-idp initiate-auth \
+    --client-id 3habrhuviqskit3ma595m5dp0b \
+    --auth-flow USER_PASSWORD_AUTH \
+    --auth-parameters USERNAME=koolankit3@gmail.com,PASSWORD=123456\
+    --region eu-central-1
