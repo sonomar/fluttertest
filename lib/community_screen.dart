@@ -46,24 +46,33 @@ class _CommunityScreenState extends State<CommunityScreen> {
             children: <Widget>[
               for (int i = 0; i < _commCollections.length; i++) ...[
                 Column(children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Collection(
-                                selectedCollection: _commCollections[
-                                    i]) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
+                  Material(
+                      borderRadius: BorderRadius.circular(25.0),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(25.0),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Collection(
+                                    selectedCollection: _commCollections[
+                                        i]) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
+                                ),
+                          );
+                        }, // Image tapped
+                        splashColor: Colors.white10, // Splash color over image
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            image: DecorationImage(
+                              image:
+                                  AssetImage(_commCollections[i]["imageRef"]),
+                              fit: BoxFit.cover,
                             ),
-                      );
-                    }, // Image tapped
-                    splashColor: Colors.white10, // Splash color over image
-                    child: Ink.image(
-                      fit: BoxFit.cover, // Fixes border issues
-                      height: 150,
-                      image: AssetImage(_commCollections[i]["imageRef"]),
-                    ),
-                  ),
+                          ), // Fixes border issues
+                          height: 150,
+                        ),
+                      )),
                   Text(_commCollections[i]["name"],
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.w700)),
