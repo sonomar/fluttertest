@@ -28,12 +28,31 @@ class _HomeScreenState extends State<HomeScreen> {
                       style:
                           TextStyle(fontSize: 30, fontWeight: FontWeight.w700))
                 ]),
-                const Row(children: [
-                  Image(
-                    image: AssetImage("assets/images/car2.jpg"),
-                    width: 300.0,
-                    height: 350.0,
-                  )
+                Row(children: [
+                  Builder(builder: (context) {
+                    if (widget.qrcode != 'Scan a Collectible!') {
+                      return Container(
+                          height: 300,
+                          width: 400,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            image: const DecorationImage(
+                              image: AssetImage("assets/images/car2.jpg"),
+                              fit: BoxFit.cover,
+                            ),
+                          ));
+                    }
+                    return Container(
+                        height: 300,
+                        width: 400,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          image: const DecorationImage(
+                            image: AssetImage("assets/images/car2.jpg"),
+                            fit: BoxFit.cover,
+                          ),
+                        ));
+                  })
                 ]),
                 Row(children: [
                   Text(widget.qrcode,
