@@ -4,7 +4,7 @@ import './collection_screen.dart';
 import './scan_screen.dart';
 import './community_screen.dart';
 import './profile_screen.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -144,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
         unselectedIconTheme: const IconThemeData(color: Colors.black),
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: const Color(0xffd622ca),
         unselectedItemColor: Colors.black,
         showSelectedLabels: true,
         showUnselectedLabels: true,
