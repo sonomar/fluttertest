@@ -90,3 +90,6 @@ CREATE TABLE CollectibleSponsor (
 
 ALTER TABLE User
 ADD CONSTRAINT UC_User UNIQUE (username, Email, deviceId);
+
+ALTER TABLE User
+ADD CONSTRAINT UC_User_Username UNIQUE (username);
