@@ -1,4 +1,7 @@
+import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:flutter/material.dart';
+import '../auth/register.dart';
+import '../auth/authenticate.dart';
 
 class UserSettings extends StatefulWidget {
   const UserSettings({super.key});
@@ -18,6 +21,86 @@ class _UserSettingsState extends State<UserSettings> {
               onPressed: () => Navigator.pop(context),
             ),
             title: const Text("User Settings")),
-        body: const Text("add username form and add email form"));
+        body: ListView(
+          padding: const EdgeInsets.all(8),
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              height: 50,
+              child: Material(
+                  child: InkWell(
+                onTap: () {
+                  signUpUser();
+                }, // Image tapped
+                splashColor: Colors.white10, // Splash color over image
+                child: Ink(
+                    height: 50,
+                    width: 100,
+                    child: const Center(child: Text("Sign Up"))),
+              )),
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              height: 50,
+              child: Material(
+                  child: InkWell(
+                onTap: () {
+                  authenticateUser();
+                }, // Image tapped
+                splashColor: Colors.white10, // Splash color over image
+                child: Ink(
+                    height: 50,
+                    width: 100,
+                    child: const Center(child: Text("AuthenticateUser"))),
+              )),
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              height: 50,
+              child: Material(
+                  child: InkWell(
+                onTap: () {
+                  emailConfirmUser();
+                }, // Image tapped
+                splashColor: Colors.white10, // Splash color over image
+                child: Ink(
+                    height: 50,
+                    width: 100,
+                    child:
+                        const Center(child: Text("Confirm User Email Code"))),
+              )),
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              height: 50,
+              child: Material(
+                  child: InkWell(
+                onTap: () {
+                  getUserAttr();
+                }, // Image tapped
+                splashColor: Colors.white10, // Splash color over image
+                child: Ink(
+                    height: 50,
+                    width: 100,
+                    child: const Center(child: Text("Get User Attributes"))),
+              )),
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              height: 50,
+              child: Material(
+                  child: InkWell(
+                onTap: () {
+                  logOut();
+                }, // Image tapped
+                splashColor: Colors.white10, // Splash color over image
+                child: Ink(
+                    height: 50,
+                    width: 100,
+                    child: const Center(child: Text("Sign Out"))),
+              )),
+            ),
+          ],
+        ));
   }
 }

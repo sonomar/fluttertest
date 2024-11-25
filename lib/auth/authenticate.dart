@@ -1,13 +1,14 @@
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final userPool = CognitoUserPool(
-  'ap-southeast-1_xxxxxxxxx',
-  'xxxxxxxxxxxxxxxxxxxxxxxxxx',
+  'eu-central-1_flxgJwy19',
+  '3habrhuviqskit3ma595m5dp0b',
 );
-final cognitoUser = CognitoUser('email@inspire.my', userPool);
+final cognitoUser = CognitoUser('lawsonmarlowe@gmail.com', userPool);
 final authDetails = AuthenticationDetails(
-  username: 'email@inspire.my',
-  password: 'Password001',
+  username: 'lawsonmarlowe@gmail.com',
+  password: 'password001',
 );
 
 Future<void> authenticateUser() async {
@@ -33,7 +34,10 @@ Future<void> authenticateUser() async {
   } catch (e) {
     print(e);
   }
-  print(session?.getAccessToken().getJwtToken());
+  final prefs = await SharedPreferences.getInstance();
+  final token = session?.getAccessToken().getJwtToken();
+  session != null;
+  prefs.setString('jwtCode', token ?? 'Error Loggin In');
 }
 
 Future<void> getUserAttr() async {
@@ -44,10 +48,11 @@ Future<void> getUserAttr() async {
     print(e);
   }
   attributes?.forEach((attribute) {
+    print('USER ATTRIBUTES:');
     print('attribute ${attribute.getName()} has value ${attribute.getValue()}');
   });
 }
 
 Future<void> logOut() async {
-  await cognitoUser.globalSignOut();
+  await cognitoUser.signOut();
 }
