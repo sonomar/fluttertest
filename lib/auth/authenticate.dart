@@ -36,8 +36,10 @@ Future<void> authenticateUser() async {
   }
   final prefs = await SharedPreferences.getInstance();
   final token = session?.getAccessToken().getJwtToken();
+  final idToken = session?.getIdToken().getJwtToken();
   session != null;
   prefs.setString('jwtCode', token ?? 'Error Loggin In');
+  prefs.setString('jwtIdCode', idToken ?? 'No ID Token');
 }
 
 Future<void> getUserAttr() async {
