@@ -39,6 +39,7 @@ Future<void> authenticateUser() async {
   final idToken = session?.getIdToken().getJwtToken();
   session != null;
   prefs.setString('jwtCode', token ?? 'Error Loggin In');
+  print(token);
   prefs.setString('jwtIdCode', idToken ?? 'No ID Token');
 }
 
