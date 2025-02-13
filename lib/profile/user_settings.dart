@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../auth/register.dart';
 import '../auth/authenticate.dart';
-import '../api/collection.dart';
+import '../api/collectible.dart';
 
 class UserSettings extends StatefulWidget {
   const UserSettings({super.key});

@@ -1,18 +1,14 @@
-import 'package:http/http.dart' as http;
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:amazon_cognito_identity_dart_2/sig_v4.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 Future<String> _getJWTIdCode() async {
-  // ignore: avoid_print
-  print('STEP 2');
   final prefs = await SharedPreferences.getInstance();
   return prefs.getString('jwtIdCode') as String;
 }
 
 Future<String> _getJWTCode() async {
-  // ignore: avoid_print
-  print('STEP 2');
   final prefs = await SharedPreferences.getInstance();
   return prefs.getString('jwtCode') as String;
 }
@@ -22,24 +18,17 @@ final userPool = CognitoUserPool(
   '3habrhuviqskit3ma595m5dp0b',
 );
 
-void getAllCollectibles() async {
-  // ignore: avoid_print
-  print('STEP 1');
+final jwtIdCode = _getJWTIdCode();
+final jwtCode = _getJWTCode();
+
+const endpoint =
+    'https://mnj4pgmr1h.execute-api.eu-central-1.amazonaws.com/kloopocar_dev';
+
+Future<AwsSigV4Client> getCredentials() async {
   final credentials = CognitoCredentials(
       'eu-central-1:a053a3b2-6679-43f3-80b9-bd9f105e404a', userPool);
-  var code = await _getJWTIdCode();
-  var userCode = await _getJWTCode();
-  // ignore: avoid_print
-  print('CODE: $code');
+  var code = await jwtIdCode;
   await credentials.getAwsCredentials(code);
-  print(credentials.accessKeyId);
-  print(credentials.secretAccessKey);
-  print(credentials.sessionToken);
-  // ignore: avoid_print
-
-  const endpoint =
-      'https://mnj4pgmr1h.execute-api.eu-central-1.amazonaws.com/kloopocar_dev';
-
   final awsSigV4Client = AwsSigV4Client(
       credentials.accessKeyId ?? 'no access key found',
       credentials.secretAccessKey ?? 'no secret key found',
@@ -47,19 +36,26 @@ void getAllCollectibles() async {
       serviceName: 'appsync',
       sessionToken: credentials.sessionToken,
       region: 'eu-central-1');
+  return awsSigV4Client;
+}
 
-  final signedRequest = SigV4Request(awsSigV4Client,
+Future getQuery(path, headers, query, body) async {
+  final userCode = await jwtCode;
+  final amazonCredentials = await getCredentials();
+  final signedRequest = SigV4Request(amazonCredentials,
       method: 'GET',
-      path: '/getAllCollectibles',
-      headers: {'Authorization': code},
+      path: path,
+      headers: headers,
+      queryParams: query,
       // queryParams: Map<String, String>.from({'tracking': 'x123'}),
-      body: Map<String, dynamic>.from({}));
+      body: body);
 
   http.Response? response;
+
   try {
     response = await http.get(
       Uri.parse(signedRequest.url ?? 'no request found'),
-      headers: {'Authorization': userCode ?? 'none found'},
+      headers: {'Authorization': userCode},
     );
   } catch (e) {
     // ignore: avoid_print
