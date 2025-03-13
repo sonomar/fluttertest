@@ -251,6 +251,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         )),
                     sectionHeader('CHALLENGE'),
                     challengeBox(),
+                    challengeBox(),
+                    sectionHeader('Nachrichten'),
+                    const Text('list of news items here'),
                   ],
                 ))));
   }
