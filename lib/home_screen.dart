@@ -128,33 +128,32 @@ class _HomeScreenState extends State<HomeScreen> {
                     ]),
                     Padding(
                         padding: const EdgeInsets.only(top: 20.0),
-                        child: Row(children: [
-                          Builder(builder: (context) {
-                            if (widget.qrcode != 'Scan a Collectible!') {
-                              return Container(
-                                  height: 300,
-                                  width: 400,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    image: const DecorationImage(
-                                      image:
-                                          AssetImage("assets/images/car2.jpg"),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ));
-                            }
-                            return Container(
-                                height: 300,
-                                width: 400,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  image: const DecorationImage(
-                                    image: AssetImage("assets/images/car2.jpg"),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ));
-                          })
-                        ])),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Builder(builder: (context) {
+                                if (widget.qrcode != 'Scan a Collectible!') {
+                                  return Container(
+                                      height: 600,
+                                      width: 400,
+                                      decoration: const BoxDecoration(
+                                        image: DecorationImage(
+                                          image: AssetImage(
+                                              "assets/images/card1.jpg"),
+                                        ),
+                                      ));
+                                }
+                                return Container(
+                                    height: 600,
+                                    width: 400,
+                                    decoration: const BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            "assets/images/card1.jpg"),
+                                      ),
+                                    ));
+                              })
+                            ])),
                     Text(widget.qrcode,
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.w700)),
