@@ -23,6 +23,75 @@ Widget sectionHeader(String header) {
       ]));
 }
 
+Widget challengeBox() {
+  return Padding(
+      padding: const EdgeInsets.all(30.0),
+      child: Container(
+          padding: const EdgeInsets.only(bottom: 20.0),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: Colors.black,
+              )),
+          child: Column(children: [
+            Container(
+                padding: const EdgeInsets.all(20.0),
+                alignment: Alignment.topLeft,
+                decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10)),
+                    border: Border.all(
+                      color: Colors.black,
+                    )),
+                child: const Text('Challenge',
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontStyle: FontStyle.italic))),
+            const Padding(
+              padding: EdgeInsets.only(
+                  top: 20, left: 10.0, right: 10.0, bottom: 10.0),
+              child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                CircleAvatar(backgroundColor: Colors.red, child: Text('LM')),
+                Padding(
+                    padding: EdgeInsets.only(left: 10.0),
+                    child: SizedBox(
+                        width: 300,
+                        child: Text(
+                            'Vervollständige die Kloppocar-Puzzle-Collection.',
+                            style:
+                                TextStyle(fontSize: 20, color: Colors.black))))
+              ]),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 15.0),
+              child: LinearPercentIndicator(
+                animation: true,
+                animationDuration: 2000,
+                lineHeight: 14.0,
+                percent: 0.5,
+                backgroundColor: Colors.grey,
+                // ignore: deprecated_member_use
+                barRadius: const Radius.circular(90),
+                progressColor: Colors.purple,
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('[collection_name]',
+                        style: TextStyle(fontSize: 12, color: Colors.black)),
+                    Text('[x/y]',
+                        style: TextStyle(fontSize: 12, color: Colors.black))
+                  ]),
+            ),
+          ])));
+}
+
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
@@ -181,6 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         )),
                     sectionHeader('CHALLENGE'),
+                    challengeBox(),
                   ],
                 ))));
   }
