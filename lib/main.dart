@@ -4,6 +4,7 @@ import './collection_screen.dart';
 import './scan_screen.dart';
 import './community_screen.dart';
 import './profile_screen.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 // import 'package:google_fonts/google_fonts.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 
