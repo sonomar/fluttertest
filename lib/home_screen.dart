@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:babylonjs_viewer/babylonjs_viewer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.qrcode});
@@ -22,6 +21,13 @@ Widget sectionHeader(String header) {
               backgroundColor: Colors.white,
             )),
       ]));
+}
+
+Widget objectViewer() {
+  return const SizedBox(
+    child: Text('[collection_name]',
+        style: TextStyle(fontSize: 12, color: Colors.black)),
+  );
 }
 
 Widget challengeBox() {
@@ -127,6 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       CircleAvatar(
                           backgroundColor: Colors.white, child: Text('LM')),
                     ]),
+                    objectViewer(),
                     Padding(
                         padding: const EdgeInsets.only(top: 20.0),
                         child: Row(
