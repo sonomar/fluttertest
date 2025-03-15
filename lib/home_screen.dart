@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:babylonjs_viewer/babylonjs_viewer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.qrcode});
@@ -126,6 +127,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       CircleAvatar(
                           backgroundColor: Colors.white, child: Text('LM')),
                     ]),
+                    BabylonJSViewer(
+                      src: 'assets/3d/deins_karten_for_blender.glb',
+                    ),
                     Padding(
                         padding: const EdgeInsets.only(top: 20.0),
                         child: Row(
@@ -135,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 if (widget.qrcode != 'Scan a Collectible!') {
                                   return Container(
                                       height: 600,
-                                      width: 400,
+                                      width: 200,
                                       decoration: const BoxDecoration(
                                         image: DecorationImage(
                                           image: AssetImage(
