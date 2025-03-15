@@ -127,9 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       CircleAvatar(
                           backgroundColor: Colors.white, child: Text('LM')),
                     ]),
-                    BabylonJSViewer(
-                      src: 'assets/3d/deins_karten_for_blender.glb',
-                    ),
                     Padding(
                         padding: const EdgeInsets.only(top: 20.0),
                         child: Row(
