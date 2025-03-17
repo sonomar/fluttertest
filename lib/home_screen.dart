@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:flutter_3d_controller/flutter_3d_controller.dart';
+import 'openCards/login_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.qrcode});
@@ -54,7 +55,7 @@ Widget objectViewer() {
         onError: (String error) {
           debugPrint('model failed to load : $error');
         },
-        src: 'assets/3d/deins_karten_for_blender.glb',
+        src: 'assets/3d/deins_card2.glb',
         controller: controller),
   );
 }
@@ -162,6 +163,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       CircleAvatar(
                           backgroundColor: Colors.white, child: Text('LM')),
                     ]),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginPage()));
+                      },
+                      child: Text('Login'),
+                    ),
                     objectViewer(),
                     Padding(
                         padding: const EdgeInsets.only(top: 20.0),

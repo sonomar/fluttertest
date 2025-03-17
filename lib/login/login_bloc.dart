@@ -1,7 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../auth/register.dart';
-import '../auth/authenticate.dart';
 
 part 'login_event.dart';
 part 'login_state.dart';
@@ -14,7 +12,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       yield LoginLoading();
 
       try {
-        authenticateUser();
         await Future.delayed(const Duration(seconds: 2));
         yield LoginSuccess();
       } catch (error) {
