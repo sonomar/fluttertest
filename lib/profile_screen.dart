@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import './profile/user_settings.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../auth/signout.dart';
+import './openCards/login_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -10,6 +13,16 @@ class ProfileScreen extends StatelessWidget {
     final Uri imprintUrl = Uri.parse('https://deins.io/Imprint');
     final Uri ppUrl = Uri.parse('https://deins.io/data-privacy');
     final Uri mailingListUrl = Uri.parse('https://deins.io/data-privacy');
+
+    Future<String?> getUserEmail() async {
+      final prefs = await SharedPreferences.getInstance();
+      var email = prefs.getString('email');
+      if (email != null) {
+        return email;
+      } else {
+        return 'no email found';
+      }
+    }
 
     Future<void> _launchUrl(url) async {
       if (!await launchUrl(url)) {
@@ -57,7 +70,7 @@ class ProfileScreen extends StatelessWidget {
                 child: Ink(
                     height: 50,
                     width: 100,
-                    child: const Center(child: Text("Sign Up!"))),
+                    child: const Center(child: Text("Mailing List"))),
               )),
             ),
             Container(
@@ -88,6 +101,27 @@ class ProfileScreen extends StatelessWidget {
                     height: 50,
                     width: 100,
                     child: const Center(child: Text("Imprint"))),
+              )),
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              height: 50,
+              child: Material(
+                  child: InkWell(
+                onTap: () {
+                  final navigator = Navigator.of(context);
+                  getUserEmail().then((email) => {
+                        logOut(email).then((value) => {
+                              navigator.push(MaterialPageRoute(
+                                  builder: (context) => LoginPage()))
+                            })
+                      });
+                }, // Image tapped
+                splashColor: Colors.white10, // Splash color over image
+                child: Ink(
+                    height: 50,
+                    width: 100,
+                    child: const Center(child: Text("Sign Out"))),
               )),
             ),
           ],

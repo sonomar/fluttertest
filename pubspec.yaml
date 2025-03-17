@@ -38,7 +38,7 @@ dependencies:
   sqflite: ^2.4.0
   path: ^1.9.0
   sqflite_common_ffi: ^2.3.4
-  sqflite_common_ffi_web: ^0.4.5+3
+  sqflite_common_ffi_web: ^1.0.0
   shared_preferences: ^2.3.2
   amazon_cognito_identity_dart_2: ^3.7.0
   babylonjs_viewer: ^1.0.1
@@ -46,6 +46,10 @@ dependencies:
   google_fonts: ^6.2.1
   http: ^1.2.2
   percent_indicator: ^4.0.1
+  flutter_3d_controller: ^2.1.0
+  flutter_bloc: ^9.1.0
+  equatable: ^2.0.7
+  bloc: ^9.0.0
 
 dev_dependencies:
   flutter_test:
@@ -56,7 +60,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

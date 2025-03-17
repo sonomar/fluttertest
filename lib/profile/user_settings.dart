@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../auth/register.dart';
-import '../auth/authenticate.dart';
 import '../api/collection.dart';
 
 class UserSettings extends StatefulWidget {
@@ -44,9 +43,7 @@ class _UserSettingsState extends State<UserSettings> {
               height: 50,
               child: Material(
                   child: InkWell(
-                onTap: () {
-                  authenticateUser();
-                }, // Image tapped
+                onTap: () {}, // Image tapped
                 splashColor: Colors.white10, // Splash color over image
                 child: Ink(
                     height: 50,
@@ -75,9 +72,7 @@ class _UserSettingsState extends State<UserSettings> {
               height: 50,
               child: Material(
                   child: InkWell(
-                onTap: () {
-                  getUserAttr();
-                }, // Image tapped
+                onTap: () {}, // Image tapped
                 splashColor: Colors.white10, // Splash color over image
                 child: Ink(
                     height: 50,
@@ -105,9 +100,7 @@ class _UserSettingsState extends State<UserSettings> {
               height: 50,
               child: Material(
                   child: InkWell(
-                onTap: () {
-                  logOut();
-                }, // Image tapped
+                onTap: () {}, // Image tapped
                 splashColor: Colors.white10, // Splash color over image
                 child: Ink(
                     height: 50,

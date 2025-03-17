@@ -1,17 +1,18 @@
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final userPool = CognitoUserPool(
-  'eu-central-1_flxgJwy19',
-  '3habrhuviqskit3ma595m5dp0b',
-);
-final cognitoUser = CognitoUser('lawsonmarlowe@gmail.com', userPool);
-final authDetails = AuthenticationDetails(
-  username: 'lawsonmarlowe@gmail.com',
-  password: 'password001',
-);
-
-Future<void> authenticateUser() async {
+Future<bool> authenticateUser(email, password) async {
+  final userPool = CognitoUserPool(
+    'eu-central-1_flxgJwy19',
+    '3habrhuviqskit3ma595m5dp0b',
+  );
+  //username: lawsonmarlowe@gmail.com
+  //password: password001
+  final cognitoUser = CognitoUser(email, userPool);
+  final authDetails = AuthenticationDetails(
+    username: email,
+    password: password,
+  );
   CognitoUserSession? session;
   try {
     session = await cognitoUser.authenticateUser(authDetails);
@@ -32,30 +33,48 @@ Future<void> authenticateUser() async {
   } on CognitoClientException catch (e) {
     // handle Wrong Username and Password and Cognito Client
   } catch (e) {
+    // ignore: avoid_print
     print(e);
   }
   final prefs = await SharedPreferences.getInstance();
   final token = session?.getAccessToken().getJwtToken();
   final idToken = session?.getIdToken().getJwtToken();
   session != null;
-  prefs.setString('jwtCode', token ?? 'Error Loggin In');
-  print(token);
-  prefs.setString('jwtIdCode', idToken ?? 'No ID Token');
+  if (email != null) {
+    prefs.setString('email', email);
+  }
+  if (token != null) {
+    prefs.setString('jwtCode', token);
+    // ignore: avoid_print
+    print(token);
+  }
+  if (idToken != null) {
+    prefs.setString('jwtIdCode', idToken);
+  }
+  return true;
 }
 
-Future<void> getUserAttr() async {
+Future<bool> getUserAttr(email) async {
+  final userPool = CognitoUserPool(
+    'eu-central-1_flxgJwy19',
+    '3habrhuviqskit3ma595m5dp0b',
+  );
+  //username: lawsonmarlowe@gmail.com
+  //password: password001
+  final cognitoUser = CognitoUser(email, userPool);
   List<CognitoUserAttribute>? attributes;
   try {
     attributes = await cognitoUser.getUserAttributes();
   } catch (e) {
+    // ignore: avoid_print
     print(e);
+    return false;
   }
   attributes?.forEach((attribute) {
+    // ignore: avoid_print
     print('USER ATTRIBUTES:');
+    // ignore: avoid_print
     print('attribute ${attribute.getName()} has value ${attribute.getValue()}');
   });
-}
-
-Future<void> logOut() async {
-  await cognitoUser.signOut();
+  return true;
 }
