@@ -17,24 +17,25 @@ Future<bool> authenticateUser(email, password) async {
   try {
     session = await cognitoUser.authenticateUser(authDetails);
   } on CognitoUserNewPasswordRequiredException catch (e) {
-    // handle New Password challenge
+    return false;
   } on CognitoUserMfaRequiredException catch (e) {
-    // handle SMS_MFA challenge
+    return false;
   } on CognitoUserSelectMfaTypeException catch (e) {
-    // handle SELECT_MFA_TYPE challenge
+    return false;
   } on CognitoUserMfaSetupException catch (e) {
-    // handle MFA_SETUP challenge
+    return false;
   } on CognitoUserTotpRequiredException catch (e) {
-    // handle SOFTWARE_TOKEN_MFA challenge
+    return false;
   } on CognitoUserCustomChallengeException catch (e) {
-    // handle CUSTOM_CHALLENGE challenge
+    return false;
   } on CognitoUserConfirmationNecessaryException catch (e) {
-    // handle User Confirmation Necessary
+    return false;
   } on CognitoClientException catch (e) {
-    // handle Wrong Username and Password and Cognito Client
+    return false;
   } catch (e) {
     // ignore: avoid_print
     print(e);
+    return false;
   }
   final prefs = await SharedPreferences.getInstance();
   final token = session?.getAccessToken().getJwtToken();

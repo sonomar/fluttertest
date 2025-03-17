@@ -70,6 +70,9 @@ class LoginPageState extends State<LoginPage> {
                         _errorMessage = 'Invalid username or password';
                       });
                     }
+                    setState(() {
+                      _errorMessage = 'Invalid username or password';
+                    });
                   },
                   child: Text('Login')),
               SizedBox(height: 10),
