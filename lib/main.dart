@@ -1,11 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import './home_screen.dart';
 import './collection_screen.dart';
 import './scan_screen.dart';
 import './community_screen.dart';
 import './profile_screen.dart';
+import './openCards/login_page.dart';
 // import 'package:google_fonts/google_fonts.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -55,11 +58,21 @@ class SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     final navigator = Navigator.of(context);
-    Future.delayed(const Duration(seconds: 3)).then(
-      (value) => navigator.pushReplacement(MaterialPageRoute(
-          builder: (context) => const MyHomePage(
-              title: 'Kloppocar App Home', qrcode: 'Scan a Collectible!'))),
-    );
+    SharedPreferences.getInstance().then((prefValue) =>
+        Future.delayed(const Duration(seconds: 3)).then((value) => {
+              if ((prefValue.containsKey('jwtCode')))
+                {
+                  navigator.pushReplacement(MaterialPageRoute(
+                      builder: (context) => const MyHomePage(
+                          title: 'Kloppocar App Home',
+                          qrcode: 'Scan a Collectible!'))),
+                }
+              else
+                {
+                  navigator.pushReplacement(MaterialPageRoute(
+                      builder: (context) => const LoginPage())),
+                }
+            }));
   }
 
   @override

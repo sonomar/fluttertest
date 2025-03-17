@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../auth/authenticate.dart';
+import '../main.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -52,23 +53,25 @@ class LoginPageState extends State<LoginPage> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    final navigator = Navigator.of(context);
-                    String username = _usernameController.text;
-                    String password = _passwordController.text;
-                    var confirm = await authenticateUser(username, password);
-                    if (confirm == true) {
-                      await navigator.pushNamed('/home', arguments: username);
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      final navigator = Navigator.of(context);
+                      String username = _usernameController.text;
+                      String password = _passwordController.text;
+                      var confirm = await authenticateUser(username, password);
+                      if (confirm == true) {
+                        navigator.push(MaterialPageRoute(
+                            builder: (context) => MyHomePage(
+                                title: 'Kloppocar App Home',
+                                qrcode: 'Scan a Collectible!')));
+                      }
                     } else {
                       setState(() {
                         _errorMessage = 'Invalid username or password';
                       });
                     }
-                  }
-                },
-                child: Text('Login'),
-              ),
+                  },
+                  child: Text('Login')),
               SizedBox(height: 10),
               Text(
                 _errorMessage,

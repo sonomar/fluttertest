@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:flutter_3d_controller/flutter_3d_controller.dart';
-import 'openCards/login_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.qrcode});
@@ -163,15 +162,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       CircleAvatar(
                           backgroundColor: Colors.white, child: Text('LM')),
                     ]),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginPage()));
-                      },
-                      child: Text('Login'),
-                    ),
                     objectViewer(),
                     Padding(
                         padding: const EdgeInsets.only(top: 20.0),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../auth/register.dart';
-import '../auth/authenticate.dart';
 import '../api/collection.dart';
 
 class UserSettings extends StatefulWidget {

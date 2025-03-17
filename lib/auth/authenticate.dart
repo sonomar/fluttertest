@@ -40,10 +40,17 @@ Future<bool> authenticateUser(email, password) async {
   final token = session?.getAccessToken().getJwtToken();
   final idToken = session?.getIdToken().getJwtToken();
   session != null;
-  prefs.setString('jwtCode', token ?? 'Error Loggin In');
-  // ignore: avoid_print
-  print(token);
-  prefs.setString('jwtIdCode', idToken ?? 'No ID Token');
+  if (email != null) {
+    prefs.setString('email', email);
+  }
+  if (token != null) {
+    prefs.setString('jwtCode', token);
+    // ignore: avoid_print
+    print(token);
+  }
+  if (idToken != null) {
+    prefs.setString('jwtIdCode', idToken);
+  }
   return true;
 }
 
@@ -70,13 +77,4 @@ Future<bool> getUserAttr(email) async {
     print('attribute ${attribute.getName()} has value ${attribute.getValue()}');
   });
   return true;
-}
-
-Future<void> logOut(email) async {
-  final userPool = CognitoUserPool(
-    'eu-central-1_flxgJwy19',
-    '3habrhuviqskit3ma595m5dp0b',
-  );
-  final cognitoUser = CognitoUser(email, userPool);
-  await cognitoUser.signOut();
 }
