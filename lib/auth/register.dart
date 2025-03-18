@@ -1,47 +1,51 @@
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 
-final userPool = CognitoUserPool(
-  'eu-central-1_flxgJwy19',
-  '3habrhuviqskit3ma595m5dp0b',
-);
-final userAttributes = [
-  const AttributeArg(name: 'first_name', value: 'Lawtest'),
-  const AttributeArg(name: 'last_name', value: 'Martest'),
-];
-
-final cognitoUser = CognitoUser('lawsonmarlowe@gmail.com', userPool);
-
 late final String status;
 
-Future<void> signUpUser() async {
-  var data;
+Future<bool> signUpUser(email, password) async {
+  final userPool = CognitoUserPool(
+    'eu-central-1_flxgJwy19',
+    '3habrhuviqskit3ma595m5dp0b',
+  );
+  CognitoUserPoolData data;
   try {
     data = await userPool.signUp(
-      'lawsonmarlowe@gmail.com',
-      'password001',
+      email,
+      password,
     );
     print('SIGNUP DATA:');
     print(data);
   } catch (e) {
     print(e);
   }
+  return true;
 }
 
-Future<void> emailConfirmUser() async {
+Future<void> emailConfirmUser(email, code) async {
+  final userPool = CognitoUserPool(
+    'eu-central-1_flxgJwy19',
+    '3habrhuviqskit3ma595m5dp0b',
+  );
+
   bool registrationConfirmed = false;
+  final cognitoUser = CognitoUser(email, userPool);
   try {
-    registrationConfirmed = await cognitoUser.confirmRegistration('194685');
+    registrationConfirmed = await cognitoUser.confirmRegistration(code);
   } catch (e) {
     print(e);
   }
   print(registrationConfirmed);
 }
 
-Future<void> emailResendConfirmation() async {
-  final String status;
+Future<void> emailResendConfirmation(email) async {
+  final userPool = CognitoUserPool(
+    'eu-central-1_flxgJwy19',
+    '3habrhuviqskit3ma595m5dp0b',
+  );
+  final cognitoUser = CognitoUser(email, userPool);
   try {
     status = await cognitoUser.resendConfirmationCode();
   } catch (e) {
-    print(e);
+    print(status);
   }
 }
