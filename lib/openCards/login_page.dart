@@ -42,6 +42,7 @@ class LoginPageState extends State<LoginPage> {
                 children: <Widget>[
                   TextFormField(
                     controller: _usernameController,
+                    style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(labelText: 'Username'),
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -55,6 +56,7 @@ class LoginPageState extends State<LoginPage> {
                     controller: _passwordController,
                     decoration: InputDecoration(labelText: 'Password'),
                     obscureText: true,
+                    style: TextStyle(color: Colors.white),
                     validator: (value) {
                       if (value!.isEmpty) {
                         return 'Please enter your password';
