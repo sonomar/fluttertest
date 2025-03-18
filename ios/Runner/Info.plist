@@ -45,6 +45,8 @@
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>The camera feature is only for scanning new cards. Scan a card QR code now!</string>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

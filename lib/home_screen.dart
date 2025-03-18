@@ -86,27 +86,37 @@ Widget challengeBox() {
                         fontSize: 20,
                         color: Colors.white,
                         fontStyle: FontStyle.italic))),
-            const Padding(
-              padding: EdgeInsets.only(
-                  top: 20, left: 10.0, right: 10.0, bottom: 10.0),
-              child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                CircleAvatar(backgroundColor: Colors.red, child: Text('LM')),
-                Padding(
-                    padding: EdgeInsets.only(left: 10.0),
-                    child: SizedBox(
-                        width: 300,
-                        child: Text(
-                            'Vervollständige die Kloppocar-Puzzle-Collection.',
-                            style:
-                                TextStyle(fontSize: 20, color: Colors.black))))
-              ]),
-            ),
+            Padding(
+                padding: const EdgeInsets.only(
+                    top: 20, left: 10.0, right: 10.0, bottom: 10.0),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const CircleAvatar(
+                            backgroundColor: Colors.red, child: Text('LM')),
+                        Padding(
+                            padding: const EdgeInsets.only(left: 10.0),
+                            child: Expanded(
+                                child: Container(
+                                    alignment: Alignment.center,
+                                    width: 300,
+                                    child: Flexible(
+                                        child: Text(
+                                            'Vervollständige die Kloppocar-Puzzle-Collection',
+                                            maxLines: 3,
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                color: Colors.black))))))
+                      ]),
+                )),
             Padding(
               padding: const EdgeInsets.only(top: 15.0),
               child: LinearPercentIndicator(
                 animation: true,
                 animationDuration: 2000,
-                lineHeight: 14.0,
+                lineHeight: 10.0,
                 percent: 0.5,
                 backgroundColor: Colors.grey,
                 // ignore: deprecated_member_use
@@ -163,34 +173,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           backgroundColor: Colors.white, child: Text('LM')),
                     ]),
                     objectViewer(),
-                    Padding(
-                        padding: const EdgeInsets.only(top: 20.0),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Builder(builder: (context) {
-                                if (widget.qrcode != 'Scan a Collectible!') {
-                                  return Container(
-                                      height: 600,
-                                      width: 200,
-                                      decoration: const BoxDecoration(
-                                        image: DecorationImage(
-                                          image: AssetImage(
-                                              "assets/images/card1.jpg"),
-                                        ),
-                                      ));
-                                }
-                                return Container(
-                                    height: 600,
-                                    width: 400,
-                                    decoration: const BoxDecoration(
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                            "assets/images/card1.jpg"),
-                                      ),
-                                    ));
-                              })
-                            ])),
                     Text(widget.qrcode,
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.w700)),
