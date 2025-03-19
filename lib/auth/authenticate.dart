@@ -52,6 +52,12 @@ Future<bool> authenticateUser(email, password) async {
   if (idToken != null) {
     prefs.setString('jwtIdCode', idToken);
   }
+  prefs.setBool('item-test1', true);
+  prefs.setBool('item-test2', false);
+  prefs.setBool('item-test3', false);
+  prefs.setBool('item-test4', false);
+  prefs.setBool('item-test5', false);
+  prefs.setBool('item-test6', false);
   return true;
 }
 

@@ -69,7 +69,9 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                                               .width -
                                           40, // here increase or decrease in width
                                     ),
-                                    builder: (context) => CardInfo(),
+                                    builder: (context) => CardInfo(
+                                        selectedCollectible:
+                                            widget.selectedCollectible),
                                   );
                                 },
                                 child: Padding(
@@ -94,7 +96,9 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                                             .width -
                                         40, // here increase or decrease in width
                                   ),
-                                  builder: (context) => CardInfo(),
+                                  builder: (context) => CardInfo(
+                                      selectedCollectible:
+                                          widget.selectedCollectible),
                                 );
                               },
                               child: Container(
