@@ -9,6 +9,7 @@ class Collectible extends StatefulWidget {
 }
 
 class _CollectibleState extends State<Collectible> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "deleted": false,
+    "archived": false,
+    "userId": 1,
+    "notificationId": 1,
+    "markRead": false
+  },
+  {
+    "id": 2,
+    "deleted": false,
+    "archived": false,
+    "userId": 1,
+    "notificationId": 2,
+    "markRead": true
+  },
+  {
+    "id": 3,
+    "deleted": false,
+    "archived": false,
+    "userId": 1,
+    "notificationId": 3,
+    "markRead": false
+  }
+]

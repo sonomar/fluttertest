@@ -24,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
       }
     }
 
-    Future<void> _launchUrl(url) async {
+    Future<void> openUrl(Uri url) async {  // ✅ Renamed to 'openUrl'
       if (!await launchUrl(url)) {
         throw Exception('Could not launch $url');
       }
@@ -47,11 +47,10 @@ class ProfileScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            const UserSettings() //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
-                        ),
+                            const UserSettings()),
                   );
-                }, // Image tapped
-                splashColor: Colors.white10, // Splash color over image
+                },
+                splashColor: Colors.white10,
                 child: Ink(
                     height: 50,
                     width: 100,
@@ -64,9 +63,9 @@ class ProfileScreen extends StatelessWidget {
               child: Material(
                   child: InkWell(
                 onTap: () {
-                  _launchUrl(mailingListUrl);
-                }, // Image tapped
-                splashColor: Colors.white10, // Splash color over image
+                  openUrl(mailingListUrl);  // ✅ Fixed function call
+                },
+                splashColor: Colors.white10,
                 child: Ink(
                     height: 50,
                     width: 100,
@@ -79,9 +78,9 @@ class ProfileScreen extends StatelessWidget {
               child: Material(
                   child: InkWell(
                 onTap: () {
-                  _launchUrl(ppUrl);
-                }, // Image tapped
-                splashColor: Colors.white10, // Splash color over image
+                  openUrl(ppUrl);  // ✅ Fixed function call
+                },
+                splashColor: Colors.white10,
                 child: Ink(
                     height: 50,
                     width: 100,
@@ -94,9 +93,9 @@ class ProfileScreen extends StatelessWidget {
               child: Material(
                   child: InkWell(
                 onTap: () {
-                  _launchUrl(mailingListUrl);
-                }, // Image tapped
-                splashColor: Colors.white10, // Splash color over image
+                  openUrl(imprintUrl);  // ✅ Fixed function call
+                },
+                splashColor: Colors.white10,
                 child: Ink(
                     height: 50,
                     width: 100,
@@ -116,8 +115,8 @@ class ProfileScreen extends StatelessWidget {
                                   builder: (context) => LoginPage()))
                             })
                       });
-                }, // Image tapped
-                splashColor: Colors.white10, // Splash color over image
+                },
+                splashColor: Colors.white10,
                 child: Ink(
                     height: 50,
                     width: 100,

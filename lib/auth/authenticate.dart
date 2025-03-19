@@ -16,21 +16,21 @@ Future<bool> authenticateUser(email, password) async {
   CognitoUserSession? session;
   try {
     session = await cognitoUser.authenticateUser(authDetails);
-  } on CognitoUserNewPasswordRequiredException catch (e) {
+  } on CognitoUserNewPasswordRequiredException {
     return false;
-  } on CognitoUserMfaRequiredException catch (e) {
+  } on CognitoUserMfaRequiredException {
     return false;
-  } on CognitoUserSelectMfaTypeException catch (e) {
+  } on CognitoUserSelectMfaTypeException {
     return false;
-  } on CognitoUserMfaSetupException catch (e) {
+  } on CognitoUserMfaSetupException {
     return false;
-  } on CognitoUserTotpRequiredException catch (e) {
+  } on CognitoUserTotpRequiredException {
     return false;
-  } on CognitoUserCustomChallengeException catch (e) {
+  } on CognitoUserCustomChallengeException {
     return false;
-  } on CognitoUserConfirmationNecessaryException catch (e) {
+  } on CognitoUserConfirmationNecessaryException {
     return false;
-  } on CognitoClientException catch (e) {
+  } on CognitoClientException {
     return false;
   } catch (e) {
     // ignore: avoid_print
