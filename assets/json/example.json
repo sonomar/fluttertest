@@ -2,7 +2,8 @@
   "collectibles": [
     {
       "collectibleId": 1,
-      "name": "item-test1",
+      "label": "item-test1",
+      "name": "Party Door",
       "category": 1,
       "collection": 1,
       "description": "this is item test 1",
@@ -16,7 +17,8 @@
     },
     {
       "collectibleId": 2,
-      "name": "item-test2",
+      "label": "item-test2",
+      "name": "Fancy Hood",
       "category": 1,
       "collection": 1,
       "description": "this is item test 2",
@@ -30,7 +32,8 @@
     },
     {
       "collectibleId": 3,
-      "name": "item-test3",
+      "label": "item-test3",
+      "name": "Flower Power",
       "category": 1,
       "collection": 1,
       "description": "this is item test 3",
@@ -44,7 +47,8 @@
     },
     {
       "collectibleId": 4,
-      "name": "item-test4",
+      "label": "item-test4",
+      "name": "Kloppocar Classic",
       "category": 1,
       "collection": 1,
       "description": "this is item test 4",
@@ -58,7 +62,8 @@
     },
     {
       "collectibleId": 5,
-      "name": "item-test5",
+      "label": "item-test5",
+      "name": "Cloud Mobile",
       "category": 1,
       "collection": 1,
       "description": "this is item test 5",
@@ -72,7 +77,8 @@
     },
     {
       "collectibleId": 6,
-      "name": "item-test6",
+      "label": "item-test6",
+      "name": "Having a Ball",
       "category": 1,
       "collection": 1,
       "description": "this is item test 6",

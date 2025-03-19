@@ -138,9 +138,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           backgroundColor: Colors.white, child: Text('LM')),
                     ]),
                     objectViewer(),
-                    Text(widget.qrcode,
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w700)),
                     const Padding(
                       padding: EdgeInsets.only(top: 30.0),
                       child: Row(

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import './collectibles/collection.dart';
-import 'dart:convert';
 
-// Fetch content from the json file
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
 
@@ -12,75 +9,48 @@ class CommunityScreen extends StatefulWidget {
 }
 
 class _CommunityScreenState extends State<CommunityScreen> {
-  List _commCollections = [];
-
-  Future<void> readJson() async {
-    final String response =
-        await rootBundle.loadString('assets/json/example_collection.json');
-    final data = await json.decode(response);
-    setState(() {
-      _commCollections = data["collections"];
-    });
-  }
-
-  // The init state function.
-  @override
-  void initState() {
-    readJson();
-    // Make sure to call super.initState();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: const Text("Community"),
+          backgroundColor: Colors.black,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontFamily: 'ChakraPetch',
+          ),
         ),
-        body: GridView.count(
-            primary: false,
-            padding: const EdgeInsets.all(20),
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            crossAxisCount: 2,
-            children: <Widget>[
-              for (int i = 0; i < _commCollections.length; i++) ...[
-                Column(children: [
-                  Material(
-                      borderRadius: BorderRadius.circular(25.0),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(25.0),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Collection(
-                                    selectedCollection: _commCollections[
-                                        i]) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
-                                ),
-                          );
-                        }, // Image tapped
-                        splashColor: Colors.white10, // Splash color over image
-                        child: Ink(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            image: DecorationImage(
-                              image:
-                                  AssetImage(_commCollections[i]["imageRef"]),
-                              fit: BoxFit.cover,
-                            ),
-                          ), // Fixes border issues
-                          height: 150,
-                        ),
-                      )),
-                  Text(_commCollections[i]["name"],
+        body: Container(
+            alignment: Alignment.topCenter,
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                colors: [
+                  Color(0xffd622ca),
+                  Color(0xff333333),
+                ],
+                center: Alignment.center,
+                radius: 0.4,
+              ),
+            ),
+            width: double.infinity,
+            height: double.infinity,
+            child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(children: [
+                  Text("NEW FEATURE COMING SOON!",
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.w700)),
-                  Text(_commCollections[i]["description"],
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white)),
+                  Text(
+                      "Join the DEINS Community and participate in awesome team challenges!",
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w700))
-                ])
-              ]
-            ]));
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white)),
+                ]))));
   }
 }

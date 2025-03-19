@@ -24,6 +24,41 @@ class ProfileScreen extends StatelessWidget {
       }
     }
 
+    Future<void> resetDemo() async {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setBool('item-test1', true);
+      prefs.setBool('item-test2', false);
+      prefs.setBool('item-test3', false);
+      prefs.setBool('item-test4', false);
+      prefs.setBool('item-test5', false);
+      prefs.setBool('item-test6', false);
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: true, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Demo Reset'),
+            content: const SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text('You have reset the demo.'),
+                  Text('You now have only the first collectible.'),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     Future<void> _launchUrl(url) async {
       if (!await launchUrl(url)) {
         throw Exception('Could not launch $url');
@@ -37,27 +72,6 @@ class ProfileScreen extends StatelessWidget {
         body: ListView(
           padding: const EdgeInsets.all(8),
           children: <Widget>[
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              height: 50,
-              child: Material(
-                  child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            const UserSettings() //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
-                        ),
-                  );
-                }, // Image tapped
-                splashColor: Colors.white10, // Splash color over image
-                child: Ink(
-                    height: 50,
-                    width: 100,
-                    child: const Center(child: Text("User Options"))),
-              )),
-            ),
             Container(
               decoration: BoxDecoration(border: Border.all()),
               height: 50,
@@ -101,6 +115,21 @@ class ProfileScreen extends StatelessWidget {
                     height: 50,
                     width: 100,
                     child: const Center(child: Text("Imprint"))),
+              )),
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              height: 50,
+              child: Material(
+                  child: InkWell(
+                onTap: () {
+                  resetDemo();
+                }, // Image tapped
+                splashColor: Colors.white10, // Splash color over image
+                child: Ink(
+                    height: 50,
+                    width: 100,
+                    child: const Center(child: Text("Reset Demo"))),
               )),
             ),
             Container(

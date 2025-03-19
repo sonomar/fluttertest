@@ -24,7 +24,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
       _items = data['collectibles'];
     });
     for (int i = 0; i < _items.length; i++) {
-      var foundItem = _items[i]['name'];
+      var foundItem = _items[i]['label'];
       setState(() {
         _cardStatus[foundItem] = prefs.getBool(foundItem);
       });
@@ -131,7 +131,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                         Container(
                             padding: const EdgeInsets.only(
                                 top: 20, bottom: 20, left: 5, right: 5),
-                            child: (_cardStatus[_items[i]['name']] == true)
+                            child: (_cardStatus[_items[i]['label']] == true)
                                 ? linkedInkwell(_items[i])
                                 : unlinkedInkwell(_items[i]))
                       ]
