@@ -109,22 +109,22 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
         appBar: AppBar(
             centerTitle: false,
-            leading: const Padding(
-              padding: EdgeInsets.only(left: 30.0),
-              child: CircleAvatar(
-                  backgroundColor: Colors.white, child: Text('LM')),
-            ),
+            // leading: const Padding(
+            //   padding: EdgeInsets.only(left: 30.0),
+            //   child: CircleAvatar(
+            //       backgroundColor: Colors.white, child: Text('LM')),
+            // ),
             title: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('USERNAME',
+                // Text('USERNAME',
+                //     textAlign: TextAlign.left,
+                //     style:
+                //         TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
+                Text('Home',
                     textAlign: TextAlign.left,
                     style:
-                        TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
-                Text('USERNAME',
-                    textAlign: TextAlign.left,
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
+                        TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
               ],
             )),
         body: SingleChildScrollView(

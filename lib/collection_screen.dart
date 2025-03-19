@@ -92,6 +92,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
         appBar: AppBar(
             titleTextStyle: TextStyle(
                 fontWeight: FontWeight.w700,
+                color: Colors.black,
                 fontFamily: 'ChakraPetch',
                 fontSize: 30),
             centerTitle: false,

@@ -15,9 +15,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
         appBar: AppBar(
           title: const Text("Community"),
           backgroundColor: Colors.black,
+          centerTitle: false,
           titleTextStyle: TextStyle(
             color: Colors.white,
-            fontSize: 20,
+            fontSize: 30,
+            fontWeight: FontWeight.w700,
             fontFamily: 'ChakraPetch',
           ),
         ),
