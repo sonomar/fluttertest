@@ -7,7 +7,7 @@ Widget objectViewer() {
     debugPrint('model is loaded : ${controller.onModelLoaded.value}');
   });
   return SizedBox(
-    height: 600,
+    height: 500,
     width: 300,
     child: Flutter3DViewer(
         //If you pass 'true' the flutter_3d_controller will add gesture interceptor layer

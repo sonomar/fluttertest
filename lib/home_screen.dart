@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'dart:async';
+import 'package:flutter/services.dart';
+import 'dart:convert';
 import 'notifications_page.dart';
 import 'widgets/object_viewer.dart'; // notification page import
 
@@ -16,11 +18,22 @@ class _HomeScreenState extends State<HomeScreen> {
   late Timer _timer;
   Duration _remainingTime = const Duration(hours: 6, minutes: 59, seconds: 43);
   int unreadNotifications = 0; // Hardcoded for now
+  List _newsItems = [];
+
+  Future<void> readItemJson() async {
+    final String response =
+        await rootBundle.loadString('assets/json/news.json');
+    final data = await json.decode(response);
+    setState(() {
+      _newsItems = data['news'];
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     _startTimer();
+    readItemJson();
   }
 
   void _startTimer() {
@@ -98,39 +111,59 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget turLWidget() {
     return Padding(
-      padding: const EdgeInsets.only(top: 20.0),
-      child: Container(
-        padding: const EdgeInsets.all(15.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              // ignore: deprecated_member_use
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
+        padding: const EdgeInsets.only(top: 20.0),
+        child: Column(children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                  padding: const EdgeInsets.only(left: 15.0),
+                  child: Text(
+                    'Tür L',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  )),
+              Stack(alignment: Alignment.center, children: [
+                Padding(
+                    padding: const EdgeInsets.only(left: 40.0),
+                    child: Image.asset('assets/images/silvertab.png',
+                        width: 120, height: 40, fit: BoxFit.fill)),
+                Text("Selten",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                      fontFamily: 'Roboto',
+                    ))
+              ])
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 5.0),
+            child: LinearPercentIndicator(
+              animation: true,
+              animationDuration: 2000,
+              lineHeight: 14.0,
+              percent: 0.5,
+              backgroundColor: Colors.grey,
+              barRadius: const Radius.circular(90),
+              progressColor: Colors.purple,
             ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Tür L',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+          ),
+          const Padding(
+            padding: EdgeInsets.only(top: 5, left: 15, right: 15, bottom: 5),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Kloppocar-Puzzle-Collection',
+                    style: TextStyle(fontSize: 12, color: Colors.black)),
+                Text('2/6', style: TextStyle(fontSize: 12, color: Colors.black))
+              ],
             ),
-            CircleAvatar(
-              radius: 25,
-              backgroundImage: AssetImage('assets/images/selten.jpg'),
-            ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ]));
   }
 
   Widget kloppocarWidget() {
@@ -170,6 +203,47 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget newsItem(category, postdate, content) {
+    return Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: Column(children: [
+          Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+            Container(
+              padding:
+                  const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+              decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: const BorderRadius.all(Radius.circular(20))),
+              child: Text(category,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.white,
+                    fontFamily: 'ChakraPetch',
+                  )),
+            ),
+            Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: Text(
+                  postdate,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black,
+                    fontFamily: 'Roboto',
+                  ),
+                ))
+          ]),
+          Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Text(content,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontFamily: 'Roboto',
+                  ))),
+          const Divider(height: 20, thickness: 1, color: Colors.grey),
+        ]));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -177,14 +251,17 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: false,
         leading: const Padding(
           padding: EdgeInsets.only(left: 30.0),
-          child: CircleAvatar(backgroundColor: Colors.white, child: Text('LM')),
+          child: CircleAvatar(
+            radius: 20,
+            backgroundImage: AssetImage('assets/images/car1.jpeg'),
+          ),
         ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('USERNAME',
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
-            Text('USERNAME',
+            Text('DEINS-Tester',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
           ],
         ),
@@ -245,41 +322,30 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(32),
           child: Column(
             children: [
-              objectViewer(),
-              Text(widget.qrcode,
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w700)),
-              const Padding(
-                padding: EdgeInsets.only(top: 30.0),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('[card_title]',
-                          style: TextStyle(fontSize: 12, color: Colors.black)),
-                      Text('[card_type_svg]',
-                          style: TextStyle(fontSize: 12, color: Colors.black))
-                    ]),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 15.0),
-                child: LinearPercentIndicator(
-                  animation: true,
-                  animationDuration: 2000,
-                  lineHeight: 14.0,
-                  percent: 0.5,
-                  backgroundColor: Colors.grey,
-                  barRadius: const Radius.circular(90),
-                  progressColor: Colors.purple,
+              const Stack(alignment: Alignment.center, children: [
+                Divider(height: 20, thickness: 1, color: Colors.grey),
+                CircleAvatar(
+                  radius: 20,
+                  backgroundImage: AssetImage('assets/images/car.jpg'),
                 ),
-              ),
+              ]),
+              objectViewer(),
               turLWidget(),
-              kloppocarWidget(),
               communityChallengeWidget(_formatTime(_remainingTime)),
               sectionHeader('CHALLENGES'),
               challengeBox(),
               challengeBox(),
               sectionHeader('Nachrichten'),
-              const Text('list of news items here'),
+              newsItem(
+                _newsItems[0]["category"],
+                _newsItems[0]["post-date"],
+                _newsItems[0]["content"],
+              ),
+              newsItem(
+                _newsItems[1]["category"],
+                _newsItems[1]["post-date"],
+                _newsItems[1]["content"],
+              )
             ],
           ),
         ),
@@ -309,7 +375,6 @@ Widget challengeBox() {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 10.0),
     child: Container(
-      padding: const EdgeInsets.all(10.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -325,6 +390,7 @@ Widget challengeBox() {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
+            width: double.infinity,
             padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
               color: Colors.black,
