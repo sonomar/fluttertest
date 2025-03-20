@@ -62,17 +62,33 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                                   ))),
                           SizedBox(height: 50),
                           Stack(alignment: Alignment.center, children: [
-                            Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, right: 10.0),
-                                child: Container(
-                                  width: double.infinity,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(25.0),
-                                    color: Colors.white,
-                                  ),
-                                )),
+                            GestureDetector(
+                                onTap: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    constraints: BoxConstraints(
+                                      maxWidth: MediaQuery.of(context)
+                                              .size
+                                              .width -
+                                          40, // here increase or decrease in width
+                                    ),
+                                    builder: (context) => CardInfo(
+                                        selectedCollectible:
+                                            widget.selectedCollectible),
+                                  );
+                                },
+                                child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 10.0, right: 10.0),
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 20,
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(25.0),
+                                        color: Colors.white,
+                                      ),
+                                    ))),
                             GestureDetector(
                               onTap: () {
                                 showModalBottomSheet(
@@ -89,7 +105,7 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                                 );
                               },
                               child: Container(
-                                width: 200,
+                                width: 20,
                                 height: 10,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(25.0),
