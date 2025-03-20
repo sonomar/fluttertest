@@ -21,7 +21,7 @@ Future<bool> signUpUser(email, password) async {
   return true;
 }
 
-Future<void> emailConfirmUser(email, code) async {
+Future<bool> emailConfirmUser(email, code) async {
   final userPool = CognitoUserPool(
     'eu-central-1_flxgJwy19',
     '3habrhuviqskit3ma595m5dp0b',
@@ -35,6 +35,7 @@ Future<void> emailConfirmUser(email, code) async {
     print(e);
   }
   print(registrationConfirmed);
+  return registrationConfirmed;
 }
 
 Future<void> emailResendConfirmation(email) async {
