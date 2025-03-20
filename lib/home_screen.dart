@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import './widgets/object_viewer.dart';
+import 'package:flutter_3d_controller/flutter_3d_controller.dart';
+import 'dart:async';
+import 'notifications_page.dart';
+import './widgets/object_viewer.dart'; // notification page import
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.qrcode});
   final String qrcode;
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -104,27 +108,184 @@ Widget challengeBox() {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late Timer _timer;
+  Duration _remainingTime = const Duration(hours: 6, minutes: 59, seconds: 43);
+  int unreadNotifications = 2; // Hardcoded for now
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_remainingTime.inSeconds > 0) {
+        setState(() {
+          _remainingTime = _remainingTime - const Duration(seconds: 1);
+        });
+      } else {
+        _timer.cancel();
+      }
+    });
+  }
+
+  String _formatTime(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    return "${twoDigits(duration.inHours)}:${twoDigits(duration.inMinutes.remainder(60))}:${twoDigits(duration.inSeconds.remainder(60))}";
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  Widget communityChallengeWidget(String time) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0),
+      child: Container(
+        padding: const EdgeInsets.all(15.0),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Community-Ziel läuft bald ab!',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Es fehlen noch 212 Assets bis zum Ziel. Trage jetzt dazu bei und hole dir noch Assets. Zum Beispiel beim Formel 1-Rennen in Spielberg oder erfülle Challenges. Die Community zählt auf dich. Viel Glück!',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 15),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.purple,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Text(
+                time,
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget turLWidget() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0),
+      child: Container(
+        padding: const EdgeInsets.all(15.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              // ignore: deprecated_member_use
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Tür L',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            CircleAvatar(
+              radius: 25,
+              backgroundImage: AssetImage('assets/images/selten.jpg'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget kloppocarWidget() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0),
+      child: Container(
+        padding: const EdgeInsets.all(15.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              // ignore: deprecated_member_use
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Kloppocar',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            CircleAvatar(
+              radius: 25,
+              backgroundImage: AssetImage('assets/images/car.jpg'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
             centerTitle: false,
-            // leading: const Padding(
-            //   padding: EdgeInsets.only(left: 30.0),
-            //   child: CircleAvatar(
-            //       backgroundColor: Colors.white, child: Text('LM')),
-            // ),
+            leading: const Padding(
+              padding: EdgeInsets.only(left: 30.0),
+              child: CircleAvatar(
+                  backgroundColor: Colors.white, child: Text('LM')),
+            ),
             title: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Text('USERNAME',
-                //     textAlign: TextAlign.left,
-                //     style:
-                //         TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
-                Text('Home',
+                Text('USERNAME',
                     textAlign: TextAlign.left,
                     style:
-                        TextStyle(fontSize: 30, fontWeight: FontWeight.w700)),
+                        TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
+                Text('USERNAME',
+                    textAlign: TextAlign.left,
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
               ],
             )),
         body: SingleChildScrollView(
