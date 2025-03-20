@@ -116,11 +116,6 @@ class SignupPageState extends State<SignupPage> {
                 ],
               ),
               Column(children: [
-                Image.asset(
-                  'assets/images/deins_logo.png',
-                  height: 200,
-                  width: 200,
-                ),
                 Form(
                   key: _formKey,
                   child: Column(
