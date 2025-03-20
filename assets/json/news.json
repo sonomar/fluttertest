@@ -1,0 +1,30 @@
+{
+  "news": [
+    {
+      "newsId": 1,
+      "title": "Event News",
+      "category": "Event",
+      "post-date": "16. Mar 2025, 14:10",
+      "short-content": "Nächste Woche Kloppocar in Salzburg, komm vorbei …",
+      "content": "Nächste Woche Kloppocar in Salzburg, komm vorbei ein super spiel!",
+      "imageRef": "assets/images/car1.jpeg",
+      "vidRef": "assets/images/car1.jpeg",
+      "createdDt": "2025-5-19 10:36:22.640",
+      "updatedDt": "2024-5-20 10:36:22.640",
+      "active": true
+    },
+    {
+      "newsId": 2,
+      "title": "Collection News",
+      "category": "Aktivitat",
+      "post-date": "3. Mar 2025, 13:12",
+      "short-content": "Es gibt ne neue Challenge (der Community) in deiner …",
+      "content": "Es gibt ne neue Challenge (der Community) in deiner Community Page. Check it out today!",
+      "imageRef": "assets/images/car2.jpeg",
+      "vidRef": "assets/images/car2.jpeg",
+      "createdDt": "2025-5-19 11:36:22.640",
+      "updatedDt": "2024-5-20 11:36:22.640",
+      "active": true
+    }
+  ]
+}

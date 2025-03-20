@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late Timer _timer;
   Duration _remainingTime = const Duration(hours: 6, minutes: 59, seconds: 43);
-  int unreadNotifications = 2; // Hardcoded for now
+  int unreadNotifications = 0; // Hardcoded for now
 
   @override
   void initState() {
