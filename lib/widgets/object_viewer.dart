@@ -31,8 +31,7 @@ Widget objectViewer() {
         onError: (String error) {
           debugPrint('model failed to load : $error');
         },
-        src:
-            'https://deins.s3.eu-central-1.amazonaws.com/Objects3d/deins_card2.glb',
+        src: 'assets/3d/deins_card2.glb',
         controller: controller),
   );
 }
