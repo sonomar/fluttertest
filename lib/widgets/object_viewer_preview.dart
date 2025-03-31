@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 
-Widget objectViewer() {
+Widget objectViewerPreview() {
   Flutter3DController controller = Flutter3DController();
   controller.onModelLoaded.addListener(() {
     debugPrint('model is loaded : ${controller.onModelLoaded.value}');
   });
   return SizedBox(
-    height: 500,
-    width: 300,
+    height: 400,
+    width: 200,
     child: Flutter3DViewer(
         //If you pass 'true' the flutter_3d_controller will add gesture interceptor layer
         //to prevent gesture recognizers from malfunctioning on iOS and some Android devices.
         //the default value is true
-        activeGestureInterceptor: true,
+        activeGestureInterceptor: false,
         //If you don't pass progressBarColor, the color of defaultLoadingProgressBar will be grey.
         //You can set your custom color or use [Colors.transparent] for hiding loadingProgressBar.
         progressBarColor: Colors.black,
         //You can disable viewer touch response by setting 'enableTouch' to 'false'
-        enableTouch: true,
+        enableTouch: false,
         //This callBack will return the loading progress value between 0 and 1.0
         onProgress: (double progressValue) {
           debugPrint('model loading progress : $progressValue');
@@ -31,7 +31,7 @@ Widget objectViewer() {
         onError: (String error) {
           debugPrint('model failed to load : $error');
         },
-        src: 'assets/3d/deins_card2.glb',
+        src: 'assets/3d/deins_card1.glb',
         controller: controller),
   );
 }

@@ -48,7 +48,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
             return Center(
               child: Text(
                 'Error: ${snapshot.error}',
-                style: const TextStyle(color: Colors.black, fontSize: 16), // Black text
+                style: const TextStyle(
+                    color: Colors.black, fontSize: 16), // Black text
               ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -65,8 +66,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
           return ListView.builder(
             itemCount: notificationsData.length,
             itemBuilder: (context, index) {
-              final userNotif =
-                  notificationsData[index]['userNotification'] as UserNotification;
+              final userNotif = notificationsData[index]['userNotification']
+                  as UserNotification;
               final notif =
                   notificationsData[index]['notification'] as NotificationModel;
 
