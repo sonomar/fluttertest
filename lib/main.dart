@@ -40,6 +40,8 @@ class MyApp extends StatelessWidget {
             // tested with just a hot reload.
             fontFamily: 'ChakraPetch',
             useMaterial3: true,
+            bottomSheetTheme:
+                BottomSheetThemeData(backgroundColor: Colors.white),
             appBarTheme: AppBarTheme(backgroundColor: Colors.white),
             scaffoldBackgroundColor: Colors.white),
         debugShowCheckedModeBanner: false,

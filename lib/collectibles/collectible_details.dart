@@ -61,9 +61,45 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                                     fontFamily: 'ChakraPetch',
                                   ))),
                           SizedBox(height: 50),
-                          Stack(alignment: Alignment.center, children: [
-                            GestureDetector(
-                                onTap: () {
+                          Stack(alignment: Alignment.topCenter, children: [
+                            Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 10.0, right: 10.0),
+                                child: Container(
+                                    width: double.infinity,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(25.0),
+                                      color: Colors.white,
+                                    ),
+                                    child: GestureDetector(
+                                      onVerticalDragEnd:
+                                          (DragEndDetails details) {
+                                        showModalBottomSheet(
+                                          context: context,
+                                          isScrollControlled: true,
+                                          constraints: BoxConstraints(
+                                            maxWidth: MediaQuery.of(context)
+                                                    .size
+                                                    .width -
+                                                40, // here increase or decrease in width
+                                          ),
+                                          builder: (context) => CardInfo(
+                                              selectedCollectible:
+                                                  widget.selectedCollectible),
+                                        );
+                                      },
+                                    ))),
+                            Container(
+                              margin: EdgeInsets.only(top: 10),
+                              width: 40,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(25.0),
+                                color: Colors.grey,
+                              ),
+                              child: GestureDetector(
+                                onVerticalDragEnd: (DragEndDetails details) {
                                   showModalBottomSheet(
                                     context: context,
                                     constraints: BoxConstraints(
@@ -77,40 +113,6 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                                             widget.selectedCollectible),
                                   );
                                 },
-                                child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 10.0, right: 10.0),
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 20,
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(25.0),
-                                        color: Colors.white,
-                                      ),
-                                    ))),
-                            GestureDetector(
-                              onTap: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  constraints: BoxConstraints(
-                                    maxWidth: MediaQuery.of(context)
-                                            .size
-                                            .width -
-                                        40, // here increase or decrease in width
-                                  ),
-                                  builder: (context) => CardInfo(
-                                      selectedCollectible:
-                                          widget.selectedCollectible),
-                                );
-                              },
-                              child: Container(
-                                width: 20,
-                                height: 10,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(25.0),
-                                  color: Colors.grey,
-                                ),
                               ),
                             ),
                           ]),
