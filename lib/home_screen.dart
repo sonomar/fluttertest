@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'notifications_page.dart';
-import 'widgets/object_viewer.dart'; // notification page import
+import 'widgets/object_viewer_preview.dart'; // notification page import
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.qrcode});
@@ -141,17 +141,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 5.0),
-            child: LinearPercentIndicator(
-              animation: true,
-              animationDuration: 2000,
-              lineHeight: 14.0,
-              percent: 0.5,
-              backgroundColor: Colors.grey,
-              barRadius: const Radius.circular(90),
-              progressColor: Colors.purple,
-            ),
-          ),
+              padding: const EdgeInsets.only(top: 5.0),
+              child: progressBar(0.45)),
           const Padding(
             padding: EdgeInsets.only(top: 5, left: 15, right: 15, bottom: 5),
             child: Row(
@@ -247,7 +238,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         centerTitle: false,
         leading: const Padding(
           padding: EdgeInsets.only(left: 30.0),
@@ -329,11 +322,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundImage: AssetImage('assets/images/car.jpg'),
                 ),
               ]),
-              objectViewer(),
+              objectViewerPreview(),
               turLWidget(),
               communityChallengeWidget(_formatTime(_remainingTime)),
               sectionHeader('CHALLENGES'),
-              challengeBox(),
               challengeBox(),
               sectionHeader('Nachrichten'),
               newsItem(
@@ -352,108 +344,125 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-}
 
-/// Section Header Widget
-Widget sectionHeader(String header) {
-  return Padding(
-      padding: const EdgeInsets.only(top: 30.0),
-      child: Stack(alignment: Alignment.center, children: [
-        const Divider(height: 20, thickness: 1, color: Colors.grey),
-        Text(header,
-            style: const TextStyle(
-              fontSize: 20,
-              color: Colors.black,
-              fontWeight: FontWeight.w700,
-              backgroundColor: Colors.white,
-            )),
-      ]));
-}
+  /// Section Header Widget
+  Widget sectionHeader(String header) {
+    return Padding(
+        padding: const EdgeInsets.only(top: 30.0),
+        child: Stack(alignment: Alignment.center, children: [
+          const Divider(height: 20, thickness: 1, color: Colors.grey),
+          Text(header,
+              style: const TextStyle(
+                fontSize: 20,
+                color: Colors.black,
+                fontWeight: FontWeight.w700,
+                backgroundColor: Colors.white,
+              )),
+        ]));
+  }
 
-/// Challenge Box
-Widget challengeBox() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 10.0),
-    child: Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12), topRight: Radius.circular(12)),
+  /// Challenge Box
+  Widget challengeBox() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              // ignore: deprecated_member_use
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
             ),
-            child: const Text(
-              'Community-Challenge',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.white,
-                fontStyle: FontStyle.italic,
-                fontWeight: FontWeight.bold,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12)),
+              ),
+              child: const Text(
+                'Community-Challenge',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              children: [
-                const CircleAvatar(
-                  backgroundImage: AssetImage("assets/images/car.jpg"),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Vervollständige die Kloppocar-Puzzle-Collection.',
-                        style: TextStyle(fontSize: 16, color: Colors.black),
-                      ),
-                    ],
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                children: [
+                  const CircleAvatar(
+                    backgroundImage: AssetImage("assets/images/car.jpg"),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Vervollständige die Kloppocar-Puzzle-Collection.',
+                          style: TextStyle(fontSize: 16, color: Colors.black),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: LinearPercentIndicator(
-              animation: true,
-              animationDuration: 2000,
-              lineHeight: 10.0,
-              percent: 0.3,
-              backgroundColor: Colors.grey,
-              barRadius: const Radius.circular(90),
-              progressColor: Colors.purple,
+            Container(
+                alignment: Alignment.center,
+                padding: EdgeInsets.all(5),
+                child: progressBar(.35)),
+            const Padding(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Kloppocar-Puzzle-Collection',
+                      style: TextStyle(fontSize: 12, color: Colors.black)),
+                  Text('4/7',
+                      style: TextStyle(fontSize: 12, color: Colors.black))
+                ],
+              ),
             ),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Kloppocar-Puzzle-Collection',
-                    style: TextStyle(fontSize: 12, color: Colors.black)),
-                Text('4/7', style: TextStyle(fontSize: 12, color: Colors.black))
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
+
+  Widget progressBar(progressPercent) {
+    return Container(
+        width: MediaQuery.of(context).size.width - 100,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(90),
+        ),
+        child: Padding(
+          padding:
+              const EdgeInsets.only(top: 5.0, bottom: 5.0, left: 0, right: 0),
+          child: LinearPercentIndicator(
+            animation: true,
+            animationDuration: 2000,
+            lineHeight: 3.0,
+            percent: progressPercent,
+            backgroundColor: Colors.transparent,
+            barRadius: const Radius.circular(90),
+            progressColor: Color(0xffd622ca),
+          ),
+        ));
+  }
 }

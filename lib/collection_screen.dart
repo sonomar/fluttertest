@@ -89,6 +89,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
     // ignore: avoid_print
     print('length: ${_items.length}');
     return Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
             titleTextStyle: TextStyle(
                 fontWeight: FontWeight.w700,

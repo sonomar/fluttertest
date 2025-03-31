@@ -85,6 +85,7 @@ class ScanScreen extends StatelessWidget {
     }
 
     return Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           title: const Text("Scan Collectible"),
           centerTitle: false,
