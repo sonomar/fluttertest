@@ -97,7 +97,13 @@ class _CollectionScreenState extends State<CollectionScreen> {
                 fontFamily: 'ChakraPetch',
                 fontSize: 30),
             centerTitle: false,
-            title: Text("Galerie")),
+            title: Text("Galerie",
+                style: const TextStyle(
+                  fontSize: 28,
+                  color: Colors.black,
+                  fontFamily: 'ChakraPetch',
+                  fontWeight: FontWeight.w500,
+                ))),
         body: Padding(
             padding: const EdgeInsets.all(20.0),
             child:
@@ -108,14 +114,18 @@ class _CollectionScreenState extends State<CollectionScreen> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         CircleAvatar(
-                            backgroundColor: Colors.red, child: Text('LM')),
+                          radius: 20,
+                          backgroundImage:
+                              AssetImage('assets/images/caricon.jpg'),
+                        ),
                         Padding(
                             padding: const EdgeInsets.only(left: 10.0),
                             child: Text('Kloppocar Puzzle Collection',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 20,
                                   color: Colors.black,
                                   fontFamily: 'ChakraPetch',
+                                  fontWeight: FontWeight.w500,
                                 )))
                       ])),
               Expanded(
@@ -127,7 +137,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                         crossAxisCount: 4,
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,
-                        childAspectRatio: (5 / 10),
+                        childAspectRatio: (6 / 10),
                         children: [
                       for (int i = 0; i < _items.length; i++) ...[
                         Container(

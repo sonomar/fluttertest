@@ -14,16 +14,15 @@ class _CommunityScreenState extends State<CommunityScreen> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text("Community"),
-          backgroundColor: Colors.black,
-          centerTitle: false,
-          titleTextStyle: TextStyle(
-            color: Colors.white,
-            fontSize: 30,
-            fontWeight: FontWeight.w700,
-            fontFamily: 'ChakraPetch',
-          ),
-        ),
+            title: const Text("Community"),
+            backgroundColor: Color(0xff333333),
+            centerTitle: false,
+            titleTextStyle: TextStyle(
+              fontSize: 28,
+              color: Colors.white,
+              fontFamily: 'ChakraPetch',
+              fontWeight: FontWeight.w500,
+            )),
         body: Container(
             alignment: Alignment.topCenter,
             decoration: BoxDecoration(

@@ -50,6 +50,7 @@ dependencies:
   flutter_bloc: ^9.1.0
   equatable: ^2.0.7
   bloc: ^9.0.0
+  flutter_svg: ^2.0.17
 
 dev_dependencies:
   flutter_test:
@@ -99,6 +100,16 @@ flutter:
         - asset: assets/google_fonts/ChakraPetch-Regular.ttf
         - asset: assets/google_fonts/ChakraPetch-Italic.ttf
           style: italic
+        - asset: assets/google_fonts/ChakraPetch-Medium.ttf
+          weight: 500
+        - asset: assets/google_fonts/ChakraPetch-MediumItalic.ttf
+          style: italic
+          weight: 500
+        - asset: assets/google_fonts/ChakraPetch-SemiBold.ttf
+          weight: 600
+        - asset: assets/google_fonts/ChakraPetch-SemiBoldItalic.ttf
+          style: italic
+          weight: 600
         - asset: assets/google_fonts/ChakraPetch-Bold.ttf
           weight: 700
         - asset: assets/google_fonts/ChakraPetch-BoldItalic.ttf

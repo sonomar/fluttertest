@@ -68,15 +68,14 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text("Profile"),
-          centerTitle: false,
-          titleTextStyle: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.w700,
-            color: Colors.black,
-            fontFamily: 'ChakraPetch',
-          ),
-        ),
+            title: const Text("Profile"),
+            centerTitle: false,
+            titleTextStyle: TextStyle(
+              fontSize: 28,
+              color: Colors.black,
+              fontFamily: 'ChakraPetch',
+              fontWeight: FontWeight.w500,
+            )),
         body: ListView(
           padding: const EdgeInsets.all(8),
           children: <Widget>[

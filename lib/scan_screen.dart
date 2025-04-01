@@ -86,14 +86,14 @@ class ScanScreen extends StatelessWidget {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text("Scan Collectible"),
-          centerTitle: false,
-          titleTextStyle: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.w700,
-            fontFamily: 'ChakraPetch',
-          ),
-        ),
+            title: const Text("Scan Collectible"),
+            centerTitle: false,
+            titleTextStyle: TextStyle(
+              fontSize: 28,
+              color: Colors.black,
+              fontFamily: 'ChakraPetch',
+              fontWeight: FontWeight.w500,
+            )),
         body: SizedBox(
             height: 400,
             child: MobileScanner(

@@ -9,6 +9,7 @@ import './profile_screen.dart';
 import './openCards/login_page.dart';
 // import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 void main() {
   runApp(const MyApp());
@@ -168,47 +169,96 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: PageStorage(
-        bucket: bucket,
-        child: _screens[_currentIndex],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.house_outlined),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.apps),
-            label: 'Collection',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.qr_code_scanner_outlined, size: 40),
-            label: 'Scan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.public),
-            label: 'Community',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle_outlined),
-            label: 'Profile',
-          ),
-        ],
-        unselectedIconTheme: const IconThemeData(color: Colors.black),
-        selectedItemColor: const Color(0xffd622ca),
-        unselectedItemColor: Colors.black,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        backgroundColor: Colors.white,
+        body: PageStorage(
+          bucket: bucket,
+          child: _screens[_currentIndex],
+        ),
+        bottomNavigationBar: Container(
+          color: Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: BottomNavigationBar(
+            currentIndex: _currentIndex,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+            type: BottomNavigationBarType.fixed,
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                  icon: SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: SvgPicture.asset(
+                      'assets/images/home.svg',
+                      colorFilter: ColorFilter.mode(
+                          _currentIndex == 0 ? Color(0xffd622ca) : Colors.black,
+                          BlendMode.srcIn),
+                    ),
+                  ),
+                  label: 'Home'),
+              BottomNavigationBarItem(
+                icon: SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: SvgPicture.asset(
+                    'assets/images/galerie.svg',
+                    colorFilter: ColorFilter.mode(
+                        _currentIndex == 1 ? Color(0xffd622ca) : Colors.black,
+                        BlendMode.srcIn),
+                  ),
+                ),
+                label: 'Galerie',
+              ),
+              BottomNavigationBarItem(
+                icon: SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: SvgPicture.asset(
+                    'assets/images/scan.svg',
+                    colorFilter: ColorFilter.mode(
+                        _currentIndex == 2 ? Color(0xffd622ca) : Colors.black,
+                        BlendMode.srcIn),
+                  ),
+                ),
+                label: 'Scan',
+              ),
+              BottomNavigationBarItem(
+                icon: SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: SvgPicture.asset(
+                    'assets/images/community.svg',
+                    colorFilter: ColorFilter.mode(
+                        _currentIndex == 3 ? Color(0xffd622ca) : Colors.black,
+                        BlendMode.srcIn),
+                  ),
+                ),
+                label: 'Community',
+              ),
+              BottomNavigationBarItem(
+                icon: SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: SvgPicture.asset(
+                    'assets/images/profil.svg',
+                    colorFilter: ColorFilter.mode(
+                        _currentIndex == 4 ? Color(0xffd622ca) : Colors.black,
+                        BlendMode.srcIn),
+                  ),
+                ),
+                label: 'Profil',
+              ),
+            ],
+            unselectedIconTheme: const IconThemeData(color: Colors.black),
+            selectedItemColor: const Color(0xffd622ca),
+            unselectedItemColor: Colors.black,
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
+          ), // This trailing comma makes auto-formatting nicer for build methods.
+        ));
   }
 }

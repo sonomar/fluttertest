@@ -4,6 +4,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'notifications_page.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'widgets/object_viewer_preview.dart'; // notification page import
 
 class HomeScreen extends StatefulWidget {
@@ -63,46 +65,78 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 20.0),
       child: Container(
-        padding: const EdgeInsets.all(15.0),
+        padding: const EdgeInsets.only(bottom: 5.0),
         decoration: BoxDecoration(
           color: Colors.black,
-          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Community-Ziel läuft bald ab!',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+            ShaderMask(
+              shaderCallback: (rect) {
+                return LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black, Colors.transparent],
+                ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+              },
+              blendMode: BlendMode.dstIn,
+              child:
+                  Image.asset('assets/images/carheader.jpg', fit: BoxFit.cover),
             ),
-            const SizedBox(height: 10),
-            const Text(
-              'Es fehlen noch 212 Assets bis zum Ziel. Trage jetzt dazu bei und hole dir noch Assets. Zum Beispiel beim Formel 1-Rennen in Spielberg oder erfülle Challenges. Die Community zählt auf dich. Viel Glück!',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 15),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.purple,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Text(
-                time,
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Padding(
+                  padding: EdgeInsets.only(left: 30),
+                  child: CircleAvatar(
+                    radius: 24,
+                    backgroundImage: AssetImage('assets/images/paint.jpg'),
+                  )),
+              Container(
+                decoration: BoxDecoration(
+                  color: Color(0xffd622ca),
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      bottomLeft: Radius.circular(8)),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Text(
+                  time,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontFamily: 'ChakraPetch',
+                    fontWeight: FontWeight.w500,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ),
-            ),
+            ]),
+            Padding(
+                padding: EdgeInsets.only(left: 30, right: 30, top: 10),
+                child: Text(
+                  'Community-Ziel läuft bald ab!',
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontFamily: 'ChakraPetch',
+                    fontWeight: FontWeight.w500,
+                    fontStyle: FontStyle.italic,
+                  ),
+                )),
+            const SizedBox(height: 10),
+            Padding(
+                padding: EdgeInsets.only(left: 30, right: 30),
+                child: Text(
+                  'Es fehlen noch 212 Assets bis zum Ziel. Trage jetzt dazu bei und hole dir noch Assets. Zum Beispiel beim Formel 1-Rennen in Spielberg oder erfülle Challenges. Die Community zählt auf dich. Viel Glück!',
+                  style: GoogleFonts.roboto(
+                      textStyle: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w300,
+                  )),
+                )),
+            const SizedBox(height: 15),
           ],
         ),
       ),
@@ -121,8 +155,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Text(
                     'Tür L',
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 28,
+                      fontFamily: 'ChakraPetch',
+                      fontWeight: FontWeight.w500,
                       color: Colors.black,
                     ),
                   )),
@@ -130,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Padding(
                     padding: const EdgeInsets.only(left: 40.0),
                     child: Image.asset('assets/images/silvertab.png',
-                        width: 120, height: 40, fit: BoxFit.fill)),
+                        width: 120, height: 50, fit: BoxFit.fill)),
                 Text("Selten",
                     style: TextStyle(
                       fontSize: 12,
@@ -179,8 +214,9 @@ class _HomeScreenState extends State<HomeScreen> {
             const Text(
               'Kloppocar',
               style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontSize: 28,
+                fontFamily: 'ChakraPetch',
+                fontWeight: FontWeight.w500,
                 color: Colors.black,
               ),
             ),
@@ -207,31 +243,38 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: const BorderRadius.all(Radius.circular(20))),
               child: Text(category,
                   style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.white,
-                    fontFamily: 'ChakraPetch',
-                  )),
+                      fontSize: 8,
+                      letterSpacing: 2.56,
+                      color: Colors.white,
+                      fontFamily: 'ChakraPetch',
+                      fontWeight: FontWeight.w700)),
             ),
             Padding(
                 padding: const EdgeInsets.only(left: 10),
                 child: Text(
                   postdate,
-                  style: TextStyle(
+                  style: GoogleFonts.roboto(
+                      textStyle: TextStyle(
                     fontSize: 12,
+                    letterSpacing: 1,
                     color: Colors.black,
-                    fontFamily: 'Roboto',
-                  ),
+                    fontWeight: FontWeight.w300,
+                  )),
                 ))
           ]),
           Padding(
               padding: const EdgeInsets.only(top: 10),
-              child: Text(content,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                    fontFamily: 'Roboto',
-                  ))),
-          const Divider(height: 20, thickness: 1, color: Colors.grey),
+              child: Text(
+                content,
+                style: GoogleFonts.roboto(
+                    textStyle: TextStyle(
+                  fontSize: 14,
+                  letterSpacing: 1,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w300,
+                )),
+              )),
+          const Divider(height: 20, thickness: 1, color: Color(0x80999999)),
         ]));
   }
 
@@ -242,42 +285,56 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         centerTitle: false,
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 30.0),
-          child: CircleAvatar(
-            radius: 20,
-            backgroundImage: AssetImage('assets/images/car1.jpeg'),
-          ),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('USERNAME',
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
-            Text('DEINS-Tester',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
-          ],
-        ),
+        title: Padding(
+            padding: const EdgeInsets.only(top: 0),
+            child: Row(children: [
+              Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                            blurRadius: 10,
+                            color: Colors.black,
+                            spreadRadius: 0)
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundImage: AssetImage('assets/images/profile.jpg'),
+                    ),
+                  )),
+              const Padding(
+                  padding: EdgeInsets.only(left: 10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('DEINS-Tester',
+                          style: TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.w700)),
+                      Text('Titel: Master Collector',
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w200)),
+                    ],
+                  ))
+            ])),
         actions: [
           Stack(
             children: [
               IconButton(
                 icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.purple,
-                      width: 2,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Color(0xffd622ca),
+                        width: 1,
+                      ),
                     ),
-                  ),
-                  child: const Icon(
-                    Icons.notifications,
-                    color: Colors.black,
-                    size: 24,
-                  ),
-                ),
+                    child: SvgPicture.asset('assets/images/bell.svg')),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -316,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             children: [
               const Stack(alignment: Alignment.center, children: [
-                Divider(height: 20, thickness: 1, color: Colors.grey),
+                Divider(height: 20, thickness: 1, color: Color(0x80999999)),
                 CircleAvatar(
                   radius: 20,
                   backgroundImage: AssetImage('assets/images/car.jpg'),
@@ -350,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
         padding: const EdgeInsets.only(top: 30.0),
         child: Stack(alignment: Alignment.center, children: [
-          const Divider(height: 20, thickness: 1, color: Colors.grey),
+          const Divider(height: 20, thickness: 1, color: Color(0x80999999)),
           Text(header,
               style: const TextStyle(
                 fontSize: 20,
@@ -392,15 +449,17 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text(
                 'Community-Challenge',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 24,
                   color: Colors.white,
+                  fontFamily: 'ChakraPetch',
+                  fontWeight: FontWeight.w500,
                   fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.only(
+                  left: 15, top: 40, right: 15, bottom: 10),
               child: Row(
                 children: [
                   const CircleAvatar(
@@ -425,15 +484,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 alignment: Alignment.center,
                 padding: EdgeInsets.all(5),
                 child: progressBar(.35)),
-            const Padding(
-              padding: EdgeInsets.all(10),
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Kloppocar-Puzzle-Collection',
-                      style: TextStyle(fontSize: 12, color: Colors.black)),
-                  Text('4/7',
-                      style: TextStyle(fontSize: 12, color: Colors.black))
+                  Text(
+                    'Kloppocar-Puzzle-Collection',
+                    style: GoogleFonts.roboto(
+                        textStyle: TextStyle(
+                      fontSize: 12,
+                      letterSpacing: 1,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w300,
+                    )),
+                  ),
+                  Text(
+                    '4/7',
+                    style: GoogleFonts.roboto(
+                        textStyle: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w300,
+                    )),
+                  )
                 ],
               ),
             ),
@@ -445,10 +519,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget progressBar(progressPercent) {
     return Container(
-        width: MediaQuery.of(context).size.width - 100,
+        width: MediaQuery.of(context).size.width - 90,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
+          border: Border.all(color: Color(0x80999999)),
           borderRadius: BorderRadius.circular(90),
         ),
         child: Padding(
