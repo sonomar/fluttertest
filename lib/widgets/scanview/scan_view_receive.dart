@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import './scan_view_success.dart';
+import 'package:flutter/services.dart';
+import 'dart:convert';
 
 class ScanViewReceive extends StatefulWidget {
   const ScanViewReceive({super.key, required this.qrcode});
@@ -9,23 +11,60 @@ class ScanViewReceive extends StatefulWidget {
   State<ScanViewReceive> createState() => _ScanViewReceiveState();
 }
 
-class _ScanViewReceiveState extends State<ScanViewReceive> {
+class _ScanViewReceiveState extends State<ScanViewReceive>
+    with SingleTickerProviderStateMixin {
   bool _clicked = false;
+  String _item = '';
+
+  late final AnimationController _controller = AnimationController(
+    duration: const Duration(seconds: 2),
+    vsync: this,
+  )..forward();
+  late final Animation<Offset> _offsetAnimation = Tween<Offset>(
+    begin: Offset(0, -4.5),
+    end: Offset.zero,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.decelerate));
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<String> readItemJson() async {
+    final String response =
+        await rootBundle.loadString('assets/json/example.json');
+    final data = await json.decode(response);
+    for (int i = 0; i < data['collectibles'].length; i++) {
+      if (data['collectibles'][i]['label'] == widget.qrcode) {
+        setState(() {
+          _item = data['collectibles'][i]['imageRef'];
+        });
+        return data['collectibles'][i]['imageRef'];
+      }
+    }
+    setState(() {
+      _item = 'assets/images/car1.jpeg';
+    });
+    return 'assets/images/car1.jpeg';
+  }
 
   @override
   void initState() {
     super.initState();
+    final qrcode = widget.qrcode;
+    final navigator = Navigator.of(context);
     setState(() {
       _clicked = false;
     });
-    final qrcode = widget.qrcode;
-    final navigator = Navigator.of(context);
-    Future.delayed(const Duration(seconds: 4)).then((value) => {
-          if (_clicked == false)
-            {
-              navigator.pushReplacement(MaterialPageRoute(
-                  builder: (context) => ScanViewSuccess(qrcode: qrcode))),
-            }
+    readItemJson().then((value) => {
+          Future.delayed(const Duration(seconds: 4)).then((value) => {
+                if (_clicked == false)
+                  {
+                    navigator.pushReplacement(MaterialPageRoute(
+                        builder: (context) => ScanViewSuccess(qrcode: qrcode))),
+                  }
+              })
         });
   }
 
@@ -47,18 +86,16 @@ class _ScanViewReceiveState extends State<ScanViewReceive> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // logo here
-                Image.asset(
-                  'assets/images/deins_logo.png',
-                  height: 200,
-                  width: 200,
-                ),
-                Container(
-                    height: 40,
-                    alignment: Alignment.center,
-                    child: Text('Collectible Received!')),
-                CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                SlideTransition(
+                  position: _offsetAnimation,
+                  child: Container(
+                      width: 200,
+                      height: 400,
+                      alignment: Alignment.center,
+                      child: Image.asset(
+                        _item,
+                        fit: BoxFit.cover,
+                      )),
                 )
               ],
             ),

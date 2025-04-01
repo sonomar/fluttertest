@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../main.dart';
 
 class ScanViewSuccess extends StatefulWidget {
@@ -9,8 +10,10 @@ class ScanViewSuccess extends StatefulWidget {
   State<ScanViewSuccess> createState() => _ScanViewSuccessState();
 }
 
-class _ScanViewSuccessState extends State<ScanViewSuccess> {
+class _ScanViewSuccessState extends State<ScanViewSuccess>
+    with SingleTickerProviderStateMixin {
   bool _clicked = false;
+  late AnimationController _controller;
 
   @override
   void initState() {
@@ -20,6 +23,10 @@ class _ScanViewSuccessState extends State<ScanViewSuccess> {
     });
     final qrcode = widget.qrcode;
     final navigator = Navigator.of(context);
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 5000),
+      vsync: this,
+    )..repeat();
     Future.delayed(const Duration(seconds: 4)).then((value) => {
           if (_clicked == false)
             {
@@ -28,6 +35,12 @@ class _ScanViewSuccessState extends State<ScanViewSuccess> {
                       MyHomePage(title: "Kloppocar Home", qrcode: qrcode))),
             }
         });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -46,22 +59,26 @@ class _ScanViewSuccessState extends State<ScanViewSuccess> {
                     MyHomePage(title: "Kloppocar Home", qrcode: qrcode)));
           },
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                // logo here
-                Image.asset(
-                  'assets/images/deins_logo.png',
-                  height: 200,
-                  width: 200,
-                ),
-                Container(
-                    height: 40,
-                    alignment: Alignment.center,
-                    child: Text('Success!')),
-                CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                )
+                RotationTransition(
+                    turns: Tween(begin: 0.0, end: 1.0).animate(_controller),
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: Stack(alignment: Alignment.center, children: [
+                        SvgPicture.asset(
+                          'assets/images/orbBurst.svg',
+                          fit: BoxFit.cover,
+                        ),
+                        SvgPicture.asset(
+                          'assets/images/starBurst.svg',
+                          fit: BoxFit.cover,
+                        ),
+                      ]),
+                    )),
+                Image.asset('assets/images/check.png',
+                    height: 100, width: 100, alignment: Alignment.center)
               ],
             ),
           ),
