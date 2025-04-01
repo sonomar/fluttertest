@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../scan_screen.dart';
+import 'package:lottie/lottie.dart';
 
 class ScanViewError extends StatefulWidget {
   const ScanViewError({super.key});
@@ -57,9 +58,10 @@ class _ScanViewErrorState extends State<ScanViewError> {
                       'Incorrect QR Code Scanned!',
                       style: TextStyle(color: Colors.white),
                     )),
-                CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-                )
+                SizedBox(
+                    height: 40,
+                    width: 40,
+                    child: Lottie.asset('assets/lottie/pinkspin1.json')),
               ],
             ),
           ),

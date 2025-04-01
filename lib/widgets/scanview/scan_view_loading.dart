@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './scan_view_receive.dart';
 import './scan_view_error.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ScanViewLoading extends StatefulWidget {
@@ -80,9 +81,10 @@ class _ScanViewLoadingState extends State<ScanViewLoading> {
                       'Scanning...',
                       style: TextStyle(color: Colors.white),
                     )),
-                CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.yellow),
-                )
+                SizedBox(
+                    height: 40,
+                    width: 40,
+                    child: Lottie.asset('assets/lottie/pinkspin1.json')),
               ],
             ),
           ),

@@ -7,6 +7,7 @@ import './scan_screen.dart';
 import './community_screen.dart';
 import './profile_screen.dart';
 import './openCards/login_page.dart';
+import 'package:lottie/lottie.dart';
 // import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -96,9 +97,10 @@ class SplashScreenState extends State<SplashScreen> {
             SizedBox(
               height: 40,
             ),
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            )
+            SizedBox(
+                height: 40,
+                width: 40,
+                child: Lottie.asset('assets/lottie/pinkspin1.json')),
           ],
         ),
       ),
