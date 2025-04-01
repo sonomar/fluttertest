@@ -13,12 +13,7 @@ class _UserSettingsState extends State<UserSettings> {
   Widget build(BuildContext context) {
     // ignore: avoid_print
     return Scaffold(
-        appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: const Text("User Settings")),
+        appBar: AppBar(title: const Text("User Settings")),
         body: ListView(
           padding: const EdgeInsets.all(8),
           children: <Widget>[

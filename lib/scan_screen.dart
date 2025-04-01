@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import './main.dart';
+import 'widgets/scanview/scan_view_loading.dart';
 
 class ScanScreen extends StatelessWidget {
   const ScanScreen({super.key});
@@ -17,72 +16,72 @@ class ScanScreen extends StatelessWidget {
       detectionSpeed: DetectionSpeed.noDuplicates,
     );
 
-    Future<void> collectedDialog(code) async {
-      final prefs = await SharedPreferences.getInstance();
+    // Future<void> collectedDialog(code) async {
+    //   final prefs = await SharedPreferences.getInstance();
 
-      return showDialog<void>(
-        context: context,
-        barrierDismissible: true, // user must tap button!
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('You got a Collectible!'),
-            content: const SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  Text('You can see it on the Collection page.'),
-                  Text('Scan other codes for more!'),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  prefs.setBool(code, true);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => MyHomePage(
-                            title: "Kloppocar Home",
-                            qrcode:
-                                code) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
-                        ),
-                  );
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
+    //   return showDialog<void>(
+    //     context: context,
+    //     barrierDismissible: true, // user must tap button!
+    //     builder: (BuildContext context) {
+    //       return AlertDialog(
+    //         title: const Text('You got a Collectible!'),
+    //         content: const SingleChildScrollView(
+    //           child: ListBody(
+    //             children: <Widget>[
+    //               Text('You can see it on the Collection page.'),
+    //               Text('Scan other codes for more!'),
+    //             ],
+    //           ),
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             child: const Text('OK'),
+    //             onPressed: () {
+    //               prefs.setBool(code, true);
+    //               Navigator.push(
+    //                 context,
+    //                 MaterialPageRoute(
+    //                     builder: (context) => MyHomePage(
+    //                         title: "Kloppocar Home",
+    //                         qrcode:
+    //                             code) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
+    //                     ),
+    //               );
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    // }
 
-    Future<void> rejectedDialog() async {
-      return showDialog<void>(
-        context: context,
-        barrierDismissible: true, // user must tap button!
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Incorrect Code'),
-            content: const SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  Text('The code you scanned is not an authorized DEINS code'),
-                  Text('Scan authorized codes to collect!'),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
+    // Future<void> rejectedDialog() async {
+    //   return showDialog<void>(
+    //     context: context,
+    //     barrierDismissible: true, // user must tap button!
+    //     builder: (BuildContext context) {
+    //       return AlertDialog(
+    //         title: const Text('Incorrect Code'),
+    //         content: const SingleChildScrollView(
+    //           child: ListBody(
+    //             children: <Widget>[
+    //               Text('The code you scanned is not an authorized DEINS code'),
+    //               Text('Scan authorized codes to collect!'),
+    //             ],
+    //           ),
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             child: const Text('OK'),
+    //             onPressed: () {
+    //               Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    // }
 
     return Scaffold(
         backgroundColor: Colors.white,
@@ -111,12 +110,16 @@ class ScanScreen extends StatelessWidget {
                 controller: scanController,
                 onDetect: (barcode) {
                   final String code = barcode.barcodes.first.rawValue ?? '';
-                  if (code.contains('item-test')) {
-                    scanController.dispose();
-                    collectedDialog(code);
-                  } else {
-                    rejectedDialog();
-                  }
+
+                  scanController.dispose();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ScanViewLoading(
+                            qrcode:
+                                code) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
+                        ),
+                  );
                 })));
   }
 }
