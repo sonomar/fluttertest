@@ -5,6 +5,19 @@ allprojects {
     }
 }
 
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                if (!hasProperty('namespace') || namespace == null || namespace.isEmpty()) {
+                    // Assign a default namespace based on the project name or group
+                    namespace = project.group.toString() ?: "io.deins.${project.name}"
+                }
+            }
+        }
+    }
+}
+
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
@@ -16,3 +29,4 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+
