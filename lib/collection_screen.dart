@@ -190,13 +190,14 @@ class _CollectionScreenState extends State<CollectionScreen> {
                         primary: false,
                         padding: const EdgeInsets.only(top: 20, bottom: 20),
                         crossAxisCount: 4,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 5,
+                        mainAxisSpacing: 5,
                         childAspectRatio: (6 / 10),
                         children: [
                       for (int i = 0; i < _items.length; i++) ...[
                         Container(
-                            padding: const EdgeInsets.only(top: 20, bottom: 20),
+                            padding: const EdgeInsets.only(
+                                top: 20, left: 5, right: 5, bottom: 20),
                             child: (_cardStatus[_items[i]['label']] == true)
                                 ? linkedInkwell(_items[i])
                                 : unlinkedInkwell(_items[i]))
