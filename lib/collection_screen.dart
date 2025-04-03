@@ -14,6 +14,29 @@ class CollectionScreen extends StatefulWidget {
 class _CollectionScreenState extends State<CollectionScreen> {
   List _items = [];
   final Map _cardStatus = {};
+  Map exampleWallet = {
+    "collectibleId": 99,
+    "label": "item-test77",
+    "name": "3D Wallet",
+    "category": 1,
+    "collection": 1,
+    "description":
+        "This is a sample 3D Wallet. This Shows off what DEINS 3D objects will look like in the future.",
+    "imageRef": "assets/images/car1.png",
+    "vidRef": "assets/images/car1.png",
+    "QRRef": "assets/images/car1.png",
+    "EmbedRef": "assets/images/car1.png",
+    "createdDt": "2024-11-18 10:36:22.640",
+    "updatedDt": "2024-11-18 10:36:22.640",
+    "active": true,
+    "collection-name": "Kloppocar-Puzzle-Collection",
+    "collection-number": "01-01",
+    "community": "Kloppocar Community",
+    "sponsor": "Mini-Cooper",
+    "sponsor-url": "https://www.mini.com",
+    "circulation": "20,000",
+    "publication-date": "20.03.2025"
+  };
 
   Future<void> readItemJson() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -124,7 +147,22 @@ class _CollectionScreenState extends State<CollectionScreen> {
                   color: Colors.black,
                   fontFamily: 'ChakraPetch',
                   fontWeight: FontWeight.w500,
-                ))),
+                )),
+            actions: [
+              Padding(
+                padding: EdgeInsets.all(10),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Collectible(
+                                selectedCollectible: exampleWallet)));
+                  },
+                  child: Image.asset("assets/images/wallet1.png"),
+                ),
+              )
+            ]),
         body: Padding(
             padding: const EdgeInsets.all(12.0),
             child:
@@ -134,7 +172,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        shadowCircle('assets/images/caricon.jpg', 20),
+                        shadowCircle('assets/images/caricon.jpg', 20.0),
                         Padding(
                             padding: const EdgeInsets.only(left: 10.0),
                             child: Text('Kloppocar Puzzle Collection',
@@ -158,8 +196,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                         children: [
                       for (int i = 0; i < _items.length; i++) ...[
                         Container(
-                            padding: const EdgeInsets.only(
-                                top: 20, bottom: 20, left: 5, right: 5),
+                            padding: const EdgeInsets.only(top: 20, bottom: 20),
                             child: (_cardStatus[_items[i]['label']] == true)
                                 ? linkedInkwell(_items[i])
                                 : unlinkedInkwell(_items[i]))

@@ -48,7 +48,12 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                           SizedBox(
                             height: 500,
                             width: double.infinity,
-                            child: objectViewer(),
+                            child: widget.selectedCollectible["label"] ==
+                                    "item-test77"
+                                ? ObjectViewer(
+                                    asset: "assets/3d/deins_card4.glb")
+                                : ObjectViewer(
+                                    asset: "assets/3d/deins_card2.glb"),
                           ),
                           ElevatedButton(
                               style: ElevatedButton.styleFrom(

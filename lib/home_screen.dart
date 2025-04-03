@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kloppocar_app/collectibles/collectible.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
@@ -6,7 +7,6 @@ import 'dart:convert';
 import 'notifications_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'widgets/object_viewer_preview.dart'; // notification page import
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.qrcode});
@@ -21,6 +21,29 @@ class _HomeScreenState extends State<HomeScreen> {
   Duration _remainingTime = const Duration(hours: 6, minutes: 59, seconds: 43);
   int unreadNotifications = 0; // Hardcoded for now
   List _newsItems = [];
+  Map exampleCollectible = {
+    "collectibleId": 1,
+    "label": "item-test1",
+    "name": "Party Door",
+    "category": 1,
+    "collection": 1,
+    "description":
+        "This is item test 1. This is great because this test item is really cool. It's part of the Kloppocar prep app and everything about it is going to be fun to collect and fun to trade! DEINS cards are the digital trading platform of the future!",
+    "imageRef": "assets/images/car1.png",
+    "vidRef": "assets/images/car1.png",
+    "QRRef": "assets/images/car1.png",
+    "EmbedRef": "assets/images/car1.png",
+    "createdDt": "2024-11-18 10:36:22.640",
+    "updatedDt": "2024-11-18 10:36:22.640",
+    "active": true,
+    "collection-name": "Kloppocar-Puzzle-Collection",
+    "collection-number": "01-01",
+    "community": "Kloppocar Community",
+    "sponsor": "Mini-Cooper",
+    "sponsor-url": "https://www.mini.com",
+    "circulation": "20,000",
+    "publication-date": "20.03.2025"
+  };
 
   Future<void> readItemJson() async {
     final String response =
@@ -264,9 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ))
             ],
           ),
-          Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: progressBar(0.8)),
+          Container(alignment: Alignment.center, child: progressBar(0.8)),
           const Padding(
             padding: EdgeInsets.only(left: 15, top: 5, right: 15, bottom: 5),
             child: Row(
@@ -360,7 +381,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(children: [
                 Padding(
                     padding: const EdgeInsets.only(left: 10.0),
-                    child: shadowCircle('assets/images/profile.jpg', 18)),
+                    child: shadowCircle('assets/images/profile.jpg', 18.0)),
                 const Padding(
                     padding: EdgeInsets.only(left: 10.0),
                     child: Column(
@@ -425,13 +446,37 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SingleChildScrollView(
             child: Column(children: [
           Padding(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(10),
               child: Column(children: [
                 Stack(alignment: Alignment.center, children: [
                   Divider(height: 20, thickness: 1, color: Color(0x80999999)),
-                  shadowCircle('assets/images/car.jpg', 20),
+                  shadowCircle('assets/images/car.jpg', 20.0),
                 ]),
-                objectViewerPreview(),
+                Align(
+                    alignment: Alignment.center,
+                    child: Stack(alignment: Alignment.center, children: [
+                      IgnorePointer(
+                          child: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: SizedBox(
+                                  height: 400,
+                                  child: Image.asset(
+                                      'assets/images/covercard.png',
+                                      fit: BoxFit.cover)))),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Collectible(
+                                      selectedCollectible:
+                                          exampleCollectible)));
+                        },
+                        child: CircleAvatar(
+                            backgroundColor: Colors.transparent,
+                            child: Text('i')),
+                      ),
+                    ])),
                 turLWidget(),
                 kloppocarWidget(),
               ])),
@@ -516,7 +561,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   left: 15, top: 40, right: 15, bottom: 10),
               child: Row(
                 children: [
-                  shadowCircle('assets/images/car.jpg', 20),
+                  shadowCircle('assets/images/car.jpg', 20.0),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -571,7 +616,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget progressBar(progressPercent) {
     return Container(
-        width: MediaQuery.of(context).size.width - 90,
+        width: MediaQuery.of(context).size.width - 50,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           border: Border.all(color: Color(0x80999999)),

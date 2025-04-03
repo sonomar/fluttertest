@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './scan_view_success.dart';
+import '../../main.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 
@@ -61,7 +61,8 @@ class _ScanViewReceiveState extends State<ScanViewReceive>
                 if (_clicked == false)
                   {
                     navigator.pushReplacement(MaterialPageRoute(
-                        builder: (context) => ScanViewSuccess(qrcode: qrcode))),
+                        builder: (context) => MyHomePage(
+                            title: "Kloppocar Home", qrcode: qrcode))),
                   }
               })
         });
@@ -80,7 +81,8 @@ class _ScanViewReceiveState extends State<ScanViewReceive>
               _clicked = true;
             });
             navigator.pushReplacement(MaterialPageRoute(
-                builder: (context) => ScanViewSuccess(qrcode: qrcode)));
+                builder: (context) =>
+                    MyHomePage(title: "Kloppocar Home", qrcode: qrcode)));
           },
           child: Center(
             child: Column(
@@ -89,6 +91,7 @@ class _ScanViewReceiveState extends State<ScanViewReceive>
                 SlideTransition(
                   position: _offsetAnimation,
                   child: Container(
+                      width: 300,
                       alignment: Alignment.center,
                       child: Image.asset(
                         _item,

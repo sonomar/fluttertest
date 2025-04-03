@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../main.dart';
+import './scan_view_receive.dart';
 
 class ScanViewSuccess extends StatefulWidget {
   const ScanViewSuccess({super.key, required this.qrcode});
@@ -27,12 +28,11 @@ class _ScanViewSuccessState extends State<ScanViewSuccess>
       duration: const Duration(milliseconds: 5000),
       vsync: this,
     )..repeat();
-    Future.delayed(const Duration(seconds: 4)).then((value) => {
+    Future.delayed(const Duration(seconds: 3)).then((value) => {
           if (_clicked == false)
             {
               navigator.pushReplacement(MaterialPageRoute(
-                  builder: (context) =>
-                      MyHomePage(title: "Kloppocar Home", qrcode: qrcode))),
+                  builder: (context) => ScanViewReceive(qrcode: qrcode))),
             }
         });
   }
@@ -55,8 +55,7 @@ class _ScanViewSuccessState extends State<ScanViewSuccess>
             final qrcode = widget.qrcode;
             final navigator = Navigator.of(context);
             navigator.pushReplacement(MaterialPageRoute(
-                builder: (context) =>
-                    MyHomePage(title: "Kloppocar Home", qrcode: qrcode)));
+                builder: (context) => ScanViewReceive(qrcode: qrcode)));
           },
           child: Center(
             child: Stack(

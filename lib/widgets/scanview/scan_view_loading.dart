@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './scan_view_receive.dart';
+import './scan_view_success.dart';
 import './scan_view_error.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,7 +32,7 @@ class _ScanViewLoadingState extends State<ScanViewLoading> {
                       prefValue.setBool(qrcode, true),
                       navigator.pushReplacement(MaterialPageRoute(
                           builder: (context) =>
-                              ScanViewReceive(qrcode: qrcode))),
+                              ScanViewSuccess(qrcode: qrcode))),
                     }
                   else
                     {
@@ -58,7 +58,7 @@ class _ScanViewLoadingState extends State<ScanViewLoading> {
             });
             if (widget.qrcode.contains('item-test')) {
               navigator.pushReplacement(MaterialPageRoute(
-                  builder: (context) => ScanViewReceive(qrcode: qrcode)));
+                  builder: (context) => ScanViewSuccess(qrcode: qrcode)));
             } else {
               navigator.pushReplacement(MaterialPageRoute(
                   builder: (context) => const ScanViewError()));

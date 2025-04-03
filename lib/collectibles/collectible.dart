@@ -40,7 +40,9 @@ class _CollectibleState extends State<Collectible> {
                 child: Align(
                     alignment: Alignment.center,
                     child: Stack(alignment: Alignment.center, children: [
-                      objectViewer(),
+                      widget.selectedCollectible["label"] == "item-test77"
+                          ? ObjectViewer(asset: "assets/3d/deins_card4.glb")
+                          : ObjectViewer(asset: "assets/3d/deins_card2.glb"),
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
