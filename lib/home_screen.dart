@@ -177,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Padding(
               padding: const EdgeInsets.only(top: 5.0),
-              child: progressBar(0.45)),
+              child: progressBar(0.33)),
           const Padding(
             padding: EdgeInsets.only(top: 5, left: 15, right: 15, bottom: 5),
             child: Row(
@@ -194,40 +194,92 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget kloppocarWidget() {
     return Padding(
-      padding: const EdgeInsets.only(top: 20.0),
-      child: Container(
-        padding: const EdgeInsets.all(15.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              // ignore: deprecated_member_use
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Kloppocar',
-              style: TextStyle(
-                fontSize: 28,
-                fontFamily: 'ChakraPetch',
-                fontWeight: FontWeight.w500,
+        padding: const EdgeInsets.only(top: 20.0),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            padding:
+                const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+            decoration: BoxDecoration(
                 color: Colors.black,
-              ),
+                borderRadius: const BorderRadius.all(Radius.circular(20))),
+            child: Text("COMMUNITY",
+                style: TextStyle(
+                    fontSize: 8,
+                    letterSpacing: 2.56,
+                    color: Colors.white,
+                    fontFamily: 'ChakraPetch',
+                    fontWeight: FontWeight.w700)),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                  padding: const EdgeInsets.only(left: 15.0),
+                  child: Text(
+                    'Kloppocar',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontFamily: 'ChakraPetch',
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  )),
+              Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Container(
+                    padding: const EdgeInsets.only(
+                        left: 10, right: 10, top: 5, bottom: 5),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                        color: Color(0xffd622ca),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8))),
+                    child: Text("+25% Heute",
+                        style: GoogleFonts.roboto(
+                            textStyle: TextStyle(
+                          fontSize: 12,
+                          letterSpacing: 1,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w300,
+                        ))),
+                  )),
+              Padding(
+                  padding: EdgeInsets.only(bottom: 10, right: 10),
+                  child: Container(
+                    alignment: Alignment.center,
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 2),
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Image.asset(
+                        'assets/images/icon-trophy.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ))
+            ],
+          ),
+          Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: progressBar(0.8)),
+          const Padding(
+            padding: EdgeInsets.only(left: 15, top: 5, right: 15, bottom: 5),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Kloppocar-Community-Challenge',
+                    style: TextStyle(fontSize: 12, color: Colors.black)),
+                Text('988/1200',
+                    style: TextStyle(fontSize: 12, color: Colors.black))
+              ],
             ),
-            CircleAvatar(
-              radius: 25,
-              backgroundImage: AssetImage('assets/images/car.jpg'),
-            ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ]));
   }
 
   Widget newsItem(category, postdate, content) {
@@ -278,128 +330,130 @@ class _HomeScreenState extends State<HomeScreen> {
         ]));
   }
 
+  Widget shadowCircle(imageLink, radius) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(blurRadius: 5, color: Colors.black, spreadRadius: 0)
+        ],
+      ),
+      child: CircleAvatar(
+        radius: radius,
+        backgroundImage: AssetImage(imageLink),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
         backgroundColor: Colors.white,
-        centerTitle: false,
-        title: Padding(
-            padding: const EdgeInsets.only(top: 0),
-            child: Row(children: [
-              Padding(
-                  padding: const EdgeInsets.only(left: 10.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                            blurRadius: 10,
-                            color: Colors.black,
-                            spreadRadius: 0)
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          scrolledUnderElevation: 0.0,
+          backgroundColor: Colors.white,
+          centerTitle: false,
+          title: Padding(
+              padding: const EdgeInsets.only(top: 0),
+              child: Row(children: [
+                Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: shadowCircle('assets/images/profile.jpg', 18)),
+                const Padding(
+                    padding: EdgeInsets.only(left: 10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('DEINS-Tester',
+                            style: TextStyle(
+                                fontSize: 10, fontWeight: FontWeight.w700)),
+                        Text('Titel: Master Collector',
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w200)),
                       ],
-                    ),
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundImage: AssetImage('assets/images/profile.jpg'),
-                    ),
-                  )),
-              const Padding(
-                  padding: EdgeInsets.only(left: 10.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('DEINS-Tester',
-                          style: TextStyle(
-                              fontSize: 10, fontWeight: FontWeight.w700)),
-                      Text('Titel: Master Collector',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w200)),
-                    ],
-                  ))
-            ])),
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Color(0xffd622ca),
-                        width: 1,
-                      ),
-                    ),
-                    child: SvgPicture.asset('assets/images/bell.svg')),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const NotificationsPage()),
-                  );
-                },
-              ),
-              if (unreadNotifications > 0)
-                Positioned(
-                  right: 10,
-                  top: 10,
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      unreadNotifications.toString(),
-                      style: const TextStyle(
+                    ))
+              ])),
+          actions: [
+            Stack(
+              children: [
+                IconButton(
+                  icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
                         color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Color(0xffd622ca),
+                          width: 1,
+                        ),
+                      ),
+                      child: SvgPicture.asset('assets/images/bell.svg')),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const NotificationsPage()),
+                    );
+                  },
+                ),
+                if (unreadNotifications > 0)
+                  Positioned(
+                    right: 10,
+                    top: 10,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        unreadNotifications.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            children: [
-              const Stack(alignment: Alignment.center, children: [
-                Divider(height: 20, thickness: 1, color: Color(0x80999999)),
-                CircleAvatar(
-                  radius: 20,
-                  backgroundImage: AssetImage('assets/images/car.jpg'),
-                ),
-              ]),
-              objectViewerPreview(),
-              turLWidget(),
-              communityChallengeWidget(_formatTime(_remainingTime)),
-              sectionHeader('CHALLENGES'),
-              challengeBox(),
-              sectionHeader('Nachrichten'),
-              newsItem(
-                _newsItems[0]["category"],
-                _newsItems[0]["post-date"],
-                _newsItems[0]["content"],
-              ),
-              newsItem(
-                _newsItems[1]["category"],
-                _newsItems[1]["post-date"],
-                _newsItems[1]["content"],
-              )
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
-      ),
-    );
+        body: SingleChildScrollView(
+            child: Column(children: [
+          Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(children: [
+                Stack(alignment: Alignment.center, children: [
+                  Divider(height: 20, thickness: 1, color: Color(0x80999999)),
+                  shadowCircle('assets/images/car.jpg', 20),
+                ]),
+                objectViewerPreview(),
+                turLWidget(),
+                kloppocarWidget(),
+              ])),
+          communityChallengeWidget(_formatTime(_remainingTime)),
+          Padding(
+              padding: const EdgeInsets.only(left: 32, right: 32, top: 10),
+              child: Column(children: [
+                sectionHeader('CHALLENGES'),
+                challengeBox(),
+                sectionHeader('Nachrichten'),
+                newsItem(
+                  _newsItems[0]["category"],
+                  _newsItems[0]["post-date"],
+                  _newsItems[0]["content"],
+                ),
+                newsItem(
+                  _newsItems[1]["category"],
+                  _newsItems[1]["post-date"],
+                  _newsItems[1]["content"],
+                )
+              ]))
+        ])));
   }
 
   /// Section Header Widget
@@ -421,7 +475,7 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Challenge Box
   Widget challengeBox() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.only(top: 20.0),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -462,9 +516,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   left: 15, top: 40, right: 15, bottom: 10),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    backgroundImage: AssetImage("assets/images/car.jpg"),
-                  ),
+                  shadowCircle('assets/images/car.jpg', 20),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(

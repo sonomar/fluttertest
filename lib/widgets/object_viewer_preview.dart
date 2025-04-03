@@ -3,12 +3,12 @@ import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 
 Widget objectViewerPreview() {
   Flutter3DController controller = Flutter3DController();
-  controller.onModelLoaded.addListener(() {
+  controller.onModelLoaded.addListener(() async {
     debugPrint('model is loaded : ${controller.onModelLoaded.value}');
   });
-  return SizedBox(
+  return IgnorePointer(
+      child: SizedBox(
     height: 400,
-    width: 200,
     child: Flutter3DViewer(
         //If you pass 'true' the flutter_3d_controller will add gesture interceptor layer
         //to prevent gesture recognizers from malfunctioning on iOS and some Android devices.
@@ -31,7 +31,7 @@ Widget objectViewerPreview() {
         onError: (String error) {
           debugPrint('model failed to load : $error');
         },
-        src: 'assets/3d/deins_card2.glb',
+        src: 'assets/3d/deins_card4.glb',
         controller: controller),
-  );
+  ));
 }

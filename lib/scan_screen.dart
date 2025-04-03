@@ -2,8 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'widgets/scanview/scan_view_loading.dart';
 
-class ScanScreen extends StatelessWidget {
+class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
+
+  @override
+  State<ScanScreen> createState() => ScanScreenState();
+}
+
+final MobileScannerController _scanController = MobileScannerController(
+  detectionSpeed: DetectionSpeed.noDuplicates,
+);
+
+class ScanScreenState extends State<ScanScreen> {
+  @override
+  void initState() {
+    _scanController.start;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,10 +26,6 @@ class ScanScreen extends StatelessWidget {
             MediaQuery.of(context).size.height < 400)
         ? 220.0
         : 330.0;
-
-    final MobileScannerController scanController = MobileScannerController(
-      detectionSpeed: DetectionSpeed.noDuplicates,
-    );
 
     // Future<void> collectedDialog(code) async {
     //   final prefs = await SharedPreferences.getInstance();
@@ -86,6 +97,8 @@ class ScanScreen extends StatelessWidget {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+            automaticallyImplyLeading: false,
+            scrolledUnderElevation: 0.0,
             title: const Text("Scan Collectible"),
             centerTitle: false,
             titleTextStyle: TextStyle(
@@ -95,23 +108,23 @@ class ScanScreen extends StatelessWidget {
               fontWeight: FontWeight.w500,
             )),
         body: SizedBox(
-            height: 400,
+            width: double.infinity,
             child: MobileScanner(
                 overlayBuilder: (context, constraints) => Align(
                       alignment: Alignment.center,
                       child: CustomPaint(
                         foregroundPainter: BorderPainter(),
                         child: SizedBox(
-                          width: scanArea + 20,
-                          height: scanArea + 20,
+                          width: scanArea,
+                          height: scanArea,
                         ),
                       ),
                     ),
-                controller: scanController,
+                controller: _scanController,
                 onDetect: (barcode) {
                   final String code = barcode.barcodes.first.rawValue ?? '';
 
-                  scanController.dispose();
+                  _scanController.stop();
                   Navigator.push(
                     context,
                     MaterialPageRoute(

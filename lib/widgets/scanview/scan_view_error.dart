@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../scan_screen.dart';
+import '../../main.dart';
 import 'package:lottie/lottie.dart';
 
 class ScanViewError extends StatefulWidget {
@@ -22,8 +22,9 @@ class _ScanViewErrorState extends State<ScanViewError> {
     Future.delayed(const Duration(seconds: 3)).then((value) => {
           if (_clicked == false)
             {
-              navigator.pushReplacement(
-                  MaterialPageRoute(builder: (context) => ScanScreen())),
+              navigator.pushReplacement(MaterialPageRoute(
+                  builder: (context) =>
+                      MyHomePage(title: "Kloppocar Home", qrcode: 'error'))),
             }
         });
   }
@@ -38,8 +39,9 @@ class _ScanViewErrorState extends State<ScanViewError> {
             setState(() {
               _clicked = true;
             });
-            navigator.pushReplacement(
-                MaterialPageRoute(builder: (context) => ScanScreen()));
+            navigator.pushReplacement(MaterialPageRoute(
+                builder: (context) =>
+                    MyHomePage(title: "Kloppocar Home", qrcode: 'error')));
           },
           child: Center(
             child: Column(

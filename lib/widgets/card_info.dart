@@ -66,7 +66,7 @@ class CardInfo extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   )))),
       Padding(
-          padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+          padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 10.0),
           child: SizedBox(
               width: 400,
               child: Text(selectedCollectible["description"],

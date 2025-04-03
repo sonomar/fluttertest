@@ -31,6 +31,22 @@ class _CollectionScreenState extends State<CollectionScreen> {
     }
   }
 
+  Widget shadowCircle(imageLink, radius) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(blurRadius: 5, color: Colors.black, spreadRadius: 0)
+        ],
+      ),
+      child: CircleAvatar(
+        radius: radius,
+        backgroundImage: AssetImage(imageLink),
+      ),
+    );
+  }
+
   Widget linkedInkwell(collectible) {
     return Material(
         child: InkWell(
@@ -43,12 +59,14 @@ class _CollectionScreenState extends State<CollectionScreen> {
                       collectible) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
               ),
         );
-      }, // Image tapped
-      splashColor: Colors.white10, // Splash color over image
+      },
+      splashColor: Color.fromARGB(
+          80, 214, 34, 202), // Image tapped // Splash color over image
+      splashFactory: InkSparkle.splashFactory,
+      radius: MediaQuery.of(context).size.width - 450,
       child: Ink(
-        height: 80,
-        width: 50,
         decoration: BoxDecoration(
+          color: Colors.white,
           image: DecorationImage(
             image: AssetImage(collectible["imageRef"]),
             fit: BoxFit.cover,
@@ -62,12 +80,13 @@ class _CollectionScreenState extends State<CollectionScreen> {
     return Material(
       child: Container(
         foregroundDecoration: BoxDecoration(
-          color: Colors.grey,
+          color: Colors.white,
           backgroundBlendMode: BlendMode.saturation,
         ),
         height: 80,
         width: 50,
         decoration: BoxDecoration(
+          color: Colors.white,
           image: DecorationImage(
             image: AssetImage(collectible["imageRef"]),
             fit: BoxFit.cover,
@@ -91,6 +110,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+            automaticallyImplyLeading: false,
+            scrolledUnderElevation: 0.0,
             titleTextStyle: TextStyle(
                 fontWeight: FontWeight.w700,
                 color: Colors.black,
@@ -105,19 +126,15 @@ class _CollectionScreenState extends State<CollectionScreen> {
                   fontWeight: FontWeight.w500,
                 ))),
         body: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(12.0),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Padding(
-                  padding: const EdgeInsets.only(left: 20.0),
+                  padding: const EdgeInsets.only(left: 10.0),
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundImage:
-                              AssetImage('assets/images/caricon.jpg'),
-                        ),
+                        shadowCircle('assets/images/caricon.jpg', 20),
                         Padding(
                             padding: const EdgeInsets.only(left: 10.0),
                             child: Text('Kloppocar Puzzle Collection',
@@ -133,7 +150,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                 Expanded(
                     child: GridView.count(
                         primary: false,
-                        padding: const EdgeInsets.all(20.0),
+                        padding: const EdgeInsets.only(top: 20, bottom: 20),
                         crossAxisCount: 4,
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,

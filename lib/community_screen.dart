@@ -14,6 +14,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+            automaticallyImplyLeading: false,
+            scrolledUnderElevation: 0.0,
             title: const Text("Community"),
             backgroundColor: Color(0xff333333),
             centerTitle: false,

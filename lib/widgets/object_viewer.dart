@@ -9,7 +9,6 @@ Widget objectViewer() {
   return Stack(children: [
     SizedBox(
       height: 500,
-      width: 300,
       child: Flutter3DViewer(
           //If you pass 'true' the flutter_3d_controller will add gesture interceptor layer
           //to prevent gesture recognizers from malfunctioning on iOS and some Android devices.
@@ -32,9 +31,9 @@ Widget objectViewer() {
           onError: (String error) {
             debugPrint('model failed to load : $error');
           },
-          src: 'assets/3d/deins_card2.glb',
+          src: 'assets/3d/deins_card4.glb',
           controller: controller),
     ),
-    SizedBox(height: 500, width: 300)
+    SizedBox(height: 500)
   ]);
 }

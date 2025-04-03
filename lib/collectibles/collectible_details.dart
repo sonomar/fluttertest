@@ -15,6 +15,7 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+            scrolledUnderElevation: 0.0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.pop(context),
@@ -42,7 +43,7 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           SizedBox(
-                            height: 50,
+                            height: 30,
                           ),
                           SizedBox(
                             height: 500,
@@ -60,16 +61,16 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                                     color: Colors.white,
                                     fontFamily: 'ChakraPetch',
                                   ))),
-                          SizedBox(height: 50),
+                          SizedBox(height: 30),
                           Stack(alignment: Alignment.topCenter, children: [
                             Padding(
                                 padding: const EdgeInsets.only(
-                                    left: 10.0, right: 10.0),
+                                    left: 10.0, right: 10.0, bottom: 10),
                                 child: Container(
                                     width: double.infinity,
-                                    height: 40,
+                                    height: 50,
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(25.0),
+                                      borderRadius: BorderRadius.circular(10.0),
                                       color: Colors.white,
                                     ),
                                     child: GestureDetector(

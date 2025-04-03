@@ -68,10 +68,12 @@ class _ScanViewSuccessState extends State<ScanViewSuccess>
                       alignment: Alignment.center,
                       child: Stack(alignment: Alignment.center, children: [
                         SvgPicture.asset(
+                          width: 300,
                           'assets/images/orbBurst.svg',
                           fit: BoxFit.cover,
                         ),
                         SvgPicture.asset(
+                          width: 300,
                           'assets/images/starBurst.svg',
                           fit: BoxFit.cover,
                         ),

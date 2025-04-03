@@ -14,7 +14,7 @@ class ScanViewReceive extends StatefulWidget {
 class _ScanViewReceiveState extends State<ScanViewReceive>
     with SingleTickerProviderStateMixin {
   bool _clicked = false;
-  String _item = '';
+  String _item = 'assets/images/car1.png';
 
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),
@@ -44,14 +44,13 @@ class _ScanViewReceiveState extends State<ScanViewReceive>
       }
     }
     setState(() {
-      _item = 'assets/images/car1.jpeg';
+      _item = 'assets/images/car1.png';
     });
-    return 'assets/images/car1.jpeg';
+    return 'assets/images/car1.png';
   }
 
   @override
   void initState() {
-    super.initState();
     final qrcode = widget.qrcode;
     final navigator = Navigator.of(context);
     setState(() {
@@ -66,6 +65,7 @@ class _ScanViewReceiveState extends State<ScanViewReceive>
                   }
               })
         });
+    super.initState();
   }
 
   @override
@@ -89,12 +89,10 @@ class _ScanViewReceiveState extends State<ScanViewReceive>
                 SlideTransition(
                   position: _offsetAnimation,
                   child: Container(
-                      width: 200,
-                      height: 400,
                       alignment: Alignment.center,
                       child: Image.asset(
                         _item,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
                       )),
                 )
               ],

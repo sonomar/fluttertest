@@ -16,6 +16,7 @@ class _CollectibleState extends State<Collectible> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+            scrolledUnderElevation: 0.0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.pop(context),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import './profile/user_settings.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../auth/signout.dart';
 import './openCards/login_page.dart';
+import './widgets/item_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -68,6 +68,9 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+            automaticallyImplyLeading: false,
+            scrolledUnderElevation: 0.0,
+            backgroundColor: Colors.white,
             title: const Text("Profile"),
             centerTitle: false,
             titleTextStyle: TextStyle(
@@ -79,71 +82,27 @@ class ProfileScreen extends StatelessWidget {
         body: ListView(
           padding: const EdgeInsets.all(8),
           children: <Widget>[
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              height: 50,
-              child: Material(
-                  child: InkWell(
+            ItemButton(
                 onTap: () {
                   _launchUrl(mailingListUrl);
-                }, // Image tapped
-                splashColor: Colors.white10, // Splash color over image
-                child: Ink(
-                    height: 50,
-                    width: 100,
-                    child: const Center(child: Text("Mailing List"))),
-              )),
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              height: 50,
-              child: Material(
-                  child: InkWell(
+                },
+                title: "Mailing List"),
+            ItemButton(
                 onTap: () {
                   _launchUrl(ppUrl);
-                }, // Image tapped
-                splashColor: Colors.white10, // Splash color over image
-                child: Ink(
-                    height: 50,
-                    width: 100,
-                    child: const Center(child: Text("Privacy Policy"))),
-              )),
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              height: 50,
-              child: Material(
-                  child: InkWell(
+                },
+                title: "Privacy Policy"),
+            ItemButton(
                 onTap: () {
                   _launchUrl(mailingListUrl);
-                }, // Image tapped
-                splashColor: Colors.white10, // Splash color over image
-                child: Ink(
-                    height: 50,
-                    width: 100,
-                    child: const Center(child: Text("Imprint"))),
-              )),
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              height: 50,
-              child: Material(
-                  child: InkWell(
+                },
+                title: "Imprint"),
+            ItemButton(
                 onTap: () {
-                  resetDemo();
-                }, // Image tapped
-                splashColor: Colors.white10, // Splash color over image
-                child: Ink(
-                    height: 50,
-                    width: 100,
-                    child: const Center(child: Text("Reset Demo"))),
-              )),
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              height: 50,
-              child: Material(
-                  child: InkWell(
+                  _launchUrl(resetDemo());
+                },
+                title: "Reset Demo"),
+            ItemButton(
                 onTap: () {
                   final navigator = Navigator.of(context);
                   getUserEmail().then((email) => {
@@ -152,14 +111,8 @@ class ProfileScreen extends StatelessWidget {
                                   builder: (context) => LoginPage()))
                             })
                       });
-                }, // Image tapped
-                splashColor: Colors.white10, // Splash color over image
-                child: Ink(
-                    height: 50,
-                    width: 100,
-                    child: const Center(child: Text("Sign Out"))),
-              )),
-            ),
+                },
+                title: "Sign Out"),
           ],
         ));
   }

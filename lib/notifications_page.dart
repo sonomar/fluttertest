@@ -31,6 +31,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       // Standard white background
       backgroundColor: Colors.white,
       appBar: AppBar(
+        scrolledUnderElevation: 0.0,
         backgroundColor: Colors.white, // White AppBar background
         elevation: 0, // No shadow
         title: const Text(
