@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import '../../main.dart';
+import 'package:lottie/lottie.dart';
 import './scan_view_receive.dart';
 
 class ScanViewSuccess extends StatefulWidget {
@@ -28,7 +27,7 @@ class _ScanViewSuccessState extends State<ScanViewSuccess>
       duration: const Duration(milliseconds: 5000),
       vsync: this,
     )..repeat();
-    Future.delayed(const Duration(seconds: 3)).then((value) => {
+    Future.delayed(const Duration(seconds: 4)).then((value) => {
           if (_clicked == false)
             {
               navigator.pushReplacement(MaterialPageRoute(
@@ -48,41 +47,19 @@ class _ScanViewSuccessState extends State<ScanViewSuccess>
     return Scaffold(
         backgroundColor: Colors.black,
         body: GestureDetector(
-          onTap: () {
-            setState(() {
-              _clicked = true;
-            });
-            final qrcode = widget.qrcode;
-            final navigator = Navigator.of(context);
-            navigator.pushReplacement(MaterialPageRoute(
-                builder: (context) => ScanViewReceive(qrcode: qrcode)));
-          },
-          child: Center(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                RotationTransition(
-                    turns: Tween(begin: 0.0, end: 1.0).animate(_controller),
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: Stack(alignment: Alignment.center, children: [
-                        SvgPicture.asset(
-                          width: 300,
-                          'assets/images/orbBurst.svg',
-                          fit: BoxFit.cover,
-                        ),
-                        SvgPicture.asset(
-                          width: 300,
-                          'assets/images/starBurst.svg',
-                          fit: BoxFit.cover,
-                        ),
-                      ]),
-                    )),
-                Image.asset('assets/images/check.png',
-                    height: 100, width: 100, alignment: Alignment.center)
-              ],
-            ),
-          ),
-        ));
+            onTap: () {
+              setState(() {
+                _clicked = true;
+              });
+              final qrcode = widget.qrcode;
+              final navigator = Navigator.of(context);
+              navigator.pushReplacement(MaterialPageRoute(
+                  builder: (context) => ScanViewReceive(qrcode: qrcode)));
+            },
+            child: Center(
+                child: Container(
+                    alignment: Alignment.center,
+                    width: 300,
+                    child: Lottie.asset('assets/lottie/success2.json')))));
   }
 }
