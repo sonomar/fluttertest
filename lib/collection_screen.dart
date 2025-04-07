@@ -129,7 +129,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   @override
   Widget build(BuildContext context) {
     // ignore: avoid_print
-    print('length: ${_items.length}');
+    //print('length: ${_items.length}');
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -193,16 +193,22 @@ class _CollectionScreenState extends State<CollectionScreen> {
                         crossAxisSpacing: 5,
                         mainAxisSpacing: 5,
                         childAspectRatio: (6 / 10),
-                        children: [
-                      for (int i = 0; i < _items.length; i++) ...[
-                        Container(
-                            padding: const EdgeInsets.only(
-                                top: 20, left: 5, right: 5, bottom: 20),
-                            child: (_cardStatus[_items[i]['label']] == true)
-                                ? linkedInkwell(_items[i])
-                                : unlinkedInkwell(_items[i]))
-                      ]
-                    ]))
+                        children: _items.isNotEmpty
+                            ? List.generate(_items.length, (i) {
+                              return Container(
+                                padding: const EdgeInsets.only(
+                                  top: 20, left: 5, right: 5, bottom: 20),
+                                child: (_cardStatus[_items[i]['label']] == true)
+                                  ? linkedInkwell(_items[i])
+                                  : unlinkedInkwell(_items[i]),
+                           );
+                          })
+                        :[
+                              const Center(
+                                child: Text("No collectibles available.",
+                                  style: TextStyle(color: Colors.black)),
+                              )
+                            ],))
               ]))
             ])));
   }

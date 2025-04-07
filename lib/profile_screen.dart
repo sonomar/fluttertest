@@ -59,10 +59,11 @@ class ProfileScreen extends StatelessWidget {
       );
     }
 
-    Future<void> _launchUrl(url) async {
+    Future<bool> launchUrl(url) async {
       if (!await launchUrl(url)) {
         throw Exception('Could not launch $url');
       }
+      return true;
     }
 
     return Scaffold(
@@ -84,22 +85,22 @@ class ProfileScreen extends StatelessWidget {
           children: <Widget>[
             ItemButton(
                 onTap: () {
-                  _launchUrl(mailingListUrl);
+                  launchUrl(mailingListUrl);
                 },
                 title: "Mailing List"),
             ItemButton(
                 onTap: () {
-                  _launchUrl(ppUrl);
+                  launchUrl(ppUrl);
                 },
                 title: "Privacy Policy"),
             ItemButton(
                 onTap: () {
-                  _launchUrl(mailingListUrl);
+                  launchUrl(mailingListUrl);
                 },
                 title: "Imprint"),
             ItemButton(
                 onTap: () {
-                  _launchUrl(resetDemo());
+                  launchUrl(resetDemo());
                 },
                 title: "Reset Demo"),
             ItemButton(

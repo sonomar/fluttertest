@@ -487,17 +487,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 sectionHeader('CHALLENGES'),
                 challengeBox(),
                 sectionHeader('Nachrichten'),
-                newsItem(
-                  _newsItems[0]["category"],
-                  _newsItems[0]["post-date"],
-                  _newsItems[0]["content"],
-                ),
-                newsItem(
-                  _newsItems[1]["category"],
-                  _newsItems[1]["post-date"],
-                  _newsItems[1]["content"],
-                )
-              ]))
+                if (_newsItems.length >= 2) ...[
+                  newsItem(
+                    _newsItems[0]["category"],
+                    _newsItems[0]["post-date"],
+                    _newsItems[0]["content"],
+                    ),
+                    newsItem(
+                      _newsItems[1]["category"],
+                      _newsItems[1]["post-date"],
+                      _newsItems[1]["content"],
+                    ),
+                  ] else if (_newsItems.length == 1) ...[
+                      newsItem(
+                        _newsItems[0]["category"],
+                        _newsItems[0]["post-date"],
+                        _newsItems[0]["content"],
+                      ),
+                    ] else ...[
+                        const Padding(
+                          padding: EdgeInsets.only(top: 10),
+                          child: Text('No news items available.',
+                              style: TextStyle(fontSize: 16, color: Colors.black)),
+                        )
+]
+                ]))
         ])));
   }
 
