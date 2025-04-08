@@ -219,20 +219,22 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
         padding: const EdgeInsets.only(top: 20.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            padding:
-                const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-            decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: const BorderRadius.all(Radius.circular(20))),
-            child: Text("COMMUNITY",
-                style: TextStyle(
-                    fontSize: 8,
-                    letterSpacing: 2.56,
-                    color: Colors.white,
-                    fontFamily: 'ChakraPetch',
-                    fontWeight: FontWeight.w700)),
-          ),
+          Padding(
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Container(
+                padding: const EdgeInsets.only(
+                    left: 10, right: 10, top: 5, bottom: 5),
+                decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: const BorderRadius.all(Radius.circular(20))),
+                child: Text("COMMUNITY",
+                    style: TextStyle(
+                        fontSize: 8,
+                        letterSpacing: 2.56,
+                        color: Colors.white,
+                        fontFamily: 'ChakraPetch',
+                        fontWeight: FontWeight.w700)),
+              )),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

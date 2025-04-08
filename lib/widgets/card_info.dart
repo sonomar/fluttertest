@@ -26,34 +26,35 @@ class CardInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-        child: Column(children: [
-      Padding(
-          padding: const EdgeInsets.only(top: 10.0),
-          child: Stack(alignment: Alignment.center, children: [
-            Padding(
-                padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 20,
-                  child: GestureDetector(onTap: () {
-                    Navigator.pop(context);
-                  }),
-                )),
-            Container(
-              width: 40,
-              height: 10,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25.0),
-                color: Colors.grey,
+    return Column(children: [
+      Stack(children: [
+        Container(
+            alignment: Alignment.center,
+            height: 30,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x80999999),
+                  spreadRadius: .5,
+                  blurRadius: 10,
+                  offset: Offset(0, 10), // changes position of shadow
+                ),
+              ],
+            )),
+        Container(
+            alignment: Alignment.center,
+            height: 30,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                bottom: BorderSide(
+                  //                   <--- left side
+                  color: Color(0x80999999),
+                  width: 1.0,
+                ),
               ),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-            )
-          ])),
+            )),
+      ]),
       Padding(
           padding: const EdgeInsets.all(20.0),
           child: SizedBox(
@@ -106,6 +107,6 @@ class CardInfo extends StatelessWidget {
               fontFamily: 'ChakraPetch',
             ))
       ])
-    ]));
+    ]);
   }
 }

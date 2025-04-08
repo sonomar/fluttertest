@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/object_viewer.dart';
 import '../widgets/card_info.dart';
+import '../widgets/drag_scroll_sheet.dart';
 
 class CollectibleDetails extends StatefulWidget {
   const CollectibleDetails({super.key, required this.selectedCollectible});
@@ -11,6 +12,26 @@ class CollectibleDetails extends StatefulWidget {
 }
 
 class _CollectibleDetailsState extends State<CollectibleDetails> {
+  Widget lineItem(key, value) {
+    return Column(children: [
+      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text(key,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.black,
+              fontFamily: 'Roboto',
+            )),
+        Text(value,
+            style: TextStyle(
+                fontSize: 12,
+                color: Colors.black,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.bold)),
+      ]),
+      const Divider(height: 20, thickness: 1, color: Colors.grey),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,107 +42,52 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(widget.selectedCollectible["name"])),
-        body: Container(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                colors: [
-                  Color(0xffd622ca),
-                  Color(0xff333333),
-                ],
-                center: Alignment.center,
-                radius: 0.8,
+        body: Stack(alignment: Alignment.center, children: [
+          Container(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  colors: [
+                    Color(0xffd622ca),
+                    Color(0xff333333),
+                  ],
+                  center: Alignment.center,
+                  radius: 0.8,
+                ),
               ),
-            ),
-            height: double.infinity,
-            width: double.infinity,
-            child: Padding(
-                padding:
-                    const EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
-                child: Align(
-                    alignment: Alignment.center,
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          SizedBox(
-                            height: 30,
-                          ),
-                          SizedBox(
-                            height: 500,
-                            width: double.infinity,
-                            child: widget.selectedCollectible["label"] ==
-                                    "item-test77"
-                                ? ObjectViewer(
-                                    asset: "assets/3d/deins_card4.glb")
-                                : ObjectViewer(
-                                    asset: "assets/3d/deins_card2.glb"),
-                          ),
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xffd622ca),
-                              ),
-                              onPressed: () {},
-                              child: Text('Transfer Asset',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                    fontFamily: 'ChakraPetch',
-                                  ))),
-                          SizedBox(height: 30),
-                          Stack(alignment: Alignment.topCenter, children: [
-                            Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, right: 10.0, bottom: 10),
-                                child: Container(
-                                    width: double.infinity,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      color: Colors.white,
-                                    ),
-                                    child: GestureDetector(
-                                      onVerticalDragEnd:
-                                          (DragEndDetails details) {
-                                        showModalBottomSheet(
-                                          context: context,
-                                          isScrollControlled: true,
-                                          constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                40, // here increase or decrease in width
-                                          ),
-                                          builder: (context) => CardInfo(
-                                              selectedCollectible:
-                                                  widget.selectedCollectible),
-                                        );
-                                      },
-                                    ))),
-                            Container(
-                              margin: EdgeInsets.only(top: 10),
-                              width: 40,
-                              height: 10,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(25.0),
-                                color: Colors.grey,
-                              ),
-                              child: GestureDetector(
-                                onVerticalDragEnd: (DragEndDetails details) {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    constraints: BoxConstraints(
-                                      maxWidth: MediaQuery.of(context)
-                                              .size
-                                              .width -
-                                          40, // here increase or decrease in width
-                                    ),
-                                    builder: (context) => CardInfo(
-                                        selectedCollectible:
-                                            widget.selectedCollectible),
-                                  );
-                                },
-                              ),
-                            ),
-                          ]),
-                        ])))));
+              height: double.infinity,
+              width: double.infinity,
+              child: Align(
+                  alignment: Alignment.center,
+                  child: Column(children: [
+                    Padding(
+                        padding:
+                            EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
+                        child: SizedBox(
+                          height: 500,
+                          width: double.infinity,
+                          child: widget.selectedCollectible["label"] ==
+                                  "item-test77"
+                              ? ObjectViewer(asset: "assets/3d/deins_card4.glb")
+                              : ObjectViewer(
+                                  asset: "assets/3d/deins_card2.glb"),
+                        )),
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xffd622ca),
+                        ),
+                        onPressed: () {},
+                        child: Text('Transfer Asset',
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: 'ChakraPetch',
+                            ))),
+                  ]))),
+          SizedBox(
+              height: MediaQuery.of(context).size.height,
+              child: DragScrollSheet(
+                  contents: CardInfo(
+                      selectedCollectible: widget.selectedCollectible))),
+        ]));
   }
 }

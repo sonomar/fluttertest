@@ -24,7 +24,7 @@ class _ScanViewSuccessState extends State<ScanViewSuccess>
     final qrcode = widget.qrcode;
     final navigator = Navigator.of(context);
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 5000),
+      duration: const Duration(milliseconds: 20000),
       vsync: this,
     )..repeat();
     Future.delayed(const Duration(seconds: 4)).then((value) => {
