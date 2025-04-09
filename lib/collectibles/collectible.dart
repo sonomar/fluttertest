@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/object_viewer.dart';
-import './collectible_details.dart';
 
 class Collectible extends StatefulWidget {
   const Collectible({super.key, required this.selectedCollectible});
@@ -38,24 +37,10 @@ class _CollectibleState extends State<Collectible> {
             child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Align(
-                    alignment: Alignment.center,
-                    child: Stack(alignment: Alignment.center, children: [
-                      widget.selectedCollectible["label"] == "item-test77"
-                          ? ObjectViewer(asset: "assets/3d/deins_card4.glb")
-                          : ObjectViewer(asset: "assets/3d/deins_card2.glb"),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => CollectibleDetails(
-                                      selectedCollectible:
-                                          widget.selectedCollectible)));
-                        },
-                        child: CircleAvatar(
-                            backgroundColor: Colors.transparent,
-                            child: Text('i')),
-                      ),
-                    ])))));
+                  alignment: Alignment.center,
+                  child: widget.selectedCollectible["label"] == "item-test77"
+                      ? ObjectViewer(asset: "assets/3d/deins_card4.glb")
+                      : ObjectViewer(asset: "assets/3d/deins_card2.glb"),
+                ))));
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import './scan_view_receive.dart';
+import './scan_view_error.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ScanViewSuccess extends StatefulWidget {
   const ScanViewSuccess({super.key, required this.qrcode});
@@ -13,7 +15,15 @@ class ScanViewSuccess extends StatefulWidget {
 class _ScanViewSuccessState extends State<ScanViewSuccess>
     with SingleTickerProviderStateMixin {
   bool _clicked = false;
-  late AnimationController _controller;
+  late final AnimationController _controller = AnimationController(
+    duration: const Duration(seconds: 2),
+    vsync: this,
+  );
+
+  final Tween<double> _opacityTween = Tween<double>(
+    begin: 1.0,
+    end: 0.0,
+  );
 
   @override
   void initState() {
@@ -23,15 +33,29 @@ class _ScanViewSuccessState extends State<ScanViewSuccess>
     });
     final qrcode = widget.qrcode;
     final navigator = Navigator.of(context);
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 20000),
-      vsync: this,
-    )..repeat();
-    Future.delayed(const Duration(seconds: 4)).then((value) => {
-          if (_clicked == false)
+
+    SharedPreferences.getInstance().then((prefValue) => {
+          if (widget.qrcode.contains('item-test'))
             {
-              navigator.pushReplacement(MaterialPageRoute(
-                  builder: (context) => ScanViewReceive(qrcode: qrcode))),
+              prefValue.setBool(qrcode, true),
+              Future.delayed(const Duration(seconds: 3)).then((value) => {
+                    _controller.forward(),
+                    Future.delayed(const Duration(seconds: 2)).then((value) => {
+                          if (_clicked == false)
+                            {
+                              navigator.pushReplacement(MaterialPageRoute(
+                                  builder: (context) =>
+                                      ScanViewReceive(qrcode: qrcode)))
+                            }
+                        }),
+                  }),
+            }
+          else
+            {
+              {
+                navigator.pushReplacement(MaterialPageRoute(
+                    builder: (context) => const ScanViewError())),
+              }
             }
         });
   }
@@ -60,6 +84,9 @@ class _ScanViewSuccessState extends State<ScanViewSuccess>
                 child: Container(
                     alignment: Alignment.center,
                     width: 300,
-                    child: Lottie.asset('assets/lottie/success2.json')))));
+                    child: AnimatedOpacity(
+                        opacity: _opacityTween.evaluate(_controller),
+                        duration: Duration(seconds: 2),
+                        child: Lottie.asset('assets/lottie/success2.json'))))));
   }
 }

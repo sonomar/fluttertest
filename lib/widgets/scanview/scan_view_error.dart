@@ -49,7 +49,7 @@ class _ScanViewErrorState extends State<ScanViewError> {
               children: [
                 // logo here
                 Image.asset(
-                  'assets/images/deins_logo.png',
+                  'assets/images/negative.png',
                   height: 200,
                   width: 200,
                 ),
@@ -60,10 +60,6 @@ class _ScanViewErrorState extends State<ScanViewError> {
                       'Incorrect QR Code Scanned!',
                       style: TextStyle(color: Colors.white),
                     )),
-                SizedBox(
-                    height: 40,
-                    width: 40,
-                    child: Lottie.asset('assets/lottie/pinkspin1.json')),
               ],
             ),
           ),

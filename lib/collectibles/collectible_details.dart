@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/object_viewer.dart';
 import '../widgets/card_info.dart';
 import '../widgets/drag_scroll_sheet.dart';
+import './collectible.dart';
 
 class CollectibleDetails extends StatefulWidget {
   const CollectibleDetails({super.key, required this.selectedCollectible});
@@ -41,7 +42,23 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.pop(context),
             ),
-            title: Text(widget.selectedCollectible["name"])),
+            title: Text(widget.selectedCollectible["name"]),
+            actions: [
+              Padding(
+                padding: EdgeInsets.all(15),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Collectible(
+                                selectedCollectible:
+                                    widget.selectedCollectible)));
+                  },
+                  child: Image.asset("assets/images/enlarge.png"),
+                ),
+              )
+            ]),
         body: Stack(alignment: Alignment.center, children: [
           Container(
               decoration: BoxDecoration(
@@ -71,17 +88,6 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                               : ObjectViewer(
                                   asset: "assets/3d/deins_card2.glb"),
                         )),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xffd622ca),
-                        ),
-                        onPressed: () {},
-                        child: Text('Transfer Asset',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.white,
-                              fontFamily: 'ChakraPetch',
-                            ))),
                   ]))),
           SizedBox(
               height: MediaQuery.of(context).size.height,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'widgets/scanview/scan_view_loading.dart';
+import 'widgets/scanview/scan_view_success.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -128,7 +128,7 @@ class ScanScreenState extends State<ScanScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ScanViewLoading(
+                        builder: (context) => ScanViewSuccess(
                             qrcode:
                                 code) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
                         ),

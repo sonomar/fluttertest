@@ -79,10 +79,6 @@ class Grabber extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!isOnDesktopAndWeb) {
-      return const SizedBox.shrink();
-    }
-
     return GestureDetector(
       onVerticalDragUpdate: onVerticalDragUpdate,
       child: Container(

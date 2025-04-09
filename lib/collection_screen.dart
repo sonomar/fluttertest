@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import './collectibles/collectible.dart';
+import './collectibles/collectible_details.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -77,7 +77,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => Collectible(
+              builder: (context) => CollectibleDetails(
                   selectedCollectible:
                       collectible) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
               ),
@@ -156,7 +156,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => Collectible(
+                            builder: (context) => CollectibleDetails(
                                 selectedCollectible: exampleWallet)));
                   },
                   child: Image.asset("assets/images/wallet1.png"),

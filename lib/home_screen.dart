@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kloppocar_app/collectibles/collectible.dart';
+import 'package:kloppocar_app/collectibles/collectible_details.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
@@ -455,30 +455,23 @@ class _HomeScreenState extends State<HomeScreen> {
                   shadowCircle('assets/images/car.jpg', 20.0),
                 ]),
                 Align(
-                    alignment: Alignment.center,
-                    child: Stack(alignment: Alignment.center, children: [
-                      IgnorePointer(
-                          child: Padding(
-                              padding: EdgeInsets.all(10),
-                              child: SizedBox(
-                                  height: 400,
-                                  child: Image.asset(
-                                      'assets/images/covercard.png',
-                                      fit: BoxFit.cover)))),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Collectible(
-                                      selectedCollectible:
-                                          exampleCollectible)));
-                        },
-                        child: CircleAvatar(
-                            backgroundColor: Colors.transparent,
-                            child: Text('i')),
-                      ),
-                    ])),
+                  alignment: Alignment.center,
+                  child: Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CollectibleDetails(
+                                        selectedCollectible:
+                                            exampleCollectible)));
+                          },
+                          child: SizedBox(
+                              height: 400,
+                              child: Image.asset('assets/images/covercard.png',
+                                  fit: BoxFit.cover)))),
+                ),
                 turLWidget(),
                 kloppocarWidget(),
               ])),
