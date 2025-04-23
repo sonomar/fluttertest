@@ -86,7 +86,7 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                                   "item-test77"
                               ? ObjectViewer(asset: "assets/3d/deins_card4.glb")
                               : ObjectViewer(
-                                  asset: "assets/3d/deins_card2.glb"),
+                                  asset: "assets/3d/DEINS_Card_Export_02.glb"),
                         )),
                   ]))),
           SizedBox(

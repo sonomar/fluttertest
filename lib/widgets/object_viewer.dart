@@ -8,9 +8,15 @@ class ObjectViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Flutter3DController controller = Flutter3DController();
-    controller.onModelLoaded.addListener(() {
+    controller.onModelLoaded.addListener(() async {
       debugPrint('model is loaded : ${controller.onModelLoaded.value}');
+      var test = await controller.getAvailableTextures();
+      controller.setTexture(textureName: '(0) JadrianClark_18_frei');
+      debugPrint('testing: $test');
     });
+
+    // controller.setTexture(textureName: 'chosenTexture');
+
     return Stack(children: [
       SizedBox(
         height: 500,
