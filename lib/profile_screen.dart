@@ -4,7 +4,7 @@ import '../auth/signout.dart';
 import './openCards/login_page.dart';
 import './widgets/item_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../api/collection.dart';
+import '../api/collectible.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
