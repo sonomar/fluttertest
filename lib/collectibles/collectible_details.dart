@@ -84,7 +84,9 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                           width: double.infinity,
                           child: widget.selectedCollectible["label"] ==
                                   "item-test77"
-                              ? ObjectViewer(asset: "assets/3d/deins_card4.glb")
+                              ? ObjectViewer(
+                                  asset:
+                                      "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/cardSample174/20250424-DEINS_Card_TEXT_2_FUNKTIONIERT.gltf")
                               : ObjectViewer(
                                   asset: "assets/3d/DEINS_Card_Export_02.glb"),
                         )),

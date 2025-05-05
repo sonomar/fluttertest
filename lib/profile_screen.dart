@@ -105,9 +105,14 @@ class ProfileScreen extends StatelessWidget {
                 title: "Reset Demo"),
             ItemButton(
                 onTap: () {
-                  getAllCollectibles();
+                  getCollectibleByCollectibleId("1");
                 },
                 title: "Test API"),
+            ItemButton(
+                onTap: () {
+                  getAllCollectibles();
+                },
+                title: "Test getAll API"),
             ItemButton(
                 onTap: () {
                   final navigator = Navigator.of(context);
