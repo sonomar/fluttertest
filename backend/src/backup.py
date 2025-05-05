@@ -3,11 +3,6 @@ import boto3
 import json
 import os
 
-import sys
-import logging
-
-
-
 # Use this code snippet in your app.
 # If you need more information about configurations
 # or implementing the sample code, visit the AWS docs:
@@ -44,45 +39,57 @@ def get_secrets():
         return f"Error retrieving secret: {e}"  # Or handle the error appropriately
 
 def get_connection():
-    if os.environ.get('ENV') == 'production':
-        parameters = get_secrets()
-
-        logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger(__name__) 
-
-        try:
-            conn =pymysql.connect(
-                host=parameters['DB_HOST'],
-                password= parameters['DB_PASSWORD'],
-                user= parameters['DB_USER'],
-                db= parameters['DB_NAME'],
-                connect_timeout=5,
-                #cursorclass=pymysql.cursors.DictCursor
-            )
-            return conn
-
-        except pymysql.MySQLError as e:
-            logger.error("ERROR: Unexpected error: Could not connect to MySQL instance.")
-            logger.error(e)
-            sys.exit(1)
-            return f"Error retrieving secret: {e}"
-    else:
-        from dotenv import load_dotenv
-        load_dotenv() 
-        # Local: Use environment variables
-        return pymysql.connect(
-            host=os.environ.get('DB_HOST'),
-            user=os.environ.get('DB_USER'),
-            password=os.environ.get('DB_PASSWORD'),
-            db=os.environ.get('DB_NAME'),
-            connect_timeout=5
+    parameters = get_secrets()
+    try:
+        conn =pymysql.connect(
+            host=parameters['DB_HOST'],
+            password= parameters['DB_PASSWORD'],
+            user= parameters['DB_USER'],
+            db= parameters['DB_NAME'],
+            connect_timeout=5,
+            #cursorclass=pymysql.cursors.DictCursor
         )
+        return conn
+
+    except pymysql.MySQLError as e:
+        logger.error("ERROR: Unexpected error: Could not connect to MySQL instance.")
+        logger.error(e)
+        sys.exit(1)
+        return f"Error retrieving secret: {e}"
 
 def split_string(string):
   """Splits a string of the format '/prefix/suffix' into 'suffix'."""
 
   parts = string.split('/')
   return '/' + parts[-1]
+
+
+def extractData(event):
+    """
+    Extracts the 'CollectibleId' from the 'body' of the event.
+    
+    Args:
+        event (dict): The event dictionary containing the body.
+        
+    Returns:
+        collectible_id (str/int/None): The 'CollectibleId' if present, or None.
+    """
+    body = event.get('body')
+    queryStringParameters = event.get('queryStringParameters')
+    if body:
+        try:
+            data = json.loads(body)
+        except json.JSONDecodeError:
+            print("Invalid JSON in body")
+    elif queryStringParameters:
+        try:
+            data = json.loads(queryStringParameters)
+        except json.JSONDecodeError:
+            print("Invalid JSON in body")
+    else:
+        print("Body not found in the event.")
+    
+    return None
 
 def extractData(event):
     """
@@ -112,12 +119,12 @@ def extractData(event):
     
     return data
 
+
 def addUser(event):
-    data = extractData(event)
-    username = data["username"]
-    email = data["Email"]
-    deviceId = data["deviceId"]
-    UserType = data["UserType"]
+    username = json.loads(event.get('body'))["username"]
+    email = json.loads(event.get('body'))["Email"]
+    deviceId = json.loads(event.get('body'))["deviceId"]
+    UserType = json.loads(event.get('body'))["UserType"]
     if not username:
         return {'statusCode': 400, 'body': 'username is required'}
     
@@ -138,22 +145,20 @@ def getAllCollectibles(event):
     return {'statusCode': 200, 'body': f"{collectibles}"}
 
 def getCollectiblesByCategoryId(event):
-    data = extractData(event)
-    category_id = data["CategoryId"]
-    if not category_id:
+    project_id = json.loads(event.get('body'))["CategoryId"]
+    if not project_id:
         return {'statusCode': 400, 'body': 'CategoryId is required'}
     
     connection = get_connection()
     with connection.cursor() as cursor:
         sql = "SELECT * FROM Collectible WHERE CategoryId = %s AND Active = TRUE"
-        cursor.execute(sql, (category_id))
+        cursor.execute(sql, (project_id))
         collectibles = cursor.fetchall()
     
     return {'statusCode': 200, 'body': f"{collectibles}"}
 
 def getCollectiblesByProjectId(event):
-    data = extractData(event)
-    project_id = data["ProjectId"]
+    project_id = json.loads(event.get('body'))["ProjectId"]
     if not project_id:
         return {'statusCode': 400, 'body': 'projectId is required'}
     
@@ -180,8 +185,7 @@ def getCollectibleByCollectibleId(event):
     return {'statusCode': 200, 'body': f"{collectible}"}
 
 def getUserByUserId(event):
-    data = extractData(event)
-    user_id = data["UserId"]
+    user_id = json.loads(event.get('body'))["UserId"]
     if not user_id:
         return {'statusCode': 400, 'body': 'UserId not found'}
     
@@ -193,9 +197,8 @@ def getUserByUserId(event):
     return {'statusCode': 200, 'body': f"{user}"}
 
 def updateUserByUserId(event):
-    data = extractData(event)
-    user_id = data["UserId"]#event.get('userId')
-    username = data["username"]#event.get('username')
+    user_id = json.loads(event.get('body'))["UserId"]#event.get('userId')
+    username = json.loads(event.get('body'))["username"]#event.get('username')
     if not user_id or not username:
         return {'statusCode': 400, 'body': 'userId and username are required'}
     
@@ -208,9 +211,8 @@ def updateUserByUserId(event):
     return {'statusCode': 200, 'body': 'User updated successfully'}
 
 def updateUserByUsername(event):
-    data = extractData(event)
-    usernameNew = data["usernameNew"]
-    username = data["username"]
+    usernameNew = json.loads(event.get('body'))["usernameNew"]
+    username = json.loads(event.get('body'))["username"]
     if not usernameNew or not username:
         return {'statusCode': 400, 'body': 'userId and username are required'}
     
@@ -223,8 +225,7 @@ def updateUserByUsername(event):
     return {'statusCode': 200, 'body': 'User updated successfully'}
 
 def getProjectByProjectId(event):
-    data = extractData(event)
-    project_id = data["ProjectId"]
+    project_id = json.loads(event.get('body'))["ProjectId"]
     if not project_id:
         return {'statusCode': 400, 'body': 'ProjectId not found'}
     
@@ -236,8 +237,7 @@ def getProjectByProjectId(event):
     return {'statusCode': 200, 'body': f"{project}"}
 
 def getUserCollectiblesByUserId(event):
-    data = extractData(event)
-    user_id = data["UserId"]
+    user_id = json.loads(event.get('body'))["UserId"]
     if not user_id:
         return {'statusCode': 400, 'body': 'UserId not found'}
     
