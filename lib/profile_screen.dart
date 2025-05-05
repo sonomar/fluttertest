@@ -4,7 +4,7 @@ import '../auth/signout.dart';
 import './openCards/login_page.dart';
 import './widgets/item_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../api/collection.dart';
+import '../api/collectible.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -105,9 +105,14 @@ class ProfileScreen extends StatelessWidget {
                 title: "Reset Demo"),
             ItemButton(
                 onTap: () {
-                  getAllCollectibles();
+                  getCollectibleByCollectibleId("1");
                 },
                 title: "Test API"),
+            ItemButton(
+                onTap: () {
+                  getAllCollectibles();
+                },
+                title: "Test getAll API"),
             ItemButton(
                 onTap: () {
                   final navigator = Navigator.of(context);
