@@ -1,12 +1,9 @@
+USE kloopocar;
 -- Inserting data into User table
 INSERT INTO User (email, userRank, username, passwordHashed, profileImg, userType, lastLoggedIn) VALUES
-('user1@example.com', '{"level": 1, "points": 10}', 'user_one', '$2a$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'https://via.placeholder.com/150/FFC107', 'username', NOW() - INTERVAL '1 day'),
-('test@test.de', '{"level": 3, "points": 55}', 'test_user', '$2a$10$yyyyyyyyyyyyyyyyyyyyyyyyyyyyy', 'https://via.placeholder.com/150/4CAF50', 'username', NOW() - INTERVAL '5 hours'),
+('user1@example.com', '{"level": 1, "points": 10}', 'user_one', '$2a$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'https://via.placeholder.com/150/FFC107', 'username', NOW() - INTERVAL 1 DAY),
+('test@test.de', '{"level": 3, "points": 55}', 'test_user', '$2a$10$yyyyyyyyyyyyyyyyyyyyyyyyyyyyy', 'https://via.placeholder.com/150/4CAF50', 'username', NOW() - INTERVAL 2 DAY),
 ('admin@kloopocar.com', '{"role": "administrator"}', 'admin_user', '$2a$10$zzzzzzzzzzzzzzzzzzzzzzzzzzz', 'https://via.placeholder.com/150/F44336', 'admin', NOW());
-
-INSERT INTO User (email, passwordHashed) VALUES
-('unregistered1@example.com', '$2a$10$aaaaaaaaaaaaaaaaaaaaaaaaaaaaa'),
-('unregistered2@example.com', '$2a$10$bbbbbbbbbbbbbbbbbbbbbbbbbbb');
 
 -- Inserting data into Category table
 INSERT INTO Category (name) VALUES
@@ -38,7 +35,7 @@ INSERT INTO Project (name, attributed, location) VALUES
 INSERT INTO Collectible (collectionId, categoryId, projectId, communityId, label, name, description, imageRef, circulation, publicationDate) VALUES
 (1, 1, 1, 1, 'Wheel', '1967 Mustang Hubcap', 'Original hubcap from a 1967 Ford Mustang.', '["https://via.placeholder.com/100/F44336"]', 500, '2024-08-20'),
 (2, 3, 2, 2, 'Event Photo', 'Berlin EV Meetup - July 2024', 'Photo from the July 2024 electric vehicle meetup.', '["https://via.placeholder.com/100/3F51B5"]', 1000, '2024-07-25'),
-(3, 4, 3, 3, 'Digital Art', 'Kloopocar #001', 'First digital collectible from the Kloopocar project.', '["https://via.placeholder.com/100/009688"]', NULL, '2025-01-01'),
+(3, 4, 3, 3, 'Digital Art', 'Kloopocar #001', 'First digital collectible from the Kloopocar project.', '["https://via.placeholder.com/100/009688"]', 12, '2025-01-01'),
 (1, 4, 1, 1, 'Badge', 'Ford Mustang Emblem', 'Original Ford Mustang hood emblem.', '["https://via.placeholder.com/100/E64A19"]', 250, '2024-11-10');
 
 -- Inserting data into UserCollectible table
@@ -75,15 +72,18 @@ INSERT INTO Notification (header, content, link) VALUES
 ('Berlin EV Meetup Reminder', 'Don\'t forget the EV meetup next Saturday!', '{"url": "/events/456"}'),
 ('Welcome to Kloopocar!', 'Thank you for joining the Kloopocar community.', '{"url": "/profile"}');
 
-INSERT INTO Notification (header, content, private, userId) VALUES
-('Private Message', 'Hey, check out this cool car!', TRUE, 1);
+INSERT INTO Notification (header, content, private) VALUES
+('Private Message', 'Hey, check out this cool car!', TRUE);
 
 -- Inserting data into NotificationUser table
 INSERT INTO NotificationUser (notificationId, userId, markRead) VALUES
 (1, 1, TRUE),
 (2, 2, FALSE),
-(3, 3, FALSE),
-(4, 1, FALSE);
+(3, 3, FALSE);
+
+-- Inserting data into NotificationUser table for the private notification
+INSERT INTO NotificationUser (notificationId, userId)
+SELECT (SELECT notificationId FROM Notification WHERE header = 'Private Message'), 1;
 
 -- Inserting data into NewsPost table
 INSERT INTO NewsPost (header, body, shortBody, type, imgRef) VALUES
@@ -101,8 +101,7 @@ INSERT INTO Mission (collectionId, title, description, reward, goal) VALUES
 INSERT INTO MissionUser (userId, missionId, progress, completed) VALUES
 (1, 1, 1, FALSE),
 (2, 2, 2, TRUE),
-(3, 3, 3, FALSE),
-(1, 2, 1, FALSE);
+(3, 3, 3, FALSE);
 
 -- Inserting data into MissionUserData table
 INSERT INTO MissionUserData (missionUserId, action) VALUES
