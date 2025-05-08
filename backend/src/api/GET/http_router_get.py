@@ -10,8 +10,21 @@ def http_router_get(event):
     raw_path = split_string(f"{event['rawPath']}")
     returnString = 'Invalid Function Call'
 
+    ## User
+    if raw_path == api_path_get.GET_RAW_PATH_getUserByUserId:
+        returnString = user.getUserByUserId(event)
+
+    elif raw_path == api_path_get.GET_RAW_PATH_getUserByEmail:
+        returnString = user.getUserByEmail(event)
+
+    elif raw_path == api_path_get.GET_RAW_PATH_getUserByUsername:
+        returnString = user.getUserByUsername(event)
+    
+    elif raw_path == api_path_get.GET_RAW_PATH_getUsersByLastLoggedIn:
+        returnString = user.getUsersByLastLoggedIn(event)
+
     ## Collectible
-    if raw_path == api_path_get.GET_RAW_PATH_getAllCollectibles:
+    elif raw_path == api_path_get.GET_RAW_PATH_getAllCollectibles:
         returnString = collectible.getAllCollectibles(event)
     
     elif raw_path == api_path_get.GET_RAW_PATH_getCollectibleByCollectibleId:
@@ -22,10 +35,6 @@ def http_router_get(event):
 
     elif raw_path == api_path_get.GET_RAW_PATH_getCollectiblesByCategoryId:
         returnString = collectible.getCollectiblesByCategoryId(event)
-    
-    ## User
-    elif raw_path == api_path_get.GET_RAW_PATH_getUserByUserId:
-        returnString = user.getUserByUserId(event)
 
     ## Project
     elif raw_path == api_path_get.GET_RAW_PATH_getProjectByProjectId:

@@ -1,2 +1,2 @@
 ## User
-CREATE_RAW_PATH_addUser = '/addUser'
+CREATE_RAW_PATH_createUser = '/createUser'

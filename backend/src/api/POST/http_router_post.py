@@ -8,7 +8,7 @@ def http_router_post(event):
     returnString = 'Invalid Function Call'
 
     ##User
-    if raw_path == api_path_post.CREATE_RAW_PATH_addUser:
-        returnString = user.addUser(event)
+    if raw_path == api_path_post.CREATE_RAW_PATH_createUser:
+        returnString = user.create_user(event)
     
     return returnString

@@ -8,12 +8,14 @@ from lambda_function import lambda_handler
 
 import api.GET.api_path_get as getPath
 import api.POST.api_path_post as postPath
-import api.PATCH.api_path_patch as patchPath 
+import api.PATCH.api_path_patch as patchPath
+import api.DELETE.api_path_delete as deletePath 
 
 # Collect paths
 get_paths = collect_raw_paths(getPath)
 patch_paths = collect_raw_paths(patchPath)
 post_paths = collect_raw_paths(postPath)
+delete_paths = collect_raw_paths(deletePath)
 
 
 app = FastAPI()
@@ -70,3 +72,6 @@ register_routes(post_paths, "POST", shared_handler)
 
 # Register PATCH routes
 register_routes(patch_paths, "PATCH", shared_handler)
+
+# Register DELETE routes
+register_routes(delete_paths, "DELETE", shared_handler)

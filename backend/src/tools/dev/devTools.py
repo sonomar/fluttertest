@@ -99,5 +99,5 @@ async def create_obj_get(request, bodyParam):
 def collect_raw_paths(module):
     return [
         value for name, value in vars(module).items()
-        if name.startswith(('GET_RAW_PATH_', 'CREATE_RAW_PATH_', 'UPDATE_RAW_PATH_'))
+        if name.startswith(('GET_RAW_PATH_', 'CREATE_RAW_PATH_', 'UPDATE_RAW_PATH_', 'DELETE_RAW_PATH_'))
     ]
