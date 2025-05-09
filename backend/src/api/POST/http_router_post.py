@@ -1,14 +1,14 @@
-import api.POST.api_path_post as api_path_post
 from tools.prod.prodTools import split_string
-import api.POST.User.post_User_table as user
+import api.table as table
+import api.POST.User.post_User_table as Userfunctions
 
 def http_router_post(event):
     
-    raw_path = split_string(f"{event['rawPath']}")
-    returnString = 'Invalid Function Call'
-
-    ##User
-    if raw_path == api_path_post.CREATE_RAW_PATH_createUser:
-        returnString = user.create_user(event)
+    tableName, raw_path = split_string(f"{event['rawPath']}")
+    returnString = 'Invalid Function Path Call'
+    
+    ## User
+    if tableName == table.User_table:
+        returnString = Userfunctions.call_User_function(raw_path, event)
     
     return returnString

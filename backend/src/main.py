@@ -56,13 +56,14 @@ async def shared_handler(request: Request, input: Optional[JSONBody] = None):
 
 # Shared handler for multiple paths
 async def shared_handler_get(request: Request, input: Optional[Any] = None):
-    event = await create_obj_get(request, input)
+    jsonBody = input if input else await request.body()
+    event = await create_obj_get(request, jsonBody)
     return lambda_handler(event, request)
 
 # Helper function to register routes
 def register_routes(paths: list, method: str, handler: callable):
     for path in paths:
-        app.add_api_route(path, handler, methods=[method])
+        app.add_api_route('/{tableName}' + path, handler, methods=[method])
 
 # Register GET routes
 register_routes(get_paths, "GET", shared_handler_get)

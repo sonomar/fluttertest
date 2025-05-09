@@ -1,50 +1,21 @@
-from tools.prod.prodTools import extractData, get_connection
+import api.GET.Collectible.get_Collectible_functions as collectible
+import api.GET.api_path_get as api_path_get
 
-def getAllCollectibles(event):
-    connection = get_connection()
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM Collectible WHERE Active = TRUE")
-        collectibles = cursor.fetchall()
+def call_Collectible_function(raw_path, event):
     
-    return {'statusCode': 200, 'body': f"{collectibles}"}
+    returnString = 'Invalid Function Call'
 
-def getCollectiblesByCategoryId(event):
-    data = extractData(event)
-    category_id = data["CategoryId"]
-    if not category_id:
-        return {'statusCode': 400, 'body': 'CategoryId is required'}
+    ## Collectible
+    if raw_path == api_path_get.GET_RAW_PATH_getAllCollectibles:
+        returnString = collectible.getAllCollectibles(event)
     
-    connection = get_connection()
-    with connection.cursor() as cursor:
-        sql = "SELECT * FROM Collectible WHERE CategoryId = %s AND Active = TRUE"
-        cursor.execute(sql, (category_id))
-        collectibles = cursor.fetchall()
+    elif raw_path == api_path_get.GET_RAW_PATH_getCollectibleByCollectibleId:
+        returnString = collectible.getCollectibleByCollectibleId(event)
     
-    return {'statusCode': 200, 'body': f"{collectibles}"}
+    elif raw_path == api_path_get.GET_RAW_PATH_getCollectiblesByProjectId:
+        returnString = collectible.getCollectiblesByProjectId(event)
 
-def getCollectiblesByProjectId(event):
-    data = extractData(event)
-    project_id = data["ProjectId"]
-    if not project_id:
-        return {'statusCode': 400, 'body': 'projectId is required'}
-    
-    connection = get_connection()
-    with connection.cursor() as cursor:
-        sql = "SELECT * FROM Collectible WHERE ProjectId = %s AND Active = TRUE"
-        cursor.execute(sql, (project_id))
-        collectibles = cursor.fetchall()
-    
-    return {'statusCode': 200, 'body': f"{collectibles}"}
+    elif raw_path == api_path_get.GET_RAW_PATH_getCollectiblesByCategoryId:
+        returnString = collectible.getCollectiblesByCategoryId(event)
 
-def getCollectibleByCollectibleId(event):
-    data = extractData(event)
-    collectible_id = data["CollectibleId"]
-    if not collectible_id:
-        return {'statusCode': 400, 'body': 'collectibleId is required'}
-    connection = get_connection()
-    with connection.cursor() as cursor:
-        sql = "SELECT * FROM Collectible WHERE CollectibleId = %s AND Active = TRUE"
-        cursor.execute(sql, (collectible_id))
-        collectible = cursor.fetchone()
-    
-    return {'statusCode': 200, 'body': f"{collectible}"}
+    return returnString

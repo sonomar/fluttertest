@@ -53,10 +53,16 @@ def get_connection():
         )
 
 def split_string(string):
-  """Splits a string of the format '/prefix/suffix' into 'suffix'."""
-
-  parts = string.split('/')
-  return '/' + parts[-1]
+    """Splits a string of the format '/prefix/suffix' and returns both the second last and last elements."""
+    
+    parts = string.strip('/').split('/')
+    
+    if len(parts) >= 2:
+        return parts[-2], '/' + parts[-1]
+    elif len(parts) == 1:
+        return None, '/' + parts[-1]
+    else:
+        return None, None
 
 def extractData(event):
     """

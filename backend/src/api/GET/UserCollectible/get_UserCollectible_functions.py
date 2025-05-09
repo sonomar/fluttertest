@@ -1,6 +1,6 @@
 from tools.prod.prodTools import extractData, get_connection
 
-def getUserCollectiblesByUserId(event):
+def getUserCollectibleByUserId(event):
     data = extractData(event)
     user_id = data["UserId"]
     if not user_id:

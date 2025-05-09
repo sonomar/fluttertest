@@ -1,14 +1,12 @@
-from tools.prod.prodTools import extractData, get_connection
+import api.GET.Project.get_Project_functions as project
+import api.GET.api_path_get as api_path_get
 
-def getProjectByProjectId(event):
-    data = extractData(event)
-    project_id = data["ProjectId"]
-    if not project_id:
-        return {'statusCode': 400, 'body': 'ProjectId not found'}
-    
-    connection = get_connection()
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM Project WHERE ProjectId = %s", (project_id))
-        project = cursor.fetchone()
-    
-    return {'statusCode': 200, 'body': f"{project}"}
+def call_Project_function(raw_path, event):
+
+    returnString = 'Invalid Function Call'
+
+    ## Project
+    if raw_path == api_path_get.GET_RAW_PATH_getProjectByProjectId:
+        returnString = project.getProjectByProjectId(event)
+
+    return returnString
