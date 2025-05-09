@@ -6,7 +6,7 @@ import api.PATCH.User.patch_User_table as Userfunctions
 def http_router_patch(event):
     
     tableName, raw_path = split_string(f"{event['rawPath']}")
-    returnString = 'Invalid Function Call'
+    returnString = 'Invalid Function Path Call'
 
     ## User
     if tableName == table.User_table:
