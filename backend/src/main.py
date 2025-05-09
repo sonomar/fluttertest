@@ -50,12 +50,12 @@ async def root(request: Request):
 
 
 # Shared handler for multiple paths
-async def shared_handler(request: Request, input: Optional[JSONBody] = None):
+async def shared_handler(request: Request, tableName: Optional[str] = None, input: Optional[JSONBody] = None):
     event = await create_obj(request)
     return lambda_handler(event, request)
 
 # Shared handler for multiple paths
-async def shared_handler_get(request: Request, input: Optional[Any] = None):
+async def shared_handler_get(request: Request, tableName: Optional[str] = None, input: Optional[Any] = None):
     jsonBody = input if input else await request.body()
     event = await create_obj_get(request, jsonBody)
     return lambda_handler(event, request)
