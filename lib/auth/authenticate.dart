@@ -1,5 +1,6 @@
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../api/user.dart';
 
 Future<bool> authenticateUser(email, password) async {
   final userPool = CognitoUserPool(

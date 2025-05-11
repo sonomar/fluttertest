@@ -1,5 +1,9 @@
 import 'api_init.dart';
 
-void updateUserByUserId(id, username) async {
-  apiPatchRequest('/updateUserByUserId', {"UserId": 2, 'username': 'testman'});
+void getUserByUserId(id, params) async {
+  apiPatchRequest('/getUserByUserId', params);
+}
+
+void updateUserByUserId(id, params) async {
+  apiPatchRequest('/updateUserByUserId', params);
 }

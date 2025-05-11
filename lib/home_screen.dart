@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kloppocar_app/collectibles/collectible_details.dart';
+import 'package:kloppocar_app/profile_screen.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
@@ -166,10 +167,26 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget turLWidget() {
+  Widget missionWidget() {
     return Padding(
         padding: const EdgeInsets.only(top: 20.0),
-        child: Column(children: [
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Padding(
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Container(
+                padding: const EdgeInsets.only(
+                    left: 40, right: 40, top: 7, bottom: 7),
+                decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: const BorderRadius.all(Radius.circular(5))),
+                child: Text("MISSION",
+                    style: TextStyle(
+                        fontSize: 10,
+                        letterSpacing: 2.56,
+                        color: Colors.white,
+                        fontFamily: 'ChakraPetch',
+                        fontWeight: FontWeight.w700)),
+              )),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -178,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Text(
                     'Tür L',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 20,
                       fontFamily: 'ChakraPetch',
                       fontWeight: FontWeight.w500,
                       color: Colors.black,
@@ -198,16 +215,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ])
             ],
           ),
-          Padding(
-              padding: const EdgeInsets.only(top: 5.0),
-              child: progressBar(0.33)),
+          Container(alignment: Alignment.center, child: progressBar(0.33)),
           const Padding(
-            padding: EdgeInsets.only(top: 5, left: 15, right: 15, bottom: 5),
+            padding: EdgeInsets.only(left: 15, top: 5, right: 20, bottom: 5),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text('Kloppocar-Puzzle-Collection',
-                    style: TextStyle(fontSize: 12, color: Colors.black)),
                 Text('2/6', style: TextStyle(fontSize: 12, color: Colors.black))
               ],
             ),
@@ -222,8 +235,8 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(
               padding: const EdgeInsets.only(left: 15.0),
               child: Container(
-                padding: const EdgeInsets.only(
-                    left: 10, right: 10, top: 5, bottom: 5),
+                padding:
+                    const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 2),
                 decoration: BoxDecoration(
                     color: Colors.black,
                     borderRadius: const BorderRadius.all(Radius.circular(20))),
@@ -243,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Text(
                     'Kloppocar',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 20,
                       fontFamily: 'ChakraPetch',
                       fontWeight: FontWeight.w500,
                       color: Colors.black,
@@ -291,12 +304,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Container(alignment: Alignment.center, child: progressBar(0.8)),
           const Padding(
-            padding: EdgeInsets.only(left: 15, top: 5, right: 15, bottom: 5),
+            padding: EdgeInsets.only(left: 15, top: 5, right: 20, bottom: 5),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text('Kloppocar-Community-Challenge',
-                    style: TextStyle(fontSize: 12, color: Colors.black)),
                 Text('988/1200',
                     style: TextStyle(fontSize: 12, color: Colors.black))
               ],
@@ -384,15 +395,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 Padding(
                     padding: const EdgeInsets.only(left: 10.0),
                     child: shadowCircle('assets/images/profile.jpg', 18.0)),
-                const Padding(
-                    padding: EdgeInsets.only(left: 10.0),
+                Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('DEINS-Tester',
-                            style: TextStyle(
-                                fontSize: 10, fontWeight: FontWeight.w700)),
-                        Text('Titel: Master Collector',
+                        Row(children: [
+                          const Text('DEINS-Tester',
+                              style: TextStyle(
+                                  fontSize: 10, fontWeight: FontWeight.w700)),
+                          Padding(
+                              padding: const EdgeInsets.only(left: 5.0),
+                              child: SizedBox(
+                                  width: 10,
+                                  child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ProfileScreen()));
+                                      },
+                                      child: Image.asset(
+                                          "assets/images/gear.png")))),
+                        ]),
+                        const Text('Titel: Master Collector',
                             style: TextStyle(
                                 fontSize: 15, fontWeight: FontWeight.w200)),
                       ],
@@ -472,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Image.asset('assets/images/covercard.png',
                                   fit: BoxFit.cover)))),
                 ),
-                turLWidget(),
+                missionWidget(),
                 kloppocarWidget(),
               ])),
           communityChallengeWidget(_formatTime(_remainingTime)),
@@ -623,7 +650,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: LinearPercentIndicator(
             animation: true,
             animationDuration: 2000,
-            lineHeight: 3.0,
+            lineHeight: 5.0,
             percent: progressPercent,
             backgroundColor: Colors.transparent,
             barRadius: const Radius.circular(90),
