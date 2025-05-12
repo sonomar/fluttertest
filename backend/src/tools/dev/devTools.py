@@ -1,3 +1,4 @@
+#from table import *  # Assuming necessary table constants are defined here
 async def create_obj(request):
     """Creates an event object by embedding a key-value pair and request metadata."""
 
@@ -101,3 +102,27 @@ def collect_raw_paths(module):
         value for name, value in vars(module).items()
         if name.startswith(('GET_RAW_PATH_', 'CREATE_RAW_PATH_', 'UPDATE_RAW_PATH_', 'DELETE_RAW_PATH_'))
     ]
+
+def get_all_active_paths(api_paths):
+    paths = []
+    for table, endpoints in api_paths.items():
+        for endpoint_name, endpoint_info in endpoints.items():
+            if endpoint_info.get("active"):
+                paths.append(endpoint_info.get("path"))
+    return paths
+
+def get_all_active_paths_object(api_paths: list):
+    paths = []
+    for table, endpoints in api_paths.items():
+        for endpoint_name, endpoint_info in endpoints.items():
+            if endpoint_info.get("active"):
+                paths.append({
+                    "path": endpoint_info.get("path"),
+                    "input": endpoint_info.get("input", {}),
+                    "output": endpoint_info.get("output", {})
+                })
+    return paths
+
+# Usage
+#all_paths = get_all_active_paths(GET_API_PATHS)
+#print(all_paths)

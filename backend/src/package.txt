@@ -4,3 +4,6 @@ json
 os
 sys
 logging
+mysqlclient
+alembic
+sqlalchemy

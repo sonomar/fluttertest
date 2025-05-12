@@ -1,12 +1,13 @@
 import api.POST.User.post_User_functions as user
-import api.POST.api_path_post as api_path_post
+from api.POST.api_paths_post import API_PATHS_POST
 
 def call_User_function(raw_path, event):
     
     returnString = 'Invalid Function Call'
+    User_Path = API_PATHS_POST['User']
 
     ## User
-    if raw_path == api_path_post.CREATE_RAW_PATH_createUser:
+    if raw_path == User_Path['createUser']['path']:
         returnString = user.create_user(event)
 
     return returnString
