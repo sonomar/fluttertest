@@ -1,12 +1,17 @@
+# models.py
 from typing import List, Optional
 
-from sqlalchemy import BigInteger, Enum, ForeignKeyConstraint, Index, JSON, String, TIMESTAMP, Text, text
+# Adjust the import path for Base
+#from src.database import Base # <-- CHANGED
+
+from sqlalchemy import BigInteger, Enum, ForeignKeyConstraint, Index, JSON, String, TIMESTAMP, Text, text, Boolean # Import Boolean
 from sqlalchemy.dialects.mysql import BIGINT, INTEGER, TINYINT
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
 
-class Base(DeclarativeBase):
-    pass
+# The Base class is now imported from src.database, remove its definition here
+class Base(DeclarativeBase): # <-- REMOVED
+     pass # <-- REMOVED
 
 
 class Category(Base):
@@ -33,7 +38,8 @@ class Community(Base):
     title: Mapped[str] = mapped_column(String(255))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    active: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    # Use Boolean type for TINYINT(1)
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
     description: Mapped[Optional[str]] = mapped_column(Text)
     imageRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
@@ -59,7 +65,8 @@ class NewsPost(Base):
     postDate: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    active: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    # Use Boolean type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
     type: Mapped[Optional[str]] = mapped_column(String(255))
     imgRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
@@ -76,11 +83,13 @@ class Notification(Base):
     notificationId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     header: Mapped[str] = mapped_column(String(255))
     content: Mapped[str] = mapped_column(Text)
-    pushNotification: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'0'"))
-    private: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'0'"))
+    # Use Boolean type
+    pushNotification: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
+    private: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    active: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    # Use Boolean type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
     link: Mapped[Optional[dict]] = mapped_column(JSON)
     imgRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
@@ -98,10 +107,11 @@ class Project(Base):
 
     projectId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     name: Mapped[str] = mapped_column(String(255))
-    attributed: Mapped[dict] = mapped_column(JSON)
+    attributed: Mapped[dict] = mapped_column(JSON) # Keep as dict/JSON
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    active: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    # Use Boolean type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
     location: Mapped[Optional[str]] = mapped_column(String(255))
 
     Collectible: Mapped[List['Collectible']] = relationship('Collectible', back_populates='Project_')
@@ -117,7 +127,8 @@ class Sponsor(Base):
     name: Mapped[str] = mapped_column(String(255))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    active: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    # Use Boolean type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
     organization: Mapped[Optional[str]] = mapped_column(String(255))
     urls: Mapped[Optional[dict]] = mapped_column(JSON)
     description: Mapped[Optional[str]] = mapped_column(Text)
@@ -130,8 +141,8 @@ class Sponsor(Base):
     sponsorZip: Mapped[Optional[str]] = mapped_column(String(20))
     primaryContactName: Mapped[Optional[str]] = mapped_column(String(255))
     primaryContactEmail: Mapped[Optional[str]] = mapped_column(String(255))
-    primaryContactPhone: Mapped[Optional[int]] = mapped_column(BigInteger)
-
+    primaryContactPhone: Mapped[Optional[int]] = mapped_column(BigInteger) # BigInt maps to Python int
+    
     CollectibleSponsor: Mapped[List['CollectibleSponsor']] = relationship('CollectibleSponsor', back_populates='Sponsor_')
 
 
@@ -144,17 +155,19 @@ class User(Base):
     )
 
     userId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    active: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    # Use Boolean type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
     email: Mapped[str] = mapped_column(String(255))
     passwordHashed: Mapped[str] = mapped_column(String(255))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    userRank: Mapped[Optional[dict]] = mapped_column(JSON)
+    userRank: Mapped[Optional[dict]] = mapped_column(JSON) # Keep as dict/JSON
     username: Mapped[Optional[str]] = mapped_column(String(255))
     profileImg: Mapped[Optional[str]] = mapped_column(String(255))
     authToken: Mapped[Optional[str]] = mapped_column(Text)
     deviceId: Mapped[Optional[str]] = mapped_column(String(255))
-    userType: Mapped[Optional[str]] = mapped_column(Enum('unregistered', 'username', 'email', 'admin'), server_default=text("'unregistered'"))
+    # Use Python Enum for ENUM type for better type safety
+    userType: Mapped[Optional['UserTypeEnum']] = mapped_column(Enum('unregistered', 'username', 'email', 'admin', name='userType'), server_default=text("'unregistered'")) # <-- CHANGED type, added name
     lastLoggedIn: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
 
     CommunityUser: Mapped[List['CommunityUser']] = relationship('CommunityUser', back_populates='User_')
@@ -162,6 +175,14 @@ class User(Base):
     MissionUser: Mapped[List['MissionUser']] = relationship('MissionUser', back_populates='User_')
     UserCollectible: Mapped[List['UserCollectible']] = relationship('UserCollectible', foreign_keys='[UserCollectible.ownerId]', back_populates='User_')
     UserCollectible_: Mapped[List['UserCollectible']] = relationship('UserCollectible', foreign_keys='[UserCollectible.previousOwnerId]', back_populates='User1')
+
+# Define Python Enum for userType if using Enum type hint
+import enum
+class UserTypeEnum(enum.Enum): # <-- ADDED
+    unregistered = "unregistered"
+    username = "username"
+    email = "email"
+    admin = "admin"
 
 
 class Collection(Base):
@@ -177,7 +198,8 @@ class Collection(Base):
     name: Mapped[str] = mapped_column(String(255))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    active: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    # Use Boolean type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
     description: Mapped[Optional[str]] = mapped_column(Text)
     imageRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
@@ -201,7 +223,8 @@ class CommunityChallenge(Base):
     communityId: Mapped[int] = mapped_column(BIGINT)
     title: Mapped[str] = mapped_column(String(255))
     goal: Mapped[int] = mapped_column(INTEGER)
-    timer: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'0'"))
+    # Use Boolean type
+    timer: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
     description: Mapped[Optional[str]] = mapped_column(Text)
@@ -249,10 +272,11 @@ class NotificationUser(Base):
     notificationUserId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     notificationId: Mapped[int] = mapped_column(BIGINT)
     userId: Mapped[int] = mapped_column(BIGINT)
-    markRead: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'0'"))
-    archived: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'0'"))
-    deleted: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'0'"))
-    pushNotification: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'0'"))
+    # Use Boolean type
+    markRead: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
+    archived: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
+    deleted: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
+    pushNotification: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
 
@@ -283,7 +307,8 @@ class Collectible(Base):
     name: Mapped[str] = mapped_column(String(255))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    active: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    # Use Boolean type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
     description: Mapped[Optional[str]] = mapped_column(Text)
     imageRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
@@ -312,7 +337,8 @@ class Mission(Base):
     collectionId: Mapped[int] = mapped_column(BIGINT)
     title: Mapped[str] = mapped_column(String(255))
     goal: Mapped[int] = mapped_column(INTEGER)
-    timer: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'0'"))
+    # Use Boolean type
+    timer: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
     description: Mapped[Optional[str]] = mapped_column(Text)
@@ -340,7 +366,8 @@ class CollectibleSponsor(Base):
     collectibleSponsorId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     collectibleId: Mapped[int] = mapped_column(BIGINT)
     sponsorId: Mapped[int] = mapped_column(BIGINT)
-    active: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'1'"))
+    # Use Boolean type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
     sponsorMessage: Mapped[Optional[str]] = mapped_column(Text)
 
     Collectible_: Mapped['Collectible'] = relationship('Collectible', back_populates='CollectibleSponsor')
@@ -361,8 +388,9 @@ class MissionUser(Base):
     userId: Mapped[int] = mapped_column(BIGINT)
     missionId: Mapped[int] = mapped_column(BIGINT)
     progress: Mapped[int] = mapped_column(INTEGER, server_default=text("'0'"))
-    completed: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'0'"))
-    rewardClaimed: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'0'"))
+    # Use Boolean type
+    completed: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
+    rewardClaimed: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
     status: Mapped[Optional[str]] = mapped_column(String(255))
     dateCompleted: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
 
@@ -389,8 +417,10 @@ class UserCollectible(Base):
     mint: Mapped[int] = mapped_column(INTEGER)
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    active: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'1'"))
-    favorite: Mapped[int] = mapped_column(TINYINT(1), server_default=text("'0'"))
+    # Use Boolean type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
+    # Use Boolean type
+    favorite: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
     previousOwnerId: Mapped[Optional[int]] = mapped_column(BIGINT)
     lastTransferredDt: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
 
