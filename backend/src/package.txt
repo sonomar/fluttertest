@@ -6,3 +6,4 @@ sys
 logging
 alembic
 sqlalchemy
+'pydantic[email,timezone]'

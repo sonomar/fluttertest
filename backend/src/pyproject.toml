@@ -9,6 +9,7 @@ dependencies = [
     "boto3>=1.38.8",
     "fastapi>=0.115.12",
     "logging>=0.4.9.6",
+    "pydantic[email,timezone]>=2.11.4",
     "pymysql>=1.1.1",
     "sqlalchemy>=2.0.40",
     "uvicorn[standard]>=0.34.2",

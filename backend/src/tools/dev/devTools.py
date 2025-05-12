@@ -103,14 +103,6 @@ def collect_raw_paths(module):
         if name.startswith(('GET_RAW_PATH_', 'CREATE_RAW_PATH_', 'UPDATE_RAW_PATH_', 'DELETE_RAW_PATH_'))
     ]
 
-def get_all_active_paths(api_paths):
-    paths = []
-    for table, endpoints in api_paths.items():
-        for endpoint_name, endpoint_info in endpoints.items():
-            if endpoint_info.get("active"):
-                paths.append(endpoint_info.get("path"))
-    return paths
-
 def get_all_active_paths_object(api_paths: list):
     paths = []
     for table, endpoints in api_paths.items():
@@ -118,8 +110,8 @@ def get_all_active_paths_object(api_paths: list):
             if endpoint_info.get("active"):
                 paths.append({
                     "path": endpoint_info.get("path"),
-                    "input": endpoint_info.get("input", {}),
-                    "output": endpoint_info.get("output", {})
+                    "handler": endpoint_info.get("handler", {}),
+                    "response_model": endpoint_info.get("response_model", {})
                 })
     return paths
 

@@ -14,6 +14,8 @@ patch_paths_object = get_all_active_paths_object(API_PATHS_PATCH)
 post_paths_object = get_all_active_paths_object(API_PATHS_POST)
 delete_paths_object = get_all_active_paths_object(API_PATHS_DELETE)
 
+Handler_Local_Type = False
+
 app = FastAPI()
 
 # Define Pydantic model for body validation
@@ -31,6 +33,7 @@ async def root(request: Request):
 async def shared_handler(request: Request, tableName: Optional[str] = None, input: Optional[JSONBody] = None):
     event = await create_obj(request)
     return lambda_handler(event, request)
+
 # Shared handler for multiple paths
 async def shared_handler_get(request: Request, tableName: Optional[str] = None, input: Optional[Any] = None):
     jsonBody = input if input else await request.body()
@@ -39,20 +42,20 @@ async def shared_handler_get(request: Request, tableName: Optional[str] = None, 
 
 
 # Helper function to register routes
-def register_routes(paths: list, method: str, handler: callable):
-    for path in paths:
+def register_routes(paths_obj: list, method: str, handler: callable):
+    for path_obj in paths_obj:
         # Dynamically create Pydantic models for input and output
         #output_model = create_pydantic_model(path["output"], "OutputModel")
-
         # Dynamically add the API route with query parameters and output models
         app.add_api_route(
-            '/{tableName}' + path["path"],
-            handler,
+            '/{tableName}' + path_obj["path"],
+            handler if not Handler_Local_Type else path_obj["handler"],
             methods=[method],
             #response_model=output_model,
             status_code=200,
+            response_model=path_obj["response_model"],
             response_description="Successful operation",
-            description=f"Create or manage item at {path['path']}",
+            description=f"Create or manage item at {path_obj['path']}",
             #params={key: param for key, param in zip(path["input"].keys(), input_params)}  # Add query parameters
         )
 
