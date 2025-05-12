@@ -69,9 +69,12 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-            automaticallyImplyLeading: false,
             scrolledUnderElevation: 0.0,
             backgroundColor: Colors.white,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => Navigator.pop(context),
+            ),
             title: const Text("Profile"),
             centerTitle: false,
             titleTextStyle: TextStyle(

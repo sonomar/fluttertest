@@ -5,7 +5,7 @@ import './home_screen.dart';
 import './collection_screen.dart';
 import './scan_screen.dart';
 import './community_screen.dart';
-import './profile_screen.dart';
+import './game_screen.dart';
 import './openCards/login_page.dart';
 import 'package:lottie/lottie.dart';
 // import 'package:google_fonts/google_fonts.dart';
@@ -144,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
       const CollectionScreen(key: PageStorageKey('collection')),
       const ScanScreen(key: PageStorageKey('scan')),
       const CommunityScreen(key: PageStorageKey('community')),
-      const ProfileScreen(key: PageStorageKey('profile')),
+      const GameScreen(key: PageStorageKey('game')),
     ];
   }
 
@@ -252,7 +252,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         BlendMode.srcIn),
                   ),
                 ),
-                label: 'Profil',
+                label: 'Game Center',
               ),
             ],
             unselectedIconTheme: const IconThemeData(color: Colors.black),

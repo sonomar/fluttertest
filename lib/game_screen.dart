@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class CommunityScreen extends StatefulWidget {
-  const CommunityScreen({super.key});
+class GameScreen extends StatefulWidget {
+  const GameScreen({super.key});
 
   @override
-  State<CommunityScreen> createState() => _CommunityScreenState();
+  State<GameScreen> createState() => _GameScreenState();
 }
 
-class _CommunityScreenState extends State<CommunityScreen> {
+class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,7 +16,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         appBar: AppBar(
             automaticallyImplyLeading: false,
             scrolledUnderElevation: 0.0,
-            title: const Text("Community"),
+            title: const Text("Game Center"),
             backgroundColor: Color(0xff333333),
             centerTitle: false,
             titleTextStyle: TextStyle(
@@ -48,8 +48,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                           color: Colors.white)),
-                  Text(
-                      "Join the DEINS Community and participate in awesome Communitys!",
+                  Text("Join the DEINS Game and participate in awesome Games!",
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                           fontSize: 20,
