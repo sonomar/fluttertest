@@ -5,13 +5,17 @@ import logging
 from typing import Generator
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase
 from sqlalchemy.ext.declarative import declarative_base # Needed for Alembic target_metadata
 
 # We'll import the Base from models.py later, but define it here first
 # as a placeholder that Alembic env.py can point to initially.
 # It will be overridden by the import from models.py
 Base = declarative_base()
+
+# The Base class is now imported from src.database, remove its definition here
+class Base(DeclarativeBase): # <-- REMOVED
+     pass # <-- REMOVED
 
 # --- Database URL Configuration ---
 # This adapts to your environment (local via .env, prod via Secrets Manager)
@@ -33,9 +37,9 @@ def get_db_url():
         db_password = parameters.get('DB_PASSWORD')
         db_name = parameters.get('DB_NAME')
 
-        # Using mysqlclient driver (mysql+mysqlclient)
+        # Using pymysql driver (mysql+pymysql)
         # If you stick with pymysql, use mysql+pymysql://
-        return f"mysql+mysqlclient://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+        return f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
     else:
         # Local development - use environment variables (e.g., from .env)
         # Assuming you have a .env file loaded elsewhere (like in main.py startup)
@@ -53,7 +57,7 @@ def get_db_url():
              # For now, let's return None or an incomplete URL
              return None # Or raise ValueError
 
-        return f"mysql+mysqlclient://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+        return f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
 
 SQLALCHEMY_DATABASE_URL = get_db_url()
@@ -64,7 +68,7 @@ if not SQLALCHEMY_DATABASE_URL:
      # For this flexible setup, just log the error and connections will fail
      logging.error("Failed to generate database URL.")
      # Set to a dummy value to allow app to potentially start, but DB operations will fail
-     SQLALCHEMY_DATABASE_URL = "mysql+mysqlclient://user:password@host/dbname_dummy"
+     SQLALCHEMY_DATABASE_URL = "mysql+pymysql://user:password@host/dbname_dummy"
 
 
 # --- SQLAlchemy Engine and Session ---
@@ -94,7 +98,7 @@ def get_db() -> Generator[Session, None, None]:
 # --- Import Models ---
 # Import your models here after Base is defined, so they can register with Base.metadata
 # This avoids circular imports if models need to import Base.
-from models import * # Adjust import path if models.py is not directly in src
+from database.models import * # Adjust import path if models.py is not directly in src
 
 # Now, the Base variable defined *before* is effectively replaced by the Base
 # imported from models.py, ensuring all models are linked to the correct metadata.
@@ -109,7 +113,7 @@ from models import * # Adjust import path if models.py is not directly in src
 
 try:
     # Attempt to import Base directly from models.py
-    from models import Base
+    from database.models import Base
     logging.info("Successfully imported Base from models.py")
 except ImportError:
     logging.error("Could not import Base from models.py. Ensure models.py is in the path and defines 'Base'.")

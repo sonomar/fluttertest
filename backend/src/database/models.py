@@ -2,17 +2,24 @@
 from typing import List, Optional
 
 # Adjust the import path for Base
-#from src.database import Base # <-- CHANGED
+from database.db import Base # <-- CHANGED
 
 from sqlalchemy import BigInteger, Enum, ForeignKeyConstraint, Index, JSON, String, TIMESTAMP, Text, text, Boolean # Import Boolean
 from sqlalchemy.dialects.mysql import BIGINT, INTEGER, TINYINT
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
 
-# The Base class is now imported from src.database, remove its definition here
-class Base(DeclarativeBase): # <-- REMOVED
-     pass # <-- REMOVED
+# # The Base class is now imported from src.database, remove its definition here
+# class Base(DeclarativeBase): # <-- REMOVED
+#      pass # <-- REMOVED
 
+# Define Python Enum for userType if using Enum type hint
+import enum
+class UserTypeEnum(enum.Enum): # <-- ADDED
+    unregistered = "unregistered"
+    username = "username"
+    email = "email"
+    admin = "admin"
 
 class Category(Base):
     __tablename__ = 'Category'
@@ -175,14 +182,6 @@ class User(Base):
     MissionUser: Mapped[List['MissionUser']] = relationship('MissionUser', back_populates='User_')
     UserCollectible: Mapped[List['UserCollectible']] = relationship('UserCollectible', foreign_keys='[UserCollectible.ownerId]', back_populates='User_')
     UserCollectible_: Mapped[List['UserCollectible']] = relationship('UserCollectible', foreign_keys='[UserCollectible.previousOwnerId]', back_populates='User1')
-
-# Define Python Enum for userType if using Enum type hint
-import enum
-class UserTypeEnum(enum.Enum): # <-- ADDED
-    unregistered = "unregistered"
-    username = "username"
-    email = "email"
-    admin = "admin"
 
 
 class Collection(Base):
