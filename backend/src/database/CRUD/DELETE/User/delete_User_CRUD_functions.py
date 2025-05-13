@@ -6,7 +6,7 @@
 # Import the database session dependency and models/schemas
 from fastapi import Depends, HTTPException, status, Path # Added FastAPI dependencies
 from sqlalchemy.orm import Session # Added SQLAlchemy Session type
-from typing import Dict, Any # Added typing hints
+from typing import Dict # Added typing hints
 
 # Import the database session dependency and models
 from database.db import get_db # Adjust import path if necessary
