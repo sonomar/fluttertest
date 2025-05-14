@@ -1,8 +1,8 @@
 # src/database.py
 import os
-import json
 import logging
 from typing import Generator
+
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase
@@ -43,6 +43,8 @@ def get_db_url():
     else:
         # Local development - use environment variables (e.g., from .env)
         # Assuming you have a .env file loaded elsewhere (like in main.py startup)
+        from dotenv import load_dotenv
+        load_dotenv()
         db_host = os.environ.get('DB_HOST')
         db_port = os.environ.get('DB_PORT', 3306)
         db_user = os.environ.get('DB_USER')
