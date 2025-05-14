@@ -14,4 +14,4 @@ class UserResponse(UserBase):
     lastLoggedIn: Optional[datetime.datetime] = None
 
     class Config:
-        orm_mode = True # Enables ORM mode
+        from_attributes = True # Enables ORM mode

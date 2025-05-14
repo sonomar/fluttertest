@@ -28,7 +28,7 @@ class CategoryResponse(CategoryBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Community Schemas ---
 class CommunityBase(BaseModel):
@@ -49,7 +49,7 @@ class CommunityResponse(CommunityBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Collection Schemas ---
 class CollectionBase(BaseModel):
@@ -71,7 +71,7 @@ class CollectionResponse(CollectionBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Project Schemas ---
 class ProjectBase(BaseModel):
@@ -89,7 +89,7 @@ class ProjectResponse(ProjectBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Collectible Schemas ---
 class CollectibleBase(BaseModel):
@@ -134,7 +134,7 @@ class CollectibleResponse(CollectibleBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- UserCollectible Schemas ---
 class UserCollectibleBase(BaseModel):
@@ -155,7 +155,7 @@ class UserCollectibleResponse(UserCollectibleBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- CommunityUser Schemas ---
 class CommunityUserBase(BaseModel):
@@ -171,7 +171,7 @@ class CommunityUserResponse(CommunityUserBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Sponsor Schemas ---
 class SponsorBase(BaseModel):
@@ -200,7 +200,7 @@ class SponsorResponse(SponsorBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # --- CollectibleSponsor Schemas ---
@@ -217,7 +217,7 @@ class CollectibleSponsorResponse(CollectibleSponsorBase):
     collectibleSponsorId: int
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Notification Schemas ---
 class NotificationBase(BaseModel):
@@ -241,7 +241,7 @@ class NotificationResponse(NotificationBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- NotificationUser Schemas ---
 class NotificationUserBase(BaseModel):
@@ -261,7 +261,7 @@ class NotificationUserResponse(NotificationUserBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- NewsPost Schemas ---
 class NewsPostBase(BaseModel):
@@ -285,7 +285,7 @@ class NewsPostResponse(NewsPostBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- Mission Schemas ---
 class MissionBase(BaseModel):
@@ -310,7 +310,7 @@ class MissionResponse(MissionBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- MissionUser Schemas ---
 class MissionUserBase(BaseModel):
@@ -331,7 +331,7 @@ class MissionUserResponse(MissionUserBase):
     updatedDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- MissionUserData Schemas ---
 class MissionUserDataBase(BaseModel):
@@ -347,7 +347,7 @@ class MissionUserDataResponse(MissionUserDataBase):
     createdDt: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- CollectibleSponsor Schemas --- (Re-defined as it was out of order)
 # Assuming this is a join table with potentially extra data
@@ -364,4 +364,4 @@ class CollectibleSponsorResponse(CollectibleSponsorBase):
     collectibleSponsorId: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
