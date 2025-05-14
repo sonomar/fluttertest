@@ -20,8 +20,8 @@ from api.exceptions import NotFoundException # Adjust import path
 # Make function async if using an async driver, otherwise sync is fine with Depends
 # Keeping sync for now to match previous examples
 
-def deleteMissionByMissionId(
-    projectId: int = Path(..., description="ID of the mission to delete"),
+def deleteProjectByProjectId(
+    projectId: int = Path(..., description="ID of the project to delete"),
     db: Session = Depends(get_db)
 ) -> Dict[str, str]:
     db_project = db.get(Project, projectId)

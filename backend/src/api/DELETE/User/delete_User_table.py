@@ -1,4 +1,4 @@
-import api.DELETE.User.delete_User_functions as user
+import api.DELETE.User.delete_User_functions as userfunctions
 from api.DELETE.api_paths_delete import API_PATHS_DELETE
 
 def call_User_function(raw_path, event):
@@ -8,6 +8,6 @@ def call_User_function(raw_path, event):
 
     ## User
     if raw_path == User_Path['deleteUserByUserId']['path']:
-        returnString = user.deleteUserByUserId(event)
+        returnString = userfunctions.deleteUserByUserId(event)
 
     return returnString
