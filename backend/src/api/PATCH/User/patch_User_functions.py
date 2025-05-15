@@ -2,6 +2,8 @@ from tools.prod.prodTools import extractData
 import database.CRUD.PATCH.User.patch_User_CRUD_functions as crudFunctions
 from database.schema.PATCH.User.user_schema import UserUpdate
 from database.models import UserTypeEnum
+import datetime
+
 
 # def updateUserByUserId(event):
 #     """
@@ -136,8 +138,9 @@ def UserDataCheck(user: UserUpdate, data: any):
     if "userType" in data: # ENUM type
         # Consider validating userType against allowed ENUM values if necessary
         user.userType = UserTypeEnum(data["userType"])
-    if "lastLoggedIn" in data: # TIMESTAMP
-        # Consider validating timestamp format
+    if "lastLoggedIn" in data:
+        if isinstance(data["lastLoggedIn"], str):
+            user.lastLoggedIn = datetime.datetime.fromisoformat(data["lastLoggedIn"])
         user.lastLoggedIn = data["lastLoggedIn"]
     if "usernameNew" in data: # TIMESTAMP
         # Consider validating timestamp format

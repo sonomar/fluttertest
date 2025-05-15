@@ -1,7 +1,6 @@
 # src/api/GET/api_paths_get.py
 from api.table import *
 from typing import List
-import database.schemas_common as schemas # Import your schemas
 from database.schema.GET.User.user_schema import UserResponse # Import your schemas
 # Import the modules containing your refactored handler functions
 import database.CRUD.GET.User.get_User_CRUD_functions as UserGETFunctions
@@ -14,6 +13,7 @@ API_PATHS_GET = {
     User_table: {
         "getUserByUserId": {
             "path": "/getUserByUserId",
+            #"pathLocal": "/getUserByUserId?userId={userId}",
             "active": True,
             "handler": UserGETFunctions.getUserByUserId, # <-- Reference the function
             "response_model": UserResponse # <-- Reference the schema
@@ -21,6 +21,7 @@ API_PATHS_GET = {
         },
         "getUserByEmail": {
             "path": "/getUserByEmail",
+            #"pathLocal": "/getUserByEmail/{email}",
             "active": True,
             "handler": UserGETFunctions.getUserByEmail, # <-- Reference the function
             "response_model": UserResponse # <-- Reference the schema
@@ -28,6 +29,7 @@ API_PATHS_GET = {
         },
         "getUserByUsername": {
             "path": "/getUserByUsername",
+            #"pathLocal": "/getUserByUsername/{username}",
             "active": True,
             "handler": UserGETFunctions.getUserByUsername, # <-- Reference the function
             "response_model": UserResponse # <-- Reference the schema
@@ -35,6 +37,7 @@ API_PATHS_GET = {
         },
         "getUsersByLastLoggedIn": {
             "path": "/getUsersByLastLoggedIn",
+            #"pathLocal": "/getUsersByLastLoggedIn/{lastLoggedInAfter}/{skip}/{limit}",
             "active": True,
             "handler": UserGETFunctions.getUsersByLastLoggedIn, # <-- Reference the function
             "response_model": List[UserResponse] # <-- Reference the schema (list)

@@ -1,6 +1,6 @@
 # src/api/POST/api_path_post.py
 from api.table import *
-from database.schema.POST.User.user_schema import UserResponse# Import schemas
+from database.schema.GET.User.user_schema import UserResponse# Import schemas
 # Import the modules containing your refactored POST handler functions
 import database.CRUD.POST.User.post_User_CRUD_functions as UserPOSTFunctions
 # ... import other POST function modules

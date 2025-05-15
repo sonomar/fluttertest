@@ -27,6 +27,7 @@ API_PATHS_DELETE = {
     User_table: {
         "deleteUserByUserId": {
             "path": "/deleteUserByUserId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteUserByUserId/{userId}", # Assuming userId becomes a path param
             "active": True,
             "handler": UserDELETEFunctions.deleteUserByUserId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -37,6 +38,7 @@ API_PATHS_DELETE = {
     Category_table: {
         "deleteCategoryByCategoryId": {
             "path": "/deleteCategoryByCategoryId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteCategoryByCategoryId/{categoryId}", # Assuming userId becomes a path param
             "active": True,
             "handler": CategoryDELETEFunctions.deleteCategoryByCategoryId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -47,6 +49,7 @@ API_PATHS_DELETE = {
     Community_table: {
         "deleteCommunityByCommunityId": {
             "path": "/deleteCommunityByCommunityId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteCommunityByCommunityId/{communityId}", # Assuming userId becomes a path param
             "active": True,
             "handler": CommunityDELETEFunctions.deleteCommunityByCommunityId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -57,6 +60,7 @@ API_PATHS_DELETE = {
     Collection_table: {
         "deleteCollectionByCollectionId": {
             "path": "/deleteCollectionByCollectionId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteCollectionByCollectionId/{collectionId}", # Assuming userId becomes a path param
             "active": True,
             "handler": CollectionDELETEFunctions.deleteCollectionByCollectionId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -67,6 +71,7 @@ API_PATHS_DELETE = {
     Project_table: {
         "deleteProjectByProjectId": {
             "path": "/deleteProjectByProjectId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteProjectByProjectId/{projectId}", # Assuming userId becomes a path param
             "active": True,
             "handler": ProjectDELETEFunctions.deleteProjectByProjectId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -77,6 +82,7 @@ API_PATHS_DELETE = {
     Collectible_table: {
         "deleteCollectibleByCollectibleId": {
             "path": "/deleteCollectibleByCollectibleId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteCollectibleByCollectibleId/{collectibleId}", # Assuming userId becomes a path param
             "active": True,
             "handler": CollectibleDELETEFunctions.deleteCollectibleByCollectibleId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -86,7 +92,8 @@ API_PATHS_DELETE = {
     },
     UserCollectible_table: {
         "deleteUserCollectibleByUserCollectibleId": {
-            "path": "/deleteCollectibleUserByCollectibleUserId", # Assuming userId becomes a path param
+            "path": "/deleteUserCollectibleByUserCollectibleId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteUserCollectibleByUserCollectibleId/{userCollectibleId}", # Assuming userId becomes a path param
             "active": True,
             "handler": UserCollectibleDELETEFunctions.deleteUserCollectibleByUserCollectibleId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -97,6 +104,7 @@ API_PATHS_DELETE = {
     CommunityUser_table: {
         "deleteCommunityUserByCommunityUserId": {
             "path": "/deleteCommunityUserByCommunityUserId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteCommunityUserByCommunityUserId/{communityUserId}", # Assuming userId becomes a path param
             "active": True,
             "handler": CommunityUserDELETEFunctions.deleteCommunityUserByCommunityUserId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -107,6 +115,7 @@ API_PATHS_DELETE = {
     Sponsor_table: {
         "deleteSponsorBySponsorId": {
             "path": "/deleteSponsorBySponsorId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteSponsorBySponsorId/{sponsorId}", # Assuming userId becomes a path param
             "active": True,
             "handler": SponsorDELETEFunctions.deleteSponsorBySponsorId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -117,6 +126,7 @@ API_PATHS_DELETE = {
     CollectibleSponsor_table: {
         "deleteCollectibleSponsorByCollectibleSponsorId": {
             "path": "/deleteCollectibleSponsorByCollectibleSponsorId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteCollectibleSponsorByCollectibleSponsorId/{collectibleSponsorId}", # Assuming userId becomes a path param
             "active": True,
             "handler": CollectibleSponsorDELETEFunctions.deleteCollectibleSponsorByCollectibleSponsorId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -127,6 +137,7 @@ API_PATHS_DELETE = {
     Notification_table: {
         "deleteNotificationByNotificationId": {
             "path": "/deleteNotificationByNotificationId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteNotificationByNotificationId/{notificationId}", # Assuming userId becomes a path param
             "active": True,
             "handler": NotificationDELETEFunctions.deleteNotificationByNotificationId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -137,6 +148,7 @@ API_PATHS_DELETE = {
     NotificationUser_table: {
         "deleteNotificationUserByNotificationUserId": {
             "path": "/deleteNotificationUserByNotificationUserId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteNotificationUserByNotificationUserId/{notificationUserId}", # Assuming userId becomes a path param
             "active": True,
             "handler": NotificationUserDELETEFunctions.deleteNotificationUserByNotificationUserId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -147,6 +159,7 @@ API_PATHS_DELETE = {
     NewsPost_table: {
         "deleteNewsPostByNewsPostId": {
             "path": "/deleteNewsPostByNewsPostId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteNewsPostByNewsPostId/{newsPostId}", # Assuming userId becomes a path param
             "active": True,
             "handler": NewsPostDELETEFunctions.deleteNewsPostByNewsPostId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -157,6 +170,7 @@ API_PATHS_DELETE = {
     Mission_table: {
         "deleteMissionByMissionId": {
             "path": "/deleteMissionByMissionId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteMissionByMissionId/{missionId}", # Assuming userId becomes a path param
             "active": True,
             "handler": MissionDELETEFunctions.deleteMissionByMissionId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -167,6 +181,7 @@ API_PATHS_DELETE = {
     MissionUser_table: {
         "deleteMissionUserByMissionUserId": {
             "path": "/deleteMissionUserByMissionUserId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteMissionUserByMissionUserId/{missionUserId}", # Assuming userId becomes a path param
             "active": True,
             "handler": MissionUserDELETEFunctions.deleteMissionUserByMissionUserId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -177,6 +192,7 @@ API_PATHS_DELETE = {
     MissionUserData_table: {
         "deleteMissionUserDataByMissionUserDataId": {
             "path": "/deleteMissionUserDataByMissionUserDataId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteMissionUserDataByMissionUserDataId/{missionUserDataId}", # Assuming userId becomes a path param
             "active": True,
             "handler": MissionUserDataDELETEFunctions.deleteMissionUserDataByMissionUserDataId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}
@@ -187,6 +203,7 @@ API_PATHS_DELETE = {
     CommunityChallenge_table: {
         "deleteCommunityChallengeByCommunityChallengeId": {
             "path": "/deleteCommunityChallengeByCommunityChallengeId", # Assuming userId becomes a path param
+            "pathLocal": "/deleteCommunityChallengeByCommunityChallengeId/{communityChallengeId}", # Assuming userId becomes a path param
             "active": True,
             "handler": CommunityChallengeDELETEFunctions.deleteCommunityChallengeByCommunityChallengeId, # <-- Reference
             "response_model": Dict[str, str] # Or a simple message schema like {"message": "User deleted successfully"}

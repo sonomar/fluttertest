@@ -96,13 +96,6 @@ async def create_obj_get(request, bodyParam):
 
     return event
 
-
-def collect_raw_paths(module):
-    return [
-        value for name, value in vars(module).items()
-        if name.startswith(('GET_RAW_PATH_', 'CREATE_RAW_PATH_', 'UPDATE_RAW_PATH_', 'DELETE_RAW_PATH_'))
-    ]
-
 def get_all_active_paths_object(api_paths: list):
     paths = []
     for table, endpoints in api_paths.items():
@@ -111,10 +104,7 @@ def get_all_active_paths_object(api_paths: list):
                 paths.append({
                     "path": endpoint_info.get("path"),
                     "handler": endpoint_info.get("handler", {}),
+                    "pathLocal": endpoint_info.get("pathLocal", {}),
                     "response_model": endpoint_info.get("response_model", {})
                 })
     return paths
-
-# Usage
-#all_paths = get_all_active_paths(GET_API_PATHS)
-#print(all_paths)

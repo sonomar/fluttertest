@@ -12,7 +12,8 @@ from sqlalchemy.exc import IntegrityError # Import SQLAlchemy exceptions
 # Import the database session dependency and models/schemas
 from database.db import get_db # Adjust import path if necessary
 from database.models import User # Adjust import path if necessary
-from database.schema.POST.User.user_schema import UserCreate, UserResponse # Adjust import path if necessary
+from database.schema.POST.User.user_schema import UserCreate  # Adjust import path if necessary
+from database.schema.GET.User.user_schema import UserResponse
 
 # Import custom exceptions
 from api.exceptions import ConflictException, BadRequestException # Adjust import path

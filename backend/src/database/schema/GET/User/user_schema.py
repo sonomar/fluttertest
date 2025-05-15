@@ -1,11 +1,15 @@
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, Dict, Any, List
+from pydantic import BaseModel, EmailStr
+from typing import Optional, Dict, Any
 import datetime
-from database.schemas_common import UserBase # Adjust import path if necessary
+
 
 # Schema for returning User data (excludes sensitive info like passwordHash)
-class UserResponse(UserBase):
+class UserResponse(BaseModel):
     userId: int
+    email: EmailStr
+    username: Optional[str] = None
+    profileImg: Optional[str] = None
+    deviceId: Optional[str] = None
     active: bool
     userRank: Optional[Dict[str, Any]] = None # JSON field
     userType: Optional[str] = None # Return user type as string

@@ -17,7 +17,8 @@ from typing import Dict, Any # Added typing hints
 # Import the database session dependency and models/schemas
 from database.db import get_db # Adjust import path if necessary
 from database.models import User, UserTypeEnum # Adjust import path, import UserTypeEnum if using Python Enum
-from database.schema.PATCH.User.user_schema import UserUpdate, UserResponse # Adjust import path, import UserUpdate schema
+from database.schema.PATCH.User.user_schema import UserUpdate # Adjust import path, import UserUpdate schema
+from database.schema.GET.User.user_schema import UserResponse
 
 # Import custom exceptions
 from api.exceptions import NotFoundException, ConflictException, BadRequestException # Adjust import path
@@ -101,7 +102,7 @@ def updateUserByUserId(
 # and the *new* username (and potentially other fields) in the body.
 
 def updateUserByUsername(
-    current_username: str = Query(..., description="Current username of the user to update"), # Get current username from query
+    current_username: str = Path(..., description="Current username of the user to update"), # Get current username from query
     user_update_data: UserUpdate = Body(..., description="Data to update user"), # Get update data from request body
     db: Session = Depends(get_db) # Inject database session
 ) -> UserResponse: # Specify return schema

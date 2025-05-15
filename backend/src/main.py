@@ -14,7 +14,7 @@ patch_paths_object = get_all_active_paths_object(API_PATHS_PATCH)
 post_paths_object = get_all_active_paths_object(API_PATHS_POST)
 delete_paths_object = get_all_active_paths_object(API_PATHS_DELETE)
 
-Handler_Local_Type = True
+Handler_Local_Type = False
 
 app = FastAPI()
 
@@ -44,19 +44,33 @@ async def shared_handler_get(request: Request, tableName: Optional[str] = None, 
 # Helper function to register routes
 def register_routes(paths_obj: list, method: str, handler: callable):
     for path_obj in paths_obj:
-        # Dynamically create Pydantic models for input and output
-        #output_model = create_pydantic_model(path["output"], "OutputModel")
-        # Dynamically add the API route with query parameters and output models
+ # Ensure path and pathLocal are strings
+        path = path_obj.get("path", "")
+        path_local = path_obj.get("pathLocal", "")
+        
+        # If path or pathLocal are dictionaries, extract the correct string key
+        if isinstance(path, dict):
+            # Replace 'some_key' with the appropriate key you need from the dictionary
+            path = path.get("some_key", "")  # Adjust this line based on your structure
+        if isinstance(path_local, dict):
+            # Similarly handle pathLocal if it's a dict
+            path_local = path_local.get("some_key", "")  # Adjust this line
+        
+        # Use pathLocal if it's available, otherwise fallback to path
+        path_local = path_local if path_local else path
+
+        # Dynamically build the full path
+        full_path = '/{tableName}' + (path if not Handler_Local_Type else path_local)
+        
+        # Now register the route
         app.add_api_route(
-            '/{tableName}' + path_obj["path"],
-            handler if not Handler_Local_Type else path_obj["handler"],
+            full_path,
+            handler if not Handler_Local_Type else path_obj.get("handler", handler),  # Fallback to original handler if missing
             methods=[method],
-            #response_model=output_model,
+            response_model=path_obj.get("response_model", None),  # Handle response_model fallback
             status_code=200,
-            response_model=path_obj["response_model"],
             response_description="Successful operation",
-            description=f"Create or manage item at {path_obj['path']}",
-            #params={key: param for key, param in zip(path["input"].keys(), input_params)}  # Add query parameters
+            description=f"Create or manage item at {full_path}",
         )
 
 # Register GET routes
