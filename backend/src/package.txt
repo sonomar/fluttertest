@@ -1,9 +1,5 @@
 pymysql
 boto3
-json
-os
-sys
-logging
 alembic
 sqlalchemy
 pydantic

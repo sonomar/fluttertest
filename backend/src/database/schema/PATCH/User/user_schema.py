@@ -17,4 +17,4 @@ class UserUpdate(BaseModel):
     active: Optional[bool] = None # Allow updating active status
     lastLoggedIn: Optional[datetime.datetime] = None # Allow updating last login time
     authToken: Optional[str] = None # Allow updating auth token
-    userType: Optional[UserTypeEnum]
+    userType: Optional[UserTypeEnum] = None

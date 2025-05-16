@@ -31,7 +31,16 @@ def create_deployment_package(lambda_file, package_file):
     if dependencies:
         for dep in dependencies:
             print(f"Installing dependency: {dep}")
-            subprocess.run(['pip', 'install', '--target', package_dir, dep])
+            subprocess.run([
+                'pip', 'install',
+                '--platform', 'manylinux2014_x86_64',
+                '--target', package_dir,
+                '--implementation', 'cp',
+                '--python-version', '3.13',
+                '--only-binary', ':all:',
+                '--upgrade',
+                dep
+            ], check=True)
 
     # Step 5: Create the .zip file for the deployment package
     zip_file_path = os.path.join(project_dir, 'my_deployment_package.zip')
@@ -54,6 +63,7 @@ def create_deployment_package(lambda_file, package_file):
                 print(f"Warning: Folder '{folder_name}' not found and will be skipped.")
 
     print(f"Deployment package created: {zip_file_path}")
+
 # Example usage:
 lambda_function_file = 'lambda_function.py'  # Your lambda function file
 package_file = 'package.txt'  # Your package.txt file containing list of dependencies

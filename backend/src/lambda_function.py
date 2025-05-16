@@ -1,6 +1,7 @@
 from api.routeCheckAll import http_router_all
 # Import the database session dependency
 from database.db import get_db # Adjust import path if necessary
+from fastapi.encoders import jsonable_encoder
 
 
 # Manually get the db session
@@ -23,4 +24,4 @@ def lambda_handler(event, context):
 
 
     #return {'statusCode': 200, 'body': f"{event.get('requestContext')["http"]["method"]}"}
-    return returnString
+    return jsonable_encoder(returnString)
