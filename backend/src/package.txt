@@ -6,4 +6,6 @@ sys
 logging
 alembic
 sqlalchemy
-'pydantic[email,timezone]'
+pydantic
+pydantic[email,timezone]
+fastapi

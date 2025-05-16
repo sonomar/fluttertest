@@ -45,7 +45,7 @@ def create_deployment_package(lambda_file, package_file):
         zipf.write(lambda_file, os.path.basename(lambda_file))
 
         # Add the 'api' and 'tools' folders
-        for folder_name in ['api', 'tools']:
+        for folder_name in ['api', 'tools', 'database']:
             folder_path = os.path.join(project_dir, folder_name)
             if os.path.exists(folder_path):
                 print(f"Adding folder {folder_name} to the ZIP file.")
