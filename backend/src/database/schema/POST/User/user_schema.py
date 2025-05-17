@@ -10,4 +10,4 @@ class UserCreate(BaseModel):
     profileImg: Optional[str] = None
     deviceId: Optional[str] = None
     passwordHashed: str # Password provided during creation
-    userType: Optional[UserTypeEnum]
+    userType: Optional[UserTypeEnum] = None

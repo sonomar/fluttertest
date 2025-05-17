@@ -11,7 +11,7 @@ from sqlalchemy.exc import IntegrityError # Import SQLAlchemy exceptions
 
 # Import the database session dependency and models/schemas
 from database.db import get_db # Adjust import path if necessary
-from database.models import User # Adjust import path if necessary
+from database.models import User, UserTypeEnum # Adjust import path if necessary
 from database.schema.POST.User.user_schema import UserCreate  # Adjust import path if necessary
 from database.schema.GET.User.user_schema import UserResponse
 
@@ -30,18 +30,20 @@ def create_user(
     Adds a new user to the database using SQLAlchemy.
     """
     # In a real app, hash the password here!
-    # hashed_password = bcrypt.hash(user.password) # Example hashing
+    #hashed_password = bcrypt.hash(user.password) # Example hashing
     fake_hashed_password = user.passwordHashed + "notreallyhashed" # Placeholder!
     db_user = User(
         email=user.email,
         # Use the hashed password
         passwordHashed=fake_hashed_password, # Use hashed password
-        userType=user.userType.value if user.userType is not None else None, # Use .value if using Python Enum
+        userType=user.userType.value if user.userType is not None else UserTypeEnum.unregistered.value, # Use .value if using Python Enum
         username=user.username, # Optional fields from schema
         deviceId=user.deviceId,
         # active, createdDt, updatedDt will use server defaults from models
         # userRank, profileImg, authToken, lastLoggedIn are Optional/nullable and default to None
     )
+    #db_user = user
+    #return user
 
     try:
         db.add(db_user) # Add the new user instance to the session
@@ -50,7 +52,7 @@ def create_user(
         # Also refreshes server-set defaults like createdDt, updatedDt
 
         # Return the SQLAlchemy model instance
-        return db_user
+        return UserResponse.model_validate(db_user) # Convertdb_user
     except IntegrityError as e:
          db.rollback() # Rollback the session on error
          # Handle unique constraint violation (email or username)
