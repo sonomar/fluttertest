@@ -1,13 +1,13 @@
-import api.POST.User.post_User_functions as user
+import api.POST.Sponsor.post_Sponsor_functions as sponsor
 from api.POST.api_paths_post import API_PATHS_POST
 
-def call_User_function(raw_path, event):
+def call_Sponsor_function(raw_path, event):
     
     returnString = 'Invalid Function Call'
-    User_Path = API_PATHS_POST['User']
+    Sponsor_Path = API_PATHS_POST['Sponsor']
 
-    ## User
-    if raw_path == User_Path['createUser']['path']:
-        returnString = user.create_user(event)
+    ## Sponsor
+    if raw_path == Sponsor_Path['createSponsor']['path']:
+        returnString = sponsor.create_sponsor(event)
 
     return returnString

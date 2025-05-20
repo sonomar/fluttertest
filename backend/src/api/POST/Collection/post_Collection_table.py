@@ -1,13 +1,13 @@
-import api.POST.User.post_User_functions as user
+import api.POST.Collection.post_Collection_functions as collection
 from api.POST.api_paths_post import API_PATHS_POST
 
-def call_User_function(raw_path, event):
+def call_Collection_function(raw_path, event):
     
     returnString = 'Invalid Function Call'
-    User_Path = API_PATHS_POST['User']
+    Collection_Path = API_PATHS_POST['Collection']
 
-    ## User
-    if raw_path == User_Path['createUser']['path']:
-        returnString = user.create_user(event)
+    ## Collection
+    if raw_path == Collection_Path['createCollection']['path']:
+        returnString = collection.create_collection(event)
 
     return returnString

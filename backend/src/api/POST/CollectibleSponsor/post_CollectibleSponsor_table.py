@@ -1,13 +1,13 @@
-import api.POST.User.post_User_functions as user
+import api.POST.CollectibleSponsor.post_CollectibleSponsor_functions as collectibleSponsor
 from api.POST.api_paths_post import API_PATHS_POST
 
-def call_User_function(raw_path, event):
+def call_CollectibleSponsor_function(raw_path, event):
     
     returnString = 'Invalid Function Call'
-    User_Path = API_PATHS_POST['User']
+    CollectibleSponsor_Path = API_PATHS_POST['CollectibleSponsor']
 
-    ## User
-    if raw_path == User_Path['createUser']['path']:
-        returnString = user.create_user(event)
+    ## CollectibleSponsor
+    if raw_path == CollectibleSponsor_Path['createCollectibleSponsor']['path']:
+        returnString = collectibleSponsor.create_collectible_sponsor(event)
 
     return returnString

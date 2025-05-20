@@ -1,13 +1,13 @@
-import api.POST.User.post_User_functions as user
+import api.POST.UserCollectible.post_UserCollectible_functions as userCollectible
 from api.POST.api_paths_post import API_PATHS_POST
 
-def call_User_function(raw_path, event):
+def call_UserCollectible_function(raw_path, event):
     
     returnString = 'Invalid Function Call'
-    User_Path = API_PATHS_POST['User']
+    UserCollectible_Path = API_PATHS_POST['UserCollectible']
 
-    ## User
-    if raw_path == User_Path['createUser']['path']:
-        returnString = user.create_user(event)
+    ## UserCollectible
+    if raw_path == UserCollectible_Path['createUserCollectible']['path']:
+        returnString = userCollectible.create_user_collectible(event)
 
     return returnString

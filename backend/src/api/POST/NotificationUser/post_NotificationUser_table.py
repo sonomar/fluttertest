@@ -1,13 +1,13 @@
-import api.POST.User.post_User_functions as user
+import api.POST.NotificationUser.post_NotificationUser_functions as notificationUser
 from api.POST.api_paths_post import API_PATHS_POST
 
-def call_User_function(raw_path, event):
+def call_NotificationUser_function(raw_path, event):
     
     returnString = 'Invalid Function Call'
-    User_Path = API_PATHS_POST['User']
+    NotificationUser_Path = API_PATHS_POST['NotificationUser']
 
-    ## User
-    if raw_path == User_Path['createUser']['path']:
-        returnString = user.create_user(event)
+    ## NotificationUser
+    if raw_path == NotificationUser_Path['createNotificationUser']['path']:
+        returnString = notificationUser.create_notification_user(event)
 
     return returnString

@@ -1,13 +1,13 @@
-import api.POST.User.post_User_functions as user
+import api.POST.MissionUser.post_MissionUser_functions as missionUser
 from api.POST.api_paths_post import API_PATHS_POST
 
-def call_User_function(raw_path, event):
+def call_MissionUser_function(raw_path, event):
     
     returnString = 'Invalid Function Call'
-    User_Path = API_PATHS_POST['User']
+    MissionUser_Path = API_PATHS_POST['MissionUser']
 
-    ## User
-    if raw_path == User_Path['createUser']['path']:
-        returnString = user.create_user(event)
+    ## MissionUser
+    if raw_path == MissionUser_Path['createMissionUser']['path']:
+        returnString = missionUser.create_mission_user(event)
 
     return returnString

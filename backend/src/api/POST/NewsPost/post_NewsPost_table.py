@@ -1,13 +1,13 @@
-import api.POST.User.post_User_functions as user
+import api.POST.NewsPost.post_NewsPost_functions as newsPost
 from api.POST.api_paths_post import API_PATHS_POST
 
-def call_User_function(raw_path, event):
+def call_NewsPost_function(raw_path, event):
     
     returnString = 'Invalid Function Call'
-    User_Path = API_PATHS_POST['User']
+    NewsPost_Path = API_PATHS_POST['NewsPost']
 
-    ## User
-    if raw_path == User_Path['createUser']['path']:
-        returnString = user.create_user(event)
+    ## NewsPost
+    if raw_path == NewsPost_Path['createNewsPost']['path']:
+        returnString = newsPost.create_news_post(event)
 
     return returnString

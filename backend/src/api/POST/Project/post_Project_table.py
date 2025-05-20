@@ -1,13 +1,13 @@
-import api.POST.User.post_User_functions as user
+import api.POST.Project.post_Project_functions as project
 from api.POST.api_paths_post import API_PATHS_POST
 
-def call_User_function(raw_path, event):
+def call_Project_function(raw_path, event):
     
     returnString = 'Invalid Function Call'
-    User_Path = API_PATHS_POST['User']
+    Project_Path = API_PATHS_POST['Project']
 
-    ## User
-    if raw_path == User_Path['createUser']['path']:
-        returnString = user.create_user(event)
+    ## Project
+    if raw_path == Project_Path['createProject']['path']:
+        returnString = project.create_project(event)
 
     return returnString
