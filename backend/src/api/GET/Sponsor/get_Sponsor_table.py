@@ -4,7 +4,7 @@ from api.GET.api_paths_get import API_PATHS_GET
 def call_Sponsor_function(raw_path, event):
 
     returnString = 'Invalid Function Call'
-    Sponsor_Path = API_PATHS_GET['User']
+    Sponsor_Path = API_PATHS_GET['Sponsor']
 
     ## Sponsor
     if raw_path == Sponsor_Path['getSponsorBySponsorId']['path']:
