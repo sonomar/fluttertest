@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union, List
 import datetime
 
 # --- Mission Schemas ---
@@ -11,7 +11,7 @@ class MissionUpdate(BaseModel):
     goal: Optional[int] = None
     timer: Optional[bool] = None
     endDate: Optional[datetime.datetime] = None
-    imgRef: Optional[Dict[str, Any]] = None
-    vidRef: Optional[Dict[str, Any]] = None
-    qrRef: Optional[Dict[str, Any]] = None
-    embedRef: Optional[Dict[str, Any]] = None
+    imgRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    embedRef: Optional[Union[Dict[str, Any], str, List[str]]] = None

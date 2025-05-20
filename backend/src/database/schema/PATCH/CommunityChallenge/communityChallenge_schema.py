@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union, List
 import datetime
 
 # --- CommunityChallenge Schemas ---
@@ -12,7 +12,7 @@ class CommunityChallengeUpdate(BaseModel):
     reward: Optional[str] = None
     startDate: Optional[datetime.datetime] = None
     endDate: Optional[datetime.datetime] = None
-    imgRef: Optional[Dict[str, Any]] = None
-    vidRef: Optional[Dict[str, Any]] = None
-    qrRef: Optional[Dict[str, Any]] = None
-    embedRef: Optional[str] = None
+    imgRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    embedRef: Optional[Union[Dict[str, Any], str, List[str]]] = None

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union, List
 
 # Schema for creating Sponsor data
 class SponsorCreate(BaseModel):
@@ -7,10 +7,10 @@ class SponsorCreate(BaseModel):
     organization: Optional[str] = None
     urls: Optional[Dict[str, Any]] = None
     description: Optional[str] = None
-    imageRef: Optional[Dict[str, Any]] = None
-    vidRef: Optional[Dict[str, Any]] = None
-    qrRef: Optional[Dict[str, Any]] = None
-    embedRef: Optional[Dict[str, Any]] = None
+    imageRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    embedRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     sponsorCity: Optional[str] = None
     sponsorCountry: Optional[str] = None
     sponsorZip: Optional[str] = None
