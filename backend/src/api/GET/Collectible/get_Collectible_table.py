@@ -7,31 +7,31 @@ def call_Collectible_function(raw_path, event):
     Collectible_Path = API_PATHS_GET['Collectible']
 
     ## Collectible
-    if raw_path ==  Collectible_Path['getAllCollectibles']:
+    if raw_path ==  Collectible_Path['getAllCollectibles']['path']:
         returnString = collectible.getAllCollectibles(event)
     
-    elif raw_path == Collectible_Path['getCollectibleByCollectibleId']:
+    elif raw_path == Collectible_Path['getCollectibleByCollectibleId']['path']:
         returnString = collectible.getCollectibleByCollectibleId(event)
     
-    elif raw_path == Collectible_Path['getCollectiblesByProjectId']:
+    elif raw_path == Collectible_Path['getCollectiblesByProjectId']['path']:
         returnString = collectible.getCollectiblesByProjectId(event)
 
-    elif raw_path == Collectible_Path['getCollectiblesByCategoryId']:
+    elif raw_path == Collectible_Path['getCollectiblesByCategoryId']['path']:
         returnString = collectible.getCollectiblesByCategoryId(event)
 
-    elif raw_path == Collectible_Path['getCollectiblesBySponsor']:
+    elif raw_path == Collectible_Path['getCollectiblesBySponsor']['path']:
         returnString = collectible.getCollectiblesBySponsor(event)
 
-    elif raw_path == Collectible_Path['getCollectiblesByLabel']:
+    elif raw_path == Collectible_Path['getCollectiblesByLabel']['path']:
         returnString = collectible.getCollectiblesByLabel(event)
 
-    elif raw_path == Collectible_Path['getCollectibleByName']:
+    elif raw_path == Collectible_Path['getCollectibleByName']['path']:
         returnString = collectible.getCollectibleByName(event)
 
-    elif raw_path == Collectible_Path['getCollectiblesByCollection']:
+    elif raw_path == Collectible_Path['getCollectiblesByCollection']['path']:
         returnString = collectible.getCollectiblesByCollection(event)
 
-    elif raw_path == Collectible_Path['getCollectiblesByCommunity']:
+    elif raw_path == Collectible_Path['getCollectiblesByCommunity']['path']:
         returnString = collectible.getCollectiblesByCommunity(event)
 
     return returnString
