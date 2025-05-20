@@ -1,4 +1,4 @@
-from tools.prod.prodTools import extractData, get_connection
+from tools.prod.prodTools import extractData
 from database.schema.POST.User.user_schema import UserCreate
 import database.CRUD.POST.User.post_User_CRUD_functions as crudFunctions
 from database.models import UserTypeEnum # Adjust import path if necessary
