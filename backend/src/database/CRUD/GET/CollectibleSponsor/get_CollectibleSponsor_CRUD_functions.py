@@ -8,7 +8,7 @@ from database.models import CollectibleSponsor
 from database.schema.GET.CollectibleSponsor.collectibleSponsor_schema import CollectibleSponsorResponse
 from api.exceptions import NotFoundException
 
-def getCollectibleSponsorById(
+def getCollectibleSponsorByCollectibleSponsorId(
     collectibleSponsorId: int = Query(..., description="ID of the collectible sponsor record to retrieve"),
     db: Session = Depends(get_db)
 ) -> CollectibleSponsorResponse:

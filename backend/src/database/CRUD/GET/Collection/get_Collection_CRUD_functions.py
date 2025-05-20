@@ -8,7 +8,7 @@ from database.models import Collection
 from database.schema.GET.Collection.collection_schema import CollectionResponse
 from api.exceptions import NotFoundException
 
-def getCollectionById(
+def getCollectionByCollectionId(
     collectionId: int = Query(..., description="ID of the collection to retrieve"),
     db: Session = Depends(get_db)
 ) -> CollectionResponse:

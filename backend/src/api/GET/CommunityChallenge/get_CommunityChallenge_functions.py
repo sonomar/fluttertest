@@ -2,7 +2,7 @@
 from tools.prod.prodTools import extractData
 import database.CRUD.GET.CommunityChallenge.get_CommunityChallenge_CRUD_functions as crudFunctions
 
-def getCommunityChallengeById(event):
+def getCommunityChallengeByCommunityChallengeId(event):
     """
     Retrieves a community challenge by its communityChallengeId.
     Requires 'communityChallengeId' in the request data.
@@ -12,7 +12,7 @@ def getCommunityChallengeById(event):
         return {'statusCode': 400, 'body': 'communityChallengeId is required'}
 
     community_challenge_id = data["communityChallengeId"]
-    return crudFunctions.getCommunityChallengeById(communityChallengeId=community_challenge_id, db=event['db_session'])
+    return crudFunctions.getCommunityChallengeByCommunityChallengeId(communityChallengeId=community_challenge_id, db=event['db_session'])
 
 def getCommunityChallengeByTitle(event):
     """

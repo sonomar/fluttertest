@@ -2,7 +2,7 @@
 from tools.prod.prodTools import extractData
 import database.CRUD.GET.Collection.get_Collection_CRUD_functions as crudFunctions
 
-def getCollectionById(event):
+def getCollectionByCollectionId(event):
     """
     Retrieves a collection by its collectionId.
     Requires 'collectionId' in the request data.
@@ -12,7 +12,7 @@ def getCollectionById(event):
         return {'statusCode': 400, 'body': 'collectionId is required'}
 
     collection_id = data["collectionId"]
-    return crudFunctions.getCollectionById(collectionId=collection_id, db=event['db_session'])
+    return crudFunctions.getCollectionByCollectionId(collectionId=collection_id, db=event['db_session'])
 
 def getCollectionByName(event):
     """

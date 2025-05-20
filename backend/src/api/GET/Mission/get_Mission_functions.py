@@ -2,7 +2,7 @@
 from tools.prod.prodTools import extractData
 import database.CRUD.GET.Mission.get_Mission_CRUD_functions as crudFunctions
 
-def getMissionById(event):
+def getMissionByMissionId(event):
     """
     Retrieves a mission by its missionId.
     Requires 'missionId' in the request data.
@@ -12,7 +12,7 @@ def getMissionById(event):
         return {'statusCode': 400, 'body': 'missionId is required'}
 
     mission_id = data["missionId"]
-    return crudFunctions.getMissionById(missionId=mission_id, db=event['db_session'])
+    return crudFunctions.getMissionByMissionId(missionId=mission_id, db=event['db_session'])
 
 def getMissionByTitle(event):
     """

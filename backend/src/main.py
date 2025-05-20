@@ -14,7 +14,7 @@ patch_paths_object = get_all_active_paths_object(API_PATHS_PATCH)
 post_paths_object = get_all_active_paths_object(API_PATHS_POST)
 delete_paths_object = get_all_active_paths_object(API_PATHS_DELETE)
 
-Handler_Local_Type = False
+Handler_Local_Type = True
 
 app = FastAPI()
 

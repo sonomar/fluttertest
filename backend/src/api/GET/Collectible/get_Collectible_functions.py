@@ -119,3 +119,60 @@ def getCollectiblesByCommunity(event):
 
     return crudFunctions.getCollectiblesByCommunity(communityId=community_id, skip=skip, limit=limit, db=event['db_session'])
 
+def getAllCollectibles(event):
+    """
+    Retrieves all collectibles.
+    Optional 'skip' and 'limit' for pagination.
+    """
+    data = extractData(event)
+    skip = 0
+    limit = 100
+
+    if "skip" in data:
+        skip = data["skip"]
+    if "limit" in data:
+        limit = data["limit"]
+
+    return crudFunctions.getAllCollectibles(skip=skip, limit=limit, db=event['db_session'])
+
+def getCollectiblesByProjectId(event):
+    """
+    Retrieves collectibles by project ID.
+    Requires 'projectId' in the request data. Optional 'skip' and 'limit' for pagination.
+    """
+    data = extractData(event)
+    skip = 0
+    limit = 100
+
+    if not data or "projectId" not in data:
+        return {'statusCode': 400, 'body': 'projectId is required'}
+
+    project_id = data["projectId"]
+
+    if "skip" in data:
+        skip = data["skip"]
+    if "limit" in data:
+        limit = data["limit"]
+
+    return crudFunctions.getCollectiblesByProjectId(projectId=project_id, skip=skip, limit=limit, db=event['db_session'])
+
+def getCollectiblesByCategoryId(event):
+    """
+    Retrieves collectibles by category ID.
+    Requires 'categoryId' in the request data. Optional 'skip' and 'limit' for pagination.
+    """
+    data = extractData(event)
+    skip = 0
+    limit = 100
+
+    if not data or "categoryId" not in data:
+        return {'statusCode': 400, 'body': 'categoryId is required'}
+
+    category_id = data["categoryId"]
+
+    if "skip" in data:
+        skip = data["skip"]
+    if "limit" in data:
+        limit = data["limit"]
+
+    return crudFunctions.getCollectiblesByCategoryId(categoryId=category_id, skip=skip, limit=limit, db=event['db_session'])

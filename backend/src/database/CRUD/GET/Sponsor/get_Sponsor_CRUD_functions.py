@@ -8,7 +8,7 @@ from database.models import Sponsor
 from database.schema.GET.Sponsor.sponsor_schema import SponsorResponse
 from api.exceptions import NotFoundException
 
-def getSponsorById(
+def getSponsorBySponsorId(
     sponsorId: int = Query(..., description="ID of the sponsor to retrieve"),
     db: Session = Depends(get_db)
 ) -> SponsorResponse:

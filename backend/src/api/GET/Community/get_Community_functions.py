@@ -2,7 +2,7 @@
 from tools.prod.prodTools import extractData
 import database.CRUD.GET.Community.get_Community_CRUD_functions as crudFunctions
 
-def getCommunityById(event):
+def getCommunityByCommunityId(event):
     """
     Retrieves a community by its communityId.
     Requires 'communityId' in the request data.
@@ -12,7 +12,7 @@ def getCommunityById(event):
         return {'statusCode': 400, 'body': 'communityId is required'}
 
     community_id = data["communityId"]
-    return crudFunctions.getCommunityById(communityId=community_id, db=event['db_session'])
+    return crudFunctions.getCommunityByCommunityId(communityId=community_id, db=event['db_session'])
 
 def getCommunityByTitle(event):
     """

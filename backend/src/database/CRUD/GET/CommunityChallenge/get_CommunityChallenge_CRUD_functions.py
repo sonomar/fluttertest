@@ -8,7 +8,7 @@ from database.models import CommunityChallenge
 from database.schema.GET.CommunityChallenge.communityChallenge_schema import CommunityChallengeResponse
 from api.exceptions import NotFoundException
 
-def getCommunityChallengeById(
+def getCommunityChallengeByCommunityChallengeId(
     communityChallengeId: int = Query(..., description="ID of the community challenge to retrieve"),
     db: Session = Depends(get_db)
 ) -> CommunityChallengeResponse:

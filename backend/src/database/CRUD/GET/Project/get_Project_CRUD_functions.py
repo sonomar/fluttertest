@@ -8,7 +8,7 @@ from database.models import Project
 from database.schema.GET.Project.project_schema import ProjectResponse
 from api.exceptions import NotFoundException
 
-def getProjectById(
+def getProjectByProjectId(
     projectId: int = Query(..., description="ID of the project to retrieve"),
     db: Session = Depends(get_db)
 ) -> ProjectResponse:

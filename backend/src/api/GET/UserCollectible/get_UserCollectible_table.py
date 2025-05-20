@@ -7,7 +7,16 @@ def call_UserCollectible_function(raw_path, event):
     UserCollectible_Path = API_PATHS_GET['UserCollectible']
 
     ## UserCollectible
-    if raw_path == UserCollectible_Path['getUserCollectibleByUserId']:
-        returnString = userCollectible.getUserCollectibleByUserId(event)
+    if raw_path == UserCollectible_Path['getUserCollectibleByCollectibleIdAndMint']:
+        returnString = userCollectible.getUserCollectibleByCollectibleIdAndMint(event)
+    
+    if raw_path == UserCollectible_Path['getUserCollectiblesByOwnerId']:
+        returnString = userCollectible.getUserCollectiblesByOwnerId(event)
+
+    if raw_path == UserCollectible_Path['getUserCollectiblesByLastOwned']:
+        returnString = userCollectible.getUserCollectiblesByLastOwned(event)
+
+    if raw_path == UserCollectible_Path['getUserCollectiblesByCollectibleId']:
+        returnString = userCollectible.getUserCollectiblesByCollectibleId(event)
     
     return returnString

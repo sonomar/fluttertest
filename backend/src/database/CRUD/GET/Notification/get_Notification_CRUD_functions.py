@@ -9,7 +9,7 @@ from database.models import Notification
 from database.schema.GET.Notification.notification_schema import NotificationResponse
 from api.exceptions import NotFoundException
 
-def getNotificationById(
+def getNotificationByNotificationId(
     notificationId: int = Query(..., description="ID of the notification to retrieve"),
     db: Session = Depends(get_db)
 ) -> NotificationResponse:

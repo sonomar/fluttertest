@@ -8,7 +8,7 @@ from database.models import Mission
 from database.schema.GET.Mission.mission_schema import MissionResponse
 from api.exceptions import NotFoundException
 
-def getMissionById(
+def getMissionByMissionId(
     missionId: int = Query(..., description="ID of the mission to retrieve"),
     db: Session = Depends(get_db)
 ) -> MissionResponse:

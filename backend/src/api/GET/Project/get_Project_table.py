@@ -9,5 +9,8 @@ def call_Project_function(raw_path, event):
     ## Project
     if raw_path == Project_Path['getProjectByProjectId']:
         returnString = project.getProjectByProjectId(event)
+    
+    elif raw_path == Project_Path['getProjectByName']:
+        returnString = project.getProjectByName(event)
 
     return returnString

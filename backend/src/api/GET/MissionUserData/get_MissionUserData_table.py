@@ -1,22 +1,19 @@
-import api.GET.User.get_User_functions as user
+import api.GET.MissionUserData.get_MissionUserData_functions as missionUserData
 from api.GET.api_paths_get import API_PATHS_GET
 
-def call_User_function(raw_path, event):
+def call_MissionUserData_function(raw_path, event):
 
     returnString = 'Invalid Function Call'
-    User_Path = API_PATHS_GET['User']
+    MissionUserData_Path = API_PATHS_GET['MissionUserData']
 
-    ## User
-    if raw_path == User_Path['getUserByUserId']['path']:
-        returnString = user.getUserByUserId(event)
+    ## MissionUserData
+    if raw_path == MissionUserData_Path['getMissionUserDatasByChallengeUserId']['path']:
+        returnString = missionUserData.getMissionUserDatasByChallengeUserId(event)
 
-    elif raw_path == User_Path['getUserByEmail']['path']:
-        returnString = user.getUserByEmail(event)
+    elif raw_path == MissionUserData_Path['getMissionUserDatasByUserId']['path']:
+        returnString = missionUserData.getMissionUserDatasByUserId(event)
 
-    elif raw_path == User_Path['getUserByUsername']['path']:
-        returnString = user.getUserByUsername(event)
-
-    elif raw_path == User_Path['getUsersByLastLoggedIn']['path']:
-        returnString = user.getUsersByLastLoggedIn(event)
+    elif raw_path == MissionUserData_Path['getMissionUserDatasByChallengeId']['path']:
+        returnString = missionUserData.getMissionUserDatasByChallengeId(event)
     
     return returnString

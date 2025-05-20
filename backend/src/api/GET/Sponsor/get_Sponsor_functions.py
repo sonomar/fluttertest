@@ -2,7 +2,7 @@
 from tools.prod.prodTools import extractData
 import database.CRUD.GET.Sponsor.get_Sponsor_CRUD_functions as crudFunctions
 
-def getSponsorById(event):
+def getSponsorBySponsorId(event):
     """
     Retrieves a sponsor by its sponsorId.
     Requires 'sponsorId' in the request data.
@@ -12,7 +12,7 @@ def getSponsorById(event):
         return {'statusCode': 400, 'body': 'sponsorId is required'}
 
     sponsor_id = data["sponsorId"]
-    return crudFunctions.getSponsorById(sponsorId=sponsor_id, db=event['db_session'])
+    return crudFunctions.getSponsorBySponsorId(sponsorId=sponsor_id, db=event['db_session'])
 
 def getSponsorByName(event):
     """

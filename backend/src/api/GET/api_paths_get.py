@@ -81,10 +81,10 @@ API_PATHS_GET = {
     },
 
     Collection_table: {
-        "getCollectionById": {
-            "path": "/getCollectionById",
+        "getCollectionByCollectionId": {
+            "path": "/getCollectionByCollectionId",
             "active": True,
-            "handler": CollectionGETFunctions.getCollectionById,
+            "handler": CollectionGETFunctions.getCollectionByCollectionId,
             "response_model": CollectionResponse
         },
         "getCollectionByName": {
@@ -131,6 +131,24 @@ API_PATHS_GET = {
             "active": True,
             "handler": CollectibleGETFunctions.getCollectiblesByCommunity,
             "response_model": List[CollectibleResponse]
+        },
+        "getAllCollectibles": {
+            "path": "/getAllCollectibles",
+            "active": True,
+            "handler": CollectibleGETFunctions.getAllCollectibles,
+            "response_model": List[CollectibleResponse]
+        },
+        "getCollectiblesByProjectId": {
+            "path": "/getCollectiblesByProjectId",
+            "active": True,
+            "handler": CollectibleGETFunctions.getCollectiblesByProjectId,
+            "response_model": List[CollectibleResponse]
+        },
+        "getCollectiblesByCategoryId": {
+            "path": "/getCollectiblesByCategoryId",
+            "active": True,
+            "handler": CollectibleGETFunctions.getCollectiblesByCategoryId,
+            "response_model": List[CollectibleResponse]
         }
     },
 
@@ -162,10 +180,10 @@ API_PATHS_GET = {
     },
 
     Community_table: {
-        "getCommunityById": {
-            "path": "/getCommunityById",
+        "getCommunityByCommunityId": {
+            "path": "/getCommunityByCommunityId",
             "active": True,
-            "handler": CommunityGETFunctions.getCommunityById,
+            "handler": CommunityGETFunctions.getCommunityByCommunityId,
             "response_model": CommunityResponse
         },
         "getCommunityByTitle": {
@@ -192,10 +210,10 @@ API_PATHS_GET = {
     },
 
     Sponsor_table: {
-        "getSponsorById": {
-            "path": "/getSponsorById",
+        "getSponsorBySponsorId": {
+            "path": "/getSponsorBySponsorId",
             "active": True,
-            "handler": SponsorGETFunctions.getSponsorById,
+            "handler": SponsorGETFunctions.getSponsorBySponsorId,
             "response_model": SponsorResponse
         },
         "getSponsorByName": {
@@ -213,10 +231,10 @@ API_PATHS_GET = {
     },
 
     Notification_table: {
-        "getNotificationById": {
-            "path": "/getNotificationById",
+        "getNotificationByNotificationId": {
+            "path": "/getNotificationByNotificationId",
             "active": True,
-            "handler": NotificationGETFunctions.getNotificationById,
+            "handler": NotificationGETFunctions.getNotificationByNotificationId,
             "response_model": NotificationResponse
         },
         "getNotificationsByDate": {
@@ -255,10 +273,10 @@ API_PATHS_GET = {
     },
 
     NewsPost_table: {
-        "getNewsPostById": {
-            "path": "/getNewsPostById",
+        "getNewsPostByNewsPostId": {
+            "path": "/getNewsPostByNewsPostId",
             "active": True,
-            "handler": NewsPostGETFunctions.getNewsPostById,
+            "handler": NewsPostGETFunctions.getNewsPostByNewsPostId,
             "response_model": NewsPostResponse
         },
         "getNewsPostsByDate": {
@@ -276,10 +294,10 @@ API_PATHS_GET = {
     },
 
     Mission_table: {
-        "getMissionById": {
-            "path": "/getMissionById",
+        "getMissionByMissionId": {
+            "path": "/getMissionByMissionId",
             "active": True,
-            "handler": MissionGETFunctions.getMissionById,
+            "handler": MissionGETFunctions.getMissionByMissionId,
             "response_model": MissionResponse
         },
         "getMissionByTitle": {
@@ -333,10 +351,10 @@ API_PATHS_GET = {
     },
 
     CommunityChallenge_table: {
-        "getCommunityChallengeById": {
-            "path": "/getCommunityChallengeById",
+        "getCommunityChallengeByCommunityChallengeId": {
+            "path": "/getCommunityChallengeByCommunityChallengeId",
             "active": True,
-            "handler": CommunityChallengeGETFunctions.getCommunityChallengeById,
+            "handler": CommunityChallengeGETFunctions.getCommunityChallengeByCommunityChallengeId,
             "response_model": CommunityChallengeResponse
         },
         "getCommunityChallengeByTitle": {
@@ -348,10 +366,10 @@ API_PATHS_GET = {
     },
 
     Project_table: {
-        "getProjectById": {
-            "path": "/getProjectById",
+        "getProjectByProjectId": {
+            "path": "/getProjectByProjectId",
             "active": True,
-            "handler": ProjectGETFunctions.getProjectById,
+            "handler": ProjectGETFunctions.getProjectByProjectId,
             "response_model": ProjectResponse
         },
         "getProjectByName": {
@@ -363,10 +381,10 @@ API_PATHS_GET = {
     },
 
     CollectibleSponsor_table: {
-        "getCollectibleSponsorById": {
-            "path": "/getCollectibleSponsorById",
+        "getCollectibleSponsorByCollectibleSponsorId": {
+            "path": "/getCollectibleSponsorByCollectibleSponsorId",
             "active": True,
-            "handler": CollectibleSponsorGETFunctions.getCollectibleSponsorById,
+            "handler": CollectibleSponsorGETFunctions.getCollectibleSponsorByCollectibleSponsorId,
             "response_model": CollectibleSponsorResponse
         },
         "getCollectibleSponsorByCollectibleId": {

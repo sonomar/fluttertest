@@ -1,22 +1,17 @@
-import api.GET.User.get_User_functions as user
+import api.GET.Community.get_Community_functions as community
 from api.GET.api_paths_get import API_PATHS_GET
 
-def call_User_function(raw_path, event):
+def call_Community_function(raw_path, event):
 
     returnString = 'Invalid Function Call'
-    User_Path = API_PATHS_GET['User']
+    Community_Path = API_PATHS_GET['Community']
 
-    ## User
-    if raw_path == User_Path['getUserByUserId']['path']:
-        returnString = user.getUserByUserId(event)
+    ## Community
+    if raw_path == Community_Path['getCommunityByCommunityId']['path']:
+        returnString = community.getCommunityByCommunityId(event)
 
-    elif raw_path == User_Path['getUserByEmail']['path']:
-        returnString = user.getUserByEmail(event)
+    elif raw_path == Community_Path['getCommunityByTitle']['path']:
+        returnString = community.getCommunityByTitle(event)
 
-    elif raw_path == User_Path['getUserByUsername']['path']:
-        returnString = user.getUserByUsername(event)
-
-    elif raw_path == User_Path['getUsersByLastLoggedIn']['path']:
-        returnString = user.getUsersByLastLoggedIn(event)
     
     return returnString

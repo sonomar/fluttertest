@@ -19,4 +19,19 @@ def call_Collectible_function(raw_path, event):
     elif raw_path == Collectible_Path['getCollectiblesByCategoryId']:
         returnString = collectible.getCollectiblesByCategoryId(event)
 
+    elif raw_path == Collectible_Path['getCollectiblesBySponsor']:
+        returnString = collectible.getCollectiblesBySponsor(event)
+
+    elif raw_path == Collectible_Path['getCollectiblesByLabel']:
+        returnString = collectible.getCollectiblesByLabel(event)
+
+    elif raw_path == Collectible_Path['getCollectibleByName']:
+        returnString = collectible.getCollectibleByName(event)
+
+    elif raw_path == Collectible_Path['getCollectiblesByCollection']:
+        returnString = collectible.getCollectiblesByCollection(event)
+
+    elif raw_path == Collectible_Path['getCollectiblesByCommunity']:
+        returnString = collectible.getCollectiblesByCommunity(event)
+
     return returnString

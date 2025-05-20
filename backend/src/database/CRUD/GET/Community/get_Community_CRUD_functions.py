@@ -8,7 +8,7 @@ from database.models import Community
 from database.schema.GET.Community.community_schema import CommunityResponse
 from api.exceptions import NotFoundException
 
-def getCommunityById(
+def getCommunityByCommunityId(
     communityId: int = Query(..., description="ID of the community to retrieve"),
     db: Session = Depends(get_db)
 ) -> CommunityResponse:

@@ -9,7 +9,7 @@ from database.models import NewsPost
 from database.schema.GET.NewsPost.newsPost_schema import NewsPostResponse
 from api.exceptions import NotFoundException
 
-def getNewsPostById(
+def getNewsPostByNewsPostId(
     newsPostId: int = Query(..., description="ID of the news post to retrieve"),
     db: Session = Depends(get_db)
 ) -> NewsPostResponse:

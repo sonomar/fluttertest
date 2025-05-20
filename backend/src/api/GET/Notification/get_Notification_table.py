@@ -1,22 +1,19 @@
-import api.GET.User.get_User_functions as user
+import api.GET.Notification.get_Notification_functions as notification
 from api.GET.api_paths_get import API_PATHS_GET
 
-def call_User_function(raw_path, event):
+def call_Notification_function(raw_path, event):
 
     returnString = 'Invalid Function Call'
-    User_Path = API_PATHS_GET['User']
+    Notification_Path = API_PATHS_GET['Notification']
 
-    ## User
-    if raw_path == User_Path['getUserByUserId']['path']:
-        returnString = user.getUserByUserId(event)
+    ## Notification
+    if raw_path == Notification_Path['getNotificationByNotificationId']['path']:
+        returnString = notification.getNotificationByNotificationId(event)
 
-    elif raw_path == User_Path['getUserByEmail']['path']:
-        returnString = user.getUserByEmail(event)
+    elif raw_path == Notification_Path['getNotificationsByDate']['path']:
+        returnString = notification.getNotificationsByDate(event)
 
-    elif raw_path == User_Path['getUserByUsername']['path']:
-        returnString = user.getUserByUsername(event)
-
-    elif raw_path == User_Path['getUsersByLastLoggedIn']['path']:
-        returnString = user.getUsersByLastLoggedIn(event)
+    elif raw_path == Notification_Path['getNotificationsByHeader']['path']:
+        returnString = notification.getUsergetNotificationsByHeaderByUsername(event)
     
     return returnString

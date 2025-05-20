@@ -2,7 +2,7 @@
 from tools.prod.prodTools import extractData
 import database.CRUD.GET.CollectibleSponsor.get_CollectibleSponsor_CRUD_functions as crudFunctions
 
-def getCollectibleSponsorById(event):
+def getCollectibleSponsorByCollectibleSponsorId(event):
     """
     Retrieves a collectible sponsor record by its collectibleSponsorId.
     Requires 'collectibleSponsorId' in the request data.
@@ -12,7 +12,7 @@ def getCollectibleSponsorById(event):
         return {'statusCode': 400, 'body': 'collectibleSponsorId is required'}
 
     collectible_sponsor_id = data["collectibleSponsorId"]
-    return crudFunctions.getCollectibleSponsorById(collectibleSponsorId=collectible_sponsor_id, db=event['db_session'])
+    return crudFunctions.getCollectibleSponsorByCollectibleSponsorId(collectibleSponsorId=collectible_sponsor_id, db=event['db_session'])
 
 def getCollectibleSponsorByCollectibleId(event):
     """

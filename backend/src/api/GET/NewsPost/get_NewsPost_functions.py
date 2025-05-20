@@ -2,7 +2,7 @@
 from tools.prod.prodTools import extractData
 import database.CRUD.GET.NewsPost.get_NewsPost_CRUD_functions as crudFunctions
 
-def getNewsPostById(event):
+def getNewsPostByNewsPostId(event):
     """
     Retrieves a news post by its newsPostId.
     Requires 'newsPostId' in the request data.
@@ -12,7 +12,7 @@ def getNewsPostById(event):
         return {'statusCode': 400, 'body': 'newsPostId is required'}
 
     news_post_id = data["newsPostId"]
-    return crudFunctions.getNewsPostById(newsPostId=news_post_id, db=event['db_session'])
+    return crudFunctions.getNewsPostByNewsPostId(newsPostId=news_post_id, db=event['db_session'])
 
 def getNewsPostsByDate(event):
     """
