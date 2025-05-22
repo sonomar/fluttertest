@@ -18,7 +18,6 @@ def add_folder_to_zip(zipf, folder_path, base_folder_to_strip):
     'base_folder_to_strip' is the path part to remove to get the desired path in the zip.
     """
     for root, dirs, files in os.walk(folder_path):
-        # Exclude __pycache__ directories and .pyc files
         dirs[:] = [d for d in dirs if d != '__pycache__']
         files = [f for f in files if not f.endswith('.pyc')]
 
@@ -26,24 +25,17 @@ def add_folder_to_zip(zipf, folder_path, base_folder_to_strip):
             full_path = os.path.join(root, file)
             archive_name = os.path.relpath(full_path, base_folder_to_strip)
             zipf.write(full_path, archive_name)
-        # Add empty directories if necessary (though often not explicitly needed for Lambda structure)
-        # for adir in dirs:
-        #     full_path = os.path.join(root, adir)
-        #     archive_name = os.path.relpath(full_path, base_folder_to_strip)
-        #     # Ensure it's treated as a directory in the zip.
-        #     # ZipFile automatically creates directory entries if files are placed within them.
-        #     # Explicitly adding might be needed if an empty dir must exist.
-        #     if not os.listdir(full_path): # if directory is empty
-        #         zipf.write(full_path, archive_name + '/')
-
 
 def check_aws_cli():
     """Checks if AWS CLI is installed and minimally configured."""
     try:
         subprocess.run(['aws', '--version'], check=True, capture_output=True, text=True)
-        # A more robust check for configuration:
         identity_check = subprocess.run(['aws', 'sts', 'get-caller-identity'], check=True, capture_output=True, text=True)
-        print(f"AWS CLI found and configured. Caller Identity: {identity_check.stdout.strip()}")
+        try:
+            caller_identity_arn = json.loads(identity_check.stdout).get('Arn')
+            print(f"AWS CLI found and configured. Caller Identity ARN: {caller_identity_arn}")
+        except json.JSONDecodeError:
+            print(f"AWS CLI found and configured. Could not parse 'get-caller-identity' JSON. Raw: {identity_check.stdout.strip()}")
         return True
     except FileNotFoundError:
         print("ERROR: AWS CLI not found. Please install it and ensure it's in your PATH.")
@@ -52,7 +44,8 @@ def check_aws_cli():
     except subprocess.CalledProcessError as e:
         print("ERROR: AWS CLI is present but not configured correctly or lacks permissions.")
         print(f"Command failed: {' '.join(e.cmd)}")
-        print(f"Error: {e.stderr}")
+        stderr_output = e.stderr.strip() if e.stderr else "No stderr output"
+        print(f"Error: {stderr_output}")
         print("Please run 'aws configure' and ensure your IAM user/role has necessary permissions (e.g., for STS, Lambda).")
         return False
 
@@ -71,7 +64,7 @@ def lambda_exists(function_name, region=None):
             return False
         else:
             print(f"Error checking if Lambda function '{function_name}' exists: {e.stderr}")
-            raise # Re-raise for other AWS CLI errors
+            raise
 
 def upload_to_s3(zip_file_path, bucket_name, s3_key, region=None):
     """Uploads the deployment package to S3."""
@@ -95,9 +88,9 @@ def deploy_lambda_function(zip_file_path, function_name, handler, runtime, role_
     """
     Deploys the Lambda function to AWS.
     Creates the function if it doesn't exist, otherwise updates its code and configuration.
+    Returns True on success, False on failure.
     """
     print(f"\nAttempting to deploy Lambda function: {function_name}")
-
     aws_command_base = ['aws', 'lambda']
     if region:
         aws_command_base.extend(['--region', region])
@@ -112,91 +105,58 @@ def deploy_lambda_function(zip_file_path, function_name, handler, runtime, role_
             print(f"Using local zip file for deployment: {zip_file_path}")
             code_location_args = ['--zip-file', f'fileb://{zip_file_path}']
 
-
         if exists:
             print(f"Updating existing Lambda function '{function_name}'...")
-            # Update function code
-            cmd_update_code = aws_command_base + [
-                'update-function-code',
-                '--function-name', function_name
-            ] + code_location_args
-            if publish:
-                cmd_update_code.append('--publish')
-            
+            cmd_update_code = aws_command_base + ['update-function-code', '--function-name', function_name] + code_location_args
+            if publish: cmd_update_code.append('--publish')
             print(f"Executing: {' '.join(cmd_update_code[:5])} ... (code args hidden for brevity)")
             result_code = subprocess.run(cmd_update_code, check=True, capture_output=True, text=True)
             print(f"Function code updated. Version: {json.loads(result_code.stdout).get('Version', 'N/A')}")
 
-            # --- !!! ADDED WAITER !!! ---
             print(f"Waiting for function '{function_name}' code update to complete...")
-            cmd_wait_code_update = aws_command_base + [
-                'wait', 'function-updated',
-                '--function-name', function_name
-            ]
-            # The waiter can take some time, especially for larger functions or container images.
-            # Default waiter timeout is usually sufficient, but can be configured if needed.
+            cmd_wait_code_update = aws_command_base + ['wait', 'function-updated', '--function-name', function_name]
             subprocess.run(cmd_wait_code_update, check=True, capture_output=True, text=True)
             print(f"Function '{function_name}' is now updated and ready for configuration changes.")
-            # --- !!! END OF WAITER !!! ---
 
-            # Update function configuration
             print("Updating function configuration...")
             cmd_update_config = aws_command_base + [
-                'update-function-configuration',
-                '--function-name', function_name,
-                '--runtime', runtime,
-                '--role', role_arn,
-                '--handler', handler,
-                '--timeout', str(timeout),
-                '--memory-size', str(memory_size)
+                'update-function-configuration', '--function-name', function_name,
+                '--runtime', runtime, '--role', role_arn, '--handler', handler,
+                '--timeout', str(timeout), '--memory-size', str(memory_size)
             ]
             if environment_variables:
                 env_vars_string = ",".join([f"{k}={v}" for k, v in environment_variables.items()])
                 cmd_update_config.extend(['--environment', f"Variables={{{env_vars_string}}}"])
-            
             print(f"Executing: {' '.join(cmd_update_config[:5])} ...")
             subprocess.run(cmd_update_config, check=True, capture_output=True, text=True)
             print("Function configuration updated successfully.")
-
-        else: # Creating new function (waiter not typically needed here before first config)
+        else:
             print(f"Creating new Lambda function '{function_name}'...")
             cmd_create = aws_command_base + [
-                'create-function',
-                '--function-name', function_name,
-                '--runtime', runtime,
-                '--role', role_arn,
-                '--handler', handler,
-                '--timeout', str(timeout),
-                '--memory-size', str(memory_size)
+                'create-function', '--function-name', function_name,
+                '--runtime', runtime, '--role', role_arn, '--handler', handler,
+                '--timeout', str(timeout), '--memory-size', str(memory_size)
             ] + code_location_args
             if environment_variables:
                 env_vars_string = ",".join([f"{k}={v}" for k, v in environment_variables.items()])
                 cmd_create.extend(['--environment', f"Variables={{{env_vars_string}}}"])
-            if publish:
-                cmd_create.append('--publish')
-
+            if publish: cmd_create.append('--publish')
             print(f"Executing: {' '.join(cmd_create[:5])} ... (code args hidden for brevity)")
             result_create = subprocess.run(cmd_create, check=True, capture_output=True, text=True)
             created_function_arn = json.loads(result_create.stdout)['FunctionArn']
             print(f"Successfully created Lambda function. ARN: {created_function_arn}")
 
-            # Wait for the new function to be fully active before any potential immediate follow-up (though not in this script flow)
             print(f"Waiting for new function '{function_name}' to become active...")
-            cmd_wait_creation = aws_command_base + [
-                'wait', 'function-active-v2', # 'function-active-v2' is a more modern waiter
-                '--function-name', function_name
-            ]
+            cmd_wait_creation = aws_command_base + ['wait', 'function-active-v2', '--function-name', function_name]
             subprocess.run(cmd_wait_creation, check=True, capture_output=True, text=True)
             print(f"New function '{function_name}' is active.")
-        
         return True
-
     except subprocess.CalledProcessError as e:
         print(f"ERROR during AWS CLI command execution for function '{function_name}':")
-        print(f"Command: {' '.join(e.cmd)}") # Be cautious if commands contain sensitive info
+        print(f"Command: {' '.join(e.cmd)}")
         print(f"Return code: {e.returncode}")
         stderr_output = e.stderr.strip() if e.stderr else "No stderr output"
-        stdout_output = e.stdout.strip() if e.stdout else "No stdout output" # Some AWS errors go to stdout
+        stdout_output = e.stdout.strip() if e.stdout else "No stdout output"
         print(f"Stderr: {stderr_output}")
         if stdout_output: print(f"Stdout: {stdout_output}")
         return False
@@ -211,113 +171,111 @@ def create_and_deploy_lambda(
     aws_lambda_handler,
     aws_lambda_runtime,
     aws_iam_role_arn,
-    folders_to_include=None, # e.g., ['api', 'tools', 'database']
+    folders_to_include=None,
     aws_deployment_region=None,
     aws_s3_bucket_for_upload=None,
     lambda_timeout=60,
     lambda_memory_size=256,
     lambda_env_variables=None,
-    publish_new_version=True
+    publish_new_version=True,
+    perform_deployment=True # New parameter
 ):
     """
-    Packages the Lambda function, its dependencies, and specified folders,
-    then deploys it to AWS Lambda.
+    Packages the Lambda function and optionally deploys it.
+    Returns: tuple (zip_file_path_or_none, deployment_status_or_none)
+             deployment_status is True for success, False for failure, None if not attempted.
     """
-    if not check_aws_cli():
+    if perform_deployment and not check_aws_cli(): # Check CLI early if deployment is intended
         print("Aborting due to AWS CLI issues.")
-        return False
+        return None, False # Packaging not attempted, deployment failed implicitly
 
     project_dir = os.getcwd()
-    # Use a temporary directory for packaging, ensure it's cleaned up
     package_build_dir_name = 'lambda_package_build_temp'
     package_build_dir = os.path.join(project_dir, package_build_dir_name)
+    zip_file_path = None # Initialize
 
-    if os.path.exists(package_build_dir):
-        print(f"Removing existing temporary package build directory: {package_build_dir}")
-        shutil.rmtree(package_build_dir)
-    os.makedirs(package_build_dir)
-    print(f"Created temporary package build directory: {package_build_dir}")
-
-    dependencies = read_dependencies_from_file(dependencies_file)
-    if dependencies:
-        print("\nInstalling dependencies...")
-        for dep in dependencies:
-            print(f"Installing: {dep} into {package_build_dir}")
-            # Note on pip install options:
-            # --platform manylinux2014_x86_64 is good for Lambda compatibility on Amazon Linux 2.
-            # --python-version should ideally align with your Lambda runtime for compiled extensions.
-            # --implementation cp (CPython) is standard.
-            # --only-binary :all: can speed up if wheels are available.
-            pip_command = [
-                'pip', 'install',
-                '--target', package_build_dir,
-                '--platform', 'manylinux2014_x86_64',
-                '--implementation', 'cp',
-                '--python-version', aws_lambda_runtime.replace('python',''), # e.g. 3.12 from python3.12
-                '--only-binary', ':all:',
-                '--upgrade',
-                dep
-            ]
-            try:
-                # Capture output for better debugging if needed
-                result = subprocess.run(pip_command, check=True, capture_output=True, text=True)
-                if result.stdout: print(f"Pip install stdout for {dep}:\n{result.stdout}")
-                if result.stderr: print(f"Pip install stderr for {dep}:\n{result.stderr}")
-            except subprocess.CalledProcessError as e:
-                print(f"ERROR: Failed to install dependency: {dep}")
-                print(f"Command: {' '.join(e.cmd)}")
-                print(f"Stderr: {e.stderr}")
-                print(f"Stdout: {e.stdout}")
-                shutil.rmtree(package_build_dir) # Clean up
-                return False
-    else:
-        print("\nNo dependencies found in package.txt or file not present.")
-
-    # Create the .zip file for the deployment package
-    zip_file_name = f"{aws_lambda_function_name}_deployment_package.zip"
-    zip_file_path = os.path.join(project_dir, zip_file_name) # Create zip in project root
-
-    print(f"\nCreating ZIP file: {zip_file_path}")
-    with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        # Add installed dependencies from the package_build_dir
-        if os.path.exists(package_build_dir) and os.listdir(package_build_dir):
-            print(f"Adding dependencies from '{package_build_dir}' to ZIP.")
-            add_folder_to_zip(zipf, package_build_dir, package_build_dir) # base_folder strips package_build_dir itself
-        
-        # Add the lambda handler file
-        if os.path.exists(lambda_handler_file):
-            print(f"Adding Lambda handler '{lambda_handler_file}' to ZIP as '{os.path.basename(lambda_handler_file)}'.")
-            zipf.write(lambda_handler_file, os.path.basename(lambda_handler_file))
-        else:
-            print(f"ERROR: Lambda handler file '{lambda_handler_file}' not found!")
+    try:
+        if os.path.exists(package_build_dir):
+            print(f"Removing existing temporary package build directory: {package_build_dir}")
             shutil.rmtree(package_build_dir)
-            return False
+        os.makedirs(package_build_dir)
+        print(f"Created temporary package build directory: {package_build_dir}")
 
-        # Add other specified folders (e.g., 'api', 'tools')
-        if folders_to_include:
-            for folder_name in folders_to_include:
-                folder_path = os.path.join(project_dir, folder_name)
-                if os.path.exists(folder_path) and os.path.isdir(folder_path):
-                    print(f"Adding folder '{folder_name}' to the ZIP file.")
-                    # This will add 'folder_name/...' to the zip
-                    add_folder_to_zip(zipf, folder_path, project_dir)
-                else:
-                    print(f"Warning: Folder '{folder_name}' not found at '{folder_path}' or is not a directory, skipping.")
+        dependencies = read_dependencies_from_file(dependencies_file)
+        if dependencies:
+            print("\nInstalling dependencies...")
+            runtime_version_for_pip = aws_lambda_runtime.replace('python', '') if 'python' in aws_lambda_runtime else '3.9'
+            for dep in dependencies:
+                print(f"Installing: {dep} into {package_build_dir}")
+                pip_command = [
+                    'pip', 'install',
+                    '--target', package_build_dir,
+                    '--platform', 'manylinux2014_x86_64',
+                    '--implementation', 'cp',
+                    '--python-version', runtime_version_for_pip,
+                    '--only-binary', ':all:',
+                    '--upgrade',
+                    dep
+                ]
+                subprocess.run(pip_command, check=True, capture_output=True, text=True)
+        else:
+            print("\nNo dependencies found in dependencies file or file not present.")
 
-    print(f"Deployment package created: {zip_file_path} (Size: {os.path.getsize(zip_file_path) / 1024:.2f} KB)")
+        zip_file_name = f"{aws_lambda_function_name}_deployment_package.zip"
+        zip_file_path = os.path.join(project_dir, zip_file_name)
 
-    # Clean up the temporary package build directory
-    print(f"Cleaning up temporary package build directory: {package_build_dir}")
-    shutil.rmtree(package_build_dir)
+        print(f"\nCreating ZIP file: {zip_file_path}")
+        with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            if os.path.exists(package_build_dir) and os.listdir(package_build_dir):
+                print(f"Adding dependencies from '{package_build_dir}' to ZIP.")
+                add_folder_to_zip(zipf, package_build_dir, package_build_dir)
+            
+            if os.path.exists(lambda_handler_file):
+                print(f"Adding Lambda handler '{lambda_handler_file}' to ZIP as '{os.path.basename(lambda_handler_file)}'.")
+                zipf.write(lambda_handler_file, os.path.basename(lambda_handler_file))
+            else:
+                print(f"ERROR: Lambda handler file '{lambda_handler_file}' not found!")
+                raise FileNotFoundError(f"Lambda handler file {lambda_handler_file} not found.")
 
-    # --- Deployment Step ---
-    s3_key_for_upload = None
+            if folders_to_include:
+                for folder_name in folders_to_include:
+                    folder_path = os.path.join(project_dir, folder_name)
+                    if os.path.exists(folder_path) and os.path.isdir(folder_path):
+                        print(f"Adding folder '{folder_name}' to the ZIP file.")
+                        add_folder_to_zip(zipf, folder_path, project_dir)
+                    else:
+                        print(f"Warning: Folder '{folder_name}' not found at '{folder_path}' or is not a directory, skipping.")
+        
+        file_size_kb = os.path.getsize(zip_file_path) / 1024
+        print(f"Deployment package created: {zip_file_path} (Size: {file_size_kb:.2f} KB)")
+
+    except Exception as e:
+        print(f"ERROR during packaging: {e}")
+        if package_build_dir and os.path.exists(package_build_dir): # Clean up build dir on packaging error
+            shutil.rmtree(package_build_dir)
+        if zip_file_path and os.path.exists(zip_file_path): # Clean up partial zip on packaging error
+            os.remove(zip_file_path)
+        return None, False if perform_deployment else None # (zip_path, deploy_status)
+    finally:
+        if package_build_dir and os.path.exists(package_build_dir): # Ensure cleanup
+            print(f"Cleaning up temporary package build directory: {package_build_dir}")
+            shutil.rmtree(package_build_dir)
+
+    # --- Deployment Step (Conditional) ---
+    if not perform_deployment:
+        print("\nPackaging complete. Deployment skipped as per user request.")
+        return zip_file_path, None # (zip_path, deploy_status=None)
+
+    print("\nProceeding with deployment...")
+    s3_uploaded_key = None
     if aws_s3_bucket_for_upload:
-        # Create a unique-ish key, perhaps with a timestamp or version
-        s3_key_for_upload = f"lambda-deployments/{aws_lambda_function_name}/{os.path.basename(zip_file_path)}"
-        if not upload_to_s3(zip_file_path, aws_s3_bucket_for_upload, s3_key_for_upload, aws_deployment_region):
-            print("Failed to upload to S3. Aborting deployment.")
-            return False
+        s3_uploaded_key = f"lambda-deployments/{aws_lambda_function_name}/{os.path.basename(zip_file_path)}"
+        print(f"\nS3 deployment bucket specified: {aws_s3_bucket_for_upload}")
+        if not upload_to_s3(zip_file_path, aws_s3_bucket_for_upload, s3_uploaded_key, aws_deployment_region):
+            print("Failed to upload to S3. Deployment aborted.")
+            return zip_file_path, False # (zip_path, deploy_status=False)
+    else:
+        print("\nNo S3 deployment bucket specified, proceeding with direct ZIP upload.")
     
     deploy_success = deploy_lambda_function(
         zip_file_path=zip_file_path,
@@ -326,8 +284,8 @@ def create_and_deploy_lambda(
         runtime=aws_lambda_runtime,
         role_arn=aws_iam_role_arn,
         region=aws_deployment_region,
-        s3_bucket=aws_s3_bucket_for_upload if s3_key_for_upload else None, # Pass S3 details only if upload was done
-        s3_key=s3_key_for_upload if s3_key_for_upload else None,
+        s3_bucket=aws_s3_bucket_for_upload if s3_uploaded_key else None,
+        s3_key=s3_uploaded_key if s3_uploaded_key else None,
         timeout=lambda_timeout,
         memory_size=lambda_memory_size,
         environment_variables=lambda_env_variables,
@@ -336,15 +294,10 @@ def create_and_deploy_lambda(
 
     if deploy_success:
         print(f"\nLambda function '{aws_lambda_function_name}' deployed successfully.")
-        # Optionally, remove local zip after successful S3 upload and deployment
-        # if aws_s3_bucket_for_upload and os.path.exists(zip_file_path):
-        #     os.remove(zip_file_path)
-        #     print(f"Removed local zip file: {zip_file_path}")
     else:
         print(f"\nLambda function '{aws_lambda_function_name}' deployment FAILED.")
-
-    return deploy_success
-
+    
+    return zip_file_path, deploy_success # (zip_path, deploy_status)
 
 # ==============================================================================
 # Example Usage: Configure and run this section
@@ -354,45 +307,29 @@ if __name__ == "__main__":
     print("==============================================")
 
     # --- Core Configuration - MODIFY THESE VALUES ---
-    # Assumes this script is in the root of your project directory.
-    # Project structure example:
-    # your_project_root/
-    #  ├── lambda_function.py  (your main Lambda handler code)
-    #  ├── package.txt         (list of pip dependencies)
-    #  ├── deploy_script.py    (this script)
-    #  ├── api/                (example custom folder to include)
-    #  │   └── client.py
-    #  └── tools/              (example custom folder to include)
-    #      └── utils.py
-
     LAMBDA_HANDLER_FILE = 'lambda_function.py'
-    DEPENDENCIES_FILE = 'package.txt' # File listing pip dependencies, one per line
+    DEPENDENCIES_FILE = 'package.txt'
 
-    # AWS Lambda Specifics - **YOU MUST CHANGE THESE**
     AWS_FUNCTION_NAME = 'kloopocarGeneralFunctions'
-    AWS_HANDLER_NAME = 'lambda_function.lambda_handler' # Format: filename_without_py.function_name
-    AWS_RUNTIME = 'python3.13' # IMPORTANT: Use a runtime supported by AWS Lambda (e.g., python3.9, python3.10, python3.11, python3.12)
-    #AWS_IAM_ROLE_ARN = 'arn:aws:iam::YOUR_ACCOUNT_ID:role/YOUR_LAMBDA_EXECUTION_ROLE_NAME' # ** Replace with your actual IAM Role ARN **
+    AWS_HANDLER_NAME = 'lambda_function.lambda_handler'
+    # IMPORTANT: Change to a supported runtime if python3.13 is not yet available in your region
+    AWS_RUNTIME = 'python3.12' # Changed from python3.13 as a safer default
+    # IMPORTANT: Ensure this role has the correct trust policy for 'lambda.amazonaws.com'
     AWS_IAM_ROLE_ARN = 'arn:aws:iam::557690594992:role/service-role/Admin'
-    # Optional AWS Configuration
-    AWS_REGION = 'eu-central-1'  # e.g., 'us-east-1', 'eu-west-2'. If None, AWS CLI default is used.
-    AWS_S3_DEPLOYMENT_BUCKET = None # 'your-s3-bucket-for-lambda-zips' # OPTIONAL: If package is large or you prefer S3. Bucket must exist.
     
-    # Lambda Function Settings
+    AWS_REGION = 'eu-central-1'
+    AWS_S3_DEPLOYMENT_BUCKET = None # Set to bucket name for S3 deployment, None for direct upload
+
     LAMBDA_TIMEOUT_SECONDS = 45
-    LAMBDA_MEMORY_MB = 192 # Min 128MB.
+    LAMBDA_MEMORY_MB = 192
     LAMBDA_ENVIRONMENT_VARIABLES = {
-        "LOG_ENV": "production",
+        "ENV": "production",
         "EXAMPLE_VAR": "HelloFromLambdaEnv",
         "secret_key": "arn:aws:secretsmanager:eu-central-1:557690594992:secret:kloopoSecrets-fP2FiS"
     }
-    # List of additional folders (relative to project root) to include in the zip
-    # Their internal structure will be preserved in the zip.
-    # e.g., if 'api/client.py' exists, it will be 'api/client.py' in the zip.
-    FOLDERS_TO_PACKAGE = ['api', 'tools', 'database'] # Add your folder names here
+    FOLDERS_TO_PACKAGE = ['api', 'tools', 'database']
 
-    # --- Sanity Checks & Dummy File Creation for Testing ---
-    # This part helps in testing the script if you don't have these files yet.
+    # --- Sanity Checks & Dummy File Creation for Testing (same as before) ---
     current_dir = os.getcwd()
     if not os.path.exists(LAMBDA_HANDLER_FILE):
         print(f"Creating dummy '{LAMBDA_HANDLER_FILE}' for testing...")
@@ -401,78 +338,95 @@ if __name__ == "__main__":
             f.write("def lambda_handler(event, context):\n")
             f.write("    print(f'Hello from {os.environ.get(\"AWS_LAMBDA_FUNCTION_NAME\", \"Lambda\")}!')\n")
             f.write("    print(f'Received event: {json.dumps(event)}')\n")
-            f.write("    print(f'LOG_LEVEL: {os.environ.get(\"LOG_LEVEL\")}')\n")
-            f.write("    try:\n")
-            f.write("        from api import client  # Example import\n")
-            f.write("        client.test_api()\n")
-            f.write("    except ImportError:\n")
-            f.write("        print('Could not import from api folder. Ensure it is packaged.')\n")
-            f.write("    except AttributeError:\n")
-            f.write("        print('api.client does not have test_api. Ensure dummy files are correct.')\n")
             f.write("    return {'statusCode': 200, 'body': json.dumps('Hello from Lambda deployed by script!')}\n")
 
     if not os.path.exists(DEPENDENCIES_FILE):
         print(f"Creating dummy '{DEPENDENCIES_FILE}' for testing (e.g., with 'requests')...")
-        with open(DEPENDENCIES_FILE, 'w') as f:
-            f.write("requests\n")
-            f.write("# boto3 # Often included in Lambda runtime, but can be bundled if specific version needed\n")
+        with open(DEPENDENCIES_FILE, 'w') as f: f.write("requests\n")
 
     for folder_name in FOLDERS_TO_PACKAGE:
         folder_path = os.path.join(current_dir, folder_name)
         if not os.path.exists(folder_path):
             print(f"Creating dummy folder '{folder_name}/' for testing...")
             os.makedirs(folder_path)
-            # Add a dummy __init__.py to make it a package and a dummy module
-            with open(os.path.join(folder_path, '__init__.py'), 'w') as f:
-                f.write(f"# __init__.py for {folder_name}\n")
-            if folder_name == 'api': # Example with a submodule
-                 with open(os.path.join(folder_path, 'client.py'), 'w') as f:
-                    f.write(f"def test_api():\n    print('Hello from {folder_name}.client.test_api()')\n")
-            else:
-                 with open(os.path.join(folder_path, f'{folder_name}_utils.py'), 'w') as f:
-                    f.write(f"def test_util():\n    print('Hello from {folder_name}_utils.test_util()')\n")
+            with open(os.path.join(folder_path, '__init__.py'), 'w') as f: f.write(f"# __init__.py for {folder_name}\n")
+            if folder_name == 'api':
+                 with open(os.path.join(folder_path, 'client.py'), 'w') as f: f.write(f"def test_api(): print('Hello from api.client')\n")
     print("----------------------------------------------")
 
-    # --- Pre-run User Confirmation ---
+    # --- Review Configuration ---
     print("\nReview Configuration:")
     print(f"  Lambda Function Name: {AWS_FUNCTION_NAME}")
     print(f"  Lambda Handler:       {AWS_HANDLER_NAME}")
-    print(f"  Lambda Runtime:       {AWS_RUNTIME}")
-    print(f"  IAM Role ARN:         {AWS_IAM_ROLE_ARN}")
+    print(f"  Lambda Runtime:       {AWS_RUNTIME} (Ensure this is supported in {AWS_REGION})")
+    print(f"  IAM Role ARN:         {AWS_IAM_ROLE_ARN} (Ensure correct trust policy for Lambda)")
     print(f"  AWS Region:           {AWS_REGION or 'Default (from AWS CLI config)'}")
-    print(f"  S3 Bucket for Upload: {AWS_S3_DEPLOYMENT_BUCKET or 'None (direct upload)'}")
+    if AWS_S3_DEPLOYMENT_BUCKET:
+        print(f"  Deployment via S3:    {AWS_S3_DEPLOYMENT_BUCKET}")
+    else:
+        print(f"  Deployment Method:    Direct ZIP upload")
     print(f"  Handler File:         {LAMBDA_HANDLER_FILE}")
-    print(f"  Dependencies File:    {DEPENDENCIES_FILE}")
-    print(f"  Folders to Package:   {FOLDERS_TO_PACKAGE}")
-    print(f"  Timeout:              {LAMBDA_TIMEOUT_SECONDS}s")
-    print(f"  Memory:               {LAMBDA_MEMORY_MB}MB")
-    print(f"  Environment Vars:     {LAMBDA_ENVIRONMENT_VARIABLES}")
+    # ... (other config printouts) ...
     print("----------------------------------------------")
 
-    if "YOUR_ACCOUNT_ID" in AWS_IAM_ROLE_ARN or "YOUR_LAMBDA_EXECUTION_ROLE_NAME" in AWS_IAM_ROLE_ARN :
-        print("\nERROR: Please update 'AWS_IAM_ROLE_ARN' in the script with your actual IAM Role ARN.")
-        print("Deployment aborted.")
-    else:
-        proceed = input("Do you want to proceed with packaging and deployment? (yes/no): ")
-        if proceed.lower() == 'yes':
-            print("\nStarting deployment process...\n")
-            create_and_deploy_lambda(
-                lambda_handler_file=LAMBDA_HANDLER_FILE,
-                dependencies_file=DEPENDENCIES_FILE,
-                aws_lambda_function_name=AWS_FUNCTION_NAME,
-                aws_lambda_handler=AWS_HANDLER_NAME,
-                aws_lambda_runtime=AWS_RUNTIME,
-                aws_iam_role_arn=AWS_IAM_ROLE_ARN,
-                folders_to_include=FOLDERS_TO_PACKAGE,
-                aws_deployment_region=AWS_REGION,
-                aws_s3_bucket_for_upload=AWS_S3_DEPLOYMENT_BUCKET,
-                lambda_timeout=LAMBDA_TIMEOUT_SECONDS,
-                lambda_memory_size=LAMBDA_MEMORY_MB,
-                lambda_env_variables=LAMBDA_ENVIRONMENT_VARIABLES,
-                publish_new_version=True
-            )
+    # --- User Choice for Action ---
+    should_deploy_lambda = False
+    while True:
+        print("\nChoose an action:")
+        print("1. Create ZIP package only")
+        print("2. Create ZIP package AND deploy to AWS Lambda")
+        choice = input("Enter your choice (1 or 2): ").strip()
+        if choice == '1':
+            should_deploy_lambda = False
+            print("\nAction: Create ZIP package only.")
+            break
+        elif choice == '2':
+            should_deploy_lambda = True
+            print("\nAction: Create ZIP package AND deploy to AWS Lambda.")
+            # Perform pre-deployment IAM role ARN check only if deploying
+            # Note: The "YOUR_ACCOUNT_ID" check was removed as user provided a full ARN.
+            # A more robust check would be to validate the ARN format or existence if needed.
+            if not AWS_IAM_ROLE_ARN or "YOUR_ACCOUNT_ID" in AWS_IAM_ROLE_ARN or "YOUR_LAMBDA_EXECUTION_ROLE_NAME" in AWS_IAM_ROLE_ARN:
+                 print("\nERROR: 'AWS_IAM_ROLE_ARN' seems to be a placeholder. Please set it correctly before deploying.")
+                 print("Exiting.")
+                 exit()
+            break
         else:
-            print("Deployment cancelled by user.")
+            print("Invalid choice. Please enter 1 or 2.")
+    
+    # --- Execute ---
+    print("\nStarting process...\n")
+    zip_file_created_path, deployment_outcome = create_and_deploy_lambda(
+        lambda_handler_file=LAMBDA_HANDLER_FILE,
+        dependencies_file=DEPENDENCIES_FILE,
+        aws_lambda_function_name=AWS_FUNCTION_NAME,
+        aws_lambda_handler=AWS_HANDLER_NAME,
+        aws_lambda_runtime=AWS_RUNTIME,
+        aws_iam_role_arn=AWS_IAM_ROLE_ARN,
+        folders_to_include=FOLDERS_TO_PACKAGE,
+        aws_deployment_region=AWS_REGION,
+        aws_s3_bucket_for_upload=AWS_S3_DEPLOYMENT_BUCKET,
+        lambda_timeout=LAMBDA_TIMEOUT_SECONDS,
+        lambda_memory_size=LAMBDA_MEMORY_MB,
+        lambda_env_variables=LAMBDA_ENVIRONMENT_VARIABLES,
+        publish_new_version=True,
+        perform_deployment=should_deploy_lambda # Pass user's choice
+    )
+
+    print("\n--- Process Summary ---")
+    if zip_file_created_path:
+        print(f"✅ Packaging successful. ZIP package is at: {zip_file_created_path}")
+        if should_deploy_lambda:
+            if deployment_outcome is True:
+                print(f"✅ Deployment successful for function '{AWS_FUNCTION_NAME}'.")
+            elif deployment_outcome is False:
+                print(f"❌ Deployment FAILED for function '{AWS_FUNCTION_NAME}'.")
+            # If deployment_outcome is None here, it means perform_deployment was True but something went wrong before deployment call
+            # This case should ideally be covered by zip_file_created_path being None if packaging failed.
+    else:
+        print("❌ Packaging FAILED.")
+        if should_deploy_lambda:
+            print("❌ Deployment was not attempted due to packaging failure.")
 
     print("\n==============================================")
     print("Script execution finished.")

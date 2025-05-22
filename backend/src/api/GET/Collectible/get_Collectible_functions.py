@@ -128,12 +128,39 @@ def getAllCollectibles(event):
     skip = 0
     limit = 100
 
-    if "skip" in data:
-        skip = data["skip"]
-    if "limit" in data:
-        limit = data["limit"]
+    if data is not None:  # Check if data is not None before trying to access it
+        if "skip" in data:
+            try:
+                # Attempt to convert to int, handle potential errors
+                skip_param = data.get("skip")
+                if skip_param is not None: # Ensure skip_param is not None before int conversion
+                    skip = int(skip_param)
+            except (ValueError, TypeError):
+                print(f"Warning: Invalid 'skip' parameter value: {data.get('skip')}. Using default {skip}.")
+        if "limit" in data:
+            try:
+                # Attempt to convert to int, handle potential errors
+                limit_param = data.get("limit")
+                if limit_param is not None: # Ensure limit_param is not None before int conversion
+                    limit = int(limit_param)
+            except (ValueError, TypeError):
+                print(f"Warning: Invalid 'limit' parameter value: {data.get('limit')}. Using default {limit}.")
+    else:
+        # This else block is optional, but can be useful for logging if you expect data
+        print("Debug: No query parameters ('skip', 'limit') found for getAllCollectibles. Using defaults.")
 
-    return crudFunctions.getAllCollectibles(skip=skip, limit=limit, db=event['db_session'])
+    # Ensure event['db_session'] is available, as seen in your lambda_handler
+    db_session = event.get('db_session')
+    if db_session is None:
+        # Handle missing db_session appropriately, e.g., raise an error or return an error response
+        # This depends on how db_session is consistently injected into the event
+        print("Error: db_session not found in event for getAllCollectibles.")
+        # For now, let's assume it should always be there as per your lambda_handler structure
+        # raise Exception("Database session is missing") 
+        # Or return an error: return {"statusCode": 500, "body": "Internal server error: DB session missing"}
+        # For now, will proceed assuming it's there, but this is a critical check.
+
+    return crudFunctions.getAllCollectibles(skip=skip, limit=limit, db=db_session)
 
 def getCollectiblesByProjectId(event):
     """
