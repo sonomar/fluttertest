@@ -19,6 +19,16 @@ The API provides a comprehensive set of CRUD operations for various entities suc
 * **AWS Cognito Integration**: Automatically creates a user in the application database when a new user confirms their signup in Cognito (`lambda_function.py`).
 * **Dependency Management**: Python dependencies are listed in `package.txt`.
 
+  If using VSCode, consider adding the following to your workspace or `settings.json` file to configure Python's type checking level:
+
+  ```json
+  {
+    "python.analysis.typeCheckingMode": "basic"  // or "strict" for more rigorous checks
+  }
+  ```
+
+  This helps in maintaining code quality and identifying potential bugs early through static analysis.
+
 ## 🏗️ Project Structure
 
 ```bash
@@ -53,87 +63,115 @@ kloopocarGeneralFunctions_deployment_package/
 ## 📋 Prerequisites
 
 * **Python**: Version 3.12 (as specified in `deployment.py`'s `AWS_RUNTIME`).
+
 * **pip**: For installing Python packages.
+
 * **AWS CLI**: Configured for deploying to AWS. (See [AWS CLI Installation Guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html))
+
+  ### Install AWS CLI
+
+  To install the AWS CLI on macOS:
+
+  ```bash
+  curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+  sudo installer -pkg AWSCLIV2.pkg -target /
+  ```
+
+  After installation, run:
+
+  ```bash
+  aws configure
+  ```
+
+  This will prompt you to enter your AWS Access Key, Secret Key, Region, and default output format.
+  Ensure your IAM user or role has the necessary permissions, such as:
+
+  * `sts:AssumeRole`
+  * `lambda:*`
+  * `secretsmanager:GetSecretValue`
+  * `logs:*`
+  * `cognito-idp:*` (if integrating with Cognito)
+
 * **MySQL Database**: The application uses `pymysql` and SQLAlchemy, implying a MySQL-compatible database.
+
 * **Docker** (Optional): If you plan to containerize the FastAPI application or build deployment packages in a consistent environment.
+
 * **Alembic**: For database migrations. Installed via `package.txt`.
 
 ## ⚙️ Setup and Installation
 
 1. **Clone the Repository** (if applicable)
 
-```bash
-git clone <repository_url>
-cd kloopocarGeneralFunctions_deployment_package
-```
+   ```bash
+   git clone <repository_url>
+   cd kloopocarGeneralFunctions_deployment_package
+   ```
 
 2. **Create and Activate a Python Virtual Environment**:
 
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
 3. **Install Dependencies**:
 
-The required Python packages are listed in `package.txt`.
+   ```bash
+   pip install -r package.txt
+   ```
 
-```bash
-pip install -r package.txt
-```
-
-Key dependencies include: `fastapi`, `uvicorn`, `sqlalchemy`, `alembic`, `pymysql`, `pydantic`, `boto3`.
+    Key dependencies include: `fastapi`, `uvicorn`, `sqlalchemy`, `alembic`, `pymysql`, `pydantic`, `boto3`.
 
 4. **Configure Environment Variables for Local Development**:
 
-The application uses `database/db.py` which attempts to load database credentials. For local development, create a `.env` file in the project root with the following variables (this file is typically gitignored):
+    The application uses `database/db.py` which attempts to load database credentials. For local development, create a `.env` file in   the project root with the following variables (this file is typically gitignored):
 
-```env
-DB_HOST=your_local_db_host
-DB_PORT=3306 # Or your MySQL port
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_NAME=kloopocar # Or your database name
-ENV=local # To signify local environment
-# For AWS Lambda, secret_key is used by tools/prod/prodTools.py
-# For local development, this isn't strictly necessary if ENV=local
-# secret_key=your_aws_secret_name_for_local_testing_if_needed
-```
+    ```env
+    DB_HOST=your_local_db_host
+    DB_PORT=3306 # Or your MySQL port
+    DB_USER=your_db_user
+    DB_PASSWORD=your_db_password
+    DB_NAME=kloopocar # Or your database name
+    ENV=local # To signify local environment
+    # For AWS Lambda, secret_key is used by tools/prod/prodTools.py
+    # For local development, this isn't strictly necessary if
+    ENV=local
+    # secret_key=your_aws_secret_name_for_local_testing_if_needed
+    ```
 
-Refer to `tools/prod/prodTools.py` and `database/db.py` for how secrets and database connections are handled.
+    Refer to `tools/prod/prodTools.py` and `database/db.py` for how secrets and database connections are handled.
 
 5. **Database Setup and Migrations**:
 
-This project uses Alembic for database migrations.
+    This project uses Alembic for database migrations.
 
-* **Configure Alembic**:
+    * **Configure Alembic**:
 
-  * Ensure `alembic.ini` has the correct `sqlalchemy.url`. For local development, it might look like:
+    * Ensure `alembic.ini` has the correct `sqlalchemy.url`. For local development, it might look like:
 
-```ini
-sqlalchemy.url = mysql+pymysql://your_db_user:your_db_password@your_local_db_host/kloopocar
-```
+    ```ini
+    sqlalchemy.url = mysql+pymysql://your_db_user:your_db_password@your_local_db_host/kloopocar
+    ```
 
-The `env.py` script (likely `alembic/env.py` or a custom one based on templates) should target the `Base.metadata` from `database.models`.
+    The `env.py` script (likely `alembic/env.py` or a custom one based on templates) should target the `Base.metadata` from `database.models`.
 
-* **Create Initial Migration (if starting fresh)**:
+    * **Create Initial Migration (if starting fresh)**:
 
-If you're setting up the database for the first time and models exist in `database/models.py`:
+    If you're setting up the database for the first time and models exist in `database/models.py`:
 
-```bash
-alembic revision -m "create initial tables" --autogenerate
-```
+    ```bash
+    alembic revision -m "create initial tables" --autogenerate
+    ```
 
-* **Apply Migrations**:
+    * **Apply Migrations**:
 
-To apply all pending migrations to your database:
+    To apply all pending migrations to your database:
 
-```bash
-alembic upgrade head
-```
+    ```bash
+    alembic upgrade head
+    ```
 
-## ඝ Running Locally (FastAPI Server)
+## ධ Running Locally (FastAPI Server)
 
 To run the application as a FastAPI server locally (primarily for development and testing API endpoints):
 
@@ -147,17 +185,17 @@ The application will be available at [http://localhost:8000](http://localhost:80
 
 The `deployment.py` script automates the packaging and deployment of this application as an AWS Lambda function.
 
-### 1. AWS CLI Configuration:
+### 1. **AWS CLI Configuration**:
 
 Ensure your AWS CLI is installed and configured with necessary permissions.
 
-```bash
-aws configure
-```
+   ```bash
+   aws configure
+   ```
 
 The script `deployment.py` checks for AWS CLI availability and identity.
 
-### 2. IAM Role and Permissions:
+### 2. **IAM Role and Permissions**:
 
 The Lambda function requires an IAM role with permissions to:
 
@@ -169,7 +207,7 @@ The Lambda function requires an IAM role with permissions to:
 
 An example IAM Role ARN is provided in `deployment.py` (replace with your actual ARN).
 
-### 3. Configure `deployment.py`:
+### 3. **Configure `deployment.py`**:
 
 Open `deployment.py` and modify the --- Core Configuration --- section as needed:
 
@@ -185,13 +223,13 @@ Open `deployment.py` and modify the --- Core Configuration --- section as needed
 * `LAMBDA_ENVIRONMENT_VARIABLES`: Set environment variables for the Lambda, including `ENV=production` and `secret_key` (ARN for AWS Secrets Manager).
 * `FOLDERS_TO_PACKAGE`: List of folders to include in the deployment package.
 
-### 4. Run the Deployment Script:
+4. **Run Deployment Script**:
 
 The script offers two modes: packaging only, or packaging and deploying.
 
-```bash
-python deployment.py
-```
+   ```bash
+   python deployment.py
+   ```
 
 You will be prompted to choose an action:
 
@@ -216,23 +254,22 @@ This file is crucial for Alembic. It should be configured to:
 * Point to your database URL (can be read from `alembic.ini` or environment variables).
 * Import and set `target_metadata = Base.metadata` from your `database.models` (or wherever your SQLAlchemy Base and models are defined). This allows Alembic to autogenerate migrations by comparing your models to the database state.
 
-### Generating a New Migration:
+###  **Generating a New Migration**:
 
 After making changes to your SQLAlchemy models in `database/models.py`:
 
-```bash
-alembic revision -m "your_migration_message_here" --autogenerate
-```
+  ```bash
+  alembic revision -m "your_migration_message_here" --autogenerate
+  ```
 
 This will compare your models against the database schema (as per `sqlalchemy.url` in `alembic.ini`) and generate a new revision script in the `alembic/versions/` directory. Review the generated script carefully.
 
-### Applying Migrations:
-
+### **Applying Migrations**:
 To apply pending migrations to the database:
 
-```bash
-alembic upgrade head
-```
+  ```bash
+  alembic upgrade head
+  ```
 
 To upgrade to a specific revision:
 
@@ -240,31 +277,30 @@ To upgrade to a specific revision:
 alembic upgrade <revision_id>
 ```
 
-### Downgrading Migrations:
+### **Downgrading Migrations**:
 
 To downgrade to a specific revision:
 
-```bash
-alembic downgrade <revision_id>
-```
+  ```bash
+  alembic downgrade <revision_id>
+  ```
 
 To downgrade by one step:
 
 ```bash
 alembic downgrade -1
 ```
+* **Checking Current Revision**:
 
-### Checking Current Revision:
-
-```bash
-alembic current
-```
+  ```bash
+  alembic current
+  ```
 
 ## 🔗 API Endpoints
 
 The API is structured with FastAPI and a dynamic routing mechanism.
 
-* **FastAPI (**\`\`**)**: Sets up the FastAPI application. It dynamically registers routes for GET, POST, PATCH, and DELETE methods based on configurations in:
+* **FastAPI (main.py)**: Sets up the FastAPI application. It dynamically registers routes for GET, POST, PATCH, and DELETE methods based on configurations in:
 
   * `api/GET/api_paths_get.py`
   * `api/POST/api_paths_post.py`
@@ -279,6 +315,7 @@ These files map paths to handler functions located in the `database/CRUD/` subdi
   * This setup appears to be a bridge between an older routing style and the newer FastAPI approach. For direct Lambda invocation without FastAPI (or using a shim like Mangum), this is the entry point.
 
 Due to the dynamic and extensive nature of the API (covering tables like User, Category, Community, Collection, Project, Collectible, etc.), please refer to the `API_PATHS_*.py` files for specific endpoint paths and their corresponding handler functions.
+
 
 ## 🔑 AWS Cognito Integration
 
