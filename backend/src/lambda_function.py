@@ -9,6 +9,8 @@ from database.db import get_db
 from database.schema.POST.User.user_schema import UserCreate
 from database.CRUD.POST.User import post_User_CRUD_functions as UserCRUDPost
 from database.CRUD.GET.User import get_User_CRUD_functions as UserCRUDGet # This likely points to functions in src/api/GET/User/get_User_functions.py
+from api.routeCheckAll import http_router_all
+
 
 # ----- KEY CHANGE: Import NotFoundException from the correct module -----
 # Adjust the path "api.exceptions" if your project structure places it elsewhere
@@ -21,15 +23,9 @@ from api.exceptions import NotFoundException
 # This is for the non-Cognito part, ensure http_router_all is correctly imported
 # from api.routeCheckAll import http_router_all # Assuming this path is correct for your deployment
 
-# Placeholder for http_router_all if not immediately available or for focusing on Cognito part
-def http_router_all(event):
-    print("http_router_all called with event:", event)
-    # Replace with actual implementation or ensure it's correctly imported
-    return {"message": "HTTP part processed by http_router_all (placeholder)"}
-
 
 def lambda_handler(event, context):
-    print(f"Received event: {json.dumps(event)}") # Log the entire event for debugging
+    print(f"Received event: {event}") # Log the entire event for debugging
 
     # Check if the event is from a Cognito PostConfirmation trigger
     if event.get('triggerSource') == 'PostConfirmation_ConfirmSignUp' and event.get('userPoolId'):
