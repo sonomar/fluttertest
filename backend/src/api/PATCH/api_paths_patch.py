@@ -117,8 +117,8 @@ API_PATHS_PATCH = {
     },
     UserCollectible_table: {
         "updateUserCollectibleByUserCollectibleId": {
-            "path": "/updateCollectibleUserByCollectibleUserId", # Assuming userId becomes a path param
-            "pathLocal": "/updateCollectibleUserByCollectibleUserId/{userCollectibleId}", # Assuming userId becomes a path param
+            "path": "/updateUserCollectibleByUserCollectibleId", # Assuming userId becomes a path param
+            "pathLocal": "/updateUserCollectibleByUserCollectibleId/{userCollectibleId}", # Assuming userId becomes a path param
             "active": True,
             "handler": UserCollectiblePATCHFunctions.updateUserCollectibleByUserCollectibleId, # <-- Reference
             "response_model": UserCollectibleResponse # Or a simple message schema like {"message": "User updated successfully"}
