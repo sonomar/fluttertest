@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS kloopocar;
-USE kloopocar;
+CREATE DATABASE IF NOT EXISTS kloppocar;
+USE kloppocar;
 
 -- User Table
 CREATE TABLE IF NOT EXISTS User (

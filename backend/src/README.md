@@ -1,4 +1,4 @@
-# Kloopocar General Functions API
+# Kloppocar General Functions API
 
 ## 🚀 Overview
 
@@ -131,7 +131,7 @@ kloopocarGeneralFunctions_deployment_package/
     DB_PORT=3306 # Or your MySQL port
     DB_USER=your_db_user
     DB_PASSWORD=your_db_password
-    DB_NAME=kloopocar # Or your database name
+    DB_NAME=kloppocar # Or your database name
     ENV=local # To signify local environment
     # For AWS Lambda, secret_key is used by tools/prod/prodTools.py
     # For local development, this isn't strictly necessary if
@@ -150,7 +150,7 @@ kloopocarGeneralFunctions_deployment_package/
     * Ensure `alembic.ini` has the correct `sqlalchemy.url`. For local development, it might look like:
 
     ```ini
-    sqlalchemy.url = mysql+pymysql://your_db_user:your_db_password@your_local_db_host/kloopocar
+    sqlalchemy.url = mysql+pymysql://your_db_user:your_db_password@your_local_db_host/kloppocar
     ```
 
     The `env.py` script (likely `alembic/env.py` or a custom one based on templates) should target the `Base.metadata` from `database.models`.

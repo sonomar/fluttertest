@@ -71,7 +71,7 @@ def _execute_admin_sql_direct_pymysql(sql_statement: str, commit: bool = True, d
 def temporary_test_database():
     global _test_db_sqlalchemy_engine, _current_test_db_name
 
-    _current_test_db_name = f"test_kloopocar_{uuid.uuid4().hex[:8]}"
+    _current_test_db_name = f"test_kloppocar_{uuid.uuid4().hex[:8]}"
     print(f"\nSETUP [temporary_test_database]: Attempting to create temporary test database: {_current_test_db_name} using admin user '{ADMIN_DB_USER}'")
 
     try:
