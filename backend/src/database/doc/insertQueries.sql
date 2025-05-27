@@ -1,4 +1,4 @@
-USE kloppocar;
+USE deins_db_local;
 -- Inserting data into User table
 INSERT INTO User (email, userRank, username, passwordHashed, profileImg, userType, lastLoggedIn) VALUES
 ('user1@example.com', '{"level": 1, "points": 10}', 'user_one', '$2a$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'https://via.placeholder.com/150/FFC107', 'username', NOW() - INTERVAL 1 DAY),
