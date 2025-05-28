@@ -60,7 +60,7 @@ apiGetRequest(
     method: 'GET',
     path: path,
     headers: {
-      'Authorization': userCode,
+      'Authorization': code,
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'
     },
@@ -75,7 +75,7 @@ apiGetRequest(
     response = await http.get(
       Uri.parse(signedRequest.url ?? 'no request found'),
       headers: Map<String, String>.from(
-          {'Access-Control-Allow-Origin': '*', 'Authorization': userCode}),
+          {'Content-Type': 'application/json', 'Authorization': code}),
     );
   } catch (e) {
     // ignore: avoid_print
@@ -123,7 +123,7 @@ apiPatchRequest(
     response =
         await http.patch(Uri.parse(signedRequest.url ?? 'no request found'),
             headers: Map<String, String>.from({
-              'Authorization': userCode,
+              'Authorization': code,
               'Content-Type': 'application/json',
             }),
             body: signedRequest.body);
@@ -173,7 +173,7 @@ apiPostRequest(
     response =
         await http.post(Uri.parse(signedRequest.url ?? 'no request found'),
             headers: Map<String, String>.from({
-              'Authorization': userCode,
+              'Authorization': code,
               'Content-Type': 'application/json',
             }),
             body: signedRequest.body);
@@ -193,7 +193,7 @@ apiDeleteRequest(
   // ignore: avoid_print
   final credentials = CognitoCredentials(identityPool, userPool);
   var code = await getJWTCode('jwtIdCode');
-  var userCode = await getJWTCode('jwtCode');
+  // var userCode = await getJWTCode('jwtCode');
   // ignore: avoid_print
   print('CODE: $code');
   await credentials.getAwsCredentials(code);
@@ -226,7 +226,7 @@ apiDeleteRequest(
     response = await http.delete(
         Uri.parse(signedRequest.url ?? 'no request found'),
         headers: Map<String, String>.from({
-          'Authorization': userCode,
+          'Authorization': code,
           'Content-Type': 'application/json',
           'Accept': "*/*"
         }),

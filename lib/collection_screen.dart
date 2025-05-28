@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import './collectibles/collectible_details.dart';
 import './api/collectible.dart';
+import './api/collection.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,6 +16,11 @@ class CollectionScreen extends StatefulWidget {
 class _CollectionScreenState extends State<CollectionScreen> {
   List _items = [];
   final Map _cardStatus = {};
+  dynamic firstCollection;
+  List collectionCollectibles =
+      []; // This will hold the result of the async call
+  bool _isLoadingCollectibles = true; // Add a loading state variable
+  String? _errorMessageCollectibles; // Add an error message variable
   Map exampleWallet = {
     "collectibleId": 99,
     "label": "item-test77",
@@ -39,21 +45,41 @@ class _CollectionScreenState extends State<CollectionScreen> {
     "publication-date": "20.03.2025"
   };
 
-  Future<void> readItemJson() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String response =
-        await rootBundle.loadString('assets/json/example.json');
-    final data = await json.decode(response);
-    setState(() {
-      _items = data['collectibles'];
-    });
-    for (int i = 0; i < _items.length; i++) {
-      var foundItem = _items[i]['label'];
-      setState(() {
-        _cardStatus[foundItem] = prefs.getBool(foundItem);
-      });
+  Future<void> _loadCollectibleData() async {
+    try {
+      final res = await getCollectiblesByCollectionId(1);
+      collectionCollectibles = res;
+      print('Collectible Response: $res'); // If it directly returns a list
+    } catch (e) {
+      print('Error loading collection data: $e');
     }
   }
+
+  Future<void> _loadCollectionData() async {
+    try {
+      final res = await getCollectibleByCollectibleId(1);
+      collectionCollectibles = res; // If it directly returns a list
+      print('Collectible Response: $res');
+    } catch (e) {
+      print('Error loading collection data: $e');
+    }
+  }
+
+  // Future<void> readItemJson() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   final String response =
+  //       await rootBundle.loadString('assets/json/example.json');
+  //   final data = await json.decode(response);
+  //   setState(() {
+  //     _items = data['collectibles'];
+  //   });
+  //   for (int i = 0; i < _items.length; i++) {
+  //     var foundItem = _items[i]['label'];
+  //     setState(() {
+  //       _cardStatus[foundItem] = prefs.getBool(foundItem);
+  //     });
+  //   }
+  // }
 
   Widget shadowCircle(imageLink, radius) {
     return Container(
@@ -122,8 +148,9 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   @override
   void initState() {
-    readItemJson();
-    getAllCollectibles();
+    // readItemJson();
+    _loadCollectionData();
+    _loadCollectibleData();
     // Make sure to call super.initState();
     super.initState();
   }
@@ -196,11 +223,13 @@ class _CollectionScreenState extends State<CollectionScreen> {
                         mainAxisSpacing: 5,
                         childAspectRatio: (6 / 10),
                         children: [
-                      for (int i = 0; i < _items.length; i++) ...[
+                      for (int i = 0;
+                          i < collectionCollectibles.length;
+                          i++) ...[
                         Container(
                             padding: const EdgeInsets.only(
                                 top: 20, left: 5, right: 5, bottom: 20),
-                            child: (_cardStatus[_items[i]['label']] == true)
+                            child: (collectionCollectibles[i]['label'] == true)
                                 ? linkedInkwell(_items[i])
                                 : unlinkedInkwell(_items[i]))
                       ]
