@@ -1,9 +1,10 @@
 import 'api_init.dart';
 
 void getAllCollectibles() async {
-  apiGetRequest('/getAllCollectibles', {});
+  apiGetRequest('Collectible/getAllCollectibles', {});
 }
 
 void getCollectibleByCollectibleId(id) async {
-  apiGetRequest('/getCollectibleByCollectibleId', {"CollectibleId": id});
+  apiGetRequest(
+      'Collectible/getCollectibleByCollectibleId', {"CollectibleId": id});
 }

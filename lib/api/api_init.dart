@@ -59,7 +59,11 @@ apiGetRequest(
     awsSigV4Client,
     method: 'GET',
     path: path,
-    headers: {'Access-Control-Allow-Origin': '*', 'Authorization': code},
+    headers: {
+      'Authorization': userCode,
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    },
     //body: Map<String, String>.from({}),
     queryParams: Map<String, String>.from(paramsContent),
     body: Map<String, dynamic>.from(paramsContent),
@@ -219,13 +223,14 @@ apiDeleteRequest(
   http.Response? response;
   print(signedRequest.url ?? 'no request found');
   try {
-    response =
-        await http.delete(Uri.parse(signedRequest.url ?? 'no request found'),
-            headers: Map<String, String>.from({
-              'Authorization': userCode,
-              'Content-Type': 'application/json',
-            }),
-            body: signedRequest.body);
+    response = await http.delete(
+        Uri.parse(signedRequest.url ?? 'no request found'),
+        headers: Map<String, String>.from({
+          'Authorization': userCode,
+          'Content-Type': 'application/json',
+          'Accept': "*/*"
+        }),
+        body: signedRequest.body);
   } catch (e) {
     // ignore: avoid_print
     print('ERROR');
