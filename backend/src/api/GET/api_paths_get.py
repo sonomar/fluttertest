@@ -153,25 +153,25 @@ API_PATHS_GET = {
     },
 
     UserCollectible_table: {
-        "getCollectibleUserByCollectibleIdAndMint": {
+        "getUserCollectibleByCollectibleIdAndMint": {
             "path": "/getUserCollectibleByCollectibleIdAndMint",
             "active": True,
             "handler": UserCollectibleGETFunctions.getUserCollectibleByCollectibleIdAndMint,
             "response_model": UserCollectibleResponse
         },
-        "getCollectibleUsersByOwnerId": {
+        "getUserCollectiblesByOwnerId": {
             "path": "/getUserCollectiblesByOwnerId",
             "active": True,
             "handler": UserCollectibleGETFunctions.getUserCollectiblesByOwnerId,
             "response_model": List[UserCollectibleResponse]
         },
-        "getCollectibleUsersByLastOwned": {
+        "getUserCollectiblesByLastOwned": {
             "path": "/getUserCollectiblesByLastOwned",
             "active": True,
             "handler": UserCollectibleGETFunctions.getUserCollectiblesByLastOwned,
             "response_model": List[UserCollectibleResponse]
         },
-         "getCollectibleUsersByCollectibleId": {
+         "getUserCollectiblesByCollectibleId": {
             "path": "/getUserCollectiblesByCollectibleId",
             "active": True,
             "handler": UserCollectibleGETFunctions.getUserCollectiblesByCollectibleId,

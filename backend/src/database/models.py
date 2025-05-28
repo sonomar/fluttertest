@@ -1,8 +1,6 @@
 # models.py
 from typing import List, Optional
 
-# Adjust the import path for Base
-from database.db import Base # <-- CHANGED
 
 from sqlalchemy import BigInteger, Enum, ForeignKeyConstraint, Index, JSON, String, TIMESTAMP, Text, text, Boolean # Import Boolean
 from sqlalchemy.dialects.mysql import BIGINT, INTEGER, TINYINT
@@ -10,8 +8,8 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
 
 # # The Base class is now imported from src.database, remove its definition here
-# class Base(DeclarativeBase): # <-- REMOVED
-#      pass # <-- REMOVED
+class Base(DeclarativeBase): # <-- REMOVED
+     pass # <-- REMOVED
 
 # Define Python Enum for userType if using Enum type hint
 import enum

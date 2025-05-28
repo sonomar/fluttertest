@@ -313,7 +313,7 @@ if __name__ == "__main__":
     AWS_FUNCTION_NAME = 'kloopocarGeneralFunctions'
     AWS_HANDLER_NAME = 'lambda_function.lambda_handler'
     # IMPORTANT: Change to a supported runtime if python3.13 is not yet available in your region
-    AWS_RUNTIME = 'python3.12' # Changed from python3.13 as a safer default
+    AWS_RUNTIME = 'python3.13' # Changed from python3.13 as a safer default
     # IMPORTANT: Ensure this role has the correct trust policy for 'lambda.amazonaws.com'
     AWS_IAM_ROLE_ARN = 'arn:aws:iam::557690594992:role/service-role/Admin'
     

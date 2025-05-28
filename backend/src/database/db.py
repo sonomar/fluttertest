@@ -13,9 +13,7 @@ from sqlalchemy.ext.declarative import declarative_base # Needed for Alembic tar
 # It will be overridden by the import from models.py
 Base = declarative_base()
 
-# The Base class is now imported from src.database, remove its definition here
-class Base(DeclarativeBase): # <-- REMOVED
-     pass # <-- REMOVED
+
 
 # --- Database URL Configuration ---
 # This adapts to your environment (local via .env, prod via Secrets Manager)
