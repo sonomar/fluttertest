@@ -11,8 +11,8 @@ Future<String> getJWTCode(code) async {
   return prefs.getString(code) as String;
 }
 
-getApiUrl() {
-  var endpoint = dotenv.env['API_URL'];
+getEnvItem(item) {
+  var endpoint = dotenv.env[item];
   if (endpoint != null) {
     return endpoint;
   } else {
@@ -20,28 +20,23 @@ getApiUrl() {
   }
 }
 
-getCognitoUrl() {
-  var cognito = dotenv.env['COGNITO_IP_URL'];
-  if (cognito != null) {
-    return cognito;
-  } else {
-    return 'no Cognito URL found';
-  }
-}
+final endpoint = getEnvItem('API_URL');
+final identityPool = getEnvItem('COGNITO_IP_URL');
+final clientRegion = getEnvItem('COGNITO_UP_REGION');
+final clientId = getEnvItem('COGNITO_UP_CLIENTID');
 
 final userPool = CognitoUserPool(
-  'eu-central-1_flxgJwy19',
-  '3habrhuviqskit3ma595m5dp0b',
+  clientRegion,
+  clientId,
 );
 
 apiGetRequest(
   String path,
   Map<String, dynamic> paramsContent,
 ) async {
+  await dotenv.load(fileName: "../.env");
   // ignore: avoid_print
-  final endpoint = getApiUrl();
-  final cognito = getCognitoUrl();
-  final credentials = CognitoCredentials(cognito, userPool);
+  final credentials = CognitoCredentials(identityPool, userPool);
   var code = await getJWTCode('jwtIdCode');
   var userCode = await getJWTCode('jwtCode');
   // ignore: avoid_print
@@ -90,10 +85,9 @@ apiPatchRequest(
   String path,
   Map<String, dynamic> bodyContent,
 ) async {
+  await dotenv.load(fileName: ".env");
   // ignore: avoid_print
-  final endpoint = getApiUrl();
-  final cognito = getCognitoUrl();
-  final credentials = CognitoCredentials(cognito, userPool);
+  final credentials = CognitoCredentials(identityPool, userPool);
   var code = await getJWTCode('jwtIdCode');
   var userCode = await getJWTCode('jwtCode');
   // ignore: avoid_print
@@ -141,10 +135,9 @@ apiPostRequest(
   String path,
   Map<String, dynamic> bodyContent,
 ) async {
+  await dotenv.load(fileName: ".env");
   // ignore: avoid_print
-  final endpoint = getApiUrl();
-  final cognito = getCognitoUrl();
-  final credentials = CognitoCredentials(cognito, userPool);
+  final credentials = CognitoCredentials(identityPool, userPool);
   var code = await getJWTCode('jwtIdCode');
   var userCode = await getJWTCode('jwtCode');
   // ignore: avoid_print
@@ -192,10 +185,9 @@ apiDeleteRequest(
   String path,
   Map<String, dynamic> paramsContent,
 ) async {
+  await dotenv.load(fileName: ".env");
   // ignore: avoid_print
-  final endpoint = getApiUrl();
-  final cognito = getCognitoUrl();
-  final credentials = CognitoCredentials(cognito, userPool);
+  final credentials = CognitoCredentials(identityPool, userPool);
   var code = await getJWTCode('jwtIdCode');
   var userCode = await getJWTCode('jwtCode');
   // ignore: avoid_print
