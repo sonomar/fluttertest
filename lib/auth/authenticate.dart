@@ -1,11 +1,25 @@
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../api/user.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+getEnvItem(item) {
+  var endpoint = dotenv.env[item];
+  if (endpoint != null) {
+    return endpoint;
+  } else {
+    return 'no API endpoint found';
+  }
+}
+
+final clientRegion = getEnvItem('COGNITO_UP_REGION');
+final clientId = getEnvItem('COGNITO_UP_CLIENTID');
 
 Future<bool> authenticateUser(email, password) async {
+  await dotenv.load(fileName: "../.env");
   final userPool = CognitoUserPool(
-    'eu-central-1_flxgJwy19',
-    '3habrhuviqskit3ma595m5dp0b',
+    clientRegion,
+    clientId,
   );
   //username: lawsonmarlowe@gmail.com
   //password: password001

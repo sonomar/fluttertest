@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import './collectibles/collectible_details.dart';
+import './api/collectible.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -122,6 +123,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   @override
   void initState() {
     readItemJson();
+    getAllCollectibles();
     // Make sure to call super.initState();
     super.initState();
   }

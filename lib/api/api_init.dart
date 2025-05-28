@@ -1,9 +1,8 @@
-import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:amazon_cognito_identity_dart_2/sig_v4.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<String> getJWTCode(code) async {
   // ignore: avoid_print
@@ -12,20 +11,32 @@ Future<String> getJWTCode(code) async {
   return prefs.getString(code) as String;
 }
 
+getEnvItem(item) {
+  var endpoint = dotenv.env[item];
+  if (endpoint != null) {
+    return endpoint;
+  } else {
+    return 'no API endpoint found';
+  }
+}
+
+final endpoint = getEnvItem('API_URL');
+final identityPool = getEnvItem('COGNITO_IP_URL');
+final clientRegion = getEnvItem('COGNITO_UP_REGION');
+final clientId = getEnvItem('COGNITO_UP_CLIENTID');
+
 final userPool = CognitoUserPool(
-  'eu-central-1_flxgJwy19',
-  '3habrhuviqskit3ma595m5dp0b',
+  clientRegion,
+  clientId,
 );
 
 apiGetRequest(
   String path,
   Map<String, dynamic> paramsContent,
 ) async {
+  await dotenv.load(fileName: "../.env");
   // ignore: avoid_print
-  const endpoint =
-      'https://mnj4pgmr1h.execute-api.eu-central-1.amazonaws.com/kloopocar_dev';
-  final credentials = CognitoCredentials(
-      'eu-central-1:a053a3b2-6679-43f3-80b9-bd9f105e404a', userPool);
+  final credentials = CognitoCredentials(identityPool, userPool);
   var code = await getJWTCode('jwtIdCode');
   var userCode = await getJWTCode('jwtCode');
   // ignore: avoid_print
@@ -48,7 +59,11 @@ apiGetRequest(
     awsSigV4Client,
     method: 'GET',
     path: path,
-    headers: {'Access-Control-Allow-Origin': '*', 'Authorization': code},
+    headers: {
+      'Authorization': userCode,
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    },
     //body: Map<String, String>.from({}),
     queryParams: Map<String, String>.from(paramsContent),
     body: Map<String, dynamic>.from(paramsContent),
@@ -74,11 +89,9 @@ apiPatchRequest(
   String path,
   Map<String, dynamic> bodyContent,
 ) async {
+  await dotenv.load(fileName: ".env");
   // ignore: avoid_print
-  const endpoint =
-      'https://mnj4pgmr1h.execute-api.eu-central-1.amazonaws.com/kloopocar_dev';
-  final credentials = CognitoCredentials(
-      'eu-central-1:a053a3b2-6679-43f3-80b9-bd9f105e404a', userPool);
+  final credentials = CognitoCredentials(identityPool, userPool);
   var code = await getJWTCode('jwtIdCode');
   var userCode = await getJWTCode('jwtCode');
   // ignore: avoid_print
@@ -126,11 +139,9 @@ apiPostRequest(
   String path,
   Map<String, dynamic> bodyContent,
 ) async {
+  await dotenv.load(fileName: ".env");
   // ignore: avoid_print
-  const endpoint =
-      'https://mnj4pgmr1h.execute-api.eu-central-1.amazonaws.com/kloopocar_dev';
-  final credentials = CognitoCredentials(
-      'eu-central-1:a053a3b2-6679-43f3-80b9-bd9f105e404a', userPool);
+  final credentials = CognitoCredentials(identityPool, userPool);
   var code = await getJWTCode('jwtIdCode');
   var userCode = await getJWTCode('jwtCode');
   // ignore: avoid_print
@@ -178,11 +189,9 @@ apiDeleteRequest(
   String path,
   Map<String, dynamic> paramsContent,
 ) async {
+  await dotenv.load(fileName: ".env");
   // ignore: avoid_print
-  const endpoint =
-      'https://mnj4pgmr1h.execute-api.eu-central-1.amazonaws.com/kloopocar_dev';
-  final credentials = CognitoCredentials(
-      'eu-central-1:a053a3b2-6679-43f3-80b9-bd9f105e404a', userPool);
+  final credentials = CognitoCredentials(identityPool, userPool);
   var code = await getJWTCode('jwtIdCode');
   var userCode = await getJWTCode('jwtCode');
   // ignore: avoid_print
@@ -214,13 +223,14 @@ apiDeleteRequest(
   http.Response? response;
   print(signedRequest.url ?? 'no request found');
   try {
-    response =
-        await http.delete(Uri.parse(signedRequest.url ?? 'no request found'),
-            headers: Map<String, String>.from({
-              'Authorization': userCode,
-              'Content-Type': 'application/json',
-            }),
-            body: signedRequest.body);
+    response = await http.delete(
+        Uri.parse(signedRequest.url ?? 'no request found'),
+        headers: Map<String, String>.from({
+          'Authorization': userCode,
+          'Content-Type': 'application/json',
+          'Accept': "*/*"
+        }),
+        body: signedRequest.body);
   } catch (e) {
     // ignore: avoid_print
     print('ERROR');
