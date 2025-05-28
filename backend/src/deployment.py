@@ -208,7 +208,7 @@ def create_and_deploy_lambda(
             for dep in dependencies:
                 print(f"Installing: {dep} into {package_build_dir}")
                 pip_command = [
-                    'pip', 'install',
+                    'pip3', 'install',
                     '--target', package_build_dir,
                     '--platform', 'manylinux2014_x86_64',
                     '--implementation', 'cp',

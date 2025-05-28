@@ -69,15 +69,6 @@ def register_routes(paths_obj: list, method: str, handler: callable):
             methods=[method],
             response_model=path_obj.get("response_model", None),  # Handle response_model fallback
             status_code=200,
-             'headers': {
-                "Access-Control-Allow-Origin": "*",
-                # Required for credentials (e.g., Cognito JWT, cookies) to be sent from the client
-                "Access-Control-Allow-Credentials": True,
-                # Required for preflight and actual request if sending custom headers (like Authorization)
-                "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
-                # Required for preflight and must include all methods your API supports for this resource
-                "Access-Control-Allow-Methods": "OPTIONS,GET,POST,PATCH,DELETE"
-            },
             response_description="Successful operation",
             description=f"Create or manage item at {full_path}",
         )
