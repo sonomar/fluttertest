@@ -14,11 +14,10 @@ class CollectionScreen extends StatefulWidget {
 }
 
 class _CollectionScreenState extends State<CollectionScreen> {
-  List _items = [];
+  final dynamic _items = [];
   final Map _cardStatus = {};
   dynamic firstCollection;
-  List collectionCollectibles =
-      []; // This will hold the result of the async call
+  dynamic collectionCollectibles; // This will hold the result of the async call
   bool _isLoadingCollectibles = true; // Add a loading state variable
   String? _errorMessageCollectibles; // Add an error message variable
   Map exampleWallet = {
@@ -47,23 +46,27 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   Future<void> _loadCollectibleData() async {
     try {
-      final res = await getCollectiblesByCollectionId(1);
-      collectionCollectibles = res;
-      print('Collectible Response: $res'); // If it directly returns a list
+      final res = await getCollectiblesByCollectionId('1');
+      setState(() {
+        collectionCollectibles =
+            json.decode(res); // Now this assignment will trigger a rebuild
+      });
+      print('Collectible Response: $collectionCollectibles');
+      // If it directly returns a list
     } catch (e) {
-      print('Error loading collection data: $e');
+      print('Error loading collectible data: $e');
     }
   }
 
-  Future<void> _loadCollectionData() async {
-    try {
-      final res = await getCollectibleByCollectibleId(1);
-      collectionCollectibles = res; // If it directly returns a list
-      print('Collectible Response: $res');
-    } catch (e) {
-      print('Error loading collection data: $e');
-    }
-  }
+  // Future<void> _loadCollectionData() async {
+  //   try {
+  //     final res = await getCollectionByCollectionId('1');
+  //     firstCollection = res; // If it directly returns a list
+  //     print('Collection Response: $res');
+  //   } catch (e) {
+  //     print('Error loading collection data: $e');
+  //   }
+  // }
 
   // Future<void> readItemJson() async {
   //   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -98,6 +101,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   }
 
   Widget linkedInkwell(collectible) {
+    print('here is the collectible: $collectible');
     return Material(
         child: InkWell(
       onTap: () {
@@ -118,7 +122,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           image: DecorationImage(
-            image: AssetImage(collectible["imageRef"]),
+            image: AssetImage('assets/images/car3.jpeg'),
             fit: BoxFit.cover,
           ),
         ), // Fixes border issues
@@ -149,7 +153,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   @override
   void initState() {
     // readItemJson();
-    _loadCollectionData();
+    // _loadCollectionData();
     _loadCollectibleData();
     // Make sure to call super.initState();
     super.initState();
@@ -229,9 +233,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                         Container(
                             padding: const EdgeInsets.only(
                                 top: 20, left: 5, right: 5, bottom: 20),
-                            child: (collectionCollectibles[i]['label'] == true)
-                                ? linkedInkwell(_items[i])
-                                : unlinkedInkwell(_items[i]))
+                            child: linkedInkwell(collectionCollectibles[i]))
                       ]
                     ]))
               ]))

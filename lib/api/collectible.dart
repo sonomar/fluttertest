@@ -1,7 +1,7 @@
 import 'api_init.dart';
 
-Future<List> getAllCollectibles() async {
-  final res = await apiGetRequest('Collectible/getAllCollectibles', {});
+Future<dynamic> getAllCollectibles() async {
+  final res = apiGetRequest('Collectible/getAllCollectibles', {});
   if (res != null) {
     return res;
   } else {
@@ -9,9 +9,9 @@ Future<List> getAllCollectibles() async {
   }
 }
 
-Future<List> getCollectibleByCollectibleId(id) async {
-  final res = await apiGetRequest(
-      'Collectible/getCollectibleByCollectibleId', {"CollectibleId": id});
+Future<dynamic> getCollectibleByCollectibleId(id) async {
+  final res = apiGetRequest(
+      'Collectible/getCollectibleByCollectibleId', {"collectibleId": id});
   if (res != null) {
     return res;
   } else {
@@ -19,9 +19,9 @@ Future<List> getCollectibleByCollectibleId(id) async {
   }
 }
 
-Future<List> getCollectiblesByCollectionId(id) async {
-  final res = await apiGetRequest(
-      'Collectible/getCollectiblesByCollectionId', {"CollectionId": id});
+Future<dynamic> getCollectiblesByCollectionId(id) async {
+  final res = apiGetRequest(
+      'Collectible/getCollectiblesByCollection', {"collectionId": id});
   if (res != null) {
     return res;
   } else {

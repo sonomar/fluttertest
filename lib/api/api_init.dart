@@ -83,6 +83,7 @@ apiGetRequest(
   }
   // ignore: avoid_print
   print(response?.body);
+  return response?.body;
 }
 
 apiPatchRequest(
@@ -133,6 +134,7 @@ apiPatchRequest(
   }
   // ignore: avoid_print
   print(response?.body);
+  return response?.body;
 }
 
 apiPostRequest(
@@ -183,6 +185,7 @@ apiPostRequest(
   }
   // ignore: avoid_print
   print(response?.body);
+  return response?.body;
 }
 
 apiDeleteRequest(
@@ -237,4 +240,5 @@ apiDeleteRequest(
   }
   // ignore: avoid_print
   print(response?.body);
+  return response?.body;
 }
