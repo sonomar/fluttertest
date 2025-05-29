@@ -310,7 +310,7 @@ if __name__ == "__main__":
     LAMBDA_HANDLER_FILE = 'lambda_function.py'
     DEPENDENCIES_FILE = 'package.txt'
 
-    AWS_FUNCTION_NAME = 'kloopocarGeneralFunctions'
+    AWS_FUNCTION_NAME = 'DeinsBackend_Prod'
     AWS_HANDLER_NAME = 'lambda_function.lambda_handler'
     # IMPORTANT: Change to a supported runtime if python3.13 is not yet available in your region
     AWS_RUNTIME = 'python3.13' # Changed from python3.13 as a safer default
@@ -325,7 +325,7 @@ if __name__ == "__main__":
     LAMBDA_ENVIRONMENT_VARIABLES = {
         "ENV": "production",
         "EXAMPLE_VAR": "HelloFromLambdaEnv",
-        "secret_key": "arn:aws:secretsmanager:eu-central-1:557690594992:secret:kloopoSecrets-fP2FiS"
+        "secret_key": "arn:aws:secretsmanager:eu-central-1:557690594992:secret:Deins_Secret_Prod-uhtY6Y"
     }
     FOLDERS_TO_PACKAGE = ['api', 'tools', 'database']
 

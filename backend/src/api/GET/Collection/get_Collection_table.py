@@ -7,7 +7,7 @@ def call_Collection_function(raw_path, event):
     Collection_Path = API_PATHS_GET['Collection']
 
     ## Collection
-    if raw_path == Collection_Path['getCollectionById']['path']:
+    if raw_path == Collection_Path['getCollectionByCollectionId']['path']:
         returnString = collection.getCollectionByCollectionId(event)
 
     elif raw_path == Collection_Path['getCollectionByName']['path']:
