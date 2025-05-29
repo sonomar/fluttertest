@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../auth/authenticate.dart';
 import '../main.dart';
 import './signup_page.dart';
+import '../api/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -74,6 +76,12 @@ class LoginPageState extends State<LoginPage> {
                           var confirm =
                               await authenticateUser(username, password);
                           if (confirm == true) {
+                            final user = await getUserByEmail(username);
+                            final prefs = await SharedPreferences.getInstance();
+                            if (user != null) {
+                              final userId = user['userId'].toString();
+                              prefs.setString('userId', userId);
+                            }
                             navigator.push(MaterialPageRoute(
                                 builder: (context) => MyHomePage(
                                     title: 'Kloppocar App Home',

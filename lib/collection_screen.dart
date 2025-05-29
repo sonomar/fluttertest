@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import './collectibles/collectible_details.dart';
 import './api/collectible.dart';
 import './api/collection.dart';
-import './api/user.dart';
 import './api/user_collectible.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,9 +19,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   final Map _cardStatus = {};
   dynamic firstCollection;
   dynamic collectionCollectibles;
-  dynamic userCollectibles; // This will hold the result of the async call
-  bool _isLoadingCollectibles = true; // Add a loading state variable
-  String? _errorMessageCollectibles; // Add an error message variable
+  dynamic userCollectibles;
   Map exampleWallet = {
     "collectibleId": 99,
     "label": "item-test77",
@@ -50,9 +47,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   Future<void> _loadCollectibleData() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      var email = prefs.getString('email');
-      final user = await getUserByEmail(email);
-      final userId = user['userId'].toString();
+      final userId = prefs.getString('userId');
       final res = await getCollectiblesByCollectionId('1');
       final userRes = await getUserCollectiblesByOwnerId(userId);
       setState(() {
@@ -65,6 +60,16 @@ class _CollectionScreenState extends State<CollectionScreen> {
     } catch (e) {
       print('Error loading collectible data: $e');
     }
+  }
+
+  bool isUserOwned(collectible) {
+    for (int i = 0; i < userCollectibles.length; i++) {
+      if (userCollectibles[i]['collectibleId'] ==
+          collectible['collectibleId']) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // Future<void> _loadCollectionData() async {
@@ -111,6 +116,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   Widget linkedInkwell(collectible) {
     print('here is the collectible: $collectible');
+    final colImage = collectible["imageRef"][0];
     return Material(
         child: InkWell(
       onTap: () {
@@ -131,7 +137,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           image: DecorationImage(
-            image: AssetImage('assets/images/car3.jpeg'),
+            image: NetworkImage(colImage),
             fit: BoxFit.cover,
           ),
         ), // Fixes border issues
@@ -140,6 +146,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   }
 
   Widget unlinkedInkwell(collectible) {
+    final colImage = collectible["imageRef"][0];
     return Material(
       child: Container(
         foregroundDecoration: BoxDecoration(
@@ -151,7 +158,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           image: DecorationImage(
-            image: AssetImage(collectible["imageRef"]),
+            image: NetworkImage(colImage),
             fit: BoxFit.cover,
           ),
         ), // Fixes border issues
@@ -242,7 +249,10 @@ class _CollectionScreenState extends State<CollectionScreen> {
                         Container(
                             padding: const EdgeInsets.only(
                                 top: 20, left: 5, right: 5, bottom: 20),
-                            child: linkedInkwell(collectionCollectibles[i]))
+                            child: (isUserOwned(collectionCollectibles[i]) ==
+                                    true)
+                                ? linkedInkwell(collectionCollectibles[i])
+                                : unlinkedInkwell(collectionCollectibles[i]))
                       ]
                     ]))
               ]))

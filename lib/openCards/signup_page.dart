@@ -58,8 +58,8 @@ class SignupPageState extends State<SignupPage> {
               child: const Text('Confirm'),
               onPressed: () async {
                 final navigator = Navigator.of(context);
-                var checkConfirm = await emailConfirmUser(
-                    _emailController.text, _emailCodeController.text);
+                var checkConfirm = await emailConfirmUser(_emailController.text,
+                    _passwordController.text, _emailCodeController.text);
                 if (checkConfirm == true) {
                   navigator.push(MaterialPageRoute(
                       builder: (context) => MyHomePage(
