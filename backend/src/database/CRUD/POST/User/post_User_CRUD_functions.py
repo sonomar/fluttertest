@@ -2,7 +2,6 @@
 # Remove pymysql and old tools imports
 # from tools.prod.prodTools import extractData, get_connection # REMOVED
 # import pymysql # REMOVED
-
 from fastapi import Depends, HTTPException, status # Added FastAPI dependencies and exceptions
 from sqlalchemy.orm import Session # Added SQLAlchemy Session type
 from sqlalchemy.exc import IntegrityError # Import SQLAlchemy exceptions
@@ -29,13 +28,23 @@ def create_user(
     """
     Adds a new user to the database using SQLAlchemy.
     """
+
+    # Assuming user.password is the plain-text password
+    #password = user.passwordHashed.encode('utf-8')  # Ensure the password is bytes
+    password = user.passwordHashed
+    # Generate a salt
+    #salt = bcrypt.gensalt()
+
+    # Hash the password with the salt
+    #hashed_password = bcrypt.hashpw(password, salt)
+
     # In a real app, hash the password here!
-    #hashed_password = bcrypt.hash(user.password) # Example hashing
-    fake_hashed_password = user.passwordHashed + "notreallyhashed" # Placeholder!
+    #if bcrypt.checkpw(password.encode('utf-8'), hashed_password):
+    #fake_hashed_password = user.passwordHashed + "" # Placeholder!
     db_user = User(
         email=user.email,
         # Use the hashed password
-        passwordHashed=fake_hashed_password, # Use hashed password
+        passwordHashed=password, # Use hashed password
         userType=user.userType.value if user.userType is not None else UserTypeEnum.unregistered.value, # Use .value if using Python Enum
         username=user.username, # Optional fields from schema
         deviceId=user.deviceId,
