@@ -1,8 +1,8 @@
 import 'api_init.dart';
 
 Future<dynamic> getCollectionByCollectionId(id) async {
-  final res =
-      apiGetRequest('Collection/getCollectionById', {"collectionId": id});
+  final res = apiGetRequest(
+      'Collection/getCollectionByCollectionId', {"collectionId": id});
   if (res != null) {
     return res;
   } else {
