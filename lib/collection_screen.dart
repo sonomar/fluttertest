@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import './collectibles/collectible_details.dart';
 import './api/collectible.dart';
 import './api/collection.dart';
+import './api/user.dart';
+import './api/user_collectible.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,7 +19,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
   final dynamic _items = [];
   final Map _cardStatus = {};
   dynamic firstCollection;
-  dynamic collectionCollectibles; // This will hold the result of the async call
+  dynamic collectionCollectibles;
+  dynamic userCollectibles; // This will hold the result of the async call
   bool _isLoadingCollectibles = true; // Add a loading state variable
   String? _errorMessageCollectibles; // Add an error message variable
   Map exampleWallet = {
@@ -46,10 +49,16 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   Future<void> _loadCollectibleData() async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var email = prefs.getString('email');
+      final user = await getUserByEmail(email);
+      final userId = user['userId'].toString();
       final res = await getCollectiblesByCollectionId('1');
+      final userRes = await getUserCollectiblesByOwnerId(userId);
       setState(() {
-        collectionCollectibles =
-            json.decode(res); // Now this assignment will trigger a rebuild
+        collectionCollectibles = res;
+        userCollectibles =
+            userRes; // Now this assignment will trigger a rebuild
       });
       print('Collectible Response: $collectionCollectibles');
       // If it directly returns a list

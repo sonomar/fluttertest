@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:amazon_cognito_identity_dart_2/sig_v4.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -83,7 +84,9 @@ apiGetRequest(
   }
   // ignore: avoid_print
   print(response?.body);
-  return response?.body;
+  if (response != null) {
+    return json.decode(response.body);
+  }
 }
 
 apiPatchRequest(
@@ -134,7 +137,9 @@ apiPatchRequest(
   }
   // ignore: avoid_print
   print(response?.body);
-  return response?.body;
+  if (response != null) {
+    return json.decode(response.body);
+  }
 }
 
 apiPostRequest(
@@ -185,7 +190,9 @@ apiPostRequest(
   }
   // ignore: avoid_print
   print(response?.body);
-  return response?.body;
+  if (response != null) {
+    return json.decode(response.body);
+  }
 }
 
 apiDeleteRequest(
@@ -240,5 +247,7 @@ apiDeleteRequest(
   }
   // ignore: avoid_print
   print(response?.body);
-  return response?.body;
+  if (response != null) {
+    return json.decode(response.body);
+  }
 }
