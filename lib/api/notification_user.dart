@@ -10,23 +10,9 @@ Future<dynamic> getNotificationUsersByUserId(id) async {
   }
 }
 
-Future<dynamic> updateNotificationUserByNotificationUserId(notificationUserId,
-    {notificationId,
-    userId,
-    markedRead,
-    archived,
-    deleted,
-    pushNotification}) async {
+Future<dynamic> updateNotificationUserByNotificationUserId(body) async {
   final res = apiPatchRequest(
-      'NotificationUser/updateNotificationUserByNotificationUserId', {
-    "notificationUserId": notificationUserId,
-    "notificationId": notificationId,
-    "userId": userId,
-    "markedRead": markedRead,
-    "archived": archived,
-    "deleted": deleted,
-    "pushNotification": pushNotification,
-  });
+      'NotificationUser/updateNotificationUserByNotificationUserId', body);
   if (res != null) {
     return res;
   } else {
