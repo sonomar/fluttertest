@@ -142,14 +142,11 @@ class CardInfo extends StatelessWidget {
                           top: 20.0, left: 20.0, right: 20.0),
                       child: Column(children: [
                         lineItem("Kartennummer",
-                            selectedCollectible["collection-number"]),
-                        lineItem("Collectionsname",
-                            selectedCollectible["collection-name"]),
-                        lineItem("Community", selectedCollectible["community"]),
-                        lineItem("Sponsor", selectedCollectible["sponsor"]),
-                        lineItem("Auflage", selectedCollectible["circulation"]),
+                            selectedCollectible["collectibleId"].toString()),
+                        lineItem("Auflage",
+                            selectedCollectible["circulation"].toString()),
                         lineItem("Erscheinungsdatum",
-                            selectedCollectible["publication-date"])
+                            selectedCollectible["publicationDate"].toString())
                       ]))),
             ]),
             Text("DATEN",

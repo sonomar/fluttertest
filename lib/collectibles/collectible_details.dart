@@ -82,8 +82,8 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                         child: SizedBox(
                           height: 500,
                           width: double.infinity,
-                          child: widget.selectedCollectible["label"] ==
-                                  "item-test77"
+                          child: widget.selectedCollectible["name"] ==
+                                  "3D Wallet"
                               ? ObjectViewer(
                                   asset:
                                       "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/cardSample2/KloppoCar_Raw_Asset.gltf")
