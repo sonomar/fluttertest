@@ -28,12 +28,17 @@ def lambda_handler(event, context):
             # It could be an email, phone number, or a preferred username based on Cognito settings.
             cognito_username = event.get('userName')
 
+            cognito_password = event.get('password')
+
             if not email:
                 error_msg = "Email not found in Cognito event's userAttributes. Cannot create user in DB."
                 print(error_msg)
                 # Raising an error here will signal to Cognito that this part of the confirmation failed.
                 # Cognito might retry or handle this based on its configuration.
                 raise ValueError(error_msg)
+            
+            if not cognito_password:
+                cognito_password = "COGNITO_MANAGED_USER"
 
             # Prepare the user data for your database
             # The 'passwordHashed' field is mandatory in your UserCreate schema.
@@ -42,7 +47,7 @@ def lambda_handler(event, context):
             user_create_payload = UserCreate(
                 email=email,
                 username=cognito_username, # Map Cognito's userName to your DB username
-                passwordHashed="COGNITO_MANAGED_USER", # Placeholder
+                passwordHashed=cognito_password, # Placeholder
                 userType=UserTypeEnum.email # Default user type for Cognito sign-ups
                 # profileImg, deviceId, etc., will be None or their defaults unless extracted from Cognito
             )
