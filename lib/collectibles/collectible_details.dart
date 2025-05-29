@@ -88,7 +88,8 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                                   asset:
                                       "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/cardSample2/KloppoCar_Raw_Asset.gltf")
                               : ObjectViewer(
-                                  asset: "assets/3d/DEINS_Card_Export_02.glb"),
+                                  asset: widget.selectedCollectible['embedRef']
+                                      ['url']),
                         )),
                   ]))),
           SizedBox(

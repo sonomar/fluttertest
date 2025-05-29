@@ -76,9 +76,10 @@ Future<bool> authenticateUser(email, password) async {
 }
 
 Future<bool> getUserAttr(email) async {
+  await dotenv.load(fileName: "../.env");
   final userPool = CognitoUserPool(
-    'eu-central-1_flxgJwy19',
-    '3habrhuviqskit3ma595m5dp0b',
+    clientRegion,
+    clientId,
   );
   //username: lawsonmarlowe@gmail.com
   //password: password001

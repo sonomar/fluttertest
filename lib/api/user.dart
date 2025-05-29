@@ -8,3 +8,19 @@ Future<dynamic> getUserByEmail(email) async {
     throw ' database GET error';
   }
 }
+
+Future<dynamic> createUser(
+    email, password, userType, username, deviceId) async {
+  final res = apiPostRequest('User/createUser', {
+    "email": email,
+    "passwordHashed": password,
+    "userType": userType,
+    "username": username,
+    "deviceId": deviceId
+  });
+  if (res != null) {
+    return res;
+  } else {
+    throw ' database GET error';
+  }
+}

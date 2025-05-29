@@ -37,9 +37,10 @@ Future<bool> signUpUser(email, password) async {
 }
 
 Future<bool> emailConfirmUser(email, password, code) async {
+  await dotenv.load(fileName: "../.env");
   final userPool = CognitoUserPool(
-    'eu-central-1_flxgJwy19',
-    '3habrhuviqskit3ma595m5dp0b',
+    clientRegion,
+    clientId,
   );
 
   bool registrationConfirmed = false;
@@ -58,9 +59,10 @@ Future<bool> emailConfirmUser(email, password, code) async {
 }
 
 Future<void> emailResendConfirmation(email) async {
+  await dotenv.load(fileName: "../.env");
   final userPool = CognitoUserPool(
-    'eu-central-1_flxgJwy19',
-    '3habrhuviqskit3ma595m5dp0b',
+    clientRegion,
+    clientId,
   );
   final cognitoUser = CognitoUser(email, userPool);
   try {
