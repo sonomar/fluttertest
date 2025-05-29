@@ -17,7 +17,7 @@ final clientRegion = getEnvItem('COGNITO_UP_REGION');
 final clientId = getEnvItem('COGNITO_UP_CLIENTID');
 
 Future<bool> signUpUser(email, password) async {
-  await dotenv.load(fileName: "../.env");
+  await dotenv.load(fileName: ".env");
   final userPool = CognitoUserPool(
     clientRegion,
     clientId,
@@ -33,11 +33,12 @@ Future<bool> signUpUser(email, password) async {
   } catch (e) {
     print(e);
   }
+  await authenticateUser(email, password, true);
   return true;
 }
 
 Future<bool> emailConfirmUser(email, password, code) async {
-  await dotenv.load(fileName: "../.env");
+  await dotenv.load(fileName: ".env");
   final userPool = CognitoUserPool(
     clientRegion,
     clientId,
@@ -51,15 +52,15 @@ Future<bool> emailConfirmUser(email, password, code) async {
     print(e);
   }
   print(registrationConfirmed);
-  final auth = await authenticateUser(email, password);
-  if (auth == true && registrationConfirmed == true) {
-    return auth;
-  }
+  // final auth = await authenticateUser(email, password, true);
+  // if (auth == true && registrationConfirmed == true) {
+  //   return auth;
+  // }
   return false;
 }
 
 Future<void> emailResendConfirmation(email) async {
-  await dotenv.load(fileName: "../.env");
+  await dotenv.load(fileName: ".env");
   final userPool = CognitoUserPool(
     clientRegion,
     clientId,

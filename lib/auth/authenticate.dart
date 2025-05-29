@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:crypto/crypto.dart';
+import '../api/user.dart';
 
 getEnvItem(item) {
   var endpoint = dotenv.env[item];
@@ -11,11 +14,18 @@ getEnvItem(item) {
   }
 }
 
+String encryptPassword(String password) {
+  final bytes = utf8.encode(password);
+  final hash = sha256.convert(bytes);
+  return hash.toString();
+}
+
 final clientRegion = getEnvItem('COGNITO_UP_REGION');
 final clientId = getEnvItem('COGNITO_UP_CLIENTID');
 
-Future<bool> authenticateUser(email, password) async {
-  await dotenv.load(fileName: "../.env");
+Future<bool> authenticateUser(email, password, register) async {
+  final isFirstRegister = register;
+  await dotenv.load(fileName: ".env");
   final userPool = CognitoUserPool(
     clientRegion,
     clientId,
@@ -66,17 +76,22 @@ Future<bool> authenticateUser(email, password) async {
   if (idToken != null) {
     prefs.setString('jwtIdCode', idToken);
   }
-  prefs.setBool('item-test1', true);
-  prefs.setBool('item-test2', false);
-  prefs.setBool('item-test3', false);
-  prefs.setBool('item-test4', false);
-  prefs.setBool('item-test5', false);
-  prefs.setBool('item-test6', false);
+  if (token != null && email != null && isFirstRegister == true) {
+    final encryptedPassword = encryptPassword(password);
+    final getUser = await getUserByEmail(email);
+    final userId = getUser['userId'];
+    final userUpdateBody = {
+      "userId": userId,
+      "passwordHashed": encryptedPassword,
+      "authToken": token
+    };
+    await updateUserByUserId(userUpdateBody);
+  }
   return true;
 }
 
 Future<bool> getUserAttr(email) async {
-  await dotenv.load(fileName: "../.env");
+  await dotenv.load(fileName: ".env");
   final userPool = CognitoUserPool(
     clientRegion,
     clientId,

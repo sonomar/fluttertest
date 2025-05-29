@@ -74,7 +74,7 @@ class LoginPageState extends State<LoginPage> {
                           String username = _usernameController.text;
                           String password = _passwordController.text;
                           var confirm =
-                              await authenticateUser(username, password);
+                              await authenticateUser(username, password, false);
                           if (confirm == true) {
                             final user = await getUserByEmail(username);
                             final prefs = await SharedPreferences.getInstance();

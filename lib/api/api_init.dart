@@ -35,7 +35,7 @@ apiGetRequest(
   String path,
   Map<String, dynamic> paramsContent,
 ) async {
-  await dotenv.load(fileName: "../.env");
+  await dotenv.load(fileName: ".env");
   // ignore: avoid_print
   final credentials = CognitoCredentials(identityPool, userPool);
   var code = await getJWTCode('jwtIdCode');

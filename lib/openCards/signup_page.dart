@@ -188,7 +188,7 @@ class SignupPageState extends State<SignupPage> {
                                   });
                                 }
                               },
-                              child: Text('Login'))),
+                              child: Text('Register'))),
                       SizedBox(height: 10),
                       Text(
                         _errorMessage,

@@ -15,7 +15,7 @@ final clientRegion = getEnvItem('COGNITO_UP_REGION');
 final clientId = getEnvItem('COGNITO_UP_CLIENTID');
 
 Future<void> logOut(email) async {
-  await dotenv.load(fileName: "../.env");
+  await dotenv.load(fileName: ".env");
   final userPool = CognitoUserPool(
     clientRegion,
     clientId,

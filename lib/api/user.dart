@@ -9,6 +9,15 @@ Future<dynamic> getUserByEmail(email) async {
   }
 }
 
+Future<dynamic> updateUserByUserId(body) async {
+  final res = apiPatchRequest('User/updateUserByUserId', body);
+  if (res != null) {
+    return res;
+  } else {
+    throw ' database PATCH error';
+  }
+}
+
 Future<dynamic> createUser(
     email, password, userType, username, deviceId) async {
   final res = apiPostRequest('User/createUser', {
