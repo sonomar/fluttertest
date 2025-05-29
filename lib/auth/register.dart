@@ -1,5 +1,6 @@
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import './authenticate.dart';
 
 late final String status;
 
@@ -35,7 +36,7 @@ Future<bool> signUpUser(email, password) async {
   return true;
 }
 
-Future<bool> emailConfirmUser(email, code) async {
+Future<bool> emailConfirmUser(email, password, code) async {
   final userPool = CognitoUserPool(
     'eu-central-1_flxgJwy19',
     '3habrhuviqskit3ma595m5dp0b',
@@ -49,7 +50,11 @@ Future<bool> emailConfirmUser(email, code) async {
     print(e);
   }
   print(registrationConfirmed);
-  return registrationConfirmed;
+  final auth = await authenticateUser(email, password);
+  if (auth == true && registrationConfirmed == true) {
+    return auth;
+  }
+  return false;
 }
 
 Future<void> emailResendConfirmation(email) async {
