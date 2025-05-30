@@ -7,6 +7,7 @@ import './scan_screen.dart';
 import './community_screen.dart';
 import './game_screen.dart';
 import './models/collectible_model.dart';
+import './models/user_model.dart';
 import './openCards/login_page.dart';
 import 'package:lottie/lottie.dart';
 // import 'package:google_fonts/google_fonts.dart';
@@ -15,8 +16,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-        create: (context) => CollectibleModel(), child: const MyApp()),
+    MultiProvider(providers: [
+      ChangeNotifierProvider(create: (context) => CollectibleModel()),
+      ChangeNotifierProvider(create: (context) => UserModel()),
+    ], child: const MyApp()),
   );
 }
 

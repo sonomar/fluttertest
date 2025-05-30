@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:kloppocar_app/collectibles/collectible_details.dart';
 import 'package:kloppocar_app/profile_screen.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -6,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'notifications_page.dart';
+import './models/user_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -58,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    Provider.of<UserModel>(context, listen: false).loadUser();
     _startTimer();
     readItemJson();
   }
@@ -364,7 +367,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ]));
   }
 
-  Widget shadowCircle(imageLink, radius) {
+  Widget getUserPic(userPic, defaultImg, radius) {
+    final subStrings = <String>["png", "jpg", "jpeg", "gif"];
+    var result = subStrings.any(userPic.contains);
+    if (result == true) {
+      return shadowCircle(userPic, radius, true);
+    }
+    return shadowCircle(defaultImg, radius, false);
+  }
+
+  Widget shadowCircle(imageLink, radius, isWeb) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -373,15 +385,23 @@ class _HomeScreenState extends State<HomeScreen> {
           BoxShadow(blurRadius: 5, color: Colors.black, spreadRadius: 0)
         ],
       ),
-      child: CircleAvatar(
-        radius: radius,
-        backgroundImage: AssetImage(imageLink),
-      ),
+      child: isWeb
+          ? CircleAvatar(
+              radius: radius,
+              backgroundImage: NetworkImage(imageLink),
+            )
+          : CircleAvatar(
+              radius: radius,
+              backgroundImage: AssetImage(imageLink),
+            ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final userModel = context.watch<UserModel>();
+    final currentUser = userModel.currentUser;
+    final userPic = currentUser["profileImg"];
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -389,42 +409,46 @@ class _HomeScreenState extends State<HomeScreen> {
           scrolledUnderElevation: 0.0,
           backgroundColor: Colors.white,
           centerTitle: false,
-          title: Padding(
-              padding: const EdgeInsets.only(top: 0),
-              child: Row(children: [
-                Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: shadowCircle('assets/images/profile.jpg', 18.0)),
-                Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(children: [
-                          const Text('DEINS-Tester',
-                              style: TextStyle(
-                                  fontSize: 10, fontWeight: FontWeight.w700)),
-                          Padding(
-                              padding: const EdgeInsets.only(left: 5.0),
-                              child: SizedBox(
-                                  width: 10,
-                                  child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    ProfileScreen()));
-                                      },
-                                      child: Image.asset(
-                                          "assets/images/gear.png")))),
-                        ]),
-                        const Text('Titel: Master Collector',
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.w200)),
-                      ],
-                    ))
-              ])),
+          title: userModel.isLoading
+              ? Center(child: CircularProgressIndicator())
+              : Padding(
+                  padding: const EdgeInsets.only(top: 0),
+                  child: Row(children: [
+                    Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: getUserPic(
+                            userPic, 'assets/images/profile.jpg', 18)),
+                    Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              Text(currentUser["username"],
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700)),
+                              Padding(
+                                  padding: const EdgeInsets.only(left: 5.0),
+                                  child: SizedBox(
+                                      width: 10,
+                                      child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ProfileScreen()));
+                                          },
+                                          child: Image.asset(
+                                              "assets/images/gear.png")))),
+                            ]),
+                            Text(currentUser["userRank"]["title"],
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w200)),
+                          ],
+                        ))
+                  ])),
           actions: [
             Stack(
               children: [
@@ -479,7 +503,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(children: [
                 Stack(alignment: Alignment.center, children: [
                   Divider(height: 20, thickness: 1, color: Color(0x80999999)),
-                  shadowCircle('assets/images/car.jpg', 20.0),
+                  shadowCircle('assets/images/car.jpg', 20.0, false),
                 ]),
                 Align(
                   alignment: Alignment.center,
@@ -583,7 +607,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   left: 15, top: 40, right: 15, bottom: 10),
               child: Row(
                 children: [
-                  shadowCircle('assets/images/car.jpg', 20.0),
+                  shadowCircle('assets/images/car.jpg', 20.0, false),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
