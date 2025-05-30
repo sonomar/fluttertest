@@ -1,11 +1,12 @@
 import 'dart:async';
-
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import './home_screen.dart';
 import './collection_screen.dart';
 import './scan_screen.dart';
 import './community_screen.dart';
 import './game_screen.dart';
+import './models/collectible_model.dart';
 import './openCards/login_page.dart';
 import 'package:lottie/lottie.dart';
 // import 'package:google_fonts/google_fonts.dart';
@@ -13,7 +14,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+        create: (context) => CollectibleModel(), child: const MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {

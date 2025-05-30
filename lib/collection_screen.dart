@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import './collectibles/collectible_details.dart';
+import './models/collectible_model.dart';
 import './api/collectible.dart';
 import './api/collection.dart';
 import './api/user_collectible.dart';
@@ -17,9 +19,9 @@ class CollectionScreen extends StatefulWidget {
 class _CollectionScreenState extends State<CollectionScreen> {
   final dynamic _items = [];
   final Map _cardStatus = {};
-  dynamic firstCollection;
-  dynamic collectionCollectibles;
-  dynamic userCollectibles;
+  // dynamic firstCollection;
+  // dynamic collectionCollectibles;
+  // dynamic userCollectibles;
   Map exampleWallet = {
     "collectibleId": 99,
     "label": "item-test77",
@@ -44,25 +46,25 @@ class _CollectionScreenState extends State<CollectionScreen> {
     "publication-date": "20.03.2025"
   };
 
-  Future<void> _loadCollectibleData() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('userId');
-      final res = await getCollectiblesByCollectionId('1');
-      final userRes = await getUserCollectiblesByOwnerId(userId);
-      setState(() {
-        collectionCollectibles = res;
-        userCollectibles =
-            userRes; // Now this assignment will trigger a rebuild
-      });
-      print('Collectible Response: $collectionCollectibles');
-      // If it directly returns a list
-    } catch (e) {
-      print('Error loading collectible data: $e');
-    }
-  }
+  // Future<void> _loadCollectibleData() async {
+  //   try {
+  //     SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     final userId = prefs.getString('userId');
+  //     final res = await getCollectiblesByCollectionId('1');
+  //     final userRes = await getUserCollectiblesByOwnerId(userId);
+  //     setState(() {
+  //       collectionCollectibles = res;
+  //       userCollectibles =
+  //           userRes; // Now this assignment will trigger a rebuild
+  //     });
+  //     print('Collectible Response: $collectionCollectibles');
+  //     // If it directly returns a list
+  //   } catch (e) {
+  //     print('Error loading collectible data: $e');
+  //   }
+  // }
 
-  bool isUserOwned(collectible) {
+  bool isUserOwned(collectible, userCollectibles) {
     for (int i = 0; i < userCollectibles.length; i++) {
       if (userCollectibles[i]['collectibleId'] ==
           collectible['collectibleId']) {
@@ -170,15 +172,19 @@ class _CollectionScreenState extends State<CollectionScreen> {
   void initState() {
     // readItemJson();
     // _loadCollectionData();
-    _loadCollectibleData();
+    // _loadCollectibleData();
     // Make sure to call super.initState();
     super.initState();
+    Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
   }
 
   @override
   Widget build(BuildContext context) {
     // ignore: avoid_print
     print('length: ${_items.length}');
+    final collectibleModel = context.watch<CollectibleModel>();
+    final collectionCollectibles = collectibleModel.collectionCollectibles;
+    final userCollectibles = collectibleModel.userCollectibles;
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -235,26 +241,35 @@ class _CollectionScreenState extends State<CollectionScreen> {
               Expanded(
                   child: Row(children: [
                 Expanded(
-                    child: GridView.count(
-                        primary: false,
-                        padding: const EdgeInsets.only(top: 20, bottom: 20),
-                        crossAxisCount: 4,
-                        crossAxisSpacing: 5,
-                        mainAxisSpacing: 5,
-                        childAspectRatio: (6 / 10),
-                        children: [
-                      for (int i = 0;
-                          i < collectionCollectibles.length;
-                          i++) ...[
-                        Container(
-                            padding: const EdgeInsets.only(
-                                top: 20, left: 5, right: 5, bottom: 20),
-                            child: (isUserOwned(collectionCollectibles[i]) ==
-                                    true)
-                                ? linkedInkwell(collectionCollectibles[i])
-                                : unlinkedInkwell(collectionCollectibles[i]))
-                      ]
-                    ]))
+                    child: collectibleModel.isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : GridView.count(
+                            primary: false,
+                            padding: const EdgeInsets.only(top: 20, bottom: 20),
+                            crossAxisCount: 4,
+                            crossAxisSpacing: 5,
+                            mainAxisSpacing: 5,
+                            childAspectRatio: (6 / 10),
+                            children: [
+                                for (int i = 0;
+                                    i < collectionCollectibles.length;
+                                    i++) ...[
+                                  Container(
+                                      padding: const EdgeInsets.only(
+                                          top: 20,
+                                          left: 5,
+                                          right: 5,
+                                          bottom: 20),
+                                      child: (isUserOwned(
+                                                  collectionCollectibles[i],
+                                                  userCollectibles) ==
+                                              true)
+                                          ? linkedInkwell(
+                                              collectionCollectibles[i])
+                                          : unlinkedInkwell(
+                                              collectionCollectibles[i]))
+                                ]
+                              ]))
               ]))
             ])));
   }
