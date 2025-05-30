@@ -266,12 +266,24 @@ class _CollectionScreenState extends State<CollectionScreen> {
                                 ]
                               ]))
               ])),
-              GestureDetector(
-                onTap: () {
-                  Provider.of<CollectibleModel>(context, listen: false)
-                      .sortCollectiblesByLabel();
+              Switch(
+                value: collectibleModel.sortByName,
+                activeColor: Colors.purple,
+                activeTrackColor: Colors.white,
+                thumbIcon: WidgetStateProperty.resolveWith<Icon>(
+                  (Set<WidgetState> states) {
+                    return const Icon(Icons.circle, color: Colors.purple);
+                  },
+                ),
+                inactiveThumbColor: Colors.purple,
+                inactiveTrackColor: Colors.white,
+                onChanged: (bool value) {
+                  collectibleModel.sortByName == true
+                      ? Provider.of<CollectibleModel>(context, listen: false)
+                          .sortCollectiblesByColumn('name')
+                      : Provider.of<CollectibleModel>(context, listen: false)
+                          .sortCollectiblesByColumn('label');
                 },
-                child: Text("Sort By Label"),
               ),
             ])));
   }

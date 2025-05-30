@@ -8,16 +8,19 @@ class CollectibleModel extends ChangeNotifier {
   dynamic _collectionCollectibles;
   dynamic _userCollectibles;
   bool _isLoading = false;
+  bool _sortByName = false;
   String? _errorMessage;
 
   dynamic get collectionCollectibles => _collectionCollectibles;
   dynamic get userCollectibles => _userCollectibles;
   bool get isLoading => _isLoading;
+  bool get sortByName => _sortByName;
   String? get errorMessage => _errorMessage;
 
   Future<void> loadCollectibles() async {
     _isLoading = true;
     _errorMessage = null;
+    _sortByName = false;
     notifyListeners();
 
     try {
@@ -34,9 +37,15 @@ class CollectibleModel extends ChangeNotifier {
     }
   }
 
-  Future<void> sortCollectiblesByLabel() async {
+  Future<void> sortCollectiblesByColumn(column) async {
+    if (_sortByName == true) {
+      _sortByName = false;
+    } else {
+      _sortByName = true;
+    }
+    notifyListeners();
     try {
-      sortData(_collectionCollectibles, "label");
+      sortData(_collectionCollectibles, column);
     } catch (e) {
       print('Error sorting collectible data: $e');
     } finally {
