@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../api/collectible.dart';
 import '../api/user_collectible.dart';
+import '../helpers/sort_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectibleModel extends ChangeNotifier {
@@ -24,10 +25,21 @@ class CollectibleModel extends ChangeNotifier {
       final userId = prefs.getString('userId');
       _collectionCollectibles = await getCollectiblesByCollectionId('1');
       _userCollectibles = await getUserCollectiblesByOwnerId(userId);
+      sortData(_collectionCollectibles, "name");
     } catch (e) {
       print('Error loading collectible data: $e');
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> sortCollectiblesByLabel() async {
+    try {
+      sortData(_collectionCollectibles, "label");
+    } catch (e) {
+      print('Error sorting collectible data: $e');
+    } finally {
       notifyListeners();
     }
   }

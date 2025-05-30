@@ -265,7 +265,14 @@ class _CollectionScreenState extends State<CollectionScreen> {
                                               collectionCollectibles[i]))
                                 ]
                               ]))
-              ]))
+              ])),
+              GestureDetector(
+                onTap: () {
+                  Provider.of<CollectibleModel>(context, listen: false)
+                      .sortCollectiblesByLabel();
+                },
+                child: Text("Sort By Label"),
+              ),
             ])));
   }
 }

@@ -123,6 +123,7 @@ apiPatchRequest(
 
   http.Response? response;
   print(signedRequest.url ?? 'no request found');
+  // ignore: prefer_interpolation_to_compose_strings
   try {
     response =
         await http.patch(Uri.parse(signedRequest.url ?? 'no request found'),
