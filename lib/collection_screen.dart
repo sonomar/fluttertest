@@ -3,11 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import './collectibles/collectible_details.dart';
 import './models/collectible_model.dart';
-import './api/collectible.dart';
-import './api/collection.dart';
-import './api/user_collectible.dart';
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectionScreen extends StatefulWidget {
   const CollectionScreen({super.key});
