@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../api/collectible.dart';
+import '../../../api/collectible.dart';
 
 class UserSettings extends StatefulWidget {
   const UserSettings({super.key});

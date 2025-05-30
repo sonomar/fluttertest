@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../widgets/object_viewer.dart';
-import '../widgets/card_info.dart';
-import '../widgets/drag_scroll_sheet.dart';
-import './collectible.dart';
+import '../../../widgets/object_viewer.dart';
+import '../../../widgets/card_info.dart';
+import '../../../widgets/drag_scroll_sheet.dart';
+import 'collectible.dart';
 
 class CollectibleDetails extends StatefulWidget {
   const CollectibleDetails({super.key, required this.selectedCollectible});

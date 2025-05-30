@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../auth/signout.dart';
-import './openCards/login_page.dart';
-import './widgets/item_button.dart';
+import '../../auth/signout.dart';
+import '../widgets/openCards/login_page.dart';
+import '../widgets/item_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../api/collectible.dart';
+import '../../api/collectible.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});

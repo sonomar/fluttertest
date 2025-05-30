@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:kloppocar_app/collectibles/collectible_details.dart';
-import 'package:kloppocar_app/profile_screen.dart';
+import 'package:kloppocar_app/screens/subscreens/collectibles/collectible_details.dart';
+import 'package:kloppocar_app/screens/profile_screen.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
-import 'notifications_page.dart';
-import './models/user_model.dart';
+import 'subscreens/notifications/notifications_page.dart';
+import '../models/user_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 

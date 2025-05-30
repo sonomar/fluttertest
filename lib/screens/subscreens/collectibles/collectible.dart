@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/object_viewer.dart';
+import '../../../widgets/object_viewer.dart';
 
 class Collectible extends StatefulWidget {
   const Collectible({super.key, required this.selectedCollectible});

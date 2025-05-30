@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import './collectibles/collectible_details.dart';
-import './models/collectible_model.dart';
+import 'subscreens/collectibles/collectible_details.dart';
+import '../models/collectible_model.dart';
 
 class CollectionScreen extends StatefulWidget {
   const CollectionScreen({super.key});
