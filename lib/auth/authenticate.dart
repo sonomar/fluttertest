@@ -86,6 +86,7 @@ Future<bool> authenticateUser(email, password, register) async {
       "authToken": token
     };
     await updateUserByUserId(userUpdateBody);
+    await cognitoUser.cacheTokens();
   }
   return true;
 }

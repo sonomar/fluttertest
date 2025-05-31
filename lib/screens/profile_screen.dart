@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../auth/signout.dart';
+import 'package:provider/provider.dart';
+import '../models/app_auth_provider.dart';
 import '../widgets/openCards/login_page.dart';
 import '../widgets/item_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -119,12 +120,13 @@ class ProfileScreen extends StatelessWidget {
             ItemButton(
                 onTap: () {
                   final navigator = Navigator.of(context);
-                  getUserEmail().then((email) => {
-                        logOut(email).then((value) => {
-                              navigator.push(MaterialPageRoute(
-                                  builder: (context) => LoginPage()))
-                            })
-                      });
+
+                  Provider.of<AppAuthProvider>(context, listen: false)
+                      .signOut()
+                      .then((value) => {
+                            navigator.push(MaterialPageRoute(
+                                builder: (context) => LoginPage()))
+                          });
                 },
                 title: "Sign Out"),
           ],

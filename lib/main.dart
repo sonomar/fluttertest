@@ -8,6 +8,8 @@ import 'screens/community_screen.dart';
 import 'screens/game_screen.dart';
 import './models/collectible_model.dart';
 import './models/user_model.dart';
+import './auth/auth_services.dart';
+import './models/app_auth_provider.dart';
 import 'widgets/openCards/login_page.dart';
 import 'package:lottie/lottie.dart';
 // import 'package:google_fonts/google_fonts.dart';
@@ -19,6 +21,8 @@ void main() {
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (context) => CollectibleModel()),
       ChangeNotifierProvider(create: (context) => UserModel()),
+      ChangeNotifierProvider(
+          create: (context) => AppAuthProvider(context.read<AuthService>())),
     ], child: const MyApp()),
   );
 }

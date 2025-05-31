@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'subscreens/notifications/notifications_page.dart';
 import '../models/user_model.dart';
+import '../models/app_auth_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -60,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    Provider.of<AppAuthProvider>(context, listen: false).checkCurrentUser();
     Provider.of<UserModel>(context, listen: false).loadUser();
     _startTimer();
     readItemJson();

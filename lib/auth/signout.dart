@@ -21,6 +21,7 @@ Future<void> logOut(email) async {
     clientId,
   );
   final cognitoUser = CognitoUser(email, userPool);
+  final session = CognitoUserSession;
   await cognitoUser.signOut();
   final prefs = await SharedPreferences.getInstance();
   prefs.remove('email');
