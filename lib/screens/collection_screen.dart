@@ -175,116 +175,201 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ignore: avoid_print
-    print('length: ${_items.length}');
     final collectibleModel = context.watch<CollectibleModel>();
     final collectionCollectibles = collectibleModel.collectionCollectibles;
     final userCollectibles = collectibleModel.userCollectibles;
+    final numAssets = collectionCollectibles.length.toString();
     return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-            automaticallyImplyLeading: false,
-            scrolledUnderElevation: 0.0,
-            titleTextStyle: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: Colors.black,
-                fontFamily: 'ChakraPetch',
-                fontSize: 30),
-            centerTitle: false,
-            title: Text("Galerie",
-                style: const TextStyle(
-                  fontSize: 28,
-                  color: Colors.black,
-                  fontFamily: 'ChakraPetch',
-                  fontWeight: FontWeight.w500,
-                )),
-            actions: [
-              Padding(
-                padding: EdgeInsets.all(10),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => CollectibleDetails(
-                                selectedCollectible: exampleWallet)));
-                  },
-                  child: Image.asset("assets/images/wallet1.png"),
-                ),
-              )
-            ]),
-        body: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Padding(
-                  padding: const EdgeInsets.only(left: 10.0),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        shadowCircle('assets/images/caricon.jpg', 20.0),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        scrolledUnderElevation: 0.0,
+        titleTextStyle: const TextStyle(
+          // Added const here
+          fontWeight: FontWeight.w700,
+          color: Colors.black,
+          fontFamily: 'ChakraPetch',
+          fontSize: 30,
+        ),
+        centerTitle: false,
+        title: const Text(
+          "Galerie", // Added const here
+          style: TextStyle(
+            fontSize: 28,
+            color: Colors.black,
+            fontFamily: 'ChakraPetch',
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(20), // Added const here
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CollectibleDetails(
+                      selectedCollectible: exampleWallet,
+                    ),
+                  ),
+                );
+              },
+              child: Image.asset("assets/images/wallet1.png"),
+            ),
+          )
+        ],
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 100,
+            decoration: BoxDecoration(
+                border: Border(
+              bottom: BorderSide(color: const Color(0x80999999)),
+              top: BorderSide(color: const Color(0x80999999)),
+            )),
+            child: Padding(
+              padding: const EdgeInsets.all(20), // Added const here
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                      child: Text(
+                    "$numAssets ASSETS",
+                    style: TextStyle(
+                        fontSize: 14,
+                        letterSpacing: 2.56,
+                        color: Colors.black,
+                        fontFamily: 'ChakraPetch',
+                        fontWeight: FontWeight.w700),
+                  )),
+                  SizedBox(
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
                         Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: Text('Kloppocar Puzzle Collection',
-                                style: const TextStyle(
-                                  fontSize: 20,
+                            padding: const EdgeInsets.only(
+                                right: 10), // Added const here
+                            child: Text(
+                              "NAME",
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  letterSpacing: 2.56,
                                   color: Colors.black,
                                   fontFamily: 'ChakraPetch',
-                                  fontWeight: FontWeight.w500,
-                                )))
+                                  fontWeight: FontWeight.w500),
+                            )),
+                        Switch(
+                          value: collectibleModel.sortByName,
+                          activeColor: Colors.purple,
+                          activeTrackColor: Colors.white,
+                          thumbIcon: WidgetStateProperty.resolveWith<Icon>(
+                            (Set<WidgetState> states) {
+                              return const Icon(Icons.circle,
+                                  color: Colors.purple);
+                            },
+                          ),
+                          inactiveThumbColor: Colors.purple,
+                          inactiveTrackColor: Colors.white,
+                          onChanged: (bool value) {
+                            if (collectibleModel.sortByName == true) {
+                              Provider.of<CollectibleModel>(context,
+                                      listen: false)
+                                  .sortCollectiblesByColumn('name');
+                            } else {
+                              Provider.of<CollectibleModel>(context,
+                                      listen: false)
+                                  .sortCollectiblesByColumn('label');
+                            }
+                          },
+                        ),
+                        Padding(
+                            padding: const EdgeInsets.only(
+                                left: 10, right: 10), // Added const here
+                            child: Text(
+                              "DATE",
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  letterSpacing: 2.56,
+                                  color: Colors.black,
+                                  fontFamily: 'ChakraPetch',
+                                  fontWeight: FontWeight.w500),
+                            )),
                       ])),
-              Expanded(
-                  child: Row(children: [
-                Expanded(
-                    child: collectibleModel.isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : GridView.count(
-                            primary: false,
-                            padding: const EdgeInsets.only(top: 20, bottom: 20),
-                            crossAxisCount: 4,
-                            crossAxisSpacing: 5,
-                            mainAxisSpacing: 5,
-                            childAspectRatio: (6 / 10),
-                            children: [
-                                for (int i = 0;
-                                    i < collectionCollectibles.length;
-                                    i++) ...[
-                                  Container(
-                                      padding: const EdgeInsets.only(
-                                          top: 20,
-                                          left: 5,
-                                          right: 5,
-                                          bottom: 20),
-                                      child: (isUserOwned(
-                                                  collectionCollectibles[i],
-                                                  userCollectibles) ==
-                                              true)
-                                          ? linkedInkwell(
-                                              collectionCollectibles[i])
-                                          : unlinkedInkwell(
-                                              collectionCollectibles[i]))
-                                ]
-                              ]))
-              ])),
-              Switch(
-                value: collectibleModel.sortByName,
-                activeColor: Colors.purple,
-                activeTrackColor: Colors.white,
-                thumbIcon: WidgetStateProperty.resolveWith<Icon>(
-                  (Set<WidgetState> states) {
-                    return const Icon(Icons.circle, color: Colors.purple);
-                  },
-                ),
-                inactiveThumbColor: Colors.purple,
-                inactiveTrackColor: Colors.white,
-                onChanged: (bool value) {
-                  collectibleModel.sortByName == true
-                      ? Provider.of<CollectibleModel>(context, listen: false)
-                          .sortCollectiblesByColumn('name')
-                      : Provider.of<CollectibleModel>(context, listen: false)
-                          .sortCollectiblesByColumn('label');
-                },
+                ],
               ),
-            ])));
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 12.0, top: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                shadowCircle('assets/images/caricon.jpg',
+                    20.0), // Ensure shadowCircle is defined
+                Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: const Text(
+                    // Added const here
+                    'Kloppocar Puzzle Collection',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black,
+                      fontFamily: 'ChakraPetch',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: collectibleModel.isLoading
+                      ? const Center(
+                          child:
+                              CircularProgressIndicator()) // Added const here
+                      : GridView.count(
+                          primary: false,
+                          padding: const EdgeInsets.only(top: 20, bottom: 20),
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 5,
+                          mainAxisSpacing: 5,
+                          childAspectRatio: (6 / 10),
+                          children: [
+                            for (int i = 0;
+                                i < collectionCollectibles.length;
+                                i++) ...[
+                              Container(
+                                padding: const EdgeInsets.only(
+                                  top: 20,
+                                  left: 5,
+                                  right: 5,
+                                  bottom: 20,
+                                ),
+                                child: (isUserOwned(
+                                          collectionCollectibles[i],
+                                          userCollectibles,
+                                        ) ==
+                                        true)
+                                    ? linkedInkwell(collectionCollectibles[
+                                        i]) // Ensure linkedInkwell is defined
+                                    : unlinkedInkwell(collectionCollectibles[
+                                        i]), // Ensure unlinkedInkwell is defined
+                              )
+                            ]
+                          ],
+                        ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
