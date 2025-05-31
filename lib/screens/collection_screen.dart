@@ -12,8 +12,6 @@ class CollectionScreen extends StatefulWidget {
 }
 
 class _CollectionScreenState extends State<CollectionScreen> {
-  final dynamic _items = [];
-  final Map _cardStatus = {};
   // dynamic firstCollection;
   // dynamic collectionCollectibles;
   // dynamic userCollectibles;
@@ -41,24 +39,6 @@ class _CollectionScreenState extends State<CollectionScreen> {
     "publication-date": "20.03.2025"
   };
 
-  // Future<void> _loadCollectibleData() async {
-  //   try {
-  //     SharedPreferences prefs = await SharedPreferences.getInstance();
-  //     final userId = prefs.getString('userId');
-  //     final res = await getCollectiblesByCollectionId('1');
-  //     final userRes = await getUserCollectiblesByOwnerId(userId);
-  //     setState(() {
-  //       collectionCollectibles = res;
-  //       userCollectibles =
-  //           userRes; // Now this assignment will trigger a rebuild
-  //     });
-  //     print('Collectible Response: $collectionCollectibles');
-  //     // If it directly returns a list
-  //   } catch (e) {
-  //     print('Error loading collectible data: $e');
-  //   }
-  // }
-
   bool isUserOwned(collectible, userCollectibles) {
     for (int i = 0; i < userCollectibles.length; i++) {
       if (userCollectibles[i]['collectibleId'] ==
@@ -68,16 +48,6 @@ class _CollectionScreenState extends State<CollectionScreen> {
     }
     return false;
   }
-
-  // Future<void> _loadCollectionData() async {
-  //   try {
-  //     final res = await getCollectionByCollectionId('1');
-  //     firstCollection = res; // If it directly returns a list
-  //     print('Collection Response: $res');
-  //   } catch (e) {
-  //     print('Error loading collection data: $e');
-  //   }
-  // }
 
   // Future<void> readItemJson() async {
   //   SharedPreferences prefs = await SharedPreferences.getInstance();

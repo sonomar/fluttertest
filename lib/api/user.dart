@@ -30,6 +30,6 @@ Future<dynamic> createUser(
   if (res != null) {
     return res;
   } else {
-    throw ' database GET error';
+    throw ' database POST error';
   }
 }

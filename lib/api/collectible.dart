@@ -28,3 +28,13 @@ Future<dynamic> getCollectiblesByCollectionId(id) async {
     throw ' database GET error';
   }
 }
+
+Future<dynamic> updateCollectibleByCollectibleId(body) async {
+  final res =
+      apiPatchRequest('Collectible/updateCollectibleByCollectibleId', body);
+  if (res != null) {
+    return res;
+  } else {
+    throw ' database PATCH error';
+  }
+}

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../widgets/scanview/scan_view_success.dart';
+import 'package:provider/provider.dart';
+import '../models/collectible_model.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -18,6 +20,7 @@ class ScanScreenState extends State<ScanScreen> {
   void initState() {
     _scanController.start;
     super.initState();
+    Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
   }
 
   @override
@@ -26,6 +29,9 @@ class ScanScreenState extends State<ScanScreen> {
             MediaQuery.of(context).size.height < 400)
         ? 220.0
         : 330.0;
+    final collectibleModel = context.watch<CollectibleModel>();
+    final collectionCollectibles = collectibleModel.collectionCollectibles;
+    final userCollectibles = collectibleModel.userCollectibles;
 
     // Future<void> collectedDialog(code) async {
     //   final prefs = await SharedPreferences.getInstance();
@@ -129,8 +135,9 @@ class ScanScreenState extends State<ScanScreen> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => ScanViewSuccess(
-                            qrcode:
-                                code) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
+                            qrcode: code,
+                            collectibles:
+                                collectionCollectibles) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
                         ),
                   );
                 })));

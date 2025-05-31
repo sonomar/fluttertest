@@ -52,4 +52,25 @@ class CollectibleModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> addUserCollectible(userId, collectibleId, mint) async {
+    try {
+      await createUserCollectible(userId, collectibleId, mint);
+      _userCollectibles = await getUserCollectiblesByOwnerId(userId);
+    } catch (e) {
+      print('Error creating userCollectible data: $e');
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateCollectible(body) async {
+    try {
+      await updateCollectibleByCollectibleId(body);
+    } catch (e) {
+      print('Error creating userCollectible data: $e');
+    } finally {
+      notifyListeners();
+    }
+  }
 }

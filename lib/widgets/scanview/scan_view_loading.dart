@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:kloppocar_app/screens/subscreens/collectibles/collectible.dart';
 import './scan_view_success.dart';
 import './scan_view_error.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ScanViewLoading extends StatefulWidget {
-  const ScanViewLoading({super.key, required this.qrcode});
+  const ScanViewLoading(
+      {super.key, required this.qrcode, required this.collectibles});
   final String qrcode;
+  final List collectibles;
 
   @override
   State<ScanViewLoading> createState() => _ScanViewLoadingState();
@@ -31,8 +34,10 @@ class _ScanViewLoadingState extends State<ScanViewLoading> {
                     {
                       prefValue.setBool(qrcode, true),
                       navigator.pushReplacement(MaterialPageRoute(
-                          builder: (context) =>
-                              ScanViewSuccess(qrcode: qrcode))),
+                          builder: (context) => ScanViewSuccess(
+                                qrcode: qrcode,
+                                collectibles: widget.collectibles,
+                              ))),
                     }
                   else
                     {
@@ -58,7 +63,10 @@ class _ScanViewLoadingState extends State<ScanViewLoading> {
             });
             if (widget.qrcode.contains('item-test')) {
               navigator.pushReplacement(MaterialPageRoute(
-                  builder: (context) => ScanViewSuccess(qrcode: qrcode)));
+                  builder: (context) => ScanViewSuccess(
+                        qrcode: qrcode,
+                        collectibles: widget.collectibles,
+                      )));
             } else {
               navigator.pushReplacement(MaterialPageRoute(
                   builder: (context) => const ScanViewError()));
