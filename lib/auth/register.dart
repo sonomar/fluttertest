@@ -1,6 +1,8 @@
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import './authenticate.dart';
+import 'package:provider/provider.dart';
+import '../models/app_auth_provider.dart';
 
 late final String status;
 
@@ -16,7 +18,8 @@ getEnvItem(item) {
 final clientRegion = getEnvItem('COGNITO_UP_REGION');
 final clientId = getEnvItem('COGNITO_UP_CLIENTID');
 
-Future<bool> signUpUser(email, password) async {
+Future<bool> signUpUser(
+    BuildContext context, String email, String password) async {
   await dotenv.load(fileName: ".env");
   final userPool = CognitoUserPool(
     clientRegion,
@@ -28,13 +31,26 @@ Future<bool> signUpUser(email, password) async {
       email,
       password,
     );
-    print('SIGNUP DATA:');
-    print(data);
+
+    final appAuthProvider = context.read<AppAuthProvider>();
+    final bool loginSuccess =
+        await appAuthProvider.signIn(email, password, isRegister: true);
+
+    if (loginSuccess) {
+      print('Email confirmed and user logged in successfully.');
+      return true;
+    } else {
+      print('Email confirmed, but automatic login failed.');
+      return false; // Return false if login failed after successful confirmation
+    }
+  } on CognitoClientException catch (e) {
+    print('CognitoClientException during signUpUser: ${e.message}');
+    // Specific error handling for Cognito, e.g., UsernameExistsException
+    return false;
   } catch (e) {
-    print(e);
+    print('Unexpected error during signUpUser: $e');
+    return false;
   }
-  await authenticateUser(email, password, true);
-  return true;
 }
 
 Future<bool> emailConfirmUser(email, password, code) async {

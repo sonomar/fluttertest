@@ -55,31 +55,56 @@ class AppAuthProvider with ChangeNotifier {
     }
   }
 
-  // Future<bool> signIn(String username, String password) async {
-  //   _status = AuthStatus.authenticating;
-  //   _errorMessage = null;
-  //   notifyListeners();
-  //   try {
-  //     final success = await _authService.signIn(username, password);
-  //     if (success) {
-  //       // After successful sign-in, re-check session to ensure all tokens are loaded correctly
-  //       await _checkCurrentUser();
-  //       return true;
-  //     } else {
-  //       // Sign-in failed by AuthService, possibly due to wrong credentials.
-  //       // The AuthService print statement should have more details.
-  //       _errorMessage = 'Login failed. Please check your credentials.';
-  //       _status = AuthStatus.unauthenticated;
-  //       notifyListeners();
-  //       return false;
-  //     }
-  //   } catch (e) {
-  //     _errorMessage = e.toString();
-  //     _status = AuthStatus.unauthenticated;
-  //     notifyListeners();
-  //     return false;
-  //   }
-  // }
+  Future<bool> signIn(String username, String password,
+      {bool isRegister = false}) async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      final bool authServiceSuccess =
+          await _authService.signIn(username, password, isRegister: isRegister);
+      if (authServiceSuccess) {
+        print(
+            'AppAuthProvider: AuthService.signIn reported success. Now verifying session state...');
+        // ONLY call checkCurrentUser if AuthService.signIn itself was successful.
+        // This ensures SharedPreferences has caught up and the CognitoUser state is consistent.
+        await checkCurrentUser();
+        // After checkCurrentUser, confirm the status
+        if (_status == AuthStatus.authenticated) {
+          // After successful signIn, ensure session is set internally
+          return true; // Login process fully successful and session established
+        } else {
+          // This scenario means AuthService.signIn reported success, but then
+          // checkCurrentUser (which calls AuthService.currentSession) failed to establish a session.
+          // This indicates a deeper inconsistency or a very short-lived valid session.
+          _errorMessage = _errorMessage ??
+              'Login succeeded, but session could not be confirmed.';
+          print(
+              'AppAuthProvider: Login succeeded, but checkCurrentUser resulted in $_status.');
+          _status =
+              AuthStatus.unauthenticated; // Ensure status reflects failure
+          notifyListeners();
+          return false;
+        }
+      } else {
+        // AuthService.signIn explicitly failed (e.g., bad credentials, API error in user update)
+        print('AppAuthProvider: AuthService.signIn failed.');
+        _errorMessage =
+            'Login failed. Please check your credentials or network.';
+        _status = AuthStatus.unauthenticated;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      // Catch any unexpected exceptions during this AppAuthProvider signIn process
+      _errorMessage =
+          'An unexpected error occurred during login: ${e.toString()}';
+      print('AppAuthProvider: $_errorMessage');
+      _status = AuthStatus.unauthenticated;
+      notifyListeners();
+      return false;
+    }
+  }
 
   Future<void> signOut() async {
     _status = AuthStatus.authenticating; // Indicate sign out is in progress

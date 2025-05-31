@@ -167,8 +167,8 @@ class SignupPageState extends State<SignupPage> {
                                   String password = _passwordController.text;
                                   String reenter = _reenterPassController.text;
                                   if (reenter == password) {
-                                    var confirm =
-                                        await signUpUser(email, password);
+                                    var confirm = await signUpUser(
+                                        context, email, password);
                                     if (confirm == true) {
                                       await getEmailCode();
                                     } else {

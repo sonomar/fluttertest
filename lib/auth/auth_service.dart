@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:kloppocar_app/api/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 getEnvItem(item) {
@@ -9,6 +13,12 @@ getEnvItem(item) {
   } else {
     return 'no API endpoint found';
   }
+}
+
+String encryptPassword(String password) {
+  final bytes = utf8.encode(password);
+  final hash = sha256.convert(bytes);
+  return hash.toString();
 }
 
 final clientRegion = getEnvItem('COGNITO_UP_REGION');
@@ -22,15 +32,12 @@ class AuthService {
   AuthService() : _userPool = CognitoUserPool(clientRegion, clientId);
 
   Future<CognitoUserSession?> get currentSession async {
-    await dotenv.load(fileName: ".env");
-    final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString("email");
     // If we already have a valid session in memory, return it immediately
     if (_session != null && _session!.isValid()) {
       return _session;
     }
 
-    _cognitoUser = CognitoUser(email, _userPool);
+    _cognitoUser = await _userPool.getCurrentUser();
     if (_cognitoUser == null) {
       return null;
     }
@@ -60,6 +67,91 @@ class AuthService {
       _cognitoUser = null;
       await signOut(); // Force sign out and clear all storage
       return null;
+    }
+  }
+
+  Future<bool> signIn(String email, String password,
+      {bool isRegister = false}) async {
+    // Ensure dotenv is loaded
+
+    // Set the internal _cognitoUser for AuthService
+    _cognitoUser = CognitoUser(email, _userPool);
+
+    final authDetails = AuthenticationDetails(
+      username: email,
+      password: password,
+    );
+    try {
+      // Authenticate the user using the internal _cognitoUser
+      _session = await _cognitoUser!.authenticateUser(authDetails);
+      // --- CRITICAL: Cache tokens unconditionally after successful authentication ---
+      // This is the most crucial part for getSession() to work later.
+      await _cognitoUser!.cacheTokens();
+      final prefs = await SharedPreferences.getInstance();
+      // Save email for future currentSession calls
+      // Added null check just in case, though email should not be null here
+      prefs.setString('email', email);
+      // Manually saving JWTs (optional, but harmless if you use them elsewhere)
+      final token = _session?.getAccessToken().getJwtToken();
+      final idToken = _session?.getIdToken().getJwtToken();
+      if (token != null) {
+        prefs.setString('jwtCode', token);
+        print('AuthService: Access Token saved to SharedPreferences.');
+      }
+      if (idToken != null) {
+        prefs.setString('jwtIdCode', idToken);
+        print('AuthService: ID Token saved to SharedPreferences.');
+      }
+
+      // Your existing logic for first registration from authenticate.dart
+      if (token != null && email != null && isRegister == true) {
+        // Using isRegister parameter now
+        final encryptedPassword = encryptPassword(password);
+        final getUser = await getUserByEmail(
+            email); // Ensure getUserByEmail is accessible (e.g., imported)
+        final userId = getUser['userId'];
+        final userUpdateBody = {
+          "userId": userId,
+          "passwordHashed": encryptedPassword,
+          "authToken": token
+        };
+        await updateUserByUserId(
+            userUpdateBody); // Ensure updateUserByUserId is accessible
+      }
+
+      print(
+          'AuthService: User $email signed in successfully. Session valid: ${_session!.isValid()}');
+      return true; // Successfully authenticated and cached
+    } on CognitoUserNewPasswordRequiredException catch (e) {
+      print('AuthService Sign-in Error: New Password Required: ${e.message}');
+      return false;
+    } on CognitoUserMfaRequiredException catch (e) {
+      print('AuthService Sign-in Error: MFA Required: ${e.message}');
+      return false;
+    } on CognitoUserSelectMfaTypeException catch (e) {
+      print('AuthService Sign-in Error: Select MFA Type: ${e.message}');
+      return false;
+    } on CognitoUserMfaSetupException catch (e) {
+      print('AuthService Sign-in Error: MFA Setup: ${e.message}');
+      return false;
+    } on CognitoUserTotpRequiredException catch (e) {
+      print('AuthService Sign-in Error: TOTP Required: ${e.message}');
+      return false;
+    } on CognitoUserCustomChallengeException catch (e) {
+      print('AuthService Sign-in Error: Custom Challenge: ${e.message}');
+      return false;
+    } on CognitoUserConfirmationNecessaryException catch (e) {
+      print('AuthService Sign-in Error: Confirmation Necessary: ${e.message}');
+      return false;
+    } on CognitoClientException catch (e) {
+      print(
+          'AuthService Sign-in Error: Cognito Client Exception: ${e.message}');
+      // This is where most login failures (e.g., bad credentials, user not confirmed) will land
+      return false;
+    } catch (e) {
+      print(
+          'AuthService Sign-in Error: Unexpected error during authentication: $e');
+      return false;
     }
   }
 

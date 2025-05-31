@@ -11,12 +11,15 @@ import './models/user_model.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
 import 'widgets/openCards/login_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lottie/lottie.dart';
 // import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(
     MultiProvider(providers: [
       Provider<AuthService>(

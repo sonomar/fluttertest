@@ -75,6 +75,7 @@ Future<bool> authenticateUser(email, password, register) async {
   }
   if (idToken != null) {
     prefs.setString('jwtIdCode', idToken);
+    await cognitoUser.cacheTokens();
   }
   if (token != null && email != null && isFirstRegister == true) {
     final encryptedPassword = encryptPassword(password);

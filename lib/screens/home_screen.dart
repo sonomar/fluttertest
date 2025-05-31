@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'subscreens/notifications/notifications_page.dart';
 import '../models/user_model.dart';
-import '../models/app_auth_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -61,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<AppAuthProvider>(context, listen: false).checkCurrentUser();
     Provider.of<UserModel>(context, listen: false).loadUser();
     _startTimer();
     readItemJson();
@@ -418,8 +416,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Row(children: [
                     Padding(
                         padding: const EdgeInsets.only(left: 10.0),
-                        child: getUserPic(
-                            userPic, 'assets/images/profile.jpg', 18)),
+                        child: userPic != null
+                            ? getUserPic(
+                                userPic, 'assets/images/profile.jpg', 18)
+                            : shadowCircle(
+                                'assets/images/profile.jpg', 18, false)),
                     Padding(
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Column(
@@ -445,7 +446,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                           child: Image.asset(
                                               "assets/images/gear.png")))),
                             ]),
-                            Text(currentUser["userRank"]["title"],
+                            Text(
+                                currentUser["userRank"] != null
+                                    ? currentUser["userRank"]["title"]
+                                    : 'NEWB',
                                 style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.w200)),
                           ],
