@@ -103,7 +103,6 @@ class AuthService {
         print('AuthService: ID Token saved to SharedPreferences.');
       }
 
-      // Your existing logic for first registration from authenticate.dart
       if (token != null && email != null && isRegister == true) {
         // Using isRegister parameter now
         final encryptedPassword = encryptPassword(password);
