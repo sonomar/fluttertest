@@ -8,7 +8,7 @@ import 'screens/community_screen.dart';
 import 'screens/game_screen.dart';
 import './models/collectible_model.dart';
 import './models/user_model.dart';
-import './auth/auth_services.dart';
+import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
 import 'widgets/openCards/login_page.dart';
 import 'package:lottie/lottie.dart';
@@ -19,10 +19,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 void main() {
   runApp(
     MultiProvider(providers: [
+      Provider<AuthService>(
+        create: (context) => AuthService(),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => AppAuthProvider(context.read<AuthService>()),
+      ),
       ChangeNotifierProvider(create: (context) => CollectibleModel()),
       ChangeNotifierProvider(create: (context) => UserModel()),
-      ChangeNotifierProvider(
-          create: (context) => AppAuthProvider(context.read<AuthService>())),
     ], child: const MyApp()),
   );
 }

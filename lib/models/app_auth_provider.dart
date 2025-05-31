@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
-import '../auth/auth_services.dart';
+import '../auth/auth_service.dart';
 
 enum AuthStatus {
   uninitialized, // App is just starting
