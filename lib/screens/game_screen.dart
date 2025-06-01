@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/item_button.dart';
+import './subscreens/missions/missions.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key, this.userData});
@@ -102,7 +103,18 @@ class _GameScreenState extends State<GameScreen> {
                         padding: const EdgeInsets.all(8),
                         children: <Widget>[
                           ItemButton(
-                              onTap: () {}, title: "Missions", active: true),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Missions(
+                                          userData: widget
+                                              .userData) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
+                                      ),
+                                );
+                              },
+                              title: "Missions",
+                              active: true),
                           ItemButton(
                               onTap: () {}, title: "Quiz Spiel", active: false),
                           ItemButton(

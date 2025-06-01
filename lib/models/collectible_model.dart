@@ -26,7 +26,6 @@ class CollectibleModel extends ChangeNotifier {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? userId = prefs.getString('userId');
-      print('lalalala: $userId');
       final dynamic fetchedCollectionData =
           await getCollectiblesByCollectionId('1');
       print(
