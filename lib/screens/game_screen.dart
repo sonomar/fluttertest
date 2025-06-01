@@ -49,12 +49,9 @@ class _GameScreenState extends State<GameScreen> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+            automaticallyImplyLeading: false,
             scrolledUnderElevation: 0.0,
             backgroundColor: Colors.white,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
-            ),
             title: const Text("Game Center"),
             centerTitle: false,
             titleTextStyle: TextStyle(

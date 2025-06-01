@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../../widgets/object_viewer.dart';
 
-class Collectible extends StatefulWidget {
-  const Collectible({super.key, required this.selectedCollectible});
-  final Map selectedCollectible;
+class Award extends StatefulWidget {
+  const Award({super.key, required this.selectedAward});
+  final dynamic selectedAward;
 
   @override
-  State<Collectible> createState() => _CollectibleState();
+  State<Award> createState() => _AwardState();
 }
 
-class _CollectibleState extends State<Collectible> {
-  List collectible = [];
+class _AwardState extends State<Award> {
+  List Award = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +20,7 @@ class _CollectibleState extends State<Collectible> {
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.pop(context),
             ),
-            title: Text(widget.selectedCollectible["name"])),
+            title: Text(widget.selectedAward["title"])),
         body: Container(
             decoration: BoxDecoration(
               gradient: RadialGradient(
@@ -35,13 +35,11 @@ class _CollectibleState extends State<Collectible> {
             height: double.infinity,
             width: double.infinity,
             child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Align(
+              padding: const EdgeInsets.all(20.0),
+              child: Align(
                   alignment: Alignment.center,
-                  child: widget.selectedCollectible["label"] == "item-test77"
-                      ? ObjectViewer(asset: "assets/3d/deins_card4.glb")
-                      : ObjectViewer(
-                          asset: widget.selectedCollectible['embedRef']['url']),
-                ))));
+                  child: ObjectViewer(
+                      asset: widget.selectedAward['embedRef']['url'])),
+            )));
   }
 }

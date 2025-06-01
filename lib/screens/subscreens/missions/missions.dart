@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
 import '../../../models/missions_model.dart';
+import './award_details.dart';
 
 class Missions extends StatefulWidget {
   const Missions({super.key, this.userData});
@@ -73,8 +74,8 @@ class _MissionsState extends State<Missions> {
               ? getMission['title']
               : 'No Title'; // Default value
       final String getLogo =
-          (getMission != null && getMission['imgRef'] != null)
-              ? getMission['imgRef']
+          (getMission != null && getMission['imgRef'][0] != null)
+              ? getMission['imgRef'][0]
               : 'assets/images/deins_logo.png'; // Default value
       final String missionGoal =
           (getMission != null && getMission['goal'] != null)
@@ -118,18 +119,29 @@ class _MissionsState extends State<Missions> {
                         color: Colors.black,
                       ),
                     )),
-                Stack(alignment: Alignment.center, children: [
-                  Padding(
-                      padding: const EdgeInsets.only(left: 40.0),
-                      child: Image.asset('assets/images/silvertab.png',
-                          width: 120, height: 50, fit: BoxFit.fill)),
-                  Text("Selten",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                        fontFamily: 'Roboto',
-                      ))
-                ])
+                GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AwardDetails(
+                            selectedAward: mission,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Stack(alignment: Alignment.center, children: [
+                      Padding(
+                          padding: const EdgeInsets.only(left: 40.0),
+                          child: Image.asset('assets/images/silvertab.png',
+                              width: 120, height: 50, fit: BoxFit.fill)),
+                      Text("Selten",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
+                            fontFamily: 'Roboto',
+                          ))
+                    ])),
               ],
             ),
             Container(
