@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 import '../models/collectible_model.dart';
 
 class ScanScreen extends StatefulWidget {
-  const ScanScreen({super.key});
+  const ScanScreen({super.key, this.userData});
+  final dynamic userData;
 
   @override
   State<ScanScreen> createState() => ScanScreenState();
@@ -136,6 +137,7 @@ class ScanScreenState extends State<ScanScreen> {
                     MaterialPageRoute(
                         builder: (context) => ScanViewSuccess(
                             qrcode: code,
+                            userData: widget.userData,
                             collectibles:
                                 collectionCollectibles) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
                         ),

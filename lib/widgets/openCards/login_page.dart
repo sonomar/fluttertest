@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:kloppocar_app/screens/home_screen.dart';
+import 'package:kloppocar_app/widgets/splash_screen.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_auth_provider.dart';
-import '../../main.dart';
-import 'signup_page.dart';
-import '../../api/user.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({super.key, this.userData});
+  final dynamic userData;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -54,9 +51,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (success) {
         print('Login successful!');
-        navigator.push(MaterialPageRoute(
-            builder: (context) => MyHomePage(
-                title: 'Kloppocar App Home', qrcode: 'Scan a Collectible!')));
+        navigator.push(MaterialPageRoute(builder: (context) => SplashScreen()));
       } else {
         setState(() {
           _errorMessage =
@@ -182,7 +177,7 @@ class _LoginPageState extends State<LoginPage> {
               GestureDetector(
                 onTap: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => SignupPage()));
+                      MaterialPageRoute(builder: (context) => SplashScreen()));
                 },
                 child: RichText(
                   textAlign: TextAlign.center,

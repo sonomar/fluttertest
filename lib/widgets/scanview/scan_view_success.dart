@@ -8,9 +8,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ScanViewSuccess extends StatefulWidget {
   const ScanViewSuccess(
-      {super.key, required this.qrcode, required this.collectibles});
+      {super.key,
+      required this.qrcode,
+      required this.collectibles,
+      this.userData});
   final String qrcode;
   final List collectibles;
+  final dynamic userData;
 
   @override
   State<ScanViewSuccess> createState() => _ScanViewSuccessState();
@@ -87,7 +91,8 @@ class _ScanViewSuccessState extends State<ScanViewSuccess>
           // Get navigator here to ensure it's from a mounted context
           final navigator = Navigator.of(context);
           navigator.pushReplacement(MaterialPageRoute(
-              builder: (context) => ScanViewReceive(qrcode: qrcode)));
+              builder: (context) =>
+                  ScanViewReceive(qrcode: qrcode, userData: widget.userData)));
         }
       } else {
         if (!mounted) {
@@ -95,8 +100,8 @@ class _ScanViewSuccessState extends State<ScanViewSuccess>
           return;
         }
         final navigator = Navigator.of(context);
-        navigator.pushReplacement(
-            MaterialPageRoute(builder: (context) => const ScanViewError()));
+        navigator.pushReplacement(MaterialPageRoute(
+            builder: (context) => ScanViewError(userData: widget.userData)));
       }
     }
 

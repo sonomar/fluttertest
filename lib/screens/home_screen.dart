@@ -12,8 +12,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.qrcode});
+  const HomeScreen({super.key, required this.qrcode, this.userData});
   final String qrcode;
+  final dynamic userData;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -60,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<UserModel>(context, listen: false).loadUser();
     _startTimer();
     readItemJson();
   }

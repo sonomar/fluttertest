@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
@@ -8,13 +7,11 @@ import 'screens/community_screen.dart';
 import 'screens/game_screen.dart';
 import './models/collectible_model.dart';
 import './models/user_model.dart';
+import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
-import 'widgets/openCards/login_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:lottie/lottie.dart';
 // import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 void main() async {
@@ -69,65 +66,12 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  SplashScreenState createState() => SplashScreenState();
-}
-
-class SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    final navigator = Navigator.of(context);
-    SharedPreferences.getInstance().then((prefValue) =>
-        Future.delayed(const Duration(seconds: 3)).then((value) => {
-              if ((prefValue.containsKey('jwtCode')))
-                {
-                  navigator.pushReplacement(MaterialPageRoute(
-                      builder: (context) => const MyHomePage(
-                          title: 'Kloppocar App Home',
-                          qrcode: 'Scan a Collectible!'))),
-                }
-              else
-                {
-                  navigator.pushReplacement(MaterialPageRoute(
-                      builder: (context) => const LoginPage())),
-                }
-            }));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // logo here
-            Image.asset(
-              'assets/images/deins_logo.png',
-              height: 200,
-              width: 200,
-            ),
-            SizedBox(
-              height: 40,
-            ),
-            SizedBox(
-                height: 40,
-                width: 40,
-                child: Lottie.asset('assets/lottie/pinkspin1.json')),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title, required this.qrcode});
+  const MyHomePage(
+      {super.key,
+      required this.title,
+      required this.qrcode,
+      required this.userData});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -140,6 +84,7 @@ class MyHomePage extends StatefulWidget {
 
   final String title;
   final String qrcode;
+  final dynamic userData;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -160,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _screens = [
       HomeScreen(key: const PageStorageKey('home'), qrcode: widget.qrcode),
       const CollectionScreen(key: PageStorageKey('collection')),
-      const ScanScreen(key: PageStorageKey('scan')),
+      ScanScreen(key: const PageStorageKey('scan'), userData: widget.userData),
       const CommunityScreen(key: PageStorageKey('community')),
       const GameScreen(key: PageStorageKey('game')),
     ];

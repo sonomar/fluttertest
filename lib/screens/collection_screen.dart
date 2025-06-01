@@ -303,37 +303,51 @@ class _CollectionScreenState extends State<CollectionScreen> {
                       ? const Center(
                           child:
                               CircularProgressIndicator()) // Added const here
-                      : GridView.count(
-                          primary: false,
-                          padding: const EdgeInsets.only(top: 20, bottom: 20),
-                          crossAxisCount: 4,
-                          crossAxisSpacing: 5,
-                          mainAxisSpacing: 5,
-                          childAspectRatio: (6 / 10),
-                          children: [
-                            for (int i = 0;
-                                i < collectionCollectibles.length;
-                                i++) ...[
-                              Container(
-                                padding: const EdgeInsets.only(
-                                  top: 20,
-                                  left: 5,
-                                  right: 5,
-                                  bottom: 20,
+                      : (collectionCollectibles != null &&
+                              collectionCollectibles.isNotEmpty)
+                          ? GridView.count(
+                              primary: false,
+                              padding:
+                                  const EdgeInsets.only(top: 20, bottom: 20),
+                              crossAxisCount: 4,
+                              crossAxisSpacing: 5,
+                              mainAxisSpacing: 5,
+                              childAspectRatio: (6 / 10),
+                              children: [
+                                for (int i = 0;
+                                    i < collectionCollectibles.length;
+                                    i++) ...[
+                                  Container(
+                                    padding: const EdgeInsets.only(
+                                      top: 20,
+                                      left: 5,
+                                      right: 5,
+                                      bottom: 20,
+                                    ),
+                                    child: (isUserOwned(
+                                              collectionCollectibles[i],
+                                              userCollectibles,
+                                            ) ==
+                                            true)
+                                        ? linkedInkwell(collectionCollectibles[
+                                            i]) // Ensure linkedInkwell is defined
+                                        : unlinkedInkwell(collectionCollectibles[
+                                            i]), // Ensure unlinkedInkwell is defined
+                                  )
+                                ]
+                              ],
+                            )
+                          : const Center(
+                              // Display a message if no collectibles
+                              child: Text(
+                                'No collectibles found.',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                  fontFamily: 'ChakraPetch',
                                 ),
-                                child: (isUserOwned(
-                                          collectionCollectibles[i],
-                                          userCollectibles,
-                                        ) ==
-                                        true)
-                                    ? linkedInkwell(collectionCollectibles[
-                                        i]) // Ensure linkedInkwell is defined
-                                    : unlinkedInkwell(collectionCollectibles[
-                                        i]), // Ensure unlinkedInkwell is defined
-                              )
-                            ]
-                          ],
-                        ),
+                              ),
+                            ),
                 )
               ],
             ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kloppocar_app/widgets/splash_screen.dart';
 import 'login_page.dart';
-import '../../main.dart';
 import '../../auth/register.dart';
 
 class SignupPage extends StatefulWidget {
@@ -61,10 +61,8 @@ class SignupPageState extends State<SignupPage> {
                 var checkConfirm = await emailConfirmUser(_emailController.text,
                     _passwordController.text, _emailCodeController.text);
                 if (checkConfirm == true) {
-                  navigator.push(MaterialPageRoute(
-                      builder: (context) => MyHomePage(
-                          title: 'Kloppocar App Home',
-                          qrcode: 'Scan a Collectible!')));
+                  navigator.push(
+                      MaterialPageRoute(builder: (context) => SplashScreen()));
                 } else {
                   setState(() {
                     _codeErrorMessage = 'Invalid username or password';
