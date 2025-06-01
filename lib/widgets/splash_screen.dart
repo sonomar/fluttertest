@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
+import '../models/app_auth_provider.dart';
 import '../main.dart';
 import '../widgets/openCards/login_page.dart';
 import 'package:lottie/lottie.dart';
@@ -24,7 +25,8 @@ class SplashScreenState extends State<SplashScreen> {
       final navigator = Navigator.of(context);
       final prefValue = await SharedPreferences.getInstance();
       await Future.delayed(const Duration(seconds: 3));
-
+      // ignore: use_build_context_synchronously
+      Provider.of<AppAuthProvider>(context, listen: false).checkCurrentUser();
       if ((prefValue.containsKey('jwtCode'))) {
         // ignore: use_build_context_synchronously
         final userModel = Provider.of<UserModel>(context, listen: false);
