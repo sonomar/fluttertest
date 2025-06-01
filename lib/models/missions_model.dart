@@ -39,29 +39,31 @@ class MissionModel extends ChangeNotifier {
         print('DEBUG: Fetched user data: $fetchedUserData');
         if (fetchedUserData is List) {
           _missionUsers = fetchedUserData;
-          final dynamic fetchedCollectionData = [];
+          final List<dynamic> fetchedCollectionData = [];
           for (int i = 0; i < _missionUsers.length; i++) {
-            var missionId =
-                await getMissionByMissionId(_missionUsers[i]["missionId"]);
-            if (missionId != null) {
-              fetchedCollectionData.push(missionId);
-              print(
-                  'DEBUG: Fetched collection data type: ${fetchedCollectionData.runtimeType}');
-              print('DEBUG: Fetched collection data: $fetchedCollectionData');
-              if (fetchedCollectionData is List) {
-                _missions = fetchedCollectionData;
+            if (_missionUsers[i] != null &&
+                _missionUsers[i]["missionId"] != null) {
+              var missionId = await getMissionByMissionId(
+                  _missionUsers[i]["missionId"].toString());
+              if (missionId != null) {
+                fetchedCollectionData.add(missionId);
+                // The print statements here are okay, but they will show the list growing
                 print(
-                    'DEBUG: Collection missions loaded successfully. Count: ${missions.length}');
+                    'DEBUG: Fetched collection data (in loop): ${fetchedCollectionData.length} items');
               } else {
-                // If not a List, it's an unexpected type or null. Default to empty list.
-                _missions = [];
                 print(
-                    'ERROR: getmissionsByCollectionId did not return a List. Type: ${fetchedCollectionData.runtimeType}');
-                _errorMessage =
-                    'Failed to load collection data: Unexpected format.';
+                    'WARNING: Mission with ID ${_missionUsers[i]["missionId"]} not found or returned null.');
               }
+            } else {
+              print(
+                  'WARNING: _missionUsers[$i] or its "missionId" is null/invalid.');
             }
           }
+          // --- IMPORTANT FIX HERE ---
+          // Assign _missions ONLY after the loop has finished collecting all items.
+          _missions = fetchedCollectionData;
+          print(
+              'DEBUG: Collection missions loaded successfully. Count: ${_missions.length}');
           print(
               'DEBUG: User missions loaded successfully. Count: ${_missionUsers.length}');
         } else {
@@ -72,18 +74,16 @@ class MissionModel extends ChangeNotifier {
               '${_errorMessage ?? ''} Failed to load user missions: Unexpected format.';
         }
       }
-      if (missions.isNotEmpty) {
-        // sortData should handle dynamic content. Ensure it's safe within sort_data.dart
-        sortData(missions, "title");
+      if (_missions.isNotEmpty) {
+        // Use _missions here
+        sortData(_missions, "title"); // sortData should handle dynamic content.
         print('DEBUG: Collection missions sorted by title.');
       } else {
         print('WARNING: No collection missions to sort.');
       }
     } catch (e) {
-      // This catch block will now mostly catch errors from API calls themselves (network, server)
       _errorMessage = 'Error loading mission data: ${e.toString()}';
       print('Error loading mission data: $e');
-      // Ensure lists are empty on any catch, so UI doesn't break on nulls
       _missions = [];
       _missionUsers = [];
     } finally {
