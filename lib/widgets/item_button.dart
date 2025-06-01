@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 class ItemButton extends StatelessWidget {
   final Function()? onTap;
   final String title;
-  const ItemButton({super.key, required this.onTap, required this.title});
+  final bool active;
+  const ItemButton(
+      {super.key,
+      required this.onTap,
+      required this.title,
+      required this.active});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +28,9 @@ class ItemButton extends StatelessWidget {
                 splashColor: Colors.white10, // Splash color over image
                 child: Ink(
                     decoration: BoxDecoration(
-                      color: Color(0x80999999),
+                      color: active == true
+                          ? Color.fromARGB(94, 214, 34, 202)
+                          : Color(0x80999999),
                       borderRadius: BorderRadius.all(Radius.circular(20)),
                     ),
                     child: Center(
@@ -31,7 +38,9 @@ class ItemButton extends StatelessWidget {
                         title,
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.black,
+                          color: active == true
+                              ? Colors.black
+                              : Color.fromARGB(158, 22, 21, 21),
                           fontFamily: 'ChakraPetch',
                           fontWeight: FontWeight.w500,
                         ),

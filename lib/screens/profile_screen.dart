@@ -91,32 +91,38 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () {
                   _launchUrl(mailingListUrl);
                 },
-                title: "Mailing List"),
+                title: "Mailing List",
+                active: true),
             ItemButton(
                 onTap: () {
                   _launchUrl(ppUrl);
                 },
-                title: "Privacy Policy"),
+                title: "Privacy Policy",
+                active: true),
             ItemButton(
                 onTap: () {
                   _launchUrl(mailingListUrl);
                 },
-                title: "Imprint"),
+                title: "Imprint",
+                active: true),
             ItemButton(
                 onTap: () {
                   _launchUrl(resetDemo());
                 },
-                title: "Reset Demo"),
+                title: "Reset Demo",
+                active: false),
             ItemButton(
                 onTap: () {
                   getCollectibleByCollectibleId("1");
                 },
-                title: "Test API"),
+                title: "Test API",
+                active: false),
             ItemButton(
                 onTap: () {
                   getAllCollectibles();
                 },
-                title: "Test getAll API"),
+                title: "Test getAll API",
+                active: false),
             ItemButton(
                 onTap: () {
                   final navigator = Navigator.of(context);
@@ -128,7 +134,8 @@ class ProfileScreen extends StatelessWidget {
                                 builder: (context) => LoginPage()))
                           });
                 },
-                title: "Sign Out"),
+                title: "Sign Out",
+                active: true),
           ],
         ));
   }

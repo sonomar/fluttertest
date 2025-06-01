@@ -1,18 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../models/user_model.dart';
 import '../widgets/item_button.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  const GameScreen({super.key, this.userData});
+  final dynamic userData;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
+Widget getUserPic(userPic, defaultImg, radius) {
+  final subStrings = <String>["png", "jpg", "jpeg", "gif"];
+  var result = subStrings.any(userPic.contains);
+  if (result == true) {
+    return shadowCircle(userPic, radius, true);
+  }
+  return shadowCircle(defaultImg, radius, false);
+}
+
+Widget shadowCircle(imageLink, radius, isWeb) {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      shape: BoxShape.circle,
+      boxShadow: [
+        BoxShadow(blurRadius: 5, color: Colors.black, spreadRadius: 0)
+      ],
+    ),
+    child: isWeb
+        ? CircleAvatar(
+            radius: radius,
+            backgroundImage: NetworkImage(imageLink),
+          )
+        : CircleAvatar(
+            radius: radius,
+            backgroundImage: AssetImage(imageLink),
+          ),
+  );
+}
+
 class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
+    final user = widget.userData;
+    final userPic = user['profileImg'];
+    final userRank = user['userRank']["title"];
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -22,7 +54,7 @@ class _GameScreenState extends State<GameScreen> {
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text("Profile"),
+            title: const Text("Game Center"),
             centerTitle: false,
             titleTextStyle: TextStyle(
               fontSize: 28,
@@ -30,14 +62,57 @@ class _GameScreenState extends State<GameScreen> {
               fontFamily: 'ChakraPetch',
               fontWeight: FontWeight.w500,
             )),
-        body: ListView(
-          padding: const EdgeInsets.all(8),
-          children: <Widget>[
-            ItemButton(onTap: () {}, title: "Missions"),
-            ItemButton(onTap: () {}, title: "Quiz Spiel"),
-            ItemButton(onTap: () {}, title: "Tipp Speil"),
-            ItemButton(onTap: () {}, title: "Fantasy Manager"),
-          ],
-        ));
+        body: Padding(
+            padding: const EdgeInsets.all(40.0),
+            child: Column(children: [
+              Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                        alignment: Alignment.center,
+                        width: 200,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.black,
+                          ),
+                        ),
+                        child: Text(
+                          "${userRank ?? 'NEWB'}",
+                          style: TextStyle(
+                              fontSize: 14,
+                              letterSpacing: 2.56,
+                              color: Colors.black,
+                              fontFamily: 'ChakraPetch',
+                              fontWeight: FontWeight.w700),
+                        )),
+                    Positioned(
+                        top: -20,
+                        child: userPic != null
+                            ? getUserPic(
+                                userPic, 'assets/images/profile.jpg', 18)
+                            : shadowCircle(
+                                'assets/images/profile.jpg', 18, false)),
+                  ]),
+              Expanded(
+                  child: Padding(
+                      padding: const EdgeInsets.all(40.0),
+                      child: ListView(
+                        padding: const EdgeInsets.all(8),
+                        children: <Widget>[
+                          ItemButton(
+                              onTap: () {}, title: "Missions", active: true),
+                          ItemButton(
+                              onTap: () {}, title: "Quiz Spiel", active: false),
+                          ItemButton(
+                              onTap: () {}, title: "Tipp Speil", active: false),
+                          ItemButton(
+                              onTap: () {},
+                              title: "Fantasy Manager",
+                              active: false),
+                        ],
+                      )))
+            ])));
   }
 }

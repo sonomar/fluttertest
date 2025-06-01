@@ -107,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
       const CollectionScreen(key: PageStorageKey('collection')),
       ScanScreen(key: const PageStorageKey('scan'), userData: widget.userData),
       const CommunityScreen(key: PageStorageKey('community')),
-      const GameScreen(key: PageStorageKey('game')),
+      GameScreen(key: PageStorageKey('game'), userData: widget.userData),
     ];
   }
 
