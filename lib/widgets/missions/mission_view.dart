@@ -233,3 +233,78 @@ Widget homeMissionWidget(pageContext, mission, missionUser) {
         ),
       ]));
 }
+
+Widget viewMissionWidget(pageContext, mission, missionUser) {
+  final getMission = mission;
+  final getMissionUser = missionUser;
+  final String getTitle = (getMission != null && getMission['title'] != null)
+      ? getMission['title']
+      : 'No Title'; // Default value
+  final String getLogo =
+      (getMission != null && getMission['imgRef']['url'] != null)
+          ? getMission['imgRef']['url']
+          : 'assets/images/deins_logo.png'; // Default value
+  final String missionGoal = (getMission != null && getMission['goal'] != null)
+      ? getMission['goal'].toString()
+      : '0'; // Default value
+  final String missionProgress =
+      (getMissionUser != null && getMissionUser['progress'] != null)
+          ? getMissionUser['progress'].toString()
+          : '0'; // Default value
+  return Padding(
+      padding: const EdgeInsets.only(top: 20.0),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+                padding: const EdgeInsets.only(left: 15.0),
+                child: Text(
+                  getTitle,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontFamily: 'ChakraPetch',
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                )),
+            GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    pageContext,
+                    MaterialPageRoute(
+                      builder: (context) => AwardDetails(
+                        selectedAward: mission,
+                      ),
+                    ),
+                  );
+                },
+                child: Stack(alignment: Alignment.center, children: [
+                  Padding(
+                      padding: const EdgeInsets.only(left: 40.0),
+                      child: Image.asset('assets/images/silvertab.png',
+                          width: 120, height: 50, fit: BoxFit.fill)),
+                  Text("Selten",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black,
+                        fontFamily: 'Roboto',
+                      ))
+                ])),
+          ],
+        ),
+        Container(
+            alignment: Alignment.center,
+            child: progressBar(pageContext, mission, missionUser)),
+        Padding(
+          padding: EdgeInsets.only(left: 15, top: 5, right: 20, bottom: 5),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text('$missionProgress / $missionGoal',
+                  style: TextStyle(fontSize: 12, color: Colors.black))
+            ],
+          ),
+        ),
+      ]));
+}

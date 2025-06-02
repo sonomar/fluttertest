@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import '../missions/latest_active_mission.dart';
 
 class CardInfo extends StatelessWidget {
-  const CardInfo({super.key, required this.selectedCollectible});
+  const CardInfo(
+      {super.key,
+      required this.selectedCollectible,
+      required this.missions,
+      required this.missionUsers,
+      required this.recentColl});
   final Map selectedCollectible;
+  final List<dynamic> missions;
+  final List<dynamic> missionUsers;
+  final dynamic recentColl;
 
   Widget lineItem(key, value) {
     return Column(children: [
@@ -116,6 +125,11 @@ class CardInfo extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ))))
           ])),
+      Padding(
+          padding: const EdgeInsets.only(left: 10.0, right: 20.0, bottom: 10.0),
+          child: getLatestActiveMission(
+              context, missions, missionUsers, recentColl,
+              isViewer: true)),
       Padding(
           padding: const EdgeInsets.only(left: 10.0, right: 20.0, bottom: 10.0),
           child: SizedBox(

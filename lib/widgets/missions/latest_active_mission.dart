@@ -69,7 +69,8 @@ dynamic getLatestCollectible(
 }
 
 Widget getLatestActiveMission(
-    context, missions, missionUsers, latestCollectible) {
+    context, missions, missionUsers, latestCollectible,
+    {bool isViewer = false}) {
   if (latestCollectible == 'not found' ||
       latestCollectible == null ||
       latestCollectible['collectionId'] == null) {
@@ -115,7 +116,9 @@ Widget getLatestActiveMission(
     final num userProgress = correspondingMissionUser['progress'] as num;
     if (userProgress != missionGoal) {
       // If all conditions are met, return the missionWidget
-      return homeMissionWidget(context, mission, correspondingMissionUser);
+      return isViewer
+          ? viewMissionWidget(context, mission, correspondingMissionUser)
+          : homeMissionWidget(context, mission, correspondingMissionUser);
     } else {
       print(
           'DEBUG: Mission ID $missionId is completed (progress == goal). Skipping.');

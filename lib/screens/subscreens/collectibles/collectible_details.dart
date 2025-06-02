@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../models/collectible_model.dart';
+import '../../../models/mission_model.dart';
 import '../../../widgets/object_viewer.dart';
-import '../../../widgets/card_info.dart';
+import '../../../widgets/collectibles/card_info.dart';
 import '../../../widgets/drag_scroll_sheet.dart';
+import '../../../widgets/missions/latest_active_mission.dart';
 import 'collectible.dart';
 
 class CollectibleDetails extends StatefulWidget {
@@ -13,6 +17,16 @@ class CollectibleDetails extends StatefulWidget {
 }
 
 class _CollectibleDetailsState extends State<CollectibleDetails> {
+  @override
+  void initState() {
+    super.initState();
+    // Defer the calls to load data until after the first frame is rendered.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MissionModel>(context, listen: false).loadMissions();
+      Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
+    });
+  }
+
   Widget lineItem(key, value) {
     return Column(children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -35,6 +49,14 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final missionModel = context.watch<MissionModel>();
+    final missions = missionModel.missions;
+    final missionUsers = missionModel.missionUsers;
+    final collectibleModel = context.watch<CollectibleModel>();
+    final collectibles = collectibleModel.collectionCollectibles;
+    final userCollectibles = collectibleModel.userCollectibles;
+    final recentColl = getLatestCollectible(collectibles, userCollectibles);
+
     return Scaffold(
         appBar: AppBar(
             scrolledUnderElevation: 0.0,
@@ -96,7 +118,10 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
               height: MediaQuery.of(context).size.height,
               child: DragScrollSheet(
                   contents: CardInfo(
-                      selectedCollectible: widget.selectedCollectible))),
+                      selectedCollectible: widget.selectedCollectible,
+                      missions: missions,
+                      missionUsers: missionUsers,
+                      recentColl: recentColl))),
         ]));
   }
 }
