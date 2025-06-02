@@ -7,7 +7,7 @@ import 'screens/community_screen.dart';
 import 'screens/game_screen.dart';
 import './models/collectible_model.dart';
 import './models/user_model.dart';
-import './models/missions_model.dart';
+import 'models/mission_model.dart';
 import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';

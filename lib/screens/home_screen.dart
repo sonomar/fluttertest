@@ -7,7 +7,9 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'subscreens/notifications/notifications_page.dart';
+import '../models/mission_model.dart';
 import '../widgets/shadow_circle.dart';
+import '../widgets/missions/mission_view.dart';
 import '../models/user_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -62,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    Provider.of<MissionModel>(context, listen: false).loadMissions();
     _startTimer();
     readItemJson();
   }
@@ -169,67 +172,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  Widget missionWidget() {
-    return Padding(
-        padding: const EdgeInsets.only(top: 20.0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Padding(
-              padding: const EdgeInsets.only(left: 15.0),
-              child: Container(
-                padding: const EdgeInsets.only(
-                    left: 40, right: 40, top: 7, bottom: 7),
-                decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: const BorderRadius.all(Radius.circular(5))),
-                child: Text("MISSION",
-                    style: TextStyle(
-                        fontSize: 10,
-                        letterSpacing: 2.56,
-                        color: Colors.white,
-                        fontFamily: 'ChakraPetch',
-                        fontWeight: FontWeight.w700)),
-              )),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                  padding: const EdgeInsets.only(left: 15.0),
-                  child: Text(
-                    'Tür L',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontFamily: 'ChakraPetch',
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                    ),
-                  )),
-              Stack(alignment: Alignment.center, children: [
-                Padding(
-                    padding: const EdgeInsets.only(left: 40.0),
-                    child: Image.asset('assets/images/silvertab.png',
-                        width: 120, height: 50, fit: BoxFit.fill)),
-                Text("Selten",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black,
-                      fontFamily: 'Roboto',
-                    ))
-              ])
-            ],
-          ),
-          Container(alignment: Alignment.center, child: progressBar(0.33)),
-          const Padding(
-            padding: EdgeInsets.only(left: 15, top: 5, right: 20, bottom: 5),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text('2/6', style: TextStyle(fontSize: 12, color: Colors.black))
-              ],
-            ),
-          ),
-        ]));
   }
 
   Widget kloppocarWidget() {
@@ -382,6 +324,60 @@ class _HomeScreenState extends State<HomeScreen> {
     final userModel = context.watch<UserModel>();
     final currentUser = userModel.currentUser;
     final userPic = currentUser["profileImg"];
+    final missionModel = context.watch<MissionModel>();
+    final missions = missionModel.missions;
+    final missionUsers = missionModel.missionUsers;
+    final isLoading = missionModel.isLoading;
+    final errorMessage = missionModel.errorMessage;
+    final List incompleteMissions = [];
+
+    print('Missions from Provider: $missions');
+    print('MissionUsers from Provider: $missionUsers');
+
+    Widget listMissions(context, getMissions, getMissionUsers) {
+      // Add a check here: If getMissions is empty, there's nothing to match.
+      // This prevents `firstWhere` from being called on an empty list,
+      // which might still lead to issues depending on the exact implementation details.
+      if (getMissions.isEmpty) {
+        return const SizedBox
+            .shrink(); // Or a message like 'No missions available'
+      }
+
+      return Column(children: [
+        ...getMissionUsers.map((missionUser) {
+          // It's crucial to ensure `getMissions` is not empty before `firstWhere`
+          final correspondingMission = getMissions.firstWhere(
+            (mission) =>
+                mission['missionId'].toString() ==
+                missionUser['missionId'].toString(),
+            orElse: () =>
+                null, // This is good, it returns null if no match is found
+          );
+
+          // Now, robustly check correspondingMission before accessing its properties
+          if (correspondingMission != null &&
+              correspondingMission['goal'] != null &&
+              missionUser['progress'] != null &&
+              (correspondingMission['goal'] as num) !=
+                  (missionUser['progress'] as num)) {
+            // Add cast to num for safe comparison
+            return Container(
+              padding: const EdgeInsets.only(
+                top: 20,
+                left: 5,
+                right: 5,
+              ),
+              child: missionWidget(context, correspondingMission, missionUser),
+            );
+          } else {
+            // If correspondingMission is null, or goal/progress are null,
+            // or goal == progress, then we hide the widget.
+            return const SizedBox.shrink();
+          }
+        }).toList(),
+      ]);
+    }
+
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -409,12 +405,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             Row(children: [
                               Text(currentUser["username"],
                                   style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700)),
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w200)),
                               Padding(
                                   padding: const EdgeInsets.only(left: 5.0),
                                   child: SizedBox(
-                                      width: 10,
+                                      width: 20,
                                       child: GestureDetector(
                                           onTap: () {
                                             Navigator.push(
@@ -431,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ? currentUser["userRank"]["title"]
                                     : 'NEWB',
                                 style: TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.w200)),
+                                    fontSize: 10, fontWeight: FontWeight.w700)),
                           ],
                         ))
                   ])),
@@ -509,15 +505,15 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Image.asset('assets/images/covercard.png',
                                   fit: BoxFit.cover)))),
                 ),
-                missionWidget(),
+                // homeMissionWidget(context, missions, missionUsers),
                 kloppocarWidget(),
               ])),
           communityChallengeWidget(_formatTime(_remainingTime)),
           Padding(
               padding: const EdgeInsets.only(left: 32, right: 32, top: 10),
               child: Column(children: [
-                sectionHeader('CHALLENGES'),
-                challengeBox(),
+                sectionHeader('GAME CENTER'),
+                listMissions(context, missions, missionUsers),
                 sectionHeader('Nachrichten'),
                 newsItem(
                   _newsItems[0]["category"],

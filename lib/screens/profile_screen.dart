@@ -107,24 +107,6 @@ class ProfileScreen extends StatelessWidget {
                 active: true),
             ItemButton(
                 onTap: () {
-                  _launchUrl(resetDemo());
-                },
-                title: "Reset Demo",
-                active: false),
-            ItemButton(
-                onTap: () {
-                  getCollectibleByCollectibleId("1");
-                },
-                title: "Test API",
-                active: false),
-            ItemButton(
-                onTap: () {
-                  getAllCollectibles();
-                },
-                title: "Test getAll API",
-                active: false),
-            ItemButton(
-                onTap: () {
                   final navigator = Navigator.of(context);
 
                   Provider.of<AppAuthProvider>(context, listen: false)

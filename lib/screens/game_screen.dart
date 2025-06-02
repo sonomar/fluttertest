@@ -112,14 +112,6 @@ class _GameScreenState extends State<GameScreen> {
                               },
                               title: "Missions",
                               active: true),
-                          ItemButton(
-                              onTap: () {}, title: "Quiz Spiel", active: false),
-                          ItemButton(
-                              onTap: () {}, title: "Tipp Speil", active: false),
-                          ItemButton(
-                              onTap: () {},
-                              title: "Fantasy Manager",
-                              active: false),
                         ],
                       )))
             ])));

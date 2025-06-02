@@ -26,6 +26,7 @@ class MissionModel extends ChangeNotifier {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? userId = prefs.getString('userId');
+      print('looodeeeloo $userId');
       if (userId == null) {
         // If userId is null, we can't fetch user missions.
         // This is where the 'null is not a subtype of String' for userId might come from.

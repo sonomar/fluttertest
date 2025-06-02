@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../models/missions_model.dart';
+import '../../../models/mission_model.dart';
 import '../../../widgets/missions/mission_view.dart';
 
 class Missions extends StatefulWidget {
@@ -23,7 +23,6 @@ class _MissionsState extends State<Missions> {
     final missionModel = context.watch<MissionModel>();
     final missions = missionModel.missions;
     final missionUsers = missionModel.missionUsers;
-    final numAssets = missionUsers.length;
     final isLoading = missionModel.isLoading;
     final errorMessage = missionModel.errorMessage;
 
@@ -78,7 +77,6 @@ class _MissionsState extends State<Missions> {
                                   top: 20,
                                   left: 5,
                                   right: 5,
-                                  bottom: 20,
                                 ),
                                 child: missionWidget(
                                     context, correspondingMission, missionUser),
