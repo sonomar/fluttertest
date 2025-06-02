@@ -39,9 +39,9 @@ class _ScanViewReceiveState extends State<ScanViewReceive>
     for (int i = 0; i < data['collectibles'].length; i++) {
       if (data['collectibles'][i]['label'] == widget.qrcode) {
         setState(() {
-          _item = data['collectibles'][i]['imageRef'];
+          _item = data['collectibles'][i]['imageRef']['url'];
         });
-        return data['collectibles'][i]['imageRef'];
+        return data['collectibles'][i]['imageRef']['url'];
       }
     }
     setState(() {

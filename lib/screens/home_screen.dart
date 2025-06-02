@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'subscreens/notifications/notifications_page.dart';
+import '../widgets/shadow_circle.dart';
 import '../models/user_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -374,27 +375,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return shadowCircle(userPic, radius, true);
     }
     return shadowCircle(defaultImg, radius, false);
-  }
-
-  Widget shadowCircle(imageLink, radius, isWeb) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(blurRadius: 5, color: Colors.black, spreadRadius: 0)
-        ],
-      ),
-      child: isWeb
-          ? CircleAvatar(
-              radius: radius,
-              backgroundImage: NetworkImage(imageLink),
-            )
-          : CircleAvatar(
-              radius: radius,
-              backgroundImage: AssetImage(imageLink),
-            ),
-    );
   }
 
   @override

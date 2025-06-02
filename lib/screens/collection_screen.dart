@@ -83,7 +83,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   Widget linkedInkwell(collectible) {
     print('here is the collectible: $collectible');
-    final colImage = collectible["imageRef"][0];
+    final colImage = collectible['imageRef']['url'];
     return Material(
         child: InkWell(
       onTap: () {
@@ -113,7 +113,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   }
 
   Widget unlinkedInkwell(collectible) {
-    final colImage = collectible["imageRef"][0];
+    final colImage = collectible['imageRef']['url'];
     return Material(
       child: Container(
         foregroundDecoration: BoxDecoration(
