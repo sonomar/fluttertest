@@ -35,8 +35,6 @@ class _AwardDetailsState extends State<AwardDetails> {
 
   @override
   Widget build(BuildContext context) {
-    final award = widget.selectedAward;
-    print('bababab $award');
     return Scaffold(
         appBar: AppBar(
             scrolledUnderElevation: 0.0,

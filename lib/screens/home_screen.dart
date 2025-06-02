@@ -8,8 +8,10 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'subscreens/notifications/notifications_page.dart';
 import '../models/mission_model.dart';
+import '../models/collectible_model.dart';
 import '../widgets/shadow_circle.dart';
-import '../widgets/missions/mission_view.dart';
+import '../widgets/object_viewer.dart';
+import '../widgets/missions/latest_active_mission.dart';
 import '../models/user_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -64,7 +66,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<MissionModel>(context, listen: false).loadMissions();
+    // Defer the calls to load data until after the first frame is rendered.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MissionModel>(context, listen: false).loadMissions();
+      Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
+    });
     _startTimer();
     readItemJson();
   }
@@ -327,57 +333,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final missionModel = context.watch<MissionModel>();
     final missions = missionModel.missions;
     final missionUsers = missionModel.missionUsers;
-    final isLoading = missionModel.isLoading;
-    final errorMessage = missionModel.errorMessage;
-    final List incompleteMissions = [];
+    final collectibleModel = context.watch<CollectibleModel>();
+    final collectibles = collectibleModel.collectionCollectibles;
+    final userCollectibles = collectibleModel.userCollectibles;
 
-    print('Missions from Provider: $missions');
-    print('MissionUsers from Provider: $missionUsers');
-
-    Widget listMissions(context, getMissions, getMissionUsers) {
-      // Add a check here: If getMissions is empty, there's nothing to match.
-      // This prevents `firstWhere` from being called on an empty list,
-      // which might still lead to issues depending on the exact implementation details.
-      if (getMissions.isEmpty) {
-        return const SizedBox
-            .shrink(); // Or a message like 'No missions available'
-      }
-
-      return Column(children: [
-        ...getMissionUsers.map((missionUser) {
-          // It's crucial to ensure `getMissions` is not empty before `firstWhere`
-          final correspondingMission = getMissions.firstWhere(
-            (mission) =>
-                mission['missionId'].toString() ==
-                missionUser['missionId'].toString(),
-            orElse: () =>
-                null, // This is good, it returns null if no match is found
-          );
-
-          // Now, robustly check correspondingMission before accessing its properties
-          if (correspondingMission != null &&
-              correspondingMission['goal'] != null &&
-              missionUser['progress'] != null &&
-              (correspondingMission['goal'] as num) !=
-                  (missionUser['progress'] as num)) {
-            // Add cast to num for safe comparison
-            return Container(
-              padding: const EdgeInsets.only(
-                top: 20,
-                left: 5,
-                right: 5,
-              ),
-              child: missionWidget(context, correspondingMission, missionUser),
-            );
-          } else {
-            // If correspondingMission is null, or goal/progress are null,
-            // or goal == progress, then we hide the widget.
-            return const SizedBox.shrink();
-          }
-        }).toList(),
-      ]);
-    }
-
+    final recentColl = getLatestCollectible(collectibles, userCollectibles);
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -501,12 +461,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                             exampleCollectible)));
                           },
                           child: SizedBox(
-                              height: 400,
-                              child: Image.asset('assets/images/covercard.png',
-                                  fit: BoxFit.cover)))),
+                            height: 400,
+                            child: ObjectViewer(
+                              asset: recentColl['embedRef'] != null &&
+                                      (recentColl['embedRef'] as Map)
+                                          .containsKey('url')
+                                  ? recentColl['embedRef']['url'] as String
+                                  : 'assets/default_placeholder.glb', // Provide a default or handle null
+                            ),
+                          ))),
                 ),
-                // homeMissionWidget(context, missions, missionUsers),
-                kloppocarWidget(),
+                getLatestActiveMission(
+                    context, missions, missionUsers, recentColl),
               ])),
           communityChallengeWidget(_formatTime(_remainingTime)),
           Padding(
