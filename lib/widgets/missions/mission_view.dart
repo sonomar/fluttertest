@@ -64,7 +64,8 @@ Widget missionWidget(pageContext, mission, missionUser) {
           pageContext,
           MaterialPageRoute(
             builder: (context) => AwardDetails(
-              selectedAward: mission,
+              selectedAward: getMission,
+              selectedAwardUser: getMissionUser,
             ),
           ),
         );
@@ -199,7 +200,8 @@ Widget homeMissionWidget(pageContext, mission, missionUser) {
                     pageContext,
                     MaterialPageRoute(
                       builder: (context) => AwardDetails(
-                        selectedAward: mission,
+                        selectedAward: getMission,
+                        selectedAwardUser: getMissionUser,
                       ),
                     ),
                   );
@@ -274,7 +276,8 @@ Widget viewMissionWidget(pageContext, mission, missionUser) {
                     pageContext,
                     MaterialPageRoute(
                       builder: (context) => AwardDetails(
-                        selectedAward: mission,
+                        selectedAward: getMission,
+                        selectedAwardUser: getMissionUser,
                       ),
                     ),
                   );

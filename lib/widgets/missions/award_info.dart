@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import './mission_view.dart';
 
 class AwardInfo extends StatelessWidget {
-  const AwardInfo({super.key, required this.selectedAward});
-  final Map selectedAward;
+  const AwardInfo(
+      {super.key,
+      required this.selectedAward,
+      required this.selectedAwardUser});
+  final dynamic selectedAward;
+  final dynamic selectedAwardUser;
 
   Widget lineItem(key, value) {
     return Column(children: [
@@ -114,8 +119,11 @@ class AwardInfo extends StatelessWidget {
                           fontSize: 30,
                           fontFamily: 'ChakraPetch',
                           fontWeight: FontWeight.bold,
-                        ))))
+                        )))),
           ])),
+      (selectedAward != null && selectedAwardUser != null)
+          ? viewMissionWidget(context, selectedAward, selectedAwardUser)
+          : SizedBox.shrink(),
       Padding(
           padding: const EdgeInsets.only(left: 10.0, right: 20.0, bottom: 10.0),
           child: SizedBox(

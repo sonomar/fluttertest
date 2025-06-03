@@ -19,35 +19,72 @@ class UserModel extends ChangeNotifier {
   }
 
   Future<void> loadUser() async {
+    print(
+        '>>> UserModel: ENTERING loadUser() method at ${DateTime.now()} <<<'); // Should be the very first print inside loadUser()
+
     if (_isLoading) {
-      print('userModel: Load user already in progress. Skipping.');
+      print(
+          'UserModel: loadUser() called but already loading. Returning. at ${DateTime.now()}');
       return;
     }
 
     _isLoading = true;
-    _errorMessage = null;
+    _errorMessage = null; // Clear any previous error
+    print(
+        'UserModel: Setting _isLoading to true and calling notifyListeners() at ${DateTime.now()}');
+    notifyListeners(); // This should cause AuthLoadingScreen to re-render with isLoading=true
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final email = prefs.getString('email');
+      print(
+          'UserModel: Attempting SharedPreferences.getInstance() at ${DateTime.now()}'); // Added print
+      final prefs = await SharedPreferences
+          .getInstance(); // This is a common point of hang/failure
+      print(
+          'UserModel: SharedPreferences.getInstance() successful at ${DateTime.now()}'); // Added print
 
-      if (email == null) {
+      final userEmail = prefs.getString('email');
+      final userId = prefs.getString('userId');
+
+      if (userEmail == null && userId == null) {
         _errorMessage =
-            'User email not found in preferences after authentication.';
+            'No user identifier found in preferences to load user data. at ${DateTime.now()}';
+        print('UserModel: $_errorMessage');
         _currentUser = null;
-        print('UserModel: Error: $_errorMessage');
       } else {
-        final user = await getUserByEmail(email);
-        _currentUser = user;
-        print('UserModel: User data loaded for ${user['email']}');
+        print(
+            'UserModel: Making API call to get user details for ${userEmail ?? userId} at ${DateTime.now()}');
+        final startApiCall = DateTime.now();
+        final fetchedUser = await getUserByEmail(
+            userEmail ?? userId); // Assuming getUserByEmail is defined
+        print(
+            'UserModel: API call completed in ${DateTime.now().difference(startApiCall).inMilliseconds}ms at ${DateTime.now()}');
+
+        if (fetchedUser != null && fetchedUser.isNotEmpty) {
+          _currentUser = fetchedUser;
+          print(
+              'UserModel: User data loaded successfully for ${userEmail ?? userId} at ${DateTime.now()}');
+        } else {
+          _errorMessage =
+              'Failed to fetch user data from API for ${userEmail ?? userId}. (Empty/null response). at ${DateTime.now()}';
+          print('UserModel: $_errorMessage');
+          _currentUser = null;
+        }
       }
-    } catch (e) {
-      _errorMessage = 'Failed to load user data: ${e.toString()}';
-      _currentUser = null;
-      print('Error loading collectible data: $_errorMessage');
+    } catch (e, stackTrace) {
+      // <--- Add stackTrace here for more details
+      // This catch block will now catch any synchronous or asynchronous errors within the try block
+      _errorMessage =
+          'UserModel.loadUser() caught an error: ${e.toString()} at ${DateTime.now()}';
+      print('UserModel: $_errorMessage');
+      print('UserModel: Stack trace: $stackTrace'); // Log the stack trace
+      _currentUser = null; // Ensure user data is cleared on error
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _isLoading = false; // Ensure loading state is reset
+      print(
+          'UserModel: END of loadUser() finally block. Setting _isLoading to false and calling notifyListeners()... at ${DateTime.now()}');
+      notifyListeners(); // Notify listeners of the final state
+      print(
+          'UserModel: notifyListeners() called. loadUser() finished at ${DateTime.now()}');
     }
   }
 }

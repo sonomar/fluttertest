@@ -66,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    print('>>> MyHomePage: initState called at ${DateTime.now()} <<<');
     // Defer the calls to load data until after the first frame is rendered.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<MissionModel>(context, listen: false).loadMissions();

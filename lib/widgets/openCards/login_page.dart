@@ -41,19 +41,10 @@ class _LoginPageState extends State<LoginPage> {
         _passwordController.text.trim(),
       );
 
-      // --- CRITICAL FIX: Check mounted here ---
-      if (!mounted) {
-        print(
-            'LoginPage: Widget unmounted, canceling state update after login attempt.');
-        return; // Stop if widget is no longer in the tree
-      }
-
       if (success) {
         // If login was successful, RootApp will handle navigation to MyHomePage.
         // No direct navigation from LoginPage needed here.
         print('LoginPage: Login successful. RootApp will navigate.');
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => SplashScreen()));
       } else {
         // Login failed, update UI with error message
         setState(() {

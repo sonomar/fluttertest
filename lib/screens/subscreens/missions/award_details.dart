@@ -5,8 +5,12 @@ import '../../../widgets/drag_scroll_sheet.dart';
 import './award.dart';
 
 class AwardDetails extends StatefulWidget {
-  const AwardDetails({super.key, required this.selectedAward});
+  const AwardDetails(
+      {super.key,
+      required this.selectedAward,
+      required this.selectedAwardUser});
   final dynamic selectedAward;
+  final dynamic selectedAwardUser;
 
   @override
   State<AwardDetails> createState() => _AwardDetailsState();
@@ -88,7 +92,9 @@ class _AwardDetailsState extends State<AwardDetails> {
           SizedBox(
               height: MediaQuery.of(context).size.height,
               child: DragScrollSheet(
-                  contents: AwardInfo(selectedAward: widget.selectedAward))),
+                  contents: AwardInfo(
+                      selectedAward: widget.selectedAward,
+                      selectedAwardUser: widget.selectedAwardUser))),
         ]));
   }
 }

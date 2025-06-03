@@ -110,11 +110,11 @@ class ProfileScreen extends StatelessWidget {
                   final navigator = Navigator.of(context);
 
                   Provider.of<AppAuthProvider>(context, listen: false)
-                      .signOut()
-                      .then((value) => {
-                            navigator.push(MaterialPageRoute(
-                                builder: (context) => LoginPage()))
-                          });
+                      .signOut();
+                  if (context.mounted) {
+                    // Check if context is still valid
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  }
                 },
                 title: "Sign Out",
                 active: true),

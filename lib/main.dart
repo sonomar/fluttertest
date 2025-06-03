@@ -13,9 +13,11 @@ import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:kloppocar_app/models/app_auth_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './app_lifefycle_observer.dart';
+import './screens/auth_loading_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,68 +65,20 @@ class MyApp extends StatelessWidget {
                 return const SplashScreen();
 
               case AuthStatus.authenticated:
-                return Consumer<UserModel>(
-                  // Listen to UserModel changes
-                  builder: (context, userModel, __) {
-                    print(
-                        'RootApp Consumer (User): isLoading=${userModel.isLoading}, currentUser=${userModel.currentUser != null ? 'loaded' : 'null'}, errorMessage=${userModel.errorMessage}'); // Debug print
-
-                    // If user data is not yet loaded and not currently loading, trigger loadUser
-                    if (userModel.currentUser == null &&
-                        !userModel.isLoading &&
-                        userModel.errorMessage == null) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        print('RootApp: Triggering UserModel.loadUser()');
-                        userModel.loadUser();
-                      });
-                      return const SplashScreen(); // Show splash while loading user data
-                    }
-
-                    // If user data is loading, show splash
-                    if (userModel.isLoading) {
-                      return const SplashScreen();
-                    }
-
-                    // If user data is loaded, show MyHomePage
-                    if (userModel.currentUser != null) {
-                      print(
-                          'RootApp: Navigating to MyHomePage with user data.');
-                      final userId =
-                          userModel.currentUser['userId']?.toString();
-                      if (userId != null) {
-                        SharedPreferences.getInstance().then((prefs) {
-                          prefs.setString('userId', userId);
-                        });
-                      }
-                      return MyHomePage(
-                        title: 'Kloppocar App Home',
-                        qrcode: 'Scan a Collectible!',
-                        userData: userModel.currentUser,
-                      );
-                    }
-
-                    // If there was an error loading user data, sign out and go to login
-                    if (userModel.errorMessage != null) {
-                      print(
-                          'RootApp: UserModel Error: ${userModel.errorMessage}. Signing out.');
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        authProvider
-                            .signOut(); // This will change auth status to unauthenticated
-                        userModel.clearUser(); // Clear user model state too
-                      });
-                      return const LoginPage(
-                          userData: {}); // Go to login immediately
-                    }
-
-                    // Fallback, should theoretically not be reached if states are handled
-                    return const SplashScreen();
-                  },
-                );
+                print(
+                    'RootApp: Returning AuthLoadingScreen() at ${DateTime.now()}.');
+                return const AuthLoadingScreen();
 
               case AuthStatus.unauthenticated:
                 print(
                     'RootApp: Navigating to LoginPage (unauthenticated).'); // Debug print
-                return const LoginPage(userData: {});
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (context.mounted) {
+                    Provider.of<UserModel>(context, listen: false).clearUser();
+                  }
+                });
+                return const LoginPage(
+                    userData: {}); // <--- This is the correct way
             }
           },
         ),
