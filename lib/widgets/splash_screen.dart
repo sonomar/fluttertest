@@ -22,16 +22,19 @@ class SplashScreenState extends State<SplashScreen> {
     super.initState();
 
     Future<void> navigateToHomeOrLogin() async {
-      final navigator = Navigator.of(context);
-      final prefValue = await SharedPreferences.getInstance();
       await Future.delayed(const Duration(seconds: 3));
+      if (!mounted) return;
       // ignore: use_build_context_synchronously
-      Provider.of<AppAuthProvider>(context, listen: false).checkCurrentUser();
-      if ((prefValue.containsKey('jwtCode'))) {
-        // ignore: use_build_context_synchronously
-        final userModel = Provider.of<UserModel>(context, listen: false);
+      final appAuthProvider =
+          Provider.of<AppAuthProvider>(context, listen: false);
+      final userModel = Provider.of<UserModel>(context, listen: false);
+      await appAuthProvider.checkCurrentUser();
+      final navigator = Navigator.of(context);
+      if (appAuthProvider.status == AuthStatus.authenticated) {
         try {
           await userModel.loadUser();
+          final SharedPreferences prefValue =
+              await SharedPreferences.getInstance();
           final userData = userModel.currentUser;
           final userId = userModel.currentUser['userId'].toString();
           prefValue.setString('userId', userId);
@@ -46,13 +49,15 @@ class SplashScreenState extends State<SplashScreen> {
           );
         } catch (e) {
           // Handle error if user data loading fails
-          print('Error loading user: $e');
+          print('Error loading user data after successful authentication: $e');
+          await appAuthProvider.signOut();
           navigator.pushReplacement(
             MaterialPageRoute(
                 builder: (context) => const LoginPage(userData: {})),
           );
         }
       } else {
+        print('User is unauthenticated. Navigating to Login.');
         navigator.pushReplacement(
           MaterialPageRoute(
               builder: (context) => const LoginPage(userData: {})),

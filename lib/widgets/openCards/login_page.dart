@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kloppocar_app/widgets/openCards/signup_page.dart';
 import 'package:kloppocar_app/widgets/splash_screen.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_auth_provider.dart';
@@ -31,41 +32,49 @@ class _LoginPageState extends State<LoginPage> {
       _errorMessage = null; // Clear previous errors
     });
 
-    final String email = _emailController.text.trim();
-    final String password = _passwordController.text.trim();
-    final navigator = Navigator.of(context);
-
-    // Basic validation
-    if (email.isEmpty || password.isEmpty) {
-      setState(() {
-        _errorMessage = 'Please enter both email and password.';
-        _isLoading = false;
-      });
-      return;
-    }
+    final appAuthProvider =
+        Provider.of<AppAuthProvider>(context, listen: false);
 
     try {
-      final appAuthProvider = context.read<AppAuthProvider>();
+      final success = await appAuthProvider.signIn(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
 
-      final bool success = await appAuthProvider.signIn(email, password);
+      // --- CRITICAL FIX: Check mounted here ---
+      if (!mounted) {
+        print(
+            'LoginPage: Widget unmounted, canceling state update after login attempt.');
+        return; // Stop if widget is no longer in the tree
+      }
 
       if (success) {
-        print('Login successful!');
-        navigator.push(MaterialPageRoute(builder: (context) => SplashScreen()));
+        // If login was successful, RootApp will handle navigation to MyHomePage.
+        // No direct navigation from LoginPage needed here.
+        print('LoginPage: Login successful. RootApp will navigate.');
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => SplashScreen()));
       } else {
+        // Login failed, update UI with error message
         setState(() {
+          _isLoading = false;
           _errorMessage =
               appAuthProvider.errorMessage ?? 'Login failed. Please try again.';
+          print('LoginPage: Login failed: $_errorMessage');
         });
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'An unexpected error occurred: ${e.toString()}';
-      });
-      print('Login error: $e');
-    } finally {
+      // Handle any unexpected errors during the login process
+      // --- CRITICAL FIX: Check mounted here ---
+      if (!mounted) {
+        print(
+            'LoginPage: Widget unmounted, canceling state update after login error.');
+        return;
+      }
       setState(() {
         _isLoading = false;
+        _errorMessage = 'An unexpected error occurred: ${e.toString()}';
+        print('LoginPage: Unexpected login error: $_errorMessage');
       });
     }
   }
@@ -177,7 +186,7 @@ class _LoginPageState extends State<LoginPage> {
               GestureDetector(
                 onTap: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => SplashScreen()));
+                      MaterialPageRoute(builder: (context) => SignupPage()));
                 },
                 child: RichText(
                   textAlign: TextAlign.center,

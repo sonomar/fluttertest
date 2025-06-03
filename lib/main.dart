@@ -1,6 +1,7 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'widgets/openCards/login_page.dart';
 import 'screens/collection_screen.dart';
 import 'screens/scan_screen.dart';
 import 'screens/community_screen.dart';
@@ -12,8 +13,9 @@ import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-// import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import './app_lifefycle_observer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,24 +41,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return AppLifecycleObserver(
+      child: MaterialApp(
         title: 'Kloppocar App',
         theme: ThemeData(
-            // This is the theme of your application.
-            //
-            // TRY THIS: Try running your application with "flutter run". You'll see
-            // the application has a purple toolbar. Then, without quitting the app,
-            // try changing the seedColor in the colorScheme below to Colors.green
-            // and then invoke "hot reload" (save your changes or press the "hot
-            // reload" button in a Flutter-supported IDE, or press "r" if you used
-            // the command line to start the app).
-            //
-            // Notice that the counter didn't reset back to zero; the application
-            // state is not lost during the reload. To reset the state, use hot
-            // restart instead.
-            //
-            // This works for code too, not just values: Most code changes can be
-            // tested with just a hot reload.
             fontFamily: 'ChakraPetch',
             useMaterial3: true,
             bottomSheetTheme:
@@ -64,7 +52,84 @@ class MyApp extends StatelessWidget {
             appBarTheme: AppBarTheme(backgroundColor: Colors.white),
             scaffoldBackgroundColor: Colors.white),
         debugShowCheckedModeBanner: false,
-        home: const SplashScreen());
+        home: Consumer<AppAuthProvider>(
+          builder: (context, authProvider, _) {
+            print(
+                'RootApp Consumer (Auth): Status = ${authProvider.status}'); // Debug print
+
+            switch (authProvider.status) {
+              case AuthStatus.uninitialized:
+              case AuthStatus.authenticating:
+                return const SplashScreen();
+
+              case AuthStatus.authenticated:
+                return Consumer<UserModel>(
+                  // Listen to UserModel changes
+                  builder: (context, userModel, __) {
+                    print(
+                        'RootApp Consumer (User): isLoading=${userModel.isLoading}, currentUser=${userModel.currentUser != null ? 'loaded' : 'null'}, errorMessage=${userModel.errorMessage}'); // Debug print
+
+                    // If user data is not yet loaded and not currently loading, trigger loadUser
+                    if (userModel.currentUser == null &&
+                        !userModel.isLoading &&
+                        userModel.errorMessage == null) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        print('RootApp: Triggering UserModel.loadUser()');
+                        userModel.loadUser();
+                      });
+                      return const SplashScreen(); // Show splash while loading user data
+                    }
+
+                    // If user data is loading, show splash
+                    if (userModel.isLoading) {
+                      return const SplashScreen();
+                    }
+
+                    // If user data is loaded, show MyHomePage
+                    if (userModel.currentUser != null) {
+                      print(
+                          'RootApp: Navigating to MyHomePage with user data.');
+                      final userId =
+                          userModel.currentUser['userId']?.toString();
+                      if (userId != null) {
+                        SharedPreferences.getInstance().then((prefs) {
+                          prefs.setString('userId', userId);
+                        });
+                      }
+                      return MyHomePage(
+                        title: 'Kloppocar App Home',
+                        qrcode: 'Scan a Collectible!',
+                        userData: userModel.currentUser,
+                      );
+                    }
+
+                    // If there was an error loading user data, sign out and go to login
+                    if (userModel.errorMessage != null) {
+                      print(
+                          'RootApp: UserModel Error: ${userModel.errorMessage}. Signing out.');
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        authProvider
+                            .signOut(); // This will change auth status to unauthenticated
+                        userModel.clearUser(); // Clear user model state too
+                      });
+                      return const LoginPage(
+                          userData: {}); // Go to login immediately
+                    }
+
+                    // Fallback, should theoretically not be reached if states are handled
+                    return const SplashScreen();
+                  },
+                );
+
+              case AuthStatus.unauthenticated:
+                print(
+                    'RootApp: Navigating to LoginPage (unauthenticated).'); // Debug print
+                return const LoginPage(userData: {});
+            }
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -113,28 +178,8 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
   }
 
-  // Future<void> _setUsername() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     _username = prefs.setString('username', _username) as String;
-  //   });
-  // }
-
-  // Future<void> _getUsername() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     _username = prefs.getString('username') as String;
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
         backgroundColor: Colors.white,
         body: PageStorage(

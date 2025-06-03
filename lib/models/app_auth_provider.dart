@@ -72,6 +72,7 @@ class AppAuthProvider with ChangeNotifier {
         // After checkCurrentUser, confirm the status
         if (_status == AuthStatus.authenticated) {
           // After successful signIn, ensure session is set internally
+          print('AppAuthProvider: Login Status Completed Successfully');
           return true; // Login process fully successful and session established
         } else {
           // This scenario means AuthService.signIn reported success, but then
