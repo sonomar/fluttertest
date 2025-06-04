@@ -1,151 +1,389 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import '../widgets/scanview/scan_view_success.dart';
 import 'package:provider/provider.dart';
-import '../models/collectible_model.dart';
+import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/collectible_model.dart'; // Ensure this path is correct
+import '../main.dart'; // Assuming MyHomePage is in main.dart
+import '../helpers/get_random.dart'; // Import the new random mint generator
+
+// Enum to manage the different states of the scan/code input process
+enum ScanState {
+  scanning, // Initial state: showing QR scanner and text input
+  loading, // Showing loading animation
+  success, // Showing success animation
+  error, // Showing error message
+  received, // Final state after success, before navigating home
+}
+
+// Helper classes to match the expected input structure of generateRandomMint
+// as it expects objects with properties, not raw maps.
+// These classes MUST be at the top-level of the file, outside of any other class or function.
+class CollectibleWrapper {
+  final String id;
+  final int circulation;
+
+  CollectibleWrapper(this.id, this.circulation);
+}
+
+class UserCollectibleWrapper {
+  final String collectibleId;
+  final int mint;
+
+  UserCollectibleWrapper(this.collectibleId, this.mint);
+}
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key, this.userData});
   final dynamic userData;
 
   @override
-  State<ScanScreen> createState() => ScanScreenState();
+  State<ScanScreen> createState() => _ScanScreenState();
 }
 
-final MobileScannerController _scanController = MobileScannerController(
-  detectionSpeed: DetectionSpeed.noDuplicates,
-);
+class _ScanScreenState extends State<ScanScreen>
+    with SingleTickerProviderStateMixin {
+  // Controller for the QR scanner
+  final MobileScannerController _scanController = MobileScannerController(
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  );
 
-class ScanScreenState extends State<ScanScreen> {
+  // Controller for the manual code input field
+  final TextEditingController _codeTextController = TextEditingController();
+
+  // Current state of the scanning/code input process
+  ScanState _currentScanState = ScanState.scanning;
+
+  // Store the code that was scanned or entered
+  String _processedCode = '';
+
+  // Animation controller for success Lottie animation
+  late final AnimationController _successLottieController;
+  final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
+
   @override
   void initState() {
-    _scanController.start;
     super.initState();
+    // Initialize the Lottie animation controller
+    _successLottieController = AnimationController(
+      duration:
+          const Duration(seconds: 2), // Duration for the success animation
+      vsync: this,
+    );
+
+    // Removed: _scanController.start();
+    // The MobileScanner widget will handle starting the camera when it's built.
+
+    // Load collectibles when the screen initializes
     Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
   }
 
   @override
+  void dispose() {
+    // Dispose all controllers to prevent memory leaks
+    _scanController.stop();
+    _scanController.dispose();
+    _codeTextController.dispose();
+    _successLottieController.dispose();
+    super.dispose();
+  }
+
+  /// Determines if the provided code is valid based on a prefix.
+  bool _isCodeValid(String code) {
+    if (code.isEmpty) return false;
+    // Split the code by hyphen and check the first part
+    final List<String> splitCode = code.split('-');
+    return splitCode.isNotEmpty && splitCode[0] == 'deinsqr';
+  }
+
+  /// Handles the processing of a QR code or manually entered code.
+  /// This method orchestrates the state changes and business logic.
+  Future<void> _processCode(String code) async {
+    if (!mounted) return; // Ensure widget is still in the tree
+
+    // Stop the scanner immediately upon detection/input
+    _scanController.stop();
+
+    setState(() {
+      _processedCode = code;
+      _currentScanState = ScanState.loading; // Show loading animation
+    });
+
+    // Simulate network delay or processing time
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return; // Check again after delay
+
+    final collectibleModel =
+        Provider.of<CollectibleModel>(context, listen: false);
+    final List collectionCollectibles = collectibleModel.collectionCollectibles;
+    final List userCollectiblesRaw =
+        collectibleModel.userCollectibles; // Get raw list of user collectibles
+
+    // Convert raw userCollectibles (List<Map>) to a list of UserCollectibleWrapper
+    final List<UserCollectibleWrapper> userCollectiblesWrapped =
+        userCollectiblesRaw.map((ucMap) {
+      return UserCollectibleWrapper(
+        // Ensure collectibleId is always a String
+        ucMap["collectibleId"].toString(),
+        ucMap["mint"] is int
+            ? ucMap["mint"] as int
+            : int.tryParse(ucMap["mint"].toString()) ?? 0,
+      );
+    }).toList();
+
+    if (_isCodeValid(code)) {
+      try {
+        final SharedPreferences prefValue =
+            await SharedPreferences.getInstance();
+        await prefValue.setBool(code, true); // Mark code as used
+
+        final String? userId = prefValue.getString("userId");
+        final String collectibleId = code.split('-').last;
+
+        // Find the specific collectible object (Map) from collectionCollectibles
+        final Map<String, dynamic>? foundCollectibleMap =
+            collectionCollectibles.firstWhere(
+          (c) => c["collectibleId"].toString() == collectibleId,
+          orElse: () => null, // Return null if collectible is not found
+        );
+
+        if (foundCollectibleMap == null) {
+          // If collectible not found in collection, treat as an error
+          debugPrint(
+              'Collectible with ID $collectibleId not found in collection.');
+          setState(() {
+            _currentScanState = ScanState.error;
+          });
+          await Future.delayed(const Duration(seconds: 2));
+          if (!mounted) return;
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => MyHomePage(
+              title: "Kloppocar Home",
+              qrcode: 'error',
+              userData: widget.userData,
+            ),
+          ));
+          return; // Exit early
+        }
+
+        // Create CollectibleWrapper from the found map to pass to generateRandomMint
+        final CollectibleWrapper wrappedCollectible = CollectibleWrapper(
+          // Ensure 'id' (collectibleId) is always a String
+          foundCollectibleMap["collectibleId"].toString(),
+          foundCollectibleMap["circulation"] is int
+              ? foundCollectibleMap["circulation"] as int
+              : int.tryParse(foundCollectibleMap["circulation"].toString()) ??
+                  0,
+        );
+
+        // Call generateRandomMint to get a new mint number
+        final int? generatedMint = generateRandomMint(
+          wrappedCollectible,
+          userCollectiblesWrapped,
+        );
+
+        if (generatedMint == null) {
+          // If generateRandomMint returns null, it means all mints are taken or an issue occurred
+          debugPrint('No available mints for collectible ID $collectibleId.');
+          setState(() {
+            _currentScanState = ScanState.error;
+          });
+          await Future.delayed(const Duration(seconds: 2));
+          if (!mounted) return;
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => MyHomePage(
+              title: "Kloppocar Home",
+              qrcode: 'error',
+              userData: widget.userData,
+            ),
+          ));
+          return; // Exit early
+        }
+
+        final String mint = generatedMint.toString();
+        print('heeeeres the fun!: $userId, $collectibleId, $mint');
+        // Add user collectible with the newly generated mint
+        await collectibleModel.addUserCollectible(userId, collectibleId, mint);
+
+        // The updateCollectible call is removed as requested, as circulation is now handled by mint generation.
+
+        setState(() {
+          _currentScanState = ScanState.success; // Show success animation
+        });
+
+        // Play success Lottie animation
+        _successLottieController.forward();
+
+        // Wait for animation to complete, then transition to final received state
+        await Future.delayed(const Duration(seconds: 2));
+
+        if (!mounted) return;
+
+        setState(() {
+          _currentScanState = ScanState.received; // Indicate final state
+        });
+
+        // After a short delay, navigate to the home page
+        await Future.delayed(const Duration(seconds: 1));
+
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => MyHomePage(
+            title: "Kloppocar Home",
+            qrcode: code, // Pass the successfully processed code
+            userData: widget.userData,
+          ),
+        ));
+      } catch (e) {
+        // Handle any errors during data processing
+        debugPrint('Error processing collectible: $e');
+        setState(() {
+          _currentScanState = ScanState.error; // Show error message
+        });
+        await Future.delayed(const Duration(seconds: 2));
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => MyHomePage(
+            title: "Kloppocar Home",
+            qrcode: 'error',
+            userData: widget.userData,
+          ),
+        ));
+      }
+    } else {
+      setState(() {
+        _currentScanState = ScanState.error; // Show error message
+      });
+      // After a short delay, navigate to the home page
+      await Future.delayed(const Duration(seconds: 2));
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => MyHomePage(
+          title: "Kloppocar Home",
+          qrcode: 'error',
+          userData: widget.userData,
+        ),
+      ));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Calculate scan area size based on screen dimensions
     double scanArea = (MediaQuery.of(context).size.width < 400 ||
             MediaQuery.of(context).size.height < 400)
         ? 220.0
         : 330.0;
-    final collectibleModel = context.watch<CollectibleModel>();
-    final collectionCollectibles = collectibleModel.collectionCollectibles;
-    final userCollectibles = collectibleModel.userCollectibles;
-
-    // Future<void> collectedDialog(code) async {
-    //   final prefs = await SharedPreferences.getInstance();
-
-    //   return showDialog<void>(
-    //     context: context,
-    //     barrierDismissible: true, // user must tap button!
-    //     builder: (BuildContext context) {
-    //       return AlertDialog(
-    //         title: const Text('You got a Collectible!'),
-    //         content: const SingleChildScrollView(
-    //           child: ListBody(
-    //             children: <Widget>[
-    //               Text('You can see it on the Collection page.'),
-    //               Text('Scan other codes for more!'),
-    //             ],
-    //           ),
-    //         ),
-    //         actions: <Widget>[
-    //           TextButton(
-    //             child: const Text('OK'),
-    //             onPressed: () {
-    //               prefs.setBool(code, true);
-    //               Navigator.push(
-    //                 context,
-    //                 MaterialPageRoute(
-    //                     builder: (context) => MyHomePage(
-    //                         title: "Kloppocar Home",
-    //                         qrcode:
-    //                             code) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
-    //                     ),
-    //               );
-    //             },
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //   );
-    // }
-
-    // Future<void> rejectedDialog() async {
-    //   return showDialog<void>(
-    //     context: context,
-    //     barrierDismissible: true, // user must tap button!
-    //     builder: (BuildContext context) {
-    //       return AlertDialog(
-    //         title: const Text('Incorrect Code'),
-    //         content: const SingleChildScrollView(
-    //           child: ListBody(
-    //             children: <Widget>[
-    //               Text('The code you scanned is not an authorized DEINS code'),
-    //               Text('Scan authorized codes to collect!'),
-    //             ],
-    //           ),
-    //         ),
-    //         actions: <Widget>[
-    //           TextButton(
-    //             child: const Text('OK'),
-    //             onPressed: () {
-    //               Navigator.of(context).pop();
-    //             },
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //   );
-    // }
 
     return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-            automaticallyImplyLeading: false,
-            scrolledUnderElevation: 0.0,
-            title: const Text("Scan Collectible"),
-            centerTitle: false,
-            titleTextStyle: TextStyle(
-              fontSize: 28,
-              color: Colors.black,
-              fontFamily: 'ChakraPetch',
-              fontWeight: FontWeight.w500,
-            )),
-        body: SizedBox(
-            width: double.infinity,
-            child: MobileScanner(
-                overlayBuilder: (context, constraints) => Align(
-                      alignment: Alignment.center,
-                      child: CustomPaint(
-                        foregroundPainter: BorderPainter(),
-                        child: SizedBox(
-                          width: scanArea,
-                          height: scanArea,
-                        ),
-                      ),
-                    ),
-                controller: _scanController,
-                onDetect: (barcode) {
-                  final String code = barcode.barcodes.first.rawValue ?? '';
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        scrolledUnderElevation: 0.0,
+        title: const Text("Scan/Enter Collectible Code"),
+        centerTitle: false,
+        titleTextStyle: const TextStyle(
+          fontSize: 28,
+          color: Colors.black,
+          fontFamily: 'ChakraPetch',
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      body: Stack(
+        children: [
+          // Display the appropriate widget based on the current scan state
+          if (_currentScanState == ScanState.scanning)
+            _buildScannerAndInput(scanArea),
+          if (_currentScanState == ScanState.loading) _CodeLoadingWidget(),
+          if (_currentScanState == ScanState.success)
+            _CodeSuccessWidget(
+                controller: _successLottieController,
+                opacityTween: _opacityTween),
+          if (_currentScanState == ScanState.error) _CodeErrorWidget(),
+        ],
+      ),
+    );
+  }
 
-                  _scanController.stop();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ScanViewSuccess(
-                            qrcode: code,
-                            userData: widget.userData,
-                            collectibles:
-                                collectionCollectibles) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
-                        ),
-                  );
-                })));
+  /// Builds the QR scanner and manual code input UI.
+  Widget _buildScannerAndInput(double scanArea) {
+    return Column(
+      children: [
+        Expanded(
+          child: MobileScanner(
+            overlayBuilder: (context, constraints) => Align(
+              alignment: Alignment.center,
+              child: CustomPaint(
+                foregroundPainter: BorderPainter(),
+                child: SizedBox(
+                  width: scanArea,
+                  height: scanArea,
+                ),
+              ),
+            ),
+            controller: _scanController,
+            onDetect: (barcode) {
+              final String code = barcode.barcodes.first.rawValue ?? '';
+              if (code.isNotEmpty) {
+                _processCode(code); // Process the scanned QR code
+              }
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              TextField(
+                controller: _codeTextController,
+                decoration: InputDecoration(
+                  labelText: 'Or enter code manually',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: () {
+                      if (_codeTextController.text.isNotEmpty) {
+                        _processCode(
+                            _codeTextController.text); // Process manual input
+                      }
+                    },
+                  ),
+                ),
+                onSubmitted: (value) {
+                  if (value.isNotEmpty) {
+                    _processCode(value); // Process manual input on submit
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  if (_codeTextController.text.isNotEmpty) {
+                    _processCode(_codeTextController
+                        .text); // Process manual input on button press
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize:
+                      const Size(double.infinity, 50), // Make button full width
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Submit Code'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
+/// Custom painter for the QR scan area border.
 class BorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -194,7 +432,7 @@ class BorderPainter extends CustomPainter {
     canvas.drawRRect(
       rrect,
       Paint()
-        ..color = const Color(0xffd622ca)
+        ..color = const Color(0xffd622ca) // Pinkish purple color
         ..style = PaintingStyle.stroke
         ..strokeWidth = width,
     );
@@ -203,5 +441,108 @@ class BorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     return false;
+  }
+}
+
+/// Widget to display the loading state.
+class _CodeLoadingWidget extends StatelessWidget {
+  const _CodeLoadingWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black, // Background color for loading screen
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Logo image
+            Image.asset(
+              'assets/images/deins_logo.png', // Ensure this asset path is correct
+              height: 200,
+              width: 200,
+            ),
+            Container(
+              height: 40,
+              alignment: Alignment.center,
+              child: const Text(
+                'Processing Code...',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            SizedBox(
+              height: 40,
+              width: 40,
+              child: Lottie.asset(
+                  'assets/lottie/pinkspin1.json'), // Ensure this asset path is correct
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Widget to display the success state with a Lottie animation.
+class _CodeSuccessWidget extends StatelessWidget {
+  const _CodeSuccessWidget({
+    super.key,
+    required this.controller,
+    required this.opacityTween,
+  });
+
+  final AnimationController controller;
+  final Tween<double> opacityTween;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black, // Background color for success screen
+      child: Center(
+        child: Container(
+          alignment: Alignment.center,
+          width: 300,
+          child: AnimatedOpacity(
+            opacity: opacityTween.evaluate(controller),
+            duration: const Duration(seconds: 2),
+            child: Lottie.asset(
+                'assets/lottie/success2.json'), // Ensure this asset path is correct
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Widget to display the error state.
+class _CodeErrorWidget extends StatelessWidget {
+  const _CodeErrorWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black, // Background color for error screen
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Error image
+            Image.asset(
+              'assets/images/negative.png', // Ensure this asset path is correct
+              height: 200,
+              width: 200,
+            ),
+            Container(
+              height: 40,
+              alignment: Alignment.center,
+              child: const Text(
+                'Incorrect Code!',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

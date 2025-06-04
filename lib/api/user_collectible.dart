@@ -15,7 +15,7 @@ Future<dynamic> createUserCollectible(
   final res = apiPostRequest(
       'UserCollectible/createUserCollectible',
       {
-        "userId": userId,
+        "ownerId": userId,
         "collectibleId": collectibleId,
         "mint": mint,
       },

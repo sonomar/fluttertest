@@ -108,8 +108,8 @@ class CollectibleModel extends ChangeNotifier {
 
   Future<void> addUserCollectible(userId, collectibleId, mint) async {
     try {
-      await createUserCollectible(
-          userId, collectibleId, mint, _appAuthProvider);
+      await createUserCollectible(userId.toString(), collectibleId.toString(),
+          mint.toString(), _appAuthProvider);
       _userCollectibles =
           await getUserCollectiblesByOwnerId(userId, _appAuthProvider);
     } catch (e) {

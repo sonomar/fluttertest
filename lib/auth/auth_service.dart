@@ -200,6 +200,7 @@ class AuthService {
         if (token != null) {
           prefs.setString('jwtCode', token);
           print('AuthService: Access Token saved to SharedPreferences.');
+          print('token $token');
         }
         if (idToken != null) {
           prefs.setString('jwtIdCode', idToken);

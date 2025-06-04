@@ -167,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _screens = [
       HomeScreen(key: const PageStorageKey('home'), qrcode: widget.qrcode),
       const CollectionScreen(key: PageStorageKey('collection')),
-      ScanScreen(key: const PageStorageKey('scan'), userData: widget.userData),
+      ScanScreen(key: const PageStorageKey('scan')),
       const CommunityScreen(key: PageStorageKey('community')),
       GameScreen(key: PageStorageKey('game'), userData: widget.userData),
     ];
