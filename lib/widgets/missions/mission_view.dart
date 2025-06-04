@@ -195,29 +195,26 @@ Widget homeMissionWidget(pageContext, mission, missionUser) {
                   ),
                 )),
             GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    pageContext,
-                    MaterialPageRoute(
-                      builder: (context) => AwardDetails(
-                        selectedAward: getMission,
-                        selectedAwardUser: getMissionUser,
-                      ),
+              onTap: () {
+                Navigator.push(
+                  pageContext,
+                  MaterialPageRoute(
+                    builder: (context) => AwardDetails(
+                      selectedAward: getMission,
+                      selectedAwardUser: getMissionUser,
                     ),
-                  );
-                },
-                child: Stack(alignment: Alignment.center, children: [
-                  Padding(
-                      padding: const EdgeInsets.only(left: 40.0),
-                      child: Image.asset('assets/images/silvertab.png',
+                  ),
+                );
+              },
+              child: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 40.0, bottom: 10, right: 20),
+                  child: getMission['imgRef']['url'] != null
+                      ? Image.network(getMission['imgRef']['url'],
+                          width: 50, fit: BoxFit.fill)
+                      : Image.asset('assets/images/car1.png',
                           width: 120, height: 50, fit: BoxFit.fill)),
-                  Text("Selten",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                        fontFamily: 'Roboto',
-                      ))
-                ])),
+            ),
           ],
         ),
         Container(
@@ -271,29 +268,26 @@ Widget viewMissionWidget(pageContext, mission, missionUser) {
                   ),
                 )),
             GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    pageContext,
-                    MaterialPageRoute(
-                      builder: (context) => AwardDetails(
-                        selectedAward: getMission,
-                        selectedAwardUser: getMissionUser,
-                      ),
+              onTap: () {
+                Navigator.push(
+                  pageContext,
+                  MaterialPageRoute(
+                    builder: (context) => AwardDetails(
+                      selectedAward: getMission,
+                      selectedAwardUser: getMissionUser,
                     ),
-                  );
-                },
-                child: Stack(alignment: Alignment.center, children: [
-                  Padding(
-                      padding: const EdgeInsets.only(left: 40.0),
-                      child: Image.asset('assets/images/silvertab.png',
+                  ),
+                );
+              },
+              child: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 40.0, bottom: 10, right: 20),
+                  child: getMission['imgRef']['url'] != null
+                      ? Image.network(getMission['imgRef']['url'],
+                          width: 50, fit: BoxFit.fill)
+                      : Image.asset('assets/images/car1.png',
                           width: 120, height: 50, fit: BoxFit.fill)),
-                  Text("Selten",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                        fontFamily: 'Roboto',
-                      ))
-                ])),
+            ),
           ],
         ),
         Container(

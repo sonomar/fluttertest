@@ -167,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _screens = [
       HomeScreen(key: const PageStorageKey('home'), qrcode: widget.qrcode),
       const CollectionScreen(key: PageStorageKey('collection')),
-      ScanScreen(key: const PageStorageKey('scan')),
+      ScanScreen(key: const PageStorageKey('scan'), userData: widget.userData),
       const CommunityScreen(key: PageStorageKey('community')),
       GameScreen(key: PageStorageKey('game'), userData: widget.userData),
     ];
@@ -251,7 +251,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   width: 30,
                   height: 30,
                   child: SvgPicture.asset(
-                    'assets/images/profil.svg',
+                    'assets/images/game.svg',
                     colorFilter: ColorFilter.mode(
                         _currentIndex == 4 ? Color(0xffd622ca) : Colors.black,
                         BlendMode.srcIn),

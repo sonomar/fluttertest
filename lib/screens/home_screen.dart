@@ -11,6 +11,7 @@ import '../models/mission_model.dart';
 import '../models/collectible_model.dart';
 import '../widgets/shadow_circle.dart';
 import '../widgets/object_viewer.dart';
+import '../widgets/community/community_missions.dart';
 import '../widgets/missions/latest_active_mission.dart';
 import '../models/user_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -97,176 +98,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _timer.cancel();
     super.dispose();
-  }
-
-  Widget communityChallengeWidget(String time) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 20.0),
-      child: Container(
-        padding: const EdgeInsets.only(bottom: 5.0),
-        decoration: BoxDecoration(
-          color: Colors.black,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ShaderMask(
-              shaderCallback: (rect) {
-                return LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.black, Colors.transparent],
-                ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
-              },
-              blendMode: BlendMode.dstIn,
-              child:
-                  Image.asset('assets/images/carheader.jpg', fit: BoxFit.cover),
-            ),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Padding(
-                  padding: EdgeInsets.only(left: 30),
-                  child: CircleAvatar(
-                    radius: 24,
-                    backgroundImage: AssetImage('assets/images/paint.jpg'),
-                  )),
-              Container(
-                decoration: BoxDecoration(
-                  color: Color(0xffd622ca),
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      bottomLeft: Radius.circular(8)),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Text(
-                  time,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontFamily: 'ChakraPetch',
-                    fontWeight: FontWeight.w500,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ),
-            ]),
-            Padding(
-                padding: EdgeInsets.only(left: 30, right: 30, top: 10),
-                child: Text(
-                  'Community-Ziel läuft bald ab!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontFamily: 'ChakraPetch',
-                    fontWeight: FontWeight.w500,
-                    fontStyle: FontStyle.italic,
-                  ),
-                )),
-            const SizedBox(height: 10),
-            Padding(
-                padding: EdgeInsets.only(left: 30, right: 30),
-                child: Text(
-                  'Es fehlen noch 212 Assets bis zum Ziel. Trage jetzt dazu bei und hole dir noch Assets. Zum Beispiel beim Formel 1-Rennen in Spielberg oder erfülle Challenges. Die Community zählt auf dich. Viel Glück!',
-                  style: GoogleFonts.roboto(
-                      textStyle: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w300,
-                  )),
-                )),
-            const SizedBox(height: 15),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget kloppocarWidget() {
-    return Padding(
-        padding: const EdgeInsets.only(top: 20.0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Padding(
-              padding: const EdgeInsets.only(left: 15.0),
-              child: Container(
-                padding:
-                    const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 2),
-                decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: const BorderRadius.all(Radius.circular(20))),
-                child: Text("COMMUNITY",
-                    style: TextStyle(
-                        fontSize: 8,
-                        letterSpacing: 2.56,
-                        color: Colors.white,
-                        fontFamily: 'ChakraPetch',
-                        fontWeight: FontWeight.w700)),
-              )),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                  padding: const EdgeInsets.only(left: 15.0),
-                  child: Text(
-                    'Kloppocar',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontFamily: 'ChakraPetch',
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                    ),
-                  )),
-              Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Container(
-                    padding: const EdgeInsets.only(
-                        left: 10, right: 10, top: 5, bottom: 5),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        color: Color(0xffd622ca),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8))),
-                    child: Text("+25% Heute",
-                        style: GoogleFonts.roboto(
-                            textStyle: TextStyle(
-                          fontSize: 12,
-                          letterSpacing: 1,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w300,
-                        ))),
-                  )),
-              Padding(
-                  padding: EdgeInsets.only(bottom: 10, right: 10),
-                  child: Container(
-                    alignment: Alignment.center,
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 2),
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Image.asset(
-                        'assets/images/icon-trophy.png',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ))
-            ],
-          ),
-          Container(alignment: Alignment.center, child: progressBar(0.8)),
-          const Padding(
-            padding: EdgeInsets.only(left: 15, top: 5, right: 20, bottom: 5),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text('988/1200',
-                    style: TextStyle(fontSize: 12, color: Colors.black))
-              ],
-            ),
-          ),
-        ]));
   }
 
   Widget newsItem(category, postdate, content) {
@@ -386,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                                 currentUser["userRank"] != null
                                     ? currentUser["userRank"]["title"]
-                                    : 'NEWB',
+                                    : 'COLLECTOR',
                                 style: TextStyle(
                                     fontSize: 10, fontWeight: FontWeight.w700)),
                           ],
@@ -480,7 +311,14 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.only(left: 32, right: 32, top: 10),
               child: Column(children: [
                 sectionHeader('GAME CENTER'),
-                listMissions(context, missions, missionUsers),
+                Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(40),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Color(0x80999999)),
+                      borderRadius: BorderRadius.circular(90),
+                    ),
+                    child: listMissions(context, missions, missionUsers)),
                 sectionHeader('Nachrichten'),
                 newsItem(
                   _newsItems[0]["category"],
