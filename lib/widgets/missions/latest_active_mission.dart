@@ -1,13 +1,13 @@
 import './mission_view.dart';
 import 'package:flutter/material.dart';
 
-dynamic getLatestCollectible(
+Map<String, dynamic>? getLatestCollectible(
     List<dynamic> collectibles, List<dynamic> userCollectibles) {
   dynamic mostRecentUserCollectible;
   DateTime? latestUpdateTime;
 
   if (userCollectibles.isEmpty) {
-    return 'not found 1'; // No user collectibles to process
+    return null; // No user collectibles to process
   }
   for (var userCollectible in userCollectibles) {
     // Basic null checks for safe access
@@ -33,7 +33,7 @@ dynamic getLatestCollectible(
     }
   }
   if (mostRecentUserCollectible == null) {
-    return 'not found 2'; // No user collectible with a valid date was found
+    return null; // No user collectible with a valid date was found
   }
 
   // 2. Find the corresponding Collectible using collectibleId
@@ -41,27 +41,33 @@ dynamic getLatestCollectible(
       mostRecentUserCollectible['collectibleId']?.toString();
 
   if (mostRecentCollectibleId == null) {
-    return 'not found 3';
+    return null;
   }
 
   // --- FIX IS HERE ---
   // Change the type from List<dynamic> to dynamic (or Map<String, dynamic>?)
   dynamic correspondingCollectible; // Changed from List<dynamic>
   try {
-    correspondingCollectible = collectibles.firstWhere(
-      (collectible) =>
-          collectible != null &&
-          collectible['collectibleId']?.toString() == mostRecentCollectibleId,
-      orElse: () => null, // Return null if no matching collectible is found
-    );
+    if (collectibles.isNotEmpty && collectibles.every((c) => c is Map)) {
+      correspondingCollectible = collectibles.firstWhere(
+        (collectible) =>
+            collectible != null &&
+            collectible['collectibleId']?.toString() == mostRecentCollectibleId,
+        orElse: () => null, // Return null if no matching collectible is found
+      );
+    } else {
+      print(
+          'WARNING: Collectibles list is empty or contains non-Map elements.');
+      return null;
+    }
   } catch (e) {
     // This catch is for cases where 'collectibles' itself is somehow malformed
     // (e.g., if it's not actually an Iterable or if elements are non-Maps when expected)
-    return 'not found 4';
+    return null;
   }
 
   if (correspondingCollectible == null) {
-    return 'not found 5';
+    return null;
   }
 
   // 3. Return the URL for the embed in the related collectible

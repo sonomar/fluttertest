@@ -118,14 +118,14 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel Trade'),
+              child: const Text('Close'),
               onPressed: () async {
                 Navigator.of(dialogContext).pop();
                 await collectibleModel.updateUserCollectibleStatus(
                     userCollectibleId, true, null, null);
                 // ignore: use_build_context_synchronously
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Trade cancelled.")),
+                  const SnackBar(content: Text("Trade Process Complete.")),
                 );
               },
             ),

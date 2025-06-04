@@ -175,6 +175,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final collectibleModel =
+        Provider.of<CollectibleModel>(context, listen: false);
+    // final missionModel = Provider.of<MissionModel>(context, listen: false); // If HomeScreen's missions need explicit refresh too
+    // final userModel = Provider.of<UserModel>(context, listen: false); // If user data affecting screens needs refresh
     return Scaffold(
         backgroundColor: Colors.white,
         body: PageStorage(
@@ -189,9 +193,42 @@ class _MyHomePageState extends State<MyHomePage> {
             backgroundColor: Colors.white,
             elevation: 0,
             onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
+              bool dataMayHaveChanged =
+                  false; // Flag to see if a relevant screen is being targeted
+
+              if (index == 0) {
+                // HomeScreen
+                print(
+                    "BottomNav: Tapped HomeScreen (index 0). Forcing CollectibleModel reload for recentColl.");
+                collectibleModel.loadCollectibles(forceClear: true);
+                // HomeScreen also loads missions/user in its own initState, which should be fine.
+                // If other models shown on HomeScreen need a direct refresh:
+                // Provider.of<MissionModel>(context, listen: false).loadMissions();
+                // Provider.of<UserModel>(context, listen: false).loadUser();
+                dataMayHaveChanged = true;
+              } else if (index == 1) {
+                // CollectionScreen
+                print(
+                    "BottomNav: Tapped CollectionScreen (index 1). Forcing CollectibleModel reload.");
+                collectibleModel.loadCollectibles(forceClear: true);
+                dataMayHaveChanged = true;
+              }
+              // Add similar logic for other screens if they depend on shared, mutable models
+              // and are not reliably refreshed by their own initState after global state changes.
+
+              // Only update the index if it actually changes,
+              // or always update if you want the tap on current tab to re-render (though reload is separate)
+              if (_currentIndex != index || dataMayHaveChanged) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              } else if (_currentIndex == index) {
+                // If tapping the current tab again, and it's one we want to refresh:
+                if (index == 0 || index == 1) {
+                  print(
+                      "BottomNav: Re-tapped current relevant screen. Data reload already triggered.");
+                }
+              }
             },
             type: BottomNavigationBarType.fixed,
             items: <BottomNavigationBarItem>[

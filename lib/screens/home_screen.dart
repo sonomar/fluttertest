@@ -157,6 +157,28 @@ class _HomeScreenState extends State<HomeScreen> {
     return shadowCircle(defaultImg, radius, false);
   }
 
+  String _getAssetUrlFromCollectible(dynamic collectibleData) {
+    const String defaultAsset = 'assets/default_placeholder.glb';
+    if (collectibleData == null || collectibleData is! Map) {
+      return defaultAsset;
+    }
+    final dynamic embedRef = collectibleData['embedRef'];
+    if (embedRef == null) {
+      return defaultAsset;
+    }
+    if (embedRef is String) {
+      // If embedRef is a direct URL string
+      return embedRef.isNotEmpty ? embedRef : defaultAsset;
+    }
+    if (embedRef is Map) {
+      final dynamic url = embedRef['url'];
+      if (url is String && url.isNotEmpty) {
+        return url;
+      }
+    }
+    return defaultAsset;
+  }
+
   @override
   Widget build(BuildContext context) {
     final userModel = context.watch<UserModel>();
@@ -295,12 +317,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: SizedBox(
                             height: 400,
                             child: ObjectViewer(
-                              asset: recentColl['embedRef'] != null &&
-                                      (recentColl['embedRef'] as Map)
-                                          .containsKey('url')
-                                  ? recentColl['embedRef']['url'] as String
-                                  : 'assets/default_placeholder.glb', // Provide a default or handle null
-                            ),
+                                asset: _getAssetUrlFromCollectible(
+                                    recentColl) // Provide a default or handle null
+                                ),
                           ))),
                 ),
                 getLatestActiveMission(

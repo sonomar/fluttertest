@@ -165,7 +165,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
+    Provider.of<CollectibleModel>(context, listen: false)
+        .loadCollectibles(forceClear: true);
   }
 
   @override

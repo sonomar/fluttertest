@@ -321,6 +321,7 @@ class _ScanScreenState extends State<ScanScreen>
     // 2c. Update UserCollectible: new owner, active=true, previousOwnerId
     // The `updateUserCollectibleStatus` method will call the API.
     // The API should check if the item with `userCollectibleIdToTrade` has `active: false` AND `ownerId: giverUserId`.
+    print('hahahaha: $userCollectibleIdToTrade, $receiverUserId, $giverUserId');
     bool tradeSuccess = await collectibleModel.updateUserCollectibleStatus(
         userCollectibleIdToTrade,
         true, // Set active to true for the new owner
@@ -341,7 +342,7 @@ class _ScanScreenState extends State<ScanScreen>
       await Future.delayed(const Duration(seconds: 1));
       if (!mounted) return;
       // Reload collectibles for the receiver
-      await collectibleModel.loadCollectibles();
+      await collectibleModel.loadCollectibles(forceClear: true);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => MyHomePage(
           title: "Kloppocar Home",

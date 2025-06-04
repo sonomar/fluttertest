@@ -20,72 +20,77 @@ class CollectibleModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   CollectibleModel(this._appAuthProvider);
 
-  Future<void> loadCollectibles() async {
+  Future<void> loadCollectibles({bool forceClear = false}) async {
     _isLoading = true;
     _errorMessage = null;
-    _sortByName = false;
-    notifyListeners();
+    if (forceClear) {
+      // Clear local data to ensure a "from scratch" reload effect
+      _userCollectibles = [];
+      // Optionally clear _collectionCollectibles if they also need a hard refresh
+      // _collectionCollectibles = [];
+      print(
+          "CollectibleModel: Forcing clear of user collectibles before loading.");
+    }
+    notifyListeners(); // Notify UI it's loading, and lists might be empty if forceClear=true
 
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? userId = prefs.getString('userId');
+
+      // Load collection templates (usually less volatile than user-specific data)
       final dynamic fetchedCollectionData =
-          await getCollectiblesByCollectionId('1', _appAuthProvider);
-      print(
-          'DEBUG: Fetched collection data type: ${fetchedCollectionData.runtimeType}');
-      print('DEBUG: Fetched collection data: $fetchedCollectionData');
+          await getCollectiblesByCollectionId('1', _appAuthProvider); //
       if (fetchedCollectionData is List) {
         _collectionCollectibles = fetchedCollectionData;
-        print(
-            'DEBUG: Collection collectibles loaded successfully. Count: ${_collectionCollectibles.length}');
       } else {
-        // If not a List, it's an unexpected type or null. Default to empty list.
-        _collectionCollectibles = [];
-        print(
-            'ERROR: getCollectiblesByCollectionId did not return a List. Type: ${fetchedCollectionData.runtimeType}');
-        _errorMessage = 'Failed to load collection data: Unexpected format.';
-      }
-      if (userId == null) {
-        // If userId is null, we can't fetch user collectibles.
-        // This is where the 'null is not a subtype of String' for userId might come from.
-        _userCollectibles = []; // Ensure it's an empty list
-        print('WARNING: userId is null. Cannot fetch user collectibles.');
+        if (forceClear || _collectionCollectibles.isNotEmpty) {
+          _collectionCollectibles = []; // Ensure it's a list
+        }
         _errorMessage =
-            (_errorMessage ?? '') + ' User ID not found.'; // Append error
+            '${_errorMessage ?? ''} Failed to load collection data: Unexpected format.';
+        print('CollectibleModel: Fetched collection data was not a List.');
+      }
+
+      // Load user-specific collectibles
+      if (userId == null) {
+        if (forceClear || _userCollectibles.isNotEmpty) {
+          _userCollectibles = []; // Ensure it's a list
+        }
+        _errorMessage =
+            '${_errorMessage ?? ''} User ID not found for user collectibles.';
+        print(
+            'CollectibleModel: User ID is null, cannot fetch user collectibles.');
       } else {
         final dynamic fetchedUserData =
-            await getUserCollectiblesByOwnerId(userId, _appAuthProvider);
-        print('DEBUG: Fetched user data type: ${fetchedUserData.runtimeType}');
-        print('DEBUG: Fetched user data: $fetchedUserData');
+            await getUserCollectiblesByOwnerId(userId, _appAuthProvider); //
         if (fetchedUserData is List) {
           _userCollectibles = fetchedUserData;
-          print(
-              'DEBUG: User collectibles loaded successfully. Count: ${_userCollectibles.length}');
         } else {
-          _userCollectibles = [];
-          print(
-              'ERROR: getUserCollectiblesByOwnerId did not return a List. Type: ${fetchedUserData.runtimeType}');
+          if (forceClear || _userCollectibles.isNotEmpty) {
+            _userCollectibles = []; // Ensure it's a list
+          }
           _errorMessage =
               '${_errorMessage ?? ''} Failed to load user collectibles: Unexpected format.';
+          print('CollectibleModel: Fetched user data was not a List.');
         }
       }
-      if (_collectionCollectibles.isNotEmpty) {
-        // sortData should handle dynamic content. Ensure it's safe within sort_data.dart
-        sortData(_collectionCollectibles, "name");
-        print('DEBUG: Collection collectibles sorted by name.');
-      } else {
-        print('WARNING: No collection collectibles to sort.');
-      }
+      // print('DEBUG: User collectibles loaded. Count: ${_userCollectibles.length}');
+      // print('DEBUG: Collection collectibles loaded. Count: ${_collectionCollectibles.length}');
+
+      // Re-apply sorting if needed
+      // if (_collectionCollectibles.isNotEmpty && _sortByName) {
+      //   sortCollectiblesByColumn("name");
+      // } else if (_collectionCollectibles.isNotEmpty && !_sortByName) {
+      //   sortCollectiblesByColumn("label"); // or your default sort
+      // }
     } catch (e) {
-      // This catch block will now mostly catch errors from API calls themselves (network, server)
       _errorMessage = 'Error loading collectible data: ${e.toString()}';
-      print('Error loading collectible data: $e');
-      // Ensure lists are empty on any catch, so UI doesn't break on nulls
-      _collectionCollectibles = [];
+      print('CollectibleModel: Error in loadCollectibles: $e');
+      _collectionCollectibles = []; // Ensure lists are empty on error
       _userCollectibles = [];
     } finally {
       _isLoading = false;
-      notifyListeners();
+      notifyListeners(); // Notify UI with the final state
     }
   }
 
@@ -106,14 +111,13 @@ class CollectibleModel extends ChangeNotifier {
   }
 
   Future<void> addUserCollectible(userId, collectibleId, mint) async {
+    // ... (ensure this method calls loadCollectibles(forceClear: true) or manually adds then notifies)
     try {
       await createUserCollectible(userId.toString(), collectibleId.toString(),
-          mint.toString(), _appAuthProvider);
-      _userCollectibles =
-          await getUserCollectiblesByOwnerId(userId, _appAuthProvider);
+          mint.toString(), _appAuthProvider); //
+      await loadCollectibles(forceClear: true); // Force refresh after adding
     } catch (e) {
-      print('Error creating userCollectible data: $e');
-    } finally {
+      _errorMessage = 'Error adding collectible: ${e.toString()}';
       notifyListeners();
     }
   }
@@ -134,11 +138,10 @@ class CollectibleModel extends ChangeNotifier {
     notifyListeners();
     try {
       final Map<String, dynamic> body = {
-        "active": isActive,
+        "active": isActive ? 1 : 0,
       };
-      if (userCollectibleId != null) {
-        body["userCollectibleId"] = userCollectibleId;
-      }
+      body["userCollectibleId"] = userCollectibleId;
+
       if (newOwnerId != null) {
         body["ownerId"] = newOwnerId;
       }
@@ -147,37 +150,45 @@ class CollectibleModel extends ChangeNotifier {
         body["previousOwnerId"] = previousOwnerId;
       }
 
-      // Find the user collectible in the local list to get its full current state
-      final userCollectibleIndex = _userCollectibles.indexWhere(
+      await updateUserCollectibleByUserCollectibleId(body, _appAuthProvider); //
+
+      // --- Revised Local State Update Logic ---
+      final prefs = await SharedPreferences.getInstance();
+      final String? currentModelUserId = prefs.getString('userId');
+
+      final localUserCollectibleIndex = _userCollectibles.indexWhere(
           (uc) => uc['userCollectibleId'].toString() == userCollectibleId);
-      if (userCollectibleIndex == -1) {
-        _errorMessage = "User collectible not found locally for update.";
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
 
-      // Merge existing data with new updates for the API call
-      // This ensures other fields are not accidentally wiped out if API expects full object
-      // Or, if API handles partial updates, just 'body' is fine.
-      // For safety, let's assume partial updates are fine.
-      // The API function updateUserCollectibleById now adds userCollectibleId to the body.
-
-      await updateUserCollectibleByUserCollectibleId(body, _appAuthProvider);
-
-      // Update local list
-      if (userCollectibleIndex != -1) {
-        if (newOwnerId != null) {
-          // If owner changes, remove from current user's list
-          _userCollectibles.removeAt(userCollectibleIndex);
-        } else {
-          // If only active status changes for the current owner
-          _userCollectibles[userCollectibleIndex]['active'] = isActive;
+      if (newOwnerId != null && newOwnerId != currentModelUserId) {
+        // This means the current user (who owns this CollectibleModel instance) was the GIVER,
+        // and the item has been transferred to someone else (newOwnerId).
+        // So, remove it from the giver's local list if it was there.
+        if (localUserCollectibleIndex != -1) {
+          // Check if the item's owner was indeed this currentModelUserId before removing
+          if (_userCollectibles[localUserCollectibleIndex]['ownerId']
+                  ?.toString() ==
+              currentModelUserId) {
+            _userCollectibles.removeAt(localUserCollectibleIndex);
+            print(
+                "UserCollectible $userCollectibleId removed from local list of giver $currentModelUserId.");
+          }
+        }
+      } else if (newOwnerId == null && localUserCollectibleIndex != -1) {
+        // No ownership change, just an active status update for the current owner.
+        // (e.g., giver initiates trade by setting active=false, or cancels by setting active=true)
+        if (_userCollectibles[localUserCollectibleIndex]['ownerId']
+                ?.toString() ==
+            currentModelUserId) {
+          _userCollectibles[localUserCollectibleIndex]['active'] = isActive;
+          print(
+              "UserCollectible $userCollectibleId active status updated locally for owner $currentModelUserId.");
         }
       }
-
-      // Optionally, re-fetch user collectibles to ensure data consistency
-      // await loadCollectibles(); // Or a more targeted refresh
+      // If newOwnerId IS currentModelUserId (i.e., this user is the RECEIVER):
+      // The item wasn't in _userCollectibles to begin with.
+      // The `loadCollectibles()` call, which should be made in `ScanScreen._processTrade`
+      // AFTER this `updateUserCollectibleStatus` returns true, will fetch the updated
+      // list from the backend, including the newly acquired item.
 
       _isLoading = false;
       notifyListeners();
