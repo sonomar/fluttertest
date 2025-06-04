@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/app_auth_provider.dart';
 import '../api/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserModel extends ChangeNotifier {
+  final AppAuthProvider _appAuthProvider;
   dynamic _currentUser;
   bool _isLoading = false;
   String? _errorMessage;
@@ -10,6 +13,7 @@ class UserModel extends ChangeNotifier {
   dynamic get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  UserModel(this._appAuthProvider);
 
   void clearUser() {
     _currentUser = null;
@@ -54,8 +58,8 @@ class UserModel extends ChangeNotifier {
         print(
             'UserModel: Making API call to get user details for ${userEmail ?? userId} at ${DateTime.now()}');
         final startApiCall = DateTime.now();
-        final fetchedUser = await getUserByEmail(
-            userEmail ?? userId); // Assuming getUserByEmail is defined
+        final fetchedUser = await getUserByEmail(userEmail ?? userId,
+            _appAuthProvider); // Assuming getUserByEmail is defined
         print(
             'UserModel: API call completed in ${DateTime.now().difference(startApiCall).inMilliseconds}ms at ${DateTime.now()}');
 

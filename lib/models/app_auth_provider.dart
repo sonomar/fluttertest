@@ -24,6 +24,9 @@ class AppAuthProvider with ChangeNotifier {
   AuthStatus get status => _status;
   CognitoUserSession? get userSession => _userSession;
   String? get errorMessage => _errorMessage;
+  String? get idToken => _userSession?.getIdToken().getJwtToken();
+  String? get accessToken => _userSession?.getAccessToken().getJwtToken();
+  String? get refreshToken => _userSession?.getRefreshToken()?.getToken();
 
   Future<void> checkCurrentUser() async {
     print('AppAuthProvider: Initiating session check...');

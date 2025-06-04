@@ -1,54 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:kloppocar_app/models/app_auth_provider.dart'; // Adjust this import path if necessary
+
+typedef AppLifecycleCallback = void Function();
 
 class AppLifecycleObserver extends StatefulWidget {
   final Widget child;
+  final AppLifecycleCallback? onAppResumed; // Define the named parameter
+  final AppLifecycleCallback?
+      onAppPaused; // Optional: add other lifecycle callbacks
 
-  const AppLifecycleObserver({super.key, required this.child});
+  const AppLifecycleObserver({
+    super.key,
+    required this.child,
+    this.onAppResumed,
+    this.onAppPaused, // Add this if you want to handle paused state
+  });
 
   @override
   State<AppLifecycleObserver> createState() => _AppLifecycleObserverState();
 }
 
 class _AppLifecycleObserverState extends State<AppLifecycleObserver> {
-  // Declare the AppLifecycleListener
   late final AppLifecycleListener _listener;
 
   @override
   void initState() {
     super.initState();
-    // Initialize the listener in initState
     _listener = AppLifecycleListener(
       onStateChange: _onStateChanged,
+      // You can add more specific callbacks here if needed, e.g., onResume, onInactive, etc.
+      // For simplicity, we'll route all state changes through onStateChange.
     );
   }
 
-  // This method is called when the app's lifecycle state changes
   void _onStateChanged(AppLifecycleState state) {
+    print('AppLifecycleObserver: AppLifecycleState changed to $state');
     if (state == AppLifecycleState.resumed) {
-      // The app has resumed from the background or inactive state.
-      // This is the ideal time to re-check the user's session validity.
-      print(
-          'AppLifecycleObserver: App has resumed. Re-checking user session...');
-      // Access your AppAuthProvider and call checkCurrentUser
-      if (!mounted) return;
-      Provider.of<AppAuthProvider>(context, listen: false).checkCurrentUser();
+      // Call the `onAppResumed` callback provided by the parent widget
+      widget.onAppResumed?.call();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      // Call the `onAppPaused` callback if provided
+      widget.onAppPaused?.call();
     }
-    // You can add conditions for other states if needed,
-    // e.g., AppLifecycleState.paused for saving data before backgrounding.
+    // You can add logic for other states (inactive, detached) as needed
   }
 
   @override
   void dispose() {
-    // It's crucial to dispose of the listener when the widget is removed
     _listener.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // The child widget (your MaterialApp in this case) will be rendered
     return widget.child;
   }
 }

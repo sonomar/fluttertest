@@ -1,8 +1,8 @@
 import 'api_init.dart';
 
-Future<dynamic> getNotificationUsersByUserId(id) async {
-  final res = apiGetRequest(
-      'NotificationUser/getNotificationUsersByUserId', {"UserId": id});
+Future<dynamic> getNotificationUsersByUserId(id, provider) async {
+  final res = apiGetRequest('NotificationUser/getNotificationUsersByUserId',
+      {"UserId": id}, provider);
   if (res != null) {
     return res;
   } else {
@@ -10,9 +10,12 @@ Future<dynamic> getNotificationUsersByUserId(id) async {
   }
 }
 
-Future<dynamic> updateNotificationUserByNotificationUserId(body) async {
+Future<dynamic> updateNotificationUserByNotificationUserId(
+    body, provider) async {
   final res = apiPatchRequest(
-      'NotificationUser/updateNotificationUserByNotificationUserId', body);
+      'NotificationUser/updateNotificationUserByNotificationUserId',
+      body,
+      provider);
   if (res != null) {
     return res;
   } else {

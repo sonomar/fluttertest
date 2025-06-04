@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/app_auth_provider.dart';
 import '../api/collectible.dart';
 import '../api/user_collectible.dart';
 import '../helpers/sort_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectibleModel extends ChangeNotifier {
+  final AppAuthProvider _appAuthProvider;
   List<dynamic> _collectionCollectibles = [];
   List<dynamic> _userCollectibles = [];
   bool _isLoading = false;
@@ -16,6 +19,7 @@ class CollectibleModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get sortByName => _sortByName;
   String? get errorMessage => _errorMessage;
+  CollectibleModel(this._appAuthProvider);
 
   Future<void> loadCollectibles() async {
     _isLoading = true;
@@ -27,7 +31,7 @@ class CollectibleModel extends ChangeNotifier {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? userId = prefs.getString('userId');
       final dynamic fetchedCollectionData =
-          await getCollectiblesByCollectionId('1');
+          await getCollectiblesByCollectionId('1', _appAuthProvider);
       print(
           'DEBUG: Fetched collection data type: ${fetchedCollectionData.runtimeType}');
       print('DEBUG: Fetched collection data: $fetchedCollectionData');
@@ -51,7 +55,7 @@ class CollectibleModel extends ChangeNotifier {
             (_errorMessage ?? '') + ' User ID not found.'; // Append error
       } else {
         final dynamic fetchedUserData =
-            await getUserCollectiblesByOwnerId(userId);
+            await getUserCollectiblesByOwnerId(userId, _appAuthProvider);
         print('DEBUG: Fetched user data type: ${fetchedUserData.runtimeType}');
         print('DEBUG: Fetched user data: $fetchedUserData');
         if (fetchedUserData is List) {
@@ -104,8 +108,10 @@ class CollectibleModel extends ChangeNotifier {
 
   Future<void> addUserCollectible(userId, collectibleId, mint) async {
     try {
-      await createUserCollectible(userId, collectibleId, mint);
-      _userCollectibles = await getUserCollectiblesByOwnerId(userId);
+      await createUserCollectible(
+          userId, collectibleId, mint, _appAuthProvider);
+      _userCollectibles =
+          await getUserCollectiblesByOwnerId(userId, _appAuthProvider);
     } catch (e) {
       print('Error creating userCollectible data: $e');
     } finally {
@@ -115,7 +121,7 @@ class CollectibleModel extends ChangeNotifier {
 
   Future<void> updateCollectible(body) async {
     try {
-      await updateCollectibleByCollectibleId(body);
+      await updateCollectibleByCollectibleId(body, _appAuthProvider);
     } catch (e) {
       print('Error creating userCollectible data: $e');
     } finally {

@@ -1,7 +1,7 @@
 import 'api_init.dart';
 
-Future<dynamic> getAllCollectibles() async {
-  final res = apiGetRequest('Collectible/getAllCollectibles', {});
+Future<dynamic> getAllCollectibles(provider) async {
+  final res = apiGetRequest('Collectible/getAllCollectibles', {}, provider);
   if (res != null) {
     return res;
   } else {
@@ -9,9 +9,9 @@ Future<dynamic> getAllCollectibles() async {
   }
 }
 
-Future<dynamic> getCollectibleByCollectibleId(id) async {
-  final res = apiGetRequest(
-      'Collectible/getCollectibleByCollectibleId', {"collectibleId": id});
+Future<dynamic> getCollectibleByCollectibleId(id, provider) async {
+  final res = apiGetRequest('Collectible/getCollectibleByCollectibleId',
+      {"collectibleId": id}, provider);
   if (res != null) {
     return res;
   } else {
@@ -19,9 +19,9 @@ Future<dynamic> getCollectibleByCollectibleId(id) async {
   }
 }
 
-Future<dynamic> getCollectiblesByCollectionId(id) async {
-  final res = apiGetRequest(
-      'Collectible/getCollectiblesByCollection', {"collectionId": id});
+Future<dynamic> getCollectiblesByCollectionId(id, provider) async {
+  final res = apiGetRequest('Collectible/getCollectiblesByCollection',
+      {"collectionId": id}, provider);
   if (res != null) {
     return res;
   } else {
@@ -29,9 +29,9 @@ Future<dynamic> getCollectiblesByCollectionId(id) async {
   }
 }
 
-Future<dynamic> updateCollectibleByCollectibleId(body) async {
-  final res =
-      apiPatchRequest('Collectible/updateCollectibleByCollectibleId', body);
+Future<dynamic> updateCollectibleByCollectibleId(body, provider) async {
+  final res = apiPatchRequest(
+      'Collectible/updateCollectibleByCollectibleId', body, provider);
   if (res != null) {
     return res;
   } else {

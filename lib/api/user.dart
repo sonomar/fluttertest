@@ -1,8 +1,8 @@
 import 'api_init.dart';
 
-Future<dynamic> getUserByEmail(email) async {
+Future<dynamic> getUserByEmail(email, provider) async {
   print('API: getUserByEmail START for $email at ${DateTime.now()}');
-  final res = apiGetRequest('User/getUserByEmail', {"email": email});
+  final res = apiGetRequest('User/getUserByEmail', {"email": email}, provider);
   if (res != null) {
     return res;
   } else {
@@ -10,8 +10,8 @@ Future<dynamic> getUserByEmail(email) async {
   }
 }
 
-Future<dynamic> updateUserByUserId(body) async {
-  final res = apiPatchRequest('User/updateUserByUserId', body);
+Future<dynamic> updateUserByUserId(body, provider) async {
+  final res = apiPatchRequest('User/updateUserByUserId', body, provider);
   if (res != null) {
     return res;
   } else {
@@ -20,14 +20,17 @@ Future<dynamic> updateUserByUserId(body) async {
 }
 
 Future<dynamic> createUser(
-    email, password, userType, username, deviceId) async {
-  final res = apiPostRequest('User/createUser', {
-    "email": email,
-    "passwordHashed": password,
-    "userType": userType,
-    "username": username,
-    "deviceId": deviceId
-  });
+    email, password, userType, username, deviceId, provider) async {
+  final res = apiPostRequest(
+      'User/createUser',
+      {
+        "email": email,
+        "passwordHashed": password,
+        "userType": userType,
+        "username": username,
+        "deviceId": deviceId
+      },
+      provider);
   if (res != null) {
     return res;
   } else {

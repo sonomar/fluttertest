@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kloppocar_app/api/user.dart'; // Assuming this import provides getUserByEmail and updateUserByUserId
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/app_auth_provider.dart';
 
 // Helper to get environment variables safely
 String getEnvItem(String item) {
@@ -86,8 +87,24 @@ class AuthService {
   CognitoUserSession? _session; // Internal storage for the current session
   String?
       _internalErrorMessage; // To hold specific error messages from AuthService
+  AppAuthProvider? _appAuthProvider;
 
-  AuthService()
+  AuthService.uninitialized()
+      : _userPool = CognitoUserPool(
+          userPoolId,
+          clientId,
+          storage: SecureCognitoStorage(),
+        );
+
+  // Default constructor (if you still have one) or remove it if uninitialized() is primary
+  // AuthService() : this.uninitialized(); // Example if you want a default that calls the named one
+  // Setter to inject AppAuthProvider AFTER AuthService is created
+  void setAppAuthProvider(AppAuthProvider provider) {
+    _appAuthProvider = provider;
+    print('AuthService: AppAuthProvider injected.');
+  }
+
+  AuthService(this._appAuthProvider)
       : _userPool = CognitoUserPool(
           userPoolId, // Use the userPoolId from env
           clientId, // Use the clientId from env
@@ -192,14 +209,14 @@ class AuthService {
         // Handle user registration update if needed
         if (token != null && isRegister == true) {
           final encryptedPassword = encryptPassword(password);
-          final getUser = await getUserByEmail(email);
+          final getUser = await getUserByEmail(email, _appAuthProvider);
           final userId = getUser['userId'];
           final userUpdateBody = {
             "userId": userId,
             "passwordHashed": encryptedPassword,
             "authToken": token
           };
-          await updateUserByUserId(userUpdateBody);
+          await updateUserByUserId(userUpdateBody, _appAuthProvider);
         }
 
         print(

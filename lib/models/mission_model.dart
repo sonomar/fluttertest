@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/app_auth_provider.dart';
 import '../api/mission.dart';
 import '../api/mission_user.dart';
 import '../helpers/sort_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MissionModel extends ChangeNotifier {
+  final AppAuthProvider _appAuthProvider;
   List<dynamic> _missions = [];
   List<dynamic> _missionUsers = [];
   bool _isLoading = false;
@@ -16,6 +19,7 @@ class MissionModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get sort => _sort;
   String? get errorMessage => _errorMessage;
+  MissionModel(this._appAuthProvider);
 
   Future<void> loadMissions() async {
     _isLoading = true;
@@ -34,7 +38,8 @@ class MissionModel extends ChangeNotifier {
         _errorMessage =
             '${_errorMessage ?? ''} User ID not found.'; // Append error
       } else {
-        final dynamic fetchedUserData = await getMissionUsersByUserId(userId);
+        final dynamic fetchedUserData =
+            await getMissionUsersByUserId(userId, _appAuthProvider);
         print('DEBUG: Fetched user data type: ${fetchedUserData.runtimeType}');
         print('DEBUG: Fetched user data: $fetchedUserData');
         if (fetchedUserData is List) {
@@ -44,7 +49,7 @@ class MissionModel extends ChangeNotifier {
             if (_missionUsers[i] != null &&
                 _missionUsers[i]["missionId"] != null) {
               var missionId = await getMissionByMissionId(
-                  _missionUsers[i]["missionId"].toString());
+                  _missionUsers[i]["missionId"].toString(), _appAuthProvider);
               if (missionId != null) {
                 fetchedCollectionData.add(missionId);
                 // The print statements here are okay, but they will show the list growing

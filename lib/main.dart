@@ -25,25 +25,66 @@ void main() async {
   runApp(
     MultiProvider(providers: [
       Provider<AuthService>(
-        create: (context) => AuthService(),
+        create: (context) => AuthService.uninitialized(),
+        lazy: false, // Ensure it's created immediately
       ),
-      ChangeNotifierProvider(
-        create: (context) => AppAuthProvider(context.read<AuthService>()),
+      ChangeNotifierProvider<AppAuthProvider>(
+        create: (context) {
+          final authService =
+              context.read<AuthService>(); // Get the AuthService instance
+          final appAuthProvider =
+              AppAuthProvider(authService); // Create AppAuthProvider
+          // Now, inject AppAuthProvider back into AuthService
+          authService.setAppAuthProvider(appAuthProvider);
+          return appAuthProvider;
+        },
+        lazy: false, // Ensure it's created immediately
       ),
-      ChangeNotifierProvider(create: (context) => CollectibleModel()),
-      ChangeNotifierProvider(create: (context) => UserModel()),
-      ChangeNotifierProvider(create: (context) => MissionModel()),
+      ChangeNotifierProxyProvider<AppAuthProvider, CollectibleModel>(
+        create: (context) => CollectibleModel(context.read<AppAuthProvider>()),
+        update: (context, appAuthProvider, previousCollectibleModel) {
+          return previousCollectibleModel ?? CollectibleModel(appAuthProvider);
+        },
+      ),
+      ChangeNotifierProxyProvider<AppAuthProvider, UserModel>(
+        create: (context) => UserModel(context.read<AppAuthProvider>()),
+        update: (context, appAuthProvider, previousUserModel) {
+          return previousUserModel ?? UserModel(appAuthProvider);
+        },
+      ),
+      ChangeNotifierProxyProvider<AppAuthProvider, MissionModel>(
+        create: (context) => MissionModel(context.read<AppAuthProvider>()),
+        update: (context, appAuthProvider, previousMissionModel) {
+          return previousMissionModel ?? MissionModel(appAuthProvider);
+        },
+      ),
     ], child: const MyApp()),
   );
 }
 
 class MyApp extends StatelessWidget {
+  // Keep as StatelessWidget as the Observer handles lifecycle
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // Wrap your MaterialApp with AppLifecycleObserver
     return AppLifecycleObserver(
+      onAppResumed: () {
+        print(
+            'AppLifecycleObserver: App resumed callback triggered in main.dart. Checking user session...');
+        // Access AppAuthProvider and call checkCurrentUser here
+        // Check if context is mounted before using it (good practice, though usually true here)
+        if (context.mounted) {
+          Provider.of<AppAuthProvider>(context, listen: false)
+              .checkCurrentUser();
+        }
+      },
+      onAppPaused: () {
+        print(
+            'AppLifecycleObserver: App paused callback triggered in main.dart.');
+        // Optional: Perform actions when app is paused
+      },
       child: MaterialApp(
         title: 'Kloppocar App',
         theme: ThemeData(
