@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'subscreens/collectibles/collectible_details.dart';
 import '../models/collectible_model.dart';
@@ -81,39 +81,66 @@ class _CollectionScreenState extends State<CollectionScreen> {
     );
   }
 
-  Widget linkedInkwell(collectible) {
-    print('here is the collectible: $collectible');
-    final colImage = collectible['imageRef']['url'];
+  Widget linkedInkwell(Map collectibleTemplate, Map? userCollectibleInstance,
+      BuildContext context) {
+    // Ensure imageRef and url are present and not null
+    final String colImage =
+        collectibleTemplate['imageRef']?['url'] ?? 'assets/images/car1.png';
+
     return Material(
         child: InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => CollectibleDetails(
-                  selectedCollectible:
-                      collectible) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
-              ),
-        );
+        if (userCollectibleInstance != null) {
+          // Ensure instance is found
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => CollectibleDetails(
+                    selectedCollectible:
+                        collectibleTemplate, // This is the template
+                    selectedUserCollectible:
+                        userCollectibleInstance // This is the specific instance
+                    )),
+          );
+        } else {
+          // Fallback or error if instance not found, though isUserOwned should prevent this
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Owned instance details not found.")),
+          );
+          // Optionally, navigate to details view without trade capability
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => CollectibleDetails(
+                      selectedCollectible: collectibleTemplate,
+                    )),
+          );
+        }
       },
-      splashColor: Color.fromARGB(
-          80, 214, 34, 202), // Image tapped // Splash color over image
+      splashColor: const Color.fromARGB(80, 214, 34, 202),
       splashFactory: InkSparkle.splashFactory,
-      radius: MediaQuery.of(context).size.width - 450,
+      radius: (MediaQuery.of(context).size.width / 4) -
+          10, // Approximate radius based on grid item size
       child: Ink(
         decoration: BoxDecoration(
           color: Colors.white,
           image: DecorationImage(
-            image: NetworkImage(colImage),
+            image: NetworkImage(colImage), // Use NetworkImage for URLs
             fit: BoxFit.cover,
+            onError: (exception, stackTrace) {
+              // Handle image loading errors
+              print("Error loading image: $colImage, $exception");
+              // Optionally, display a placeholder
+            },
           ),
-        ), // Fixes border issues
+        ),
       ),
     ));
   }
 
-  Widget unlinkedInkwell(collectible) {
-    final colImage = collectible['imageRef']['url'];
+  Widget unlinkedInkwell(Map collectible) {
+    final colImage =
+        collectible['imageRef']?['url'] ?? 'assets/images/car1.png';
     return Material(
       child: Container(
         foregroundDecoration: BoxDecoration(
@@ -125,9 +152,11 @@ class _CollectionScreenState extends State<CollectionScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           image: DecorationImage(
-            image: NetworkImage(colImage),
-            fit: BoxFit.cover,
-          ),
+              image: NetworkImage(colImage),
+              fit: BoxFit.cover,
+              onError: (exception, stackTrace) {
+                //             print("Error loading unlinked image: $colImage, $exception");
+              }),
         ), // Fixes border issues
       ),
     );
@@ -135,10 +164,6 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   @override
   void initState() {
-    // readItemJson();
-    // _loadCollectionData();
-    // _loadCollectibleData();
-    // Make sure to call super.initState();
     super.initState();
     Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
   }
@@ -313,32 +338,35 @@ class _CollectionScreenState extends State<CollectionScreen> {
                               crossAxisSpacing: 5,
                               mainAxisSpacing: 5,
                               childAspectRatio: (6 / 10),
-                              children: [
-                                for (int i = 0;
-                                    i < collectionCollectibles.length;
-                                    i++) ...[
-                                  Container(
-                                    padding: const EdgeInsets.only(
-                                      top: 20,
-                                      left: 5,
-                                      right: 5,
-                                      bottom: 20,
-                                    ),
-                                    child: (isUserOwned(
-                                              collectionCollectibles[i],
-                                              userCollectibles,
-                                            ) ==
-                                            true)
-                                        ? linkedInkwell(collectionCollectibles[
-                                            i]) // Ensure linkedInkwell is defined
-                                        : unlinkedInkwell(collectionCollectibles[
-                                            i]), // Ensure unlinkedInkwell is defined
-                                  )
-                                ]
-                              ],
+                              children: collectionCollectibles
+                                  .map<Widget>((collectibleTemplate) {
+                                bool isOwned = isUserOwned(
+                                    collectibleTemplate, userCollectibles);
+                                Map? userCollectibleInstance;
+                                if (isOwned) {
+                                  userCollectibleInstance =
+                                      userCollectibles.firstWhere(
+                                    (uc) =>
+                                        uc['collectibleId'].toString() ==
+                                        collectibleTemplate['collectibleId']
+                                            .toString(),
+                                    orElse: () => null,
+                                  );
+                                }
+
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                      horizontal: 5), // Adjusted padding
+                                  child: isOwned &&
+                                          userCollectibleInstance != null
+                                      ? linkedInkwell(collectibleTemplate,
+                                          userCollectibleInstance, context)
+                                      : unlinkedInkwell(collectibleTemplate),
+                                );
+                              }).toList(),
                             )
                           : const Center(
-                              // Display a message if no collectibles
                               child: Text(
                                 'No collectibles found.',
                                 style: TextStyle(

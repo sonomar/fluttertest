@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../models/app_auth_provider.dart';
 import '../api/collectible.dart';
 import '../api/user_collectible.dart';
@@ -126,6 +125,80 @@ class CollectibleModel extends ChangeNotifier {
       print('Error creating userCollectible data: $e');
     } finally {
       notifyListeners();
+    }
+  }
+
+  Future<bool> updateUserCollectibleStatus(String userCollectibleId,
+      bool isActive, String? newOwnerId, String? previousOwnerId) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final Map<String, dynamic> body = {
+        "active": isActive,
+      };
+      if (userCollectibleId != null) {
+        body["userCollectibleId"] = userCollectibleId;
+      }
+      if (newOwnerId != null) {
+        body["ownerId"] = newOwnerId;
+      }
+      if (previousOwnerId != null) {
+        // Assuming your backend supports a 'previousOwnerId' field
+        body["previousOwnerId"] = previousOwnerId;
+      }
+
+      // Find the user collectible in the local list to get its full current state
+      final userCollectibleIndex = _userCollectibles.indexWhere(
+          (uc) => uc['userCollectibleId'].toString() == userCollectibleId);
+      if (userCollectibleIndex == -1) {
+        _errorMessage = "User collectible not found locally for update.";
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Merge existing data with new updates for the API call
+      // This ensures other fields are not accidentally wiped out if API expects full object
+      // Or, if API handles partial updates, just 'body' is fine.
+      // For safety, let's assume partial updates are fine.
+      // The API function updateUserCollectibleById now adds userCollectibleId to the body.
+
+      await updateUserCollectibleByUserCollectibleId(body, _appAuthProvider);
+
+      // Update local list
+      if (userCollectibleIndex != -1) {
+        if (newOwnerId != null) {
+          // If owner changes, remove from current user's list
+          _userCollectibles.removeAt(userCollectibleIndex);
+        } else {
+          // If only active status changes for the current owner
+          _userCollectibles[userCollectibleIndex]['active'] = isActive;
+        }
+      }
+
+      // Optionally, re-fetch user collectibles to ensure data consistency
+      // await loadCollectibles(); // Or a more targeted refresh
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Error updating UserCollectible: ${e.toString()}';
+      print(_errorMessage);
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Helper to find a user collectible from the local list
+  Map<String, dynamic>? getLocalUserCollectibleById(String userCollectibleId) {
+    try {
+      return _userCollectibles.firstWhere(
+          (uc) => uc['userCollectibleId'].toString() == userCollectibleId,
+          orElse: () => null);
+    } catch (e) {
+      return null;
     }
   }
 }

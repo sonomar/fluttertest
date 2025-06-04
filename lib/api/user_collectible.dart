@@ -26,3 +26,15 @@ Future<dynamic> createUserCollectible(
     throw ' database POST error';
   }
 }
+
+Future<dynamic> updateUserCollectibleByUserCollectibleId(body, provider) async {
+  final res = apiPatchRequest(
+      'UserCollectible/updateUserCollectibleByUserCollectibleId',
+      body,
+      provider);
+  if (res != null) {
+    return res;
+  } else {
+    throw ' database PATCH error';
+  }
+}

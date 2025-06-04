@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import '../missions/latest_active_mission.dart';
 
 class CardInfo extends StatelessWidget {
-  const CardInfo(
-      {super.key,
-      required this.selectedCollectible,
-      required this.missions,
-      required this.missionUsers,
-      required this.recentColl});
+  const CardInfo({
+    super.key,
+    required this.selectedCollectible,
+    required this.missions,
+    required this.missionUsers,
+    required this.recentColl,
+    this.onTradeInitiate,
+  });
   final Map selectedCollectible;
   final List<dynamic> missions;
   final List<dynamic> missionUsers;
   final dynamic recentColl;
+  final Function()? onTradeInitiate;
 
   Widget lineItem(key, value) {
     return Column(children: [
@@ -31,22 +34,6 @@ class CardInfo extends StatelessWidget {
       ]),
       const Divider(height: 20, thickness: 1, color: Colors.grey),
     ]);
-  }
-
-  Future<void> _qrDialog(BuildContext context) {
-    return showDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-              backgroundColor: Colors.transparent,
-              insetPadding: EdgeInsets.all(0),
-              content: GestureDetector(
-                onTap: () => {Navigator.pop(context)},
-                child: Container(
-                    alignment: Alignment.center,
-                    child: Image.asset('assets/images/qrcodesample.png')),
-              ));
-        });
   }
 
   @override
@@ -88,7 +75,9 @@ class CardInfo extends StatelessWidget {
                         backgroundColor: Color(0xffd622ca),
                       ),
                       onPressed: () {
-                        _qrDialog(context);
+                        if (onTradeInitiate != null) {
+                          onTradeInitiate!();
+                        }
                       },
                       child: Text('Transfer Asset',
                           style: TextStyle(

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/collectible_model.dart'; // Ensure this path is correct
+import '../models/user_model.dart';
 import '../main.dart'; // Assuming MyHomePage is in main.dart
 import '../helpers/get_random.dart'; // Import the new random mint generator
 
@@ -96,6 +97,13 @@ class _ScanScreenState extends State<ScanScreen>
     return splitCode.isNotEmpty && splitCode[0] == 'deinsqr';
   }
 
+  bool _isTradeCode(String code) {
+    final List<String> parts = code.split('-');
+    return parts.length == 4 &&
+        (parts[0] == 'deinsQr' || parts[0] == 'deinsqr') &&
+        parts[1] == 'trade';
+  }
+
   /// Handles the processing of a QR code or manually entered code.
   /// This method orchestrates the state changes and business logic.
   Future<void> _processCode(String code) async {
@@ -104,35 +112,42 @@ class _ScanScreenState extends State<ScanScreen>
     // Stop the scanner immediately upon detection/input
     _scanController.stop();
 
-    setState(() {
-      _processedCode = code;
-      _currentScanState = ScanState.loading; // Show loading animation
-    });
+    if (_isTradeCode(code)) {
+      setState(() {
+        _processedCode = code;
+        _currentScanState = ScanState.loading;
+      });
+      await _processTrade(code);
+    } else if (_isCodeValid(code)) {
+      // Existing logic for non-trade codes
+      setState(() {
+        _processedCode = code;
+        _currentScanState = ScanState.loading;
+      });
 
-    // Simulate network delay or processing time
-    await Future.delayed(const Duration(seconds: 2));
+      // Simulate network delay or processing time
+      await Future.delayed(const Duration(seconds: 2));
 
-    if (!mounted) return; // Check again after delay
+      if (!mounted) return; // Check again after delay
 
-    final collectibleModel =
-        Provider.of<CollectibleModel>(context, listen: false);
-    final List collectionCollectibles = collectibleModel.collectionCollectibles;
-    final List userCollectiblesRaw =
-        collectibleModel.userCollectibles; // Get raw list of user collectibles
+      final collectibleModel =
+          Provider.of<CollectibleModel>(context, listen: false);
+      final List collectionCollectibles =
+          collectibleModel.collectionCollectibles;
+      final List userCollectiblesRaw = collectibleModel
+          .userCollectibles; // Get raw list of user collectibles
 
-    // Convert raw userCollectibles (List<Map>) to a list of UserCollectibleWrapper
-    final List<UserCollectibleWrapper> userCollectiblesWrapped =
-        userCollectiblesRaw.map((ucMap) {
-      return UserCollectibleWrapper(
-        // Ensure collectibleId is always a String
-        ucMap["collectibleId"].toString(),
-        ucMap["mint"] is int
-            ? ucMap["mint"] as int
-            : int.tryParse(ucMap["mint"].toString()) ?? 0,
-      );
-    }).toList();
+      // Convert raw userCollectibles (List<Map>) to a list of UserCollectibleWrapper
+      final List<UserCollectibleWrapper> userCollectiblesWrapped =
+          userCollectiblesRaw.map((ucMap) {
+        return UserCollectibleWrapper(
+          ucMap["collectibleId"].toString(),
+          ucMap["mint"] is int
+              ? ucMap["mint"] as int
+              : int.tryParse(ucMap["mint"].toString()) ?? 0,
+        );
+      }).toList();
 
-    if (_isCodeValid(code)) {
       try {
         final SharedPreferences prefValue =
             await SharedPreferences.getInstance();
@@ -266,6 +281,100 @@ class _ScanScreenState extends State<ScanScreen>
         ),
       ));
     }
+  }
+
+  Future<void> _processTrade(String tradeCode) async {
+    if (!mounted) return;
+
+    final List<String> parts = tradeCode.split('-');
+    // String qrType = parts[0]; // "deinsQr"
+    // String tradeMarker = parts[1]; // "trade"
+    String giverUserId = parts[2];
+    String userCollectibleIdToTrade = parts[3];
+
+    final collectibleModel =
+        Provider.of<CollectibleModel>(context, listen: false);
+    final userModel = Provider.of<UserModel>(context, listen: false);
+    final String? receiverUserId = userModel.currentUser?['userId']?.toString();
+
+    if (receiverUserId == null) {
+      _handleTradeError("Could not identify current user to receive trade.");
+      return;
+    }
+
+    if (receiverUserId == giverUserId) {
+      _handleTradeError("Cannot trade a collectible to yourself.");
+      return;
+    }
+
+    // Simulate fetching the specific UserCollectible (in a real app, this might be an API call if not already loaded)
+    // For now, we try to find it in the loaded list by the CollectibleModel.
+    // This part is tricky as the receiver's app doesn't have the giver's UserCollectibles loaded.
+    // The API for updateUserCollectibleStatus will need to fetch it by userCollectibleIdToTrade.
+    // The client-side check for `active == 0` needs the backend to enforce it or provide the data.
+    // For now, let's assume the backend handles checking the `active` status before updating owner.
+
+    // The CollectibleModel's `getLocalUserCollectibleById` would only find it if the receiver somehow had it.
+    // The critical step is the API call. The `active` status check should ideally happen server-side during the update.
+    // If the server successfully updates ownerId only if active=false, that's the best enforcement.
+
+    // 2c. Update UserCollectible: new owner, active=true, previousOwnerId
+    // The `updateUserCollectibleStatus` method will call the API.
+    // The API should check if the item with `userCollectibleIdToTrade` has `active: false` AND `ownerId: giverUserId`.
+    bool tradeSuccess = await collectibleModel.updateUserCollectibleStatus(
+        userCollectibleIdToTrade,
+        true, // Set active to true for the new owner
+        receiverUserId,
+        giverUserId);
+
+    if (tradeSuccess) {
+      if (!mounted) return;
+      setState(() {
+        _currentScanState = ScanState.success;
+      });
+      _successLottieController.forward();
+      await Future.delayed(const Duration(seconds: 2));
+      if (!mounted) return;
+      setState(() {
+        _currentScanState = ScanState.received;
+      });
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return;
+      // Reload collectibles for the receiver
+      await collectibleModel.loadCollectibles();
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => MyHomePage(
+          title: "Kloppocar Home",
+          qrcode: tradeCode, // Pass the successfully processed trade code
+          userData: widget.userData, // Or fetch updated user data
+        ),
+      ));
+    } else {
+      _handleTradeError(collectibleModel.errorMessage ??
+          "Trade failed. The item might not be available or an error occurred.");
+    }
+  }
+
+  void _handleTradeError(String message) async {
+    if (!mounted) return;
+    debugPrint('Trade Error: $message');
+    setState(() {
+      _currentScanState = ScanState.error;
+    });
+    // Show message to user via SnackBar or Dialog if preferred
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: Duration(seconds: 3)),
+    );
+    await Future.delayed(
+        const Duration(seconds: 2)); // Keep error screen for a bit
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => MyHomePage(
+        title: "Kloppocar Home",
+        qrcode: 'error',
+        userData: widget.userData,
+      ),
+    ));
   }
 
   @override
