@@ -5,10 +5,12 @@ import 'widgets/openCards/login_page.dart';
 import 'screens/collection_screen.dart';
 import 'screens/scan_screen.dart';
 import 'screens/community_screen.dart';
-import 'screens/game_screen.dart';
+// import 'screens/game_screen.dart';
+import 'screens/subscreens/missions/missions.dart';
 import './models/collectible_model.dart';
 import './models/user_model.dart';
 import 'models/mission_model.dart';
+import 'models/community_model.dart';
 import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
@@ -56,6 +58,12 @@ void main() async {
         create: (context) => MissionModel(context.read<AppAuthProvider>()),
         update: (context, appAuthProvider, previousMissionModel) {
           return previousMissionModel ?? MissionModel(appAuthProvider);
+        },
+      ),
+      ChangeNotifierProxyProvider<AppAuthProvider, CommunityModel>(
+        create: (context) => CommunityModel(context.read<AppAuthProvider>()),
+        update: (context, appAuthProvider, previousCommunityModel) {
+          return previousCommunityModel ?? CommunityModel(appAuthProvider);
         },
       ),
     ], child: const MyApp()),
@@ -169,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
       const CollectionScreen(key: PageStorageKey('collection')),
       ScanScreen(key: const PageStorageKey('scan'), userData: widget.userData),
       const CommunityScreen(key: PageStorageKey('community')),
-      GameScreen(key: PageStorageKey('game'), userData: widget.userData),
+      Missions(key: PageStorageKey('mission'), userData: widget.userData),
     ];
   }
 
@@ -294,7 +302,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         BlendMode.srcIn),
                   ),
                 ),
-                label: 'Game Center',
+                label: 'Missions',
               ),
             ],
             unselectedIconTheme: const IconThemeData(color: Colors.black),

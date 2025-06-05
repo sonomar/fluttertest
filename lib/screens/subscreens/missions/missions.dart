@@ -28,12 +28,17 @@ class _MissionsState extends State<Missions> {
 
     return Scaffold(
       appBar: AppBar(
-        scrolledUnderElevation: 0.0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+          automaticallyImplyLeading: false,
+          scrolledUnderElevation: 0.0,
+          backgroundColor: Colors.white,
+          title: const Text("Missions"),
+          centerTitle: false,
+          titleTextStyle: TextStyle(
+            fontSize: 28,
+            color: Colors.black,
+            fontFamily: 'ChakraPetch',
+            fontWeight: FontWeight.w500,
+          )),
       body: isLoading
           ? const Center(
               child: CircularProgressIndicator(),

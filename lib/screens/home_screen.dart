@@ -7,13 +7,14 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'subscreens/notifications/notifications_page.dart';
+import '../models/user_model.dart';
 import '../models/mission_model.dart';
 import '../models/collectible_model.dart';
+import '../models/community_model.dart';
 import '../widgets/shadow_circle.dart';
 import '../widgets/object_viewer.dart';
 import '../widgets/community/community_missions.dart';
 import '../widgets/missions/latest_active_mission.dart';
-import '../models/user_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -72,6 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<MissionModel>(context, listen: false).loadMissions();
       Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
+      Provider.of<CommunityModel>(context, listen: false)
+          .loadCommunityChallenge();
     });
     _startTimer();
     readItemJson();
@@ -182,6 +185,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final userModel = context.watch<UserModel>();
+    final communityModel = context.watch<CommunityModel>();
+    final communityChallenge = communityModel.communityChallenge;
     final currentUser = userModel.currentUser;
     final userPic = currentUser["profileImg"];
     final missionModel = context.watch<MissionModel>();
@@ -190,6 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final collectibleModel = context.watch<CollectibleModel>();
     final collectibles = collectibleModel.collectionCollectibles;
     final userCollectibles = collectibleModel.userCollectibles;
+    print('ttyyyeeessst: $communityChallenge');
 
     final recentColl = getLatestCollectible(collectibles, userCollectibles);
     return Scaffold(
@@ -208,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.only(left: 10.0),
                         child: userPic != null
                             ? getUserPic(
-                                userPic, 'assets/images/profile.jpg', 18)
+                                userPic, 'assets/images/profile.jpg', 18.0)
                             : shadowCircle(
                                 'assets/images/profile.jpg', 18, false)),
                     Padding(
@@ -325,7 +331,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 getLatestActiveMission(
                     context, missions, missionUsers, recentColl),
               ])),
-          communityChallengeWidget(_formatTime(_remainingTime)),
+          communityChallengeWidget(
+              _formatTime(_remainingTime), context, communityChallenge, 200),
           Padding(
               padding: const EdgeInsets.only(left: 32, right: 32, top: 10),
               child: Column(children: [

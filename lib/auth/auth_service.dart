@@ -177,127 +177,98 @@ class AuthService {
       username: email,
       password: password,
     );
-
-    int attempts = 0;
-    const int maxAttempts = 3;
     const Duration retryDelay = Duration(milliseconds: 500);
 
-    while (attempts < maxAttempts) {
-      attempts++;
-      try {
-        _session = await _cognitoUser!
-            .authenticateUser(authDetails); // This updates _session
-        // --- CRITICAL: Cache tokens unconditionally after successful authentication ---
-        // This is the most crucial part for getSession() to work later.
-        await _cognitoUser!.cacheTokens();
-        final prefs = await SharedPreferences.getInstance();
-        prefs.setString(
-            'email', email); // Save email for future currentSession calls
+    try {
+      _session = await _cognitoUser!
+          .authenticateUser(authDetails); // This updates _session
+      // --- CRITICAL: Cache tokens unconditionally after successful authentication ---
+      // This is the most crucial part for getSession() to work later.
+      await _cognitoUser!.cacheTokens();
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString(
+          'email', email); // Save email for future currentSession calls
 
-        // Manually saving JWTs (optional, but harmless if you use them elsewhere)
-        final token = _session?.getAccessToken().getJwtToken();
-        final idToken = _session?.getIdToken().getJwtToken();
-        if (token != null) {
-          prefs.setString('jwtCode', token);
-          print('AuthService: Access Token saved to SharedPreferences.');
-          print('token $token');
-        }
-        if (idToken != null) {
-          prefs.setString('jwtIdCode', idToken);
-          print('AuthService: ID Token saved to SharedPreferences.');
-        }
-
-        // Handle user registration update if needed
-        if (token != null && isRegister == true) {
-          final encryptedPassword = encryptPassword(password);
-          final getUser = await getUserByEmail(email, _appAuthProvider);
-          final userId = getUser['userId'];
-          final userUpdateBody = {
-            "userId": userId,
-            "passwordHashed": encryptedPassword,
-            "authToken": token
-          };
-          await updateUserByUserId(userUpdateBody, _appAuthProvider);
-        }
-
-        print(
-            'AuthService: User $email signed in successfully. Session valid: ${_session!.isValid()}');
-        return true; // Successfully authenticated and cached
-      } on CognitoUserNewPasswordRequiredException catch (e) {
-        _internalErrorMessage = 'New Password Required: ${e.message}';
-        print('AuthService Sign-in Error: $_internalErrorMessage');
-        _session = null; // Clear session on specific failure
-        return false; // No retry for user action required
-      } on CognitoUserMfaRequiredException catch (e) {
-        _internalErrorMessage = 'MFA Required: ${e.message}';
-        print('AuthService Sign-in Error: $_internalErrorMessage');
-        _session = null; // Clear session on specific failure
-        return false; // No retry for user action required
-      } on CognitoUserSelectMfaTypeException catch (e) {
-        _internalErrorMessage = 'Select MFA Type: ${e.message}';
-        print('AuthService Sign-in Error: $_internalErrorMessage');
-        _session = null; // Clear session on specific failure
-        return false; // No retry for user action required
-      } on CognitoUserMfaSetupException catch (e) {
-        _internalErrorMessage = 'MFA Setup: ${e.message}';
-        print('AuthService Sign-in Error: $_internalErrorMessage');
-        _session = null; // Clear session on specific failure
-        return false; // No retry for user action required
-      } on CognitoUserTotpRequiredException catch (e) {
-        _internalErrorMessage = 'TOTP Required: ${e.message}';
-        print('AuthService Sign-in Error: $_internalErrorMessage');
-        _session = null; // Clear session on specific failure
-        return false; // No retry for user action required
-      } on CognitoUserCustomChallengeException catch (e) {
-        _internalErrorMessage = 'Custom Challenge: ${e.message}';
-        print('AuthService Sign-in Error: $_internalErrorMessage');
-        _session = null; // Clear session on specific failure
-        return false; // No retry for user action required
-      } on CognitoUserConfirmationNecessaryException catch (e) {
-        _internalErrorMessage = 'Confirmation Necessary: ${e.message}';
-        print('AuthService Sign-in Error: $_internalErrorMessage');
-        _session = null; // Clear session on specific failure
-        return false; // No retry for user action required
-      } on CognitoClientException catch (e) {
-        _internalErrorMessage = 'Cognito Client Exception: ${e.message}';
-        print(
-            'AuthService Sign-in Error: $_internalErrorMessage. Attempt $attempts of $maxAttempts.');
-        _session = null; // Clear session on this type of failure
-        if (attempts < maxAttempts) {
-          print('AuthService: Retrying in ${retryDelay.inMilliseconds}ms...');
-          await Future.delayed(retryDelay);
-        } else {
-          // All attempts exhausted for this type of error
-          print(
-              'AuthService: All $maxAttempts attempts failed for user $email due to CognitoClientException. Signing out.');
-          await _forceSignOutAndClearLocal(); // Call the consolidated sign-out
-          return false;
-        }
-      } catch (e) {
-        _internalErrorMessage =
-            'Unexpected error during authentication: ${e.toString()}';
-        print(
-            'AuthService Sign-in Error: $_internalErrorMessage. Attempt $attempts of $maxAttempts.');
-        _session = null; // Clear session on this type of failure
-        if (attempts < maxAttempts) {
-          print('AuthService: Retrying in ${retryDelay.inMilliseconds}ms...');
-          await Future.delayed(retryDelay);
-        } else {
-          // All attempts exhausted for general errors
-          print(
-              'AuthService: All $maxAttempts attempts failed for user $email due to unexpected error. Signing out.');
-          await _forceSignOutAndClearLocal(); // Call the consolidated sign-out
-          return false;
-        }
+      // Manually saving JWTs (optional, but harmless if you use them elsewhere)
+      final token = _session?.getAccessToken().getJwtToken();
+      final idToken = _session?.getIdToken().getJwtToken();
+      if (token != null) {
+        prefs.setString('jwtCode', token);
+        print('AuthService: Access Token saved to SharedPreferences.');
+        print('token $token');
       }
+      if (idToken != null) {
+        prefs.setString('jwtIdCode', idToken);
+        print('AuthService: ID Token saved to SharedPreferences.');
+      }
+
+      // Handle user registration update if needed
+      if (token != null && isRegister == true) {
+        final encryptedPassword = encryptPassword(password);
+        final getUser = await getUserByEmail(email, _appAuthProvider);
+        final userId = getUser['userId'];
+        final userUpdateBody = {
+          "userId": userId,
+          "passwordHashed": encryptedPassword,
+          "authToken": token
+        };
+        await updateUserByUserId(userUpdateBody, _appAuthProvider);
+      }
+
+      print(
+          'AuthService: User $email signed in successfully. Session valid: ${_session!.isValid()}');
+      return true; // Successfully authenticated and cached
+    } on CognitoUserNewPasswordRequiredException catch (e) {
+      _internalErrorMessage = 'New Password Required: ${e.message}';
+      print('AuthService Sign-in Error: $_internalErrorMessage');
+      _session = null; // Clear session on specific failure
+      return false; // No retry for user action required
+    } on CognitoUserMfaRequiredException catch (e) {
+      _internalErrorMessage = 'MFA Required: ${e.message}';
+      print('AuthService Sign-in Error: $_internalErrorMessage');
+      _session = null; // Clear session on specific failure
+      return false; // No retry for user action required
+    } on CognitoUserSelectMfaTypeException catch (e) {
+      _internalErrorMessage = 'Select MFA Type: ${e.message}';
+      print('AuthService Sign-in Error: $_internalErrorMessage');
+      _session = null; // Clear session on specific failure
+      return false; // No retry for user action required
+    } on CognitoUserMfaSetupException catch (e) {
+      _internalErrorMessage = 'MFA Setup: ${e.message}';
+      print('AuthService Sign-in Error: $_internalErrorMessage');
+      _session = null; // Clear session on specific failure
+      return false; // No retry for user action required
+    } on CognitoUserTotpRequiredException catch (e) {
+      _internalErrorMessage = 'TOTP Required: ${e.message}';
+      print('AuthService Sign-in Error: $_internalErrorMessage');
+      _session = null; // Clear session on specific failure
+      return false; // No retry for user action required
+    } on CognitoUserCustomChallengeException catch (e) {
+      _internalErrorMessage = 'Custom Challenge: ${e.message}';
+      print('AuthService Sign-in Error: $_internalErrorMessage');
+      _session = null; // Clear session on specific failure
+      return false; // No retry for user action required
+    } on CognitoUserConfirmationNecessaryException catch (e) {
+      _internalErrorMessage = 'Confirmation Necessary: ${e.message}';
+      print('AuthService Sign-in Error: $_internalErrorMessage');
+      _session = null; // Clear session on specific failure
+      return false; // No retry for user action required
+    } on CognitoClientException catch (e) {
+      _internalErrorMessage = 'Cognito Client Exception: ${e.message}';
+      _session = null; // Clear session on this type of failure
+      // All attempts exhausted for this type of error
+      print(
+          'AuthService: attempt failed for user $email due to CognitoClientException. Signing out.');
+      await _forceSignOutAndClearLocal(); // Call the consolidated sign-out
+      return false;
+    } catch (e) {
+      _internalErrorMessage =
+          'Unexpected error during authentication: ${e.toString()}';
+      print(
+          'AuthService: Attempt failed for user $email due to unexpected error. Signing out.');
+      await _forceSignOutAndClearLocal(); // Call the consolidated sign-out
+      return false;
     }
-    _internalErrorMessage =
-        'All login attempts failed without a specific error.';
-    print(
-        'AuthService: Final return after all attempts. User $email could not be signed in.');
-    await _forceSignOutAndClearLocal(); // Call the consolidated sign-out if loop finishes without success
-    _session = null;
-    return false;
   }
 
   Future<void> signOut() async {
@@ -310,6 +281,8 @@ class AuthService {
     await _clearSharedPreferences(); // Call the new private method to clear shared preferences
     _session = null; // Clear internal session object
     _cognitoUser = null; // Clear internal CognitoUser object
+    print(
+        'AuthService: User signed out and all relevant local data cleared. _cognitoUser is now $_cognitoUser.');
     _internalErrorMessage = null; // Clear error message on sign out
     print('AuthService: User signed out and all relevant local data cleared.');
   }

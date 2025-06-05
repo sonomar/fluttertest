@@ -89,9 +89,9 @@ class _GameScreenState extends State<GameScreen> {
                         top: -20,
                         child: userPic != null
                             ? getUserPic(
-                                userPic, 'assets/images/profile.jpg', 18)
+                                userPic, 'assets/images/profile.jpg', 18.0)
                             : shadowCircle(
-                                'assets/images/profile.jpg', 18, false)),
+                                'assets/images/profile.jpg', 18.0, false)),
                   ]),
               Expanded(
                   child: Padding(
@@ -104,10 +104,8 @@ class _GameScreenState extends State<GameScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => Missions(
-                                          userData: widget
-                                              .userData) //here pass the actual values of these variables, for example false if the payment isn't successfull..etc
-                                      ),
+                                      builder: (context) =>
+                                          Missions(userData: widget.userData)),
                                 );
                               },
                               title: "Missions",
