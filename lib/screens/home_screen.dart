@@ -12,6 +12,7 @@ import '../models/mission_model.dart';
 import '../models/collectible_model.dart';
 import '../models/notification_provider.dart';
 import '../models/community_model.dart';
+import '../models/news_post_model.dart';
 import '../widgets/shadow_circle.dart';
 import '../widgets/object_viewer.dart';
 import '../widgets/community/community_missions.dart';
@@ -31,7 +32,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late Timer _timer;
   Duration _remainingTime = const Duration(hours: 6, minutes: 59, seconds: 43);
-  List _newsItems = [];
   Map exampleCollectible = {
     "collectibleId": 1,
     "label": "item-test1",
@@ -56,22 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
     "publication-date": "20.03.2025"
   };
 
-  Future<void> readItemJson() async {
-    try {
-      final String response =
-          await rootBundle.loadString('assets/json/news.json');
-      final data = await json.decode(response);
-      if (mounted) {
-        // Check if widget is still in the tree before setting state
-        setState(() {
-          _newsItems = data['news'];
-        });
-      }
-    } catch (e) {
-      print("Error reading news.json: $e");
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -80,11 +64,11 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<MissionModel>(context, listen: false).loadMissions();
       Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
+      Provider.of<NewsPostModel>(context, listen: false).loadNewsPosts();
       Provider.of<CommunityModel>(context, listen: false)
           .loadCommunityChallenge();
     });
     _startTimer();
-    readItemJson();
   }
 
   void _startTimer() {
@@ -113,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget newsItem(category, postdate, content) {
     return Padding(
         padding: const EdgeInsets.only(top: 10),
-        child: Column(children: [
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(mainAxisAlignment: MainAxisAlignment.start, children: [
             Container(
               padding:
@@ -210,6 +194,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final missionModel = context.watch<MissionModel>();
     final missions = missionModel.missions;
     final missionUsers = missionModel.missionUsers;
+    final newsPostModel = context.watch<NewsPostModel>();
+    final newsPosts = newsPostModel.newsPosts;
     final collectibleModel = context.watch<CollectibleModel>();
     final collectibles = collectibleModel.collectionCollectibles;
     final userCollectibles = collectibleModel.userCollectibles;
@@ -372,16 +358,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: listMissions(context, missions, missionUsers)),
                 sectionHeader('Nachrichten'),
-                if (_newsItems.length > 1) ...[
+                if (newsPosts.isNotEmpty) ...[
                   newsItem(
-                    _newsItems[0]["category"],
-                    _newsItems[0]["post-date"],
-                    _newsItems[0]["content"],
+                    newsPosts[0]["type"],
+                    newsPosts[0]["updatedDt"],
+                    newsPosts[0]["header"],
                   ),
                   newsItem(
-                    _newsItems[1]["category"],
-                    _newsItems[1]["post-date"],
-                    _newsItems[1]["content"],
+                    newsPosts[1]["type"],
+                    newsPosts[1]["updatedDt"],
+                    newsPosts[1]["header"],
+                  ),
+                  newsItem(
+                    newsPosts[2]["type"],
+                    newsPosts[2]["updatedDt"],
+                    newsPosts[2]["header"],
                   ),
                 ] else ...[
                   // Show a loading indicator while news is being fetched

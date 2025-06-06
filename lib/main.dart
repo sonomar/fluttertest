@@ -12,6 +12,7 @@ import './models/notification_provider.dart';
 import './models/user_model.dart';
 import 'models/mission_model.dart';
 import 'models/community_model.dart';
+import 'models/news_post_model.dart';
 import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
@@ -59,6 +60,12 @@ void main() async {
         create: (context) => MissionModel(context.read<AppAuthProvider>()),
         update: (context, appAuthProvider, previousMissionModel) {
           return previousMissionModel ?? MissionModel(appAuthProvider);
+        },
+      ),
+      ChangeNotifierProxyProvider<AppAuthProvider, NewsPostModel>(
+        create: (context) => NewsPostModel(context.read<AppAuthProvider>()),
+        update: (context, appAuthProvider, previousNewsPostModel) {
+          return previousNewsPostModel ?? NewsPostModel(appAuthProvider);
         },
       ),
       ChangeNotifierProxyProvider<AppAuthProvider, CommunityModel>(
