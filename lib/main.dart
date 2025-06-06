@@ -8,6 +8,7 @@ import 'screens/community_screen.dart';
 // import 'screens/game_screen.dart';
 import 'screens/subscreens/missions/missions.dart';
 import './models/collectible_model.dart';
+import './models/notification_provider.dart';
 import './models/user_model.dart';
 import 'models/mission_model.dart';
 import 'models/community_model.dart';
@@ -65,6 +66,21 @@ void main() async {
         update: (context, appAuthProvider, previousCommunityModel) {
           return previousCommunityModel ?? CommunityModel(appAuthProvider);
         },
+      ),
+      ChangeNotifierProxyProvider2<AppAuthProvider, UserModel,
+          NotificationProvider>(
+        create: (context) => NotificationProvider(
+          context.read<AppAuthProvider>(),
+          context.read<UserModel>(),
+        ),
+        update: (context, appAuthProvider, userModel,
+            previousNotificationProvider) {
+          // Re-create or update. Simpler to re-create if dependencies change significantly.
+          // Or, if NotificationProvider has an update method: previousNotificationProvider..updateDependencies(appAuthProvider, userModel);
+          return previousNotificationProvider ??
+              NotificationProvider(appAuthProvider, userModel);
+        },
+        lazy: false, // Load it eagerly
       ),
     ], child: const MyApp()),
   );

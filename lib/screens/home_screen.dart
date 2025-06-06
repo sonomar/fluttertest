@@ -10,6 +10,7 @@ import 'subscreens/notifications/notifications_page.dart';
 import '../models/user_model.dart';
 import '../models/mission_model.dart';
 import '../models/collectible_model.dart';
+import '../models/notification_provider.dart';
 import '../models/community_model.dart';
 import '../widgets/shadow_circle.dart';
 import '../widgets/object_viewer.dart';
@@ -30,7 +31,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late Timer _timer;
   Duration _remainingTime = const Duration(hours: 6, minutes: 59, seconds: 43);
-  int unreadNotifications = 0; // Hardcoded for now
   List _newsItems = [];
   Map exampleCollectible = {
     "collectibleId": 1,
@@ -57,12 +57,19 @@ class _HomeScreenState extends State<HomeScreen> {
   };
 
   Future<void> readItemJson() async {
-    final String response =
-        await rootBundle.loadString('assets/json/news.json');
-    final data = await json.decode(response);
-    setState(() {
-      _newsItems = data['news'];
-    });
+    try {
+      final String response =
+          await rootBundle.loadString('assets/json/news.json');
+      final data = await json.decode(response);
+      if (mounted) {
+        // Check if widget is still in the tree before setting state
+        setState(() {
+          _newsItems = data['news'];
+        });
+      }
+    } catch (e) {
+      print("Error reading news.json: $e");
+    }
   }
 
   @override
@@ -185,17 +192,30 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final userModel = context.watch<UserModel>();
+    final currentUser = userModel.currentUser;
+    if (userModel.isLoading && currentUser == null) {
+      // More specific loading condition
+      return const Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(child: CircularProgressIndicator()));
+    }
+    if (currentUser == null) {
+      return const Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(child: Text("User data not available.")));
+    }
+    final userPic = currentUser["profileImg"];
     final communityModel = context.watch<CommunityModel>();
     final communityChallenge = communityModel.communityChallenge;
-    final currentUser = userModel.currentUser;
-    final userPic = currentUser["profileImg"];
     final missionModel = context.watch<MissionModel>();
     final missions = missionModel.missions;
     final missionUsers = missionModel.missionUsers;
     final collectibleModel = context.watch<CollectibleModel>();
     final collectibles = collectibleModel.collectionCollectibles;
     final userCollectibles = collectibleModel.userCollectibles;
-    print('ttyyyeeessst: $communityChallenge');
+    final notificationProvider = context.watch<NotificationProvider>();
+    final int unreadNotifications =
+        notificationProvider.unreadNotificationCount;
 
     final recentColl = getLatestCollectible(collectibles, userCollectibles);
     return Scaffold(
@@ -279,19 +299,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     right: 10,
                     top: 10,
                     child: Container(
-                      padding: const EdgeInsets.all(5),
+                      padding: const EdgeInsets.all(1),
                       decoration: const BoxDecoration(
                         color: Colors.red,
                         shape: BoxShape.circle,
                       ),
-                      child: Text(
+                      constraints: const BoxConstraints(
+                        // Ensure minimum size
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      child: Center(
+                          child: Text(
                         unreadNotifications.toString(),
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
-                      ),
+                      )),
                     ),
                   ),
               ],
@@ -346,16 +372,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: listMissions(context, missions, missionUsers)),
                 sectionHeader('Nachrichten'),
-                newsItem(
-                  _newsItems[0]["category"],
-                  _newsItems[0]["post-date"],
-                  _newsItems[0]["content"],
-                ),
-                newsItem(
-                  _newsItems[1]["category"],
-                  _newsItems[1]["post-date"],
-                  _newsItems[1]["content"],
-                )
+                if (_newsItems.length > 1) ...[
+                  newsItem(
+                    _newsItems[0]["category"],
+                    _newsItems[0]["post-date"],
+                    _newsItems[0]["content"],
+                  ),
+                  newsItem(
+                    _newsItems[1]["category"],
+                    _newsItems[1]["post-date"],
+                    _newsItems[1]["content"],
+                  ),
+                ] else ...[
+                  // Show a loading indicator while news is being fetched
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                ]
               ]))
         ])));
   }

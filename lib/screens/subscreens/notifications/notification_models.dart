@@ -1,51 +1,52 @@
-// NotificationModel represents a general notification.
 class NotificationModel {
-  final int id;
-  final DateTime createdDt;
-  final bool enabled;
-  final String title;
-  final String message;
+  final int notificationId;
+  final bool active;
+  final String header; // Corresponds to 'title' in old model
+  final String content; // Corresponds to 'message' in old model
 
   NotificationModel({
-    required this.id,
-    required this.createdDt,
-    required this.enabled,
-    required this.title,
-    required this.message,
+    required this.notificationId,
+    required this.active,
+    required this.header,
+    required this.content,
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
-      id: json['id'],
-      createdDt: DateTime.parse(json['createdDt']),
-      enabled: json['enabled'],
-      title: json['title'],
-      message: json['message'],
+      notificationId: json['notificationId'],
+
+      // --- FIX 1: Map the new property 'active' to the 'active' key from JSON ---
+      active: json['active'] ?? false,
+
+      // --- FIX 2: Map 'header' and 'content' to their corresponding keys from JSON ---
+      // Assuming your API now sends 'header' and 'content'.
+      // If it still sends 'title' and 'message', map them accordingly like this:
+      header: json['header'] ?? json['title'] ?? 'No Title',
+      content: json['content'] ?? json['message'] ?? 'No message content.',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'createdDt': createdDt.toIso8601String(),
-      'enabled': enabled,
-      'title': title,
-      'message': message,
+      // FIX 3: Use a consistent key name, likely camelCase for JSON conventions
+      'notificationId': notificationId,
+      'active': active,
+      'header': header,
+      'content': content,
     };
   }
 }
 
-// UserNotification represents user-specific metadata for notifications.
 class UserNotification {
-  final int id;
-  bool deleted; // Mutable for state updates
+  final int notificationUserid;
+  bool deleted;
   final bool archived;
   final int userId;
   final int notificationId;
-  bool markRead; // Mutable for state updates
+  bool markRead;
 
   UserNotification({
-    required this.id,
+    required this.notificationUserid,
     required this.deleted,
     required this.archived,
     required this.userId,
@@ -55,18 +56,19 @@ class UserNotification {
 
   factory UserNotification.fromJson(Map<String, dynamic> json) {
     return UserNotification(
-      id: json['id'],
-      deleted: json['deleted'],
-      archived: json['archived'],
+      notificationUserid: json['notificationUserId'],
+      deleted: json['deleted'] ?? false,
+      archived: json['archived'] ?? false,
       userId: json['userId'],
       notificationId: json['notificationId'],
-      markRead: json['markRead'],
+      markRead: json['markRead'] ?? false,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      // FIX 4: Use the consistent key 'notificationUserId'
+      'notificationUserId': notificationUserid,
       'deleted': deleted,
       'archived': archived,
       'userId': userId,

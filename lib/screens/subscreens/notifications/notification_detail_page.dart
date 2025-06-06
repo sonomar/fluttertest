@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'notification_models.dart';
+import 'package:provider/provider.dart';
+import 'package:kloppocar_app/models/notification_provider.dart';
+import 'package:kloppocar_app/screens/subscreens/notifications/notification_models.dart';
 
 class NotificationDetailPage extends StatefulWidget {
-  final UserNotification userNotification;
-  final NotificationModel notification;
+  final UserNotification userNotification; // Receive UserNotification object
+  final NotificationModel notification; // Receive NotificationModel object
 
   const NotificationDetailPage({
     super.key,
@@ -12,74 +14,101 @@ class NotificationDetailPage extends StatefulWidget {
   });
 
   @override
-  // ignore: library_private_types_in_public_api
   _NotificationDetailPageState createState() => _NotificationDetailPageState();
 }
 
 class _NotificationDetailPageState extends State<NotificationDetailPage> {
+  late UserNotification
+      _currentUserNotification; // To hold mutable state if needed
+
   @override
   void initState() {
     super.initState();
-    // Mark notification as read if it isn't already
-    if (!widget.userNotification.markRead) {
-      setState(() {
-        widget.userNotification.markRead = true;
+    _currentUserNotification =
+        widget.userNotification; // Initialize with passed data
+
+    // Mark as read if not already
+    if (!_currentUserNotification.markRead) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<NotificationProvider>(context, listen: false)
+            .markNotificationAsRead(_currentUserNotification);
+        // Optimistically update local state for immediate UI feedback, provider will reload anyway
+        if (mounted) {
+          setState(() {
+            _currentUserNotification.markRead = true;
+          });
+        }
       });
-      // In a real app, you'd also persist this state (e.g., via an API call or local DB).
+    }
+  }
+
+  Future<void> _deleteNotification() async {
+    await Provider.of<NotificationProvider>(context, listen: false)
+        .deleteUserNotification(_currentUserNotification);
+    // After deleting, pop the page. The list on NotificationsPage will update
+    // because deleteUserNotification triggers a reload in the provider.
+    if (mounted) {
+      Navigator.of(context).pop();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final userNotif = widget.userNotification;
+    // final userNotif = _currentUserNotification; // Use local state for display if optimistically updated
+    final userNotif = widget
+        .userNotification; // Or always use widget data if provider reloads fast
     final notif = widget.notification;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notification Details'),
+        title: Text(
+            notif.header.isNotEmpty ? notif.header : 'Notification Details'),
+        leading: IconButton(
+          // Add back button
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              notif.title,
+              notif.header,
               style: const TextStyle(
-                fontSize: 20,
+                fontSize: 22, // Increased size
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            const Divider(height: 32),
             Expanded(
               child: SingleChildScrollView(
                 child: Text(
-                  notif.message,
-                  style: const TextStyle(fontSize: 16),
+                  notif.content,
+                  style: const TextStyle(
+                      fontSize: 16, height: 1.5), // Added line height
                 ),
               ),
             ),
+            const SizedBox(height: 20), // Space before buttons
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment:
+                  MainAxisAlignment.end, // Align buttons to the end
               children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.delete),
-                  label: const Text('Delete'),
-                  onPressed: () {
-                    // Set deleted = true and then navigate back.
-                    setState(() {
-                      userNotif.deleted = true;
-                    });
-                    Navigator.of(context).pop();
-                  },
+                TextButton.icon(
+                  // Use TextButton for less emphasis
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  label:
+                      const Text('Delete', style: TextStyle(color: Colors.red)),
+                  onPressed: _deleteNotification,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                  ),
                 ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Back'),
-                  onPressed: () {
-                    // Just go back without deleting
-                    Navigator.of(context).pop();
-                  },
-                ),
+                // Removed the "Back" button as AppBar has one.
+                // If you need another primary action, replace this.
               ],
             ),
           ],

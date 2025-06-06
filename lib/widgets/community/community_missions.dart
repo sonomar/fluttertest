@@ -49,7 +49,7 @@ Widget communityChallengeWidget(
   final int communityGoal =
       (communityChallenge != null && communityChallenge['goal'] != null)
           ? communityChallenge['goal']
-          : '0';
+          : 0;
   final String ChallengeTitle =
       (communityChallenge != null && communityChallenge['title'] != null)
           ? communityChallenge['title']

@@ -2,7 +2,7 @@ import 'api_init.dart';
 
 Future<dynamic> getNotificationUsersByUserId(id, provider) async {
   final res = apiGetRequest('NotificationUser/getNotificationUsersByUserId',
-      {"UserId": id}, provider);
+      {"userId": id}, provider);
   if (res != null) {
     return res;
   } else {
