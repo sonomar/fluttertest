@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kloppocar_app/screens/subscreens/news_posts/news_post_details.dart';
 import 'package:provider/provider.dart';
 import 'package:kloppocar_app/screens/subscreens/collectibles/collectible_details.dart';
 import 'package:kloppocar_app/screens/profile_screen.dart';
@@ -94,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Widget newsItem(category, postdate, content) {
+  Widget newsItem(type, postedDate, header) {
     return Padding(
         padding: const EdgeInsets.only(top: 10),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -105,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: BoxDecoration(
                   color: Colors.black,
                   borderRadius: const BorderRadius.all(Radius.circular(20))),
-              child: Text(category,
+              child: Text(type,
                   style: TextStyle(
                       fontSize: 8,
                       letterSpacing: 2.56,
@@ -116,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
                 padding: const EdgeInsets.only(left: 10),
                 child: Text(
-                  postdate,
+                  postedDate,
                   style: GoogleFonts.roboto(
                       textStyle: TextStyle(
                     fontSize: 12,
@@ -129,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(
               padding: const EdgeInsets.only(top: 10),
               child: Text(
-                content,
+                header,
                 style: GoogleFonts.roboto(
                     textStyle: TextStyle(
                   fontSize: 14,
@@ -359,20 +360,47 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: listMissions(context, missions, missionUsers)),
                 sectionHeader('Nachrichten'),
                 if (newsPosts.isNotEmpty) ...[
-                  newsItem(
-                    newsPosts[0]["type"],
-                    newsPosts[0]["updatedDt"],
-                    newsPosts[0]["header"],
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => NewsPostDetails(
+                                  selectedNewsPost: newsPosts[0])));
+                    },
+                    child: newsItem(
+                      newsPosts[0]["type"],
+                      newsPosts[0]["updatedDt"],
+                      newsPosts[0]["header"],
+                    ),
                   ),
-                  newsItem(
-                    newsPosts[1]["type"],
-                    newsPosts[1]["updatedDt"],
-                    newsPosts[1]["header"],
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => NewsPostDetails(
+                                  selectedNewsPost: newsPosts[1])));
+                    },
+                    child: newsItem(
+                      newsPosts[1]["type"],
+                      newsPosts[1]["updatedDt"],
+                      newsPosts[1]["header"],
+                    ),
                   ),
-                  newsItem(
-                    newsPosts[2]["type"],
-                    newsPosts[2]["updatedDt"],
-                    newsPosts[2]["header"],
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => NewsPostDetails(
+                                  selectedNewsPost: newsPosts[2])));
+                    },
+                    child: newsItem(
+                      newsPosts[2]["type"],
+                      newsPosts[2]["updatedDt"],
+                      newsPosts[2]["header"],
+                    ),
                   ),
                 ] else ...[
                   // Show a loading indicator while news is being fetched
