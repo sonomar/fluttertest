@@ -86,7 +86,9 @@ class _AwardDetailsState extends State<AwardDetails> {
                           height: 500,
                           width: double.infinity,
                           child: ObjectViewer(
-                              asset: widget.selectedAward['embedRef']['url']),
+                              asset: widget.selectedAward['embedRef']['url'],
+                              placeholder: widget.selectedAward['imgRef']
+                                  ['load']),
                         )),
                   ]))),
           SizedBox(

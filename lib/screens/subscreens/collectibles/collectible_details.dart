@@ -207,20 +207,25 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                   alignment: Alignment.center,
                   child: Column(children: [
                     Padding(
-                        padding:
-                            EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
-                        child: SizedBox(
+                      padding:
+                          EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
+                      child: SizedBox(
                           height: 500,
                           width: double.infinity,
                           child: widget.selectedCollectible["name"] ==
                                   "3D Wallet"
                               ? ObjectViewer(
                                   asset:
-                                      "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/cardSample2/KloppoCar_Raw_Asset.gltf")
+                                      "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/KloppoCar_4.gltf",
+                                  placeholder:
+                                      "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/images/k4.png")
                               : ObjectViewer(
                                   asset: widget.selectedCollectible['embedRef']
-                                      ['url']),
-                        )),
+                                      ['url'],
+                                  placeholder:
+                                      widget.selectedCollectible['imageRef']
+                                          ['load'])),
+                    )
                   ]))),
           SizedBox(
               height: MediaQuery.of(context).size.height,

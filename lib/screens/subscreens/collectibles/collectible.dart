@@ -39,9 +39,15 @@ class _CollectibleState extends State<Collectible> {
                 child: Align(
                   alignment: Alignment.center,
                   child: widget.selectedCollectible["label"] == "item-test77"
-                      ? ObjectViewer(asset: "assets/3d/deins_card4.glb")
+                      ? ObjectViewer(
+                          asset:
+                              "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/KloppoCar_4.gltf",
+                          placeholder:
+                              "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/images/k4.png")
                       : ObjectViewer(
-                          asset: widget.selectedCollectible['embedRef']['url']),
+                          asset: widget.selectedCollectible['embedRef']['url'],
+                          placeholder: widget.selectedCollectible['imageRef']
+                              ['load']),
                 ))));
   }
 }

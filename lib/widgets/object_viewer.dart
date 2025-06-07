@@ -1,51 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 
-class ObjectViewer extends StatelessWidget {
+class ObjectViewer extends StatefulWidget {
+  const ObjectViewer({
+    super.key,
+    required this.asset,
+    required this.placeholder,
+  });
   final String asset;
-  const ObjectViewer({super.key, required this.asset});
+  final String placeholder;
+
+  @override
+  State<ObjectViewer> createState() => _ObjectViewerState();
+}
+
+class _ObjectViewerState extends State<ObjectViewer> {
+  final Flutter3DController _controller = Flutter3DController();
+  bool _isModelLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    Flutter3DController controller = Flutter3DController();
-    controller.onModelLoaded.addListener(() async {
-      debugPrint('model is loaded : ${controller.onModelLoaded.value}');
-      var test = await controller.getAvailableTextures();
-      controller.setTexture(textureName: '(0) JadrianClark_18_frei');
-      debugPrint('testing: $test');
-    });
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // --- 3D Viewer ---
+        Flutter3DViewer(
+          activeGestureInterceptor: true,
+          progressBarColor: Colors.transparent,
+          enableTouch: true,
+          onProgress: (double progressValue) {
+            // This is great for debugging to see that loading is happening.
+            debugPrint('model loading progress : $progressValue');
+          },
+          onLoad: (String modelAddress) {
+            print('testtesttest');
+            debugPrint(
+                'onLoad callback triggered: model loaded at $modelAddress');
+            // Check if the widget is still mounted before calling setState
+            if (mounted) {
+              setState(() {
+                _isModelLoaded = true;
+              });
+            }
+          },
+          onError: (String error) {
+            debugPrint('model failed to load : $error');
+            // Optionally, handle the error state in the UI
+          },
+          src: widget.asset,
+          controller: _controller,
+        ),
 
-    // controller.setTexture(textureName: 'chosenTexture');
+        // --- Placeholder ---
+        IgnorePointer(
+          ignoring:
+              _isModelLoaded, // Also disable pointer events when not visible
+          child: AnimatedOpacity(
+              opacity: _isModelLoaded ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 100),
+              child: Padding(
+                  padding: EdgeInsets.all(40),
+                  child: Image.network(
+                    widget.placeholder,
+                  ))),
+        ),
 
-    return Stack(children: [
-      SizedBox(
-        height: 500,
-        child: Flutter3DViewer(
-            //If you pass 'true' the flutter_3d_controller will add gesture interceptor layer
-            //to prevent gesture recognizers from malfunctioning on iOS and some Android devices.
-            //the default value is true
-            activeGestureInterceptor: true,
-            //If you don't pass progressBarColor, the color of defaultLoadingProgressBar will be grey.
-            //You can set your custom color or use [Colors.transparent] for hiding loadingProgressBar.
-            progressBarColor: Colors.transparent,
-            //You can disable viewer touch response by setting 'enableTouch' to 'false'
-            enableTouch: true,
-            //This callBack will return the loading progress value between 0 and 1.0
-            onProgress: (double progressValue) {
-              debugPrint('model loading progress : $progressValue');
-            },
-            //This callBack will call after model loaded successfully and will return model address
-            onLoad: (String modelAddress) {
-              debugPrint('model loaded : $modelAddress');
-            },
-            //this callBack will call when model failed to load and will return failure error
-            onError: (String error) {
-              debugPrint('model failed to load : $error');
-            },
-            src: asset,
-            controller: controller),
-      ),
-      SizedBox(height: 500)
-    ]);
+        // --- Loading Indicator ---
+        if (!_isModelLoaded)
+          const Center(
+            child: CircularProgressIndicator(),
+          ),
+      ],
+    );
   }
 }

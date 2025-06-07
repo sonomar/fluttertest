@@ -39,7 +39,8 @@ class _AwardState extends State<Award> {
               child: Align(
                   alignment: Alignment.center,
                   child: ObjectViewer(
-                      asset: widget.selectedAward['embedRef']['url'])),
+                      asset: widget.selectedAward['embedRef']['url'],
+                      placeholder: widget.selectedAward['imgRef']['load'])),
             )));
   }
 }

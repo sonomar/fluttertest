@@ -33,29 +33,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late Timer _timer;
   Duration _remainingTime = const Duration(hours: 6, minutes: 59, seconds: 43);
-  Map exampleCollectible = {
-    "collectibleId": 1,
-    "label": "item-test1",
-    "name": "Party Door",
-    "category": 1,
-    "collection": 1,
-    "description":
-        "This is item test 1. This is great because this test item is really cool. It's part of the Kloppocar prep app and everything about it is going to be fun to collect and fun to trade! DEINS cards are the digital trading platform of the future!",
-    "imageRef": "assets/images/car1.png",
-    "vidRef": "assets/images/car1.png",
-    "QRRef": "assets/images/car1.png",
-    "EmbedRef": "assets/images/car1.png",
-    "createdDt": "2024-11-18 10:36:22.640",
-    "updatedDt": "2024-11-18 10:36:22.640",
-    "active": true,
-    "collection-name": "Kloppocar-Puzzle-Collection",
-    "collection-number": "01-01",
-    "community": "Kloppocar Community",
-    "sponsor": "Mini-Cooper",
-    "sponsor-url": "https://www.mini.com",
-    "circulation": "20,000",
-    "publication-date": "20.03.2025"
-  };
 
   @override
   void initState() {
@@ -152,26 +129,26 @@ class _HomeScreenState extends State<HomeScreen> {
     return shadowCircle(defaultImg, radius, false);
   }
 
-  String _getAssetUrlFromCollectible(dynamic collectibleData) {
-    const String defaultAsset = 'assets/default_placeholder.glb';
+  dynamic _getAssetUrlFromCollectible(dynamic collectibleData) {
+    dynamic urls = {
+      'url': 'https://deins.s3.eu-central-1.amazonaws.com/images/car3.png',
+      'placeholder':
+          'https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/images/k1.png'
+    };
     if (collectibleData == null || collectibleData is! Map) {
-      return defaultAsset;
+      return urls;
     }
     final dynamic embedRef = collectibleData['embedRef'];
-    if (embedRef == null) {
-      return defaultAsset;
+    final dynamic imageRef = collectibleData['imageRef'];
+    if (embedRef == null || imageRef == null) {
+      return urls;
     }
-    if (embedRef is String) {
-      // If embedRef is a direct URL string
-      return embedRef.isNotEmpty ? embedRef : defaultAsset;
+    urls['url'] = embedRef['url'];
+    urls['placeholder'] = imageRef['load'];
+    if (urls.isNotEmpty) {
+      return urls;
     }
-    if (embedRef is Map) {
-      final dynamic url = embedRef['url'];
-      if (url is String && url.isNotEmpty) {
-        return url;
-      }
-    }
-    return defaultAsset;
+    return urls;
   }
 
   @override
@@ -205,6 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
         notificationProvider.unreadNotificationCount;
 
     final recentColl = getLatestCollectible(collectibles, userCollectibles);
+    final recentUrls = _getAssetUrlFromCollectible(recentColl);
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -326,18 +304,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: EdgeInsets.only(top: 10, bottom: 10),
                       child: GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => CollectibleDetails(
-                                        selectedCollectible:
-                                            exampleCollectible)));
+                            if (recentColl != null) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => CollectibleDetails(
+                                          selectedCollectible: recentColl)));
+                            } else {
+                              {}
+                            }
                           },
                           child: SizedBox(
                             height: 400,
                             child: ObjectViewer(
-                                asset: _getAssetUrlFromCollectible(
-                                    recentColl) // Provide a default or handle null
+                                asset: recentUrls['url'],
+                                placeholder: recentUrls[
+                                    'placeholder'] // Provide a default or handle null
                                 ),
                           ))),
                 ),
