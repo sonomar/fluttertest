@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import '../models/app_localizations.dart';
 import 'package:kloppocar_app/screens/subscreens/news_posts/news_post_details.dart';
 import 'package:provider/provider.dart';
 import 'package:kloppocar_app/screens/subscreens/collectibles/collectible_details.dart';
 import 'package:kloppocar_app/screens/profile_screen.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'dart:async';
-import 'package:flutter/services.dart';
-import 'dart:convert';
 import 'subscreens/notifications/notifications_page.dart';
 import '../models/user_model.dart';
 import '../models/mission_model.dart';
@@ -22,17 +21,25 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.qrcode, this.userData});
+  const HomeScreen(
+      {super.key,
+      PageStorageKey<String>? pageKey,
+      required this.qrcode,
+      this.userData});
   final String qrcode;
   final dynamic userData;
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin<HomeScreen> {
   late Timer _timer;
   Duration _remainingTime = const Duration(hours: 6, minutes: 59, seconds: 43);
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -153,6 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final userModel = context.watch<UserModel>();
     final currentUser = userModel.currentUser;
     if (userModel.isLoading && currentUser == null) {
@@ -291,6 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: SingleChildScrollView(
             child: Column(children: [
+          Text(AppLocalizations.of(context)!.translate('title')),
           Padding(
               padding: const EdgeInsets.all(10),
               child: Column(children: [

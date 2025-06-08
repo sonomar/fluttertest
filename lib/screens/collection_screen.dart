@@ -3,18 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'subscreens/collectibles/collectible_details.dart';
 import '../models/collectible_model.dart';
+import '../models/app_localizations.dart';
 
 class CollectionScreen extends StatefulWidget {
-  const CollectionScreen({super.key});
+  const CollectionScreen({super.key, PageStorageKey<String>? pageKey});
 
   @override
   State<CollectionScreen> createState() => _CollectionScreenState();
 }
 
-class _CollectionScreenState extends State<CollectionScreen> {
-  // dynamic firstCollection;
-  // dynamic collectionCollectibles;
-  // dynamic userCollectibles;
+class _CollectionScreenState extends State<CollectionScreen>
+    with AutomaticKeepAliveClientMixin<CollectionScreen> {
+  @override
+  bool get wantKeepAlive => true;
+
   Map exampleWallet = {
     "collectibleId": 99,
     "label": "item-test77",
@@ -171,6 +173,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final collectibleModel = context.watch<CollectibleModel>();
     final collectionCollectibles = collectibleModel.collectionCollectibles;
     final userCollectibles = collectibleModel.userCollectibles;
@@ -381,6 +384,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
               ],
             ),
           ),
+          Text(AppLocalizations.of(context)!.translate('title')),
         ],
       ),
     );

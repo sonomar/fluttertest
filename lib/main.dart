@@ -1,5 +1,7 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import './models/app_localizations.dart';
 import 'screens/home_screen.dart';
 import 'widgets/openCards/login_page.dart';
 import 'screens/collection_screen.dart';
@@ -13,6 +15,7 @@ import './models/user_model.dart';
 import 'models/mission_model.dart';
 import 'models/community_model.dart';
 import 'models/news_post_model.dart';
+import 'models/locale_provider.dart';
 import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
@@ -28,6 +31,9 @@ void main() async {
   await dotenv.load(fileName: ".env");
   runApp(
     MultiProvider(providers: [
+      ChangeNotifierProvider<LocaleProvider>(
+        create: (context) => LocaleProvider(),
+      ),
       Provider<AuthService>(
         create: (context) => AuthService.uninitialized(),
         lazy: false, // Ensure it's created immediately
@@ -99,6 +105,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocaleProvider>(context);
     // Wrap your MaterialApp with AppLifecycleObserver
     return AppLifecycleObserver(
       onAppResumed: () {
@@ -126,6 +133,26 @@ class MyApp extends StatelessWidget {
             appBarTheme: AppBarTheme(backgroundColor: Colors.white),
             scaffoldBackgroundColor: Colors.white),
         debugShowCheckedModeBanner: false,
+        locale: localeProvider.locale, // Use the locale from the provider
+        supportedLocales: [
+          Locale('en', ''),
+          Locale('de', ''),
+        ],
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        localeResolutionCallback: (locale, supportedLocales) {
+          // This callback is still useful as a fallback for the initial load.
+          for (var supportedLocale in supportedLocales) {
+            if (supportedLocale.languageCode == locale?.languageCode) {
+              return supportedLocale;
+            }
+          }
+          return supportedLocales.first;
+        },
         home: Consumer<AppAuthProvider>(
           builder: (context, authProvider, _) {
             print(

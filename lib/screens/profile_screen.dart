@@ -6,6 +6,8 @@ import '../widgets/openCards/login_page.dart';
 import '../widgets/item_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/collectible.dart';
+import '../models/locale_provider.dart';
+import '../models/app_localizations.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -104,6 +106,16 @@ class ProfileScreen extends StatelessWidget {
                   _launchUrl(mailingListUrl);
                 },
                 title: "Imprint",
+                active: true),
+            ItemButton(
+                onTap: () {
+                  // Use the provider to toggle the locale
+                  Provider.of<LocaleProvider>(context, listen: false)
+                      .toggleLocale();
+                },
+                // Use AppLocalizations to make the button text itself translatable
+                title:
+                    AppLocalizations.of(context)!.translate('switch_language'),
                 active: true),
             ItemButton(
                 onTap: () {

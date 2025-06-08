@@ -4,14 +4,18 @@ import '../../../models/mission_model.dart';
 import '../../../widgets/missions/mission_view.dart';
 
 class Missions extends StatefulWidget {
-  const Missions({super.key, this.userData});
+  const Missions({super.key, PageStorageKey<String>? pageKey, this.userData});
   final dynamic userData;
 
   @override
   State<Missions> createState() => _MissionsState();
 }
 
-class _MissionsState extends State<Missions> {
+class _MissionsState extends State<Missions>
+    with AutomaticKeepAliveClientMixin<Missions> {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
@@ -20,6 +24,7 @@ class _MissionsState extends State<Missions> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final missionModel = context.watch<MissionModel>();
     final missions = missionModel.missions;
     final missionUsers = missionModel.missionUsers;
