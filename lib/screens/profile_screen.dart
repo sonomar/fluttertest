@@ -114,8 +114,8 @@ class ProfileScreen extends StatelessWidget {
                       .toggleLocale();
                 },
                 // Use AppLocalizations to make the button text itself translatable
-                title:
-                    AppLocalizations.of(context)!.translate('switch_language'),
+                title: AppLocalizations.of(context)!
+                    .translate('profile_language_label'),
                 active: true),
             ItemButton(
                 onTap: () {
