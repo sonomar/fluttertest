@@ -93,8 +93,8 @@ Widget missionWidget(pageContext, mission, missionUser) {
                     topLeft: Radius.circular(12),
                     topRight: Radius.circular(12)),
               ),
-              child: const Text(
-                'Mission',
+              child: Text(
+                missionUser['completed'] ? 'Mission Complete' : 'Mission',
                 style: TextStyle(
                   fontSize: 24,
                   color: Colors.white,
