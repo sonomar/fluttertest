@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:kloppocar_app/helpers/mission_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -220,8 +221,13 @@ class _ScanScreenState extends State<ScanScreen>
         print('heeeeres the fun!: $userId, $collectibleId, $mint');
         // Add user collectible with the newly generated mint
         await collectibleModel.addUserCollectible(userId, collectibleId, mint);
-
-        // The updateCollectible call is removed as requested, as circulation is now handled by mint generation.
+        await updateMissionProgress(
+          userId: userId!,
+          collectibleId: collectibleId,
+          operation: MissionProgressOperation.increment,
+          // ignore: use_build_context_synchronously
+          context: context,
+        );
 
         setState(() {
           _currentScanState = ScanState.success; // Show success animation
@@ -321,7 +327,15 @@ class _ScanScreenState extends State<ScanScreen>
     // 2c. Update UserCollectible: new owner, active=true, previousOwnerId
     // The `updateUserCollectibleStatus` method will call the API.
     // The API should check if the item with `userCollectibleIdToTrade` has `active: false` AND `ownerId: giverUserId`.
-    print('hahahaha: $userCollectibleIdToTrade, $receiverUserId, $giverUserId');
+    final tradedUserCollectible =
+        collectibleModel.getLocalUserCollectibleById(userCollectibleIdToTrade);
+
+    if (tradedUserCollectible == null) {
+      _handleTradeError("Could not identify the collectible being traded.");
+      return;
+    }
+    final String collectibleId =
+        tradedUserCollectible['collectibleId'].toString();
     bool tradeSuccess = await collectibleModel.updateUserCollectibleStatus(
         userCollectibleIdToTrade,
         true, // Set active to true for the new owner
@@ -330,6 +344,22 @@ class _ScanScreenState extends State<ScanScreen>
 
     if (tradeSuccess) {
       if (!mounted) return;
+      // Increment progress for the receiver
+      await updateMissionProgress(
+        userId: receiverUserId,
+        collectibleId: collectibleId,
+        operation: MissionProgressOperation.increment,
+        // ignore: use_build_context_synchronously
+        context: context,
+      );
+      // Decrement progress for the giver
+      await updateMissionProgress(
+        userId: giverUserId,
+        collectibleId: collectibleId,
+        operation: MissionProgressOperation.decrement,
+        // ignore: use_build_context_synchronously
+        context: context,
+      );
       setState(() {
         _currentScanState = ScanState.success;
       });
@@ -343,6 +373,7 @@ class _ScanScreenState extends State<ScanScreen>
       if (!mounted) return;
       // Reload collectibles for the receiver
       await collectibleModel.loadCollectibles(forceClear: true);
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => MyHomePage(
           title: "Kloppocar Home",

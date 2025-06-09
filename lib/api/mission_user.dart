@@ -19,3 +19,13 @@ Future<dynamic> getMissionUsersByUserId(id, provider) async {
     throw ' database GET error';
   }
 }
+
+Future<dynamic> updateMissionUserByMissionUserId(body, provider) async {
+  final res = apiPatchRequest(
+      'MissionUser/updateMissionUserByMissionUserId', body, provider);
+  if (res != null) {
+    return res;
+  } else {
+    throw ' database PATCH error';
+  }
+}
