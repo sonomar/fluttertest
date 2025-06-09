@@ -39,6 +39,8 @@ class _AwardDetailsState extends State<AwardDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isCompleted = widget.selectedAwardUser['completed'];
+    final String missionImage = widget.selectedAward['imgRef']['load'];
     return Scaffold(
         appBar: AppBar(
             scrolledUnderElevation: 0.0,
@@ -50,16 +52,18 @@ class _AwardDetailsState extends State<AwardDetails> {
             actions: [
               Padding(
                 padding: EdgeInsets.all(15),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                Award(selectedAward: widget.selectedAward)));
-                  },
-                  child: Image.asset("assets/images/enlarge.png"),
-                ),
+                child: isCompleted
+                    ? GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Award(
+                                      selectedAward: widget.selectedAward)));
+                        },
+                        child: Image.asset("assets/images/enlarge.png"),
+                      )
+                    : SizedBox.shrink(),
               )
             ]),
         body: Stack(alignment: Alignment.center, children: [
@@ -85,10 +89,29 @@ class _AwardDetailsState extends State<AwardDetails> {
                         child: SizedBox(
                           height: 500,
                           width: double.infinity,
-                          child: ObjectViewer(
-                              asset: widget.selectedAward['embedRef']['url'],
-                              placeholder: widget.selectedAward['imgRef']
-                                  ['load']),
+                          child: isCompleted
+                              ? ObjectViewer(
+                                  asset: widget.selectedAward['embedRef']
+                                      ['url'],
+                                  placeholder: widget.selectedAward['imgRef']
+                                      ['load'])
+                              : Center(
+                                  child: ColorFiltered(
+                                    colorFilter: ColorFilter.matrix(<double>[
+                                      // Greyscale matrix that preserves the alpha channel
+                                      0.2126, 0.7152, 0.0722, 0, 0,
+                                      0.2126, 0.7152, 0.0722, 0, 0,
+                                      0.2126, 0.7152, 0.0722, 0, 0,
+                                      0, 0, 0, 1, 0,
+                                    ]),
+                                    child: Image.network(
+                                      missionImage,
+                                      width: 350,
+                                      height: 350,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
                         )),
                   ]))),
           SizedBox(
