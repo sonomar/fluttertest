@@ -30,6 +30,7 @@ Future<void> updateMissionProgress({
     orElse: () => null,
   );
 
+  print('missionHelper: collectibleTemplate: $collectibleTemplate');
   if (collectibleTemplate == null ||
       collectibleTemplate['collectionId'] == null) {
     print(
@@ -38,19 +39,19 @@ Future<void> updateMissionProgress({
   }
   final dynamic collectionId = collectibleTemplate['collectionId'];
 
-  // 2. Find all active missions associated with that collectionId
+  // 2. Find all missions associated with that collectionId
   final relevantMissions = missionModel.missions
-      .where((m) => m['collectionId'] == collectionId && m['active'] == true)
+      .where((m) => m['collectionId'].toString() == collectionId.toString())
       .toList();
-
+  print('missionHelper: relevantMissions: $relevantMissions');
   if (relevantMissions.isEmpty) {
-    print(
-        "MissionHelper: No active missions found for collection ID $collectionId.");
+    print("MissionHelper: No missions found for collection ID $collectionId.");
     return;
   }
 
   // 3. Loop through each relevant mission and update the user's progress
   for (var mission in relevantMissions) {
+    print('missionInstance: mission: $mission');
     final missionUser = missionModel.missionUsers.firstWhere(
       (mu) =>
           mu['userId'].toString() == userId &&

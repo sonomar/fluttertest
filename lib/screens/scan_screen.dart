@@ -4,7 +4,9 @@ import 'package:kloppocar_app/helpers/mission_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/collectible_model.dart'; // Ensure this path is correct
+import '../models/collectible_model.dart';
+import '../api/user_collectible.dart';
+import '../models/app_auth_provider.dart';
 import '../models/user_model.dart';
 import '../main.dart'; // Assuming MyHomePage is in main.dart
 import '../helpers/get_random.dart'; // Import the new random mint generator
@@ -297,10 +299,11 @@ class _ScanScreenState extends State<ScanScreen>
     // String tradeMarker = parts[1]; // "trade"
     String giverUserId = parts[2];
     String userCollectibleIdToTrade = parts[3];
+    final userModel = Provider.of<UserModel>(context, listen: false);
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
 
     final collectibleModel =
         Provider.of<CollectibleModel>(context, listen: false);
-    final userModel = Provider.of<UserModel>(context, listen: false);
     final String? receiverUserId = userModel.currentUser?['userId']?.toString();
 
     if (receiverUserId == null) {
@@ -327,15 +330,15 @@ class _ScanScreenState extends State<ScanScreen>
     // 2c. Update UserCollectible: new owner, active=true, previousOwnerId
     // The `updateUserCollectibleStatus` method will call the API.
     // The API should check if the item with `userCollectibleIdToTrade` has `active: false` AND `ownerId: giverUserId`.
-    final tradedUserCollectible =
-        collectibleModel.getLocalUserCollectibleById(userCollectibleIdToTrade);
+    final tradedInstanceData = await getUserCollectibleByUserCollectibleId(
+        userCollectibleIdToTrade, authProvider);
 
-    if (tradedUserCollectible == null) {
-      _handleTradeError("Could not identify the collectible being traded.");
+    if (tradedInstanceData == null ||
+        tradedInstanceData['collectibleId'] == null) {
+      _handleTradeError("Could not verify the collectible being traded.");
       return;
     }
-    final String collectibleId =
-        tradedUserCollectible['collectibleId'].toString();
+    final String collectibleId = tradedInstanceData['collectibleId'].toString();
     bool tradeSuccess = await collectibleModel.updateUserCollectibleStatus(
         userCollectibleIdToTrade,
         true, // Set active to true for the new owner
@@ -343,7 +346,6 @@ class _ScanScreenState extends State<ScanScreen>
         giverUserId);
 
     if (tradeSuccess) {
-      if (!mounted) return;
       // Increment progress for the receiver
       await updateMissionProgress(
         userId: receiverUserId,
@@ -360,6 +362,7 @@ class _ScanScreenState extends State<ScanScreen>
         // ignore: use_build_context_synchronously
         context: context,
       );
+      if (!mounted) return;
       setState(() {
         _currentScanState = ScanState.success;
       });

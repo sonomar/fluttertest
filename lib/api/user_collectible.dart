@@ -10,6 +10,18 @@ Future<dynamic> getUserCollectiblesByOwnerId(id, provider) async {
   }
 }
 
+Future<dynamic> getUserCollectibleByUserCollectibleId(id, provider) async {
+  final res = apiGetRequest(
+      'UserCollectible/getUserCollectibleByUserCollectibleId',
+      {"userCollectibleId": id},
+      provider);
+  if (res != null) {
+    return res;
+  } else {
+    throw ' database GET error';
+  }
+}
+
 Future<dynamic> createUserCollectible(
     userId, collectibleId, mint, provider) async {
   final res = apiPostRequest(
