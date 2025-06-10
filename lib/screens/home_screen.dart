@@ -343,11 +343,7 @@ class HomeScreenState extends State<HomeScreen>
                 sectionHeader('GAME CENTER'),
                 Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.all(40),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Color(0x80999999)),
-                      borderRadius: BorderRadius.circular(90),
-                    ),
+                    padding: EdgeInsets.all(15),
                     child: listMissions(context, missions, missionUsers)),
                 sectionHeader('Nachrichten'),
                 if (newsPosts.isNotEmpty) ...[

@@ -108,26 +108,46 @@ Widget missionWidget(pageContext, mission, missionUser) {
               padding: const EdgeInsets.only(
                   left: 20, top: 20, right: 15, bottom: 10),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  shadowCircle('assets/images/car.jpg', 20.0, false),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          getTitle,
-                          style: TextStyle(fontSize: 16, color: Colors.black),
+                  Padding(
+                      padding: const EdgeInsets.only(left: 0),
+                      child: Text(
+                        getTitle,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontFamily: 'ChakraPetch',
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
                         ),
-                      ],
-                    ),
+                      )),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        pageContext,
+                        MaterialPageRoute(
+                          builder: (context) => AwardDetails(
+                            selectedAward: getMission,
+                            selectedAwardUser: getMissionUser,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 20.0, bottom: 10, right: 10),
+                        child: getMission['imgRef']['url'] != null
+                            ? Image.network(getMission['imgRef']['url'],
+                                width: 40, fit: BoxFit.fill)
+                            : Image.asset('assets/images/car1.png',
+                                width: 120, height: 50, fit: BoxFit.fill)),
                   ),
                 ],
               ),
             ),
             Padding(
                 padding:
-                    EdgeInsets.only(left: 20, right: 20, bottom: 5, top: 10),
+                    EdgeInsets.only(left: 15, right: 15, bottom: 5, top: 10),
                 child: Container(
                     alignment: Alignment.center,
                     child: progressBar(pageContext, mission, missionUser))),
@@ -267,27 +287,14 @@ Widget viewMissionWidget(pageContext, mission, missionUser) {
                     color: Colors.black,
                   ),
                 )),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  pageContext,
-                  MaterialPageRoute(
-                    builder: (context) => AwardDetails(
-                      selectedAward: getMission,
-                      selectedAwardUser: getMissionUser,
-                    ),
-                  ),
-                );
-              },
-              child: Padding(
-                  padding:
-                      const EdgeInsets.only(left: 40.0, bottom: 10, right: 20),
-                  child: getMission['imgRef']['url'] != null
-                      ? Image.network(getMission['imgRef']['url'],
-                          width: 50, fit: BoxFit.fill)
-                      : Image.asset('assets/images/car1.png',
-                          width: 120, height: 50, fit: BoxFit.fill)),
-            ),
+            Padding(
+                padding:
+                    const EdgeInsets.only(left: 40.0, bottom: 10, right: 20),
+                child: getMission['imgRef']['url'] != null
+                    ? Image.network(getMission['imgRef']['url'],
+                        width: 50, fit: BoxFit.fill)
+                    : Image.asset('assets/images/car1.png',
+                        width: 120, height: 50, fit: BoxFit.fill)),
           ],
         ),
         Container(
