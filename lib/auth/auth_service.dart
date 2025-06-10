@@ -361,4 +361,89 @@ class AuthService {
     _internalErrorMessage = null;
     print('AuthService: Forced sign-out and local data cleared.');
   }
+
+  Future<bool> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    _internalErrorMessage = null;
+    // First, ensure we have a valid session and user object.
+    if (_cognitoUser == null || _session == null || !_session!.isValid()) {
+      _internalErrorMessage = "You must be logged in to change your password.";
+      return false;
+    }
+
+    try {
+      await _cognitoUser!.changePassword(oldPassword, newPassword);
+      print('AuthService: Password changed successfully.');
+      return true;
+    } on CognitoClientException catch (e) {
+      _internalErrorMessage =
+          e.message ?? "An error occurred while changing password.";
+      print('AuthService: ChangePassword Error: $_internalErrorMessage');
+      return false;
+    } catch (e) {
+      _internalErrorMessage = 'An unexpected error occurred.';
+      print('AuthService: ChangePassword Error: $e');
+      return false;
+    }
+  }
+
+  /// Initiates the process of updating the user's email address.
+  /// This will send a verification code to the [newEmail].
+  Future<bool> updateUserEmail({
+    required String newEmail,
+  }) async {
+    _internalErrorMessage = null;
+    if (_cognitoUser == null || _session == null || !_session!.isValid()) {
+      _internalErrorMessage = "You must be logged in to change your email.";
+      return false;
+    }
+
+    try {
+      final attributes = [
+        CognitoUserAttribute(name: 'email', value: newEmail),
+      ];
+      await _cognitoUser!.updateAttributes(attributes);
+      print(
+          'AuthService: Update email initiated. Verification code sent to $newEmail.');
+      return true;
+    } on CognitoClientException catch (e) {
+      _internalErrorMessage =
+          e.message ?? "An error occurred while updating email.";
+      print('AuthService: UpdateEmail Error: $_internalErrorMessage');
+      return false;
+    } catch (e) {
+      _internalErrorMessage = 'An unexpected error occurred.';
+      print('AuthService: UpdateEmail Error: $e');
+      return false;
+    }
+  }
+
+  /// Verifies the new email address with the provided code.
+  Future<bool> verifyUserEmail({
+    required String verificationCode,
+  }) async {
+    _internalErrorMessage = null;
+    if (_cognitoUser == null) {
+      _internalErrorMessage = "User not found. Please log in again.";
+      return false;
+    }
+
+    try {
+      await _cognitoUser!.verifyAttribute('email', verificationCode);
+      print('AuthService: Email attribute verified successfully.');
+      // After a successful verification, it's best practice to force a re-login
+      // to ensure the user's session tokens are updated with the new email.
+      return true;
+    } on CognitoClientException catch (e) {
+      _internalErrorMessage = e.message ?? "Invalid verification code.";
+      print('AuthService: VerifyEmail Error: $_internalErrorMessage');
+      return false;
+    } catch (e) {
+      _internalErrorMessage = 'An unexpected error occurred.';
+      print('AuthService: VerifyEmail Error: $e');
+      return false;
+    }
+  }
 }

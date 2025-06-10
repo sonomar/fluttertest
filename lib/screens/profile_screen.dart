@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/collectible.dart';
 import '../models/locale_provider.dart';
 import '../models/app_localizations.dart';
+import './subscreens/profile/account_settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -89,6 +90,14 @@ class ProfileScreen extends StatelessWidget {
         body: ListView(
           padding: const EdgeInsets.all(8),
           children: <Widget>[
+            ItemButton(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const AccountSettingsScreen(),
+                  ));
+                },
+                title: "Account Settings", // Or separate buttons if you prefer
+                active: true),
             ItemButton(
                 onTap: () {
                   _launchUrl(mailingListUrl);

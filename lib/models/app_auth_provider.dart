@@ -193,4 +193,46 @@ class AppAuthProvider with ChangeNotifier {
     print('AppAuthProvider: Signed out successfully.');
     notifyListeners();
   }
+
+  Future<bool> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    _errorMessage = null;
+    notifyListeners();
+    final success = await _authService.changePassword(
+        oldPassword: oldPassword, newPassword: newPassword);
+    if (!success) {
+      _errorMessage = _authService.errorMessage;
+    }
+    notifyListeners();
+    return success;
+  }
+
+  Future<bool> updateUserEmail({
+    required String newEmail,
+  }) async {
+    _errorMessage = null;
+    notifyListeners();
+    final success = await _authService.updateUserEmail(newEmail: newEmail);
+    if (!success) {
+      _errorMessage = _authService.errorMessage;
+    }
+    notifyListeners();
+    return success;
+  }
+
+  Future<bool> verifyUserEmail({
+    required String verificationCode,
+  }) async {
+    _errorMessage = null;
+    notifyListeners();
+    final success =
+        await _authService.verifyUserEmail(verificationCode: verificationCode);
+    if (!success) {
+      _errorMessage = _authService.errorMessage;
+    }
+    notifyListeners();
+    return success;
+  }
 }
