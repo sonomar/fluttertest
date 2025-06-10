@@ -26,6 +26,22 @@ final userPool = CognitoUserPool(
   clientId,
 );
 
+Future<Map<String, String>> _getHeaders(AppAuthProvider? provider) async {
+  final prefs = await SharedPreferences.getInstance();
+
+  // The ONLY source of truth for the token will be SharedPreferences.
+  // The 'provider' argument is now ignored for auth purposes.
+  final token = prefs.getString('jwtIdCode');
+
+  print(
+      'API Init: Reading token directly from storage. Token is present: $token');
+
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
+}
+
 Future<dynamic> apiGetRequest(
   String path,
   Map<String, dynamic> paramsContent,
@@ -35,6 +51,7 @@ Future<dynamic> apiGetRequest(
   // ignore: avoid_print
   final credentials = CognitoCredentials(identityPool, userPool);
   final currentIdToken = authProvider.idToken;
+  final headers = await _getHeaders(authProvider);
 
   if (currentIdToken == null) {
     print('Current ID Token: $currentIdToken');
@@ -61,11 +78,7 @@ Future<dynamic> apiGetRequest(
     awsSigV4Client,
     method: 'GET',
     path: path,
-    headers: {
-      'Authorization': currentIdToken,
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    },
+    headers: headers,
     //body: Map<String, String>.from({}),
     queryParams: Map<String, String>.from(paramsContent),
     body: Map<String, dynamic>.from(paramsContent),
@@ -76,10 +89,7 @@ Future<dynamic> apiGetRequest(
   try {
     response = await http.get(
       Uri.parse(signedRequest.url ?? 'no request found'),
-      headers: Map<String, String>.from({
-        'Content-Type': 'application/json',
-        'Authorization': currentIdToken
-      }),
+      headers: headers,
     );
   } catch (e) {
     // ignore: avoid_print
@@ -106,6 +116,7 @@ Future<dynamic> apiPatchRequest(
   // ignore: avoid_print
   final credentials = CognitoCredentials(identityPool, userPool);
   final currentIdToken = authProvider.idToken;
+  final headers = await _getHeaders(authProvider);
 
   if (currentIdToken == null) {
     print('Current ID Token: $currentIdToken');
@@ -131,10 +142,7 @@ Future<dynamic> apiPatchRequest(
   final signedRequest = SigV4Request(awsSigV4Client,
       method: 'PATCH',
       path: path,
-      headers: {
-        'Authorization': currentIdToken,
-        'Content-Type': 'application/json'
-      },
+      headers: headers,
       //body: Map<String, String>.from({}),
       body: Map<String, dynamic>.from(bodyContent));
 
@@ -142,13 +150,10 @@ Future<dynamic> apiPatchRequest(
   print(signedRequest.url ?? 'no request found');
   // ignore: prefer_interpolation_to_compose_strings
   try {
-    response =
-        await http.patch(Uri.parse(signedRequest.url ?? 'no request found'),
-            headers: Map<String, String>.from({
-              'Authorization': currentIdToken,
-              'Content-Type': 'application/json',
-            }),
-            body: signedRequest.body);
+    response = await http.patch(
+        Uri.parse(signedRequest.url ?? 'no request found'),
+        headers: headers,
+        body: signedRequest.body);
   } catch (e) {
     // ignore: avoid_print
     print('ERROR');
@@ -169,6 +174,7 @@ Future<dynamic> apiPostRequest(
   // ignore: avoid_print
   final credentials = CognitoCredentials(identityPool, userPool);
   final currentIdToken = authProvider.idToken;
+  final headers = await _getHeaders(authProvider);
 
   if (currentIdToken == null) {
     print('Current ID Token: $currentIdToken');
@@ -194,23 +200,17 @@ Future<dynamic> apiPostRequest(
   final signedRequest = SigV4Request(awsSigV4Client,
       method: 'POST',
       path: path,
-      headers: {
-        'Authorization': currentIdToken,
-        'Content-Type': 'application/json'
-      },
+      headers: headers,
       //body: Map<String, String>.from({}),
       body: Map<String, dynamic>.from(bodyContent));
 
   http.Response? response;
   print(signedRequest.url ?? 'no request found');
   try {
-    response =
-        await http.post(Uri.parse(signedRequest.url ?? 'no request found'),
-            headers: Map<String, String>.from({
-              'Authorization': currentIdToken,
-              'Content-Type': 'application/json',
-            }),
-            body: signedRequest.body);
+    response = await http.post(
+        Uri.parse(signedRequest.url ?? 'no request found'),
+        headers: headers,
+        body: signedRequest.body);
   } catch (e) {
     // ignore: avoid_print
     print('ERROR');
@@ -231,6 +231,7 @@ apiDeleteRequest(
   // ignore: avoid_print
   final credentials = CognitoCredentials(identityPool, userPool);
   final currentIdToken = authProvider.idToken;
+  final headers = await _getHeaders(authProvider);
 
   if (currentIdToken == null) {
     print('Current ID Token: $currentIdToken');
@@ -257,10 +258,7 @@ apiDeleteRequest(
     awsSigV4Client,
     method: 'DELETE',
     path: path,
-    headers: {
-      'Authorization': currentIdToken,
-      'Content-Type': 'application/json'
-    },
+    headers: headers,
     //body: Map<String, String>.from({}),
     queryParams: Map<String, String>.from(paramsContent),
     body: Map<String, dynamic>.from(paramsContent),
@@ -269,14 +267,10 @@ apiDeleteRequest(
   http.Response? response;
   print(signedRequest.url ?? 'no request found');
   try {
-    response =
-        await http.delete(Uri.parse(signedRequest.url ?? 'no request found'),
-            headers: Map<String, String>.from({
-              'Authorization': currentIdToken,
-              'Content-Type': 'application/json',
-              'Accept': "*/*"
-            }),
-            body: signedRequest.body);
+    response = await http.delete(
+        Uri.parse(signedRequest.url ?? 'no request found'),
+        headers: headers,
+        body: signedRequest.body);
   } catch (e) {
     // ignore: avoid_print
     print('ERROR');

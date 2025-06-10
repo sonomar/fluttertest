@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:kloppocar_app/api/user.dart'; // Assuming this import provides getUserByEmail and updateUserByUserId
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/app_auth_provider.dart';
 
@@ -217,19 +216,21 @@ class AuthService {
   Future<bool> signIn(String email, String password,
       {bool isRegister = false}) async {
     _internalErrorMessage = null; // Clear any previous error message
-    _cognitoUser = CognitoUser(email, _userPool);
+    final cognitoUser = CognitoUser(email, _userPool);
 
     final authDetails = AuthenticationDetails(
       username: email,
       password: password,
     );
-    const Duration retryDelay = Duration(milliseconds: 500);
 
     try {
-      _session = await _cognitoUser!
-          .authenticateUser(authDetails); // This updates _session
-      // --- CRITICAL: Cache tokens unconditionally after successful authentication ---
-      // This is the most crucial part for getSession() to work later.
+      final CognitoUserSession? newSession =
+          await cognitoUser.authenticateUser(authDetails);
+      if (newSession == null || !newSession.isValid()) {
+        throw Exception('Authentication returned a null or invalid session.');
+      }
+      _session = newSession;
+      _cognitoUser = cognitoUser;
       await _cognitoUser!.cacheTokens();
       final prefs = await SharedPreferences.getInstance();
       prefs.setString(
@@ -248,18 +249,18 @@ class AuthService {
         print('AuthService: ID Token saved to SharedPreferences.');
       }
 
-      // Handle user registration update if needed
-      if (token != null && isRegister == true) {
-        final encryptedPassword = encryptPassword(password);
-        final getUser = await getUserByEmail(email, _appAuthProvider);
-        final userId = getUser['userId'];
-        final userUpdateBody = {
-          "userId": userId,
-          "passwordHashed": encryptedPassword,
-          "authToken": token
-        };
-        await updateUserByUserId(userUpdateBody, _appAuthProvider);
-      }
+      // // Handle user registration update if needed
+      // if (token != null && isRegister == true) {
+      //   final encryptedPassword = encryptPassword(password);
+      //   final getUser = await getUserByEmail(email, _appAuthProvider);
+      //   final userId = getUser['userId'];
+      //   final userUpdateBody = {
+      //     "userId": userId,
+      //     "passwordHashed": encryptedPassword,
+      //     "authToken": token
+      //   };
+      //   await updateUserByUserId(userUpdateBody, _appAuthProvider);
+      // }
 
       print(
           'AuthService: User $email signed in successfully. Session valid: ${_session!.isValid()}');

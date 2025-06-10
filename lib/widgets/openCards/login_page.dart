@@ -94,6 +94,10 @@ class _LoginPageState extends State<LoginPage> {
         if (success) {
           // If confirmation is successful, automatically log the user in
           // Use the isRegister flag to trigger user record update in your DB
+          print(
+              'Login Page: Post-registration sign-in. Adding a short delay...');
+          await Future.delayed(const Duration(seconds: 2));
+          print('Login Page: Delay complete. Proceeding with user data fetch.');
           await authProvider.signIn(email, password, isRegister: true);
           return; // Navigation will be handled by the provider status change
         }
