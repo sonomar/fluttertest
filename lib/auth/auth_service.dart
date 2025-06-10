@@ -117,6 +117,52 @@ class AuthService {
   // Expose internal error messages
   String? get errorMessage => _internalErrorMessage;
 
+  Future<bool> signUp({required String email, required String password}) async {
+    _internalErrorMessage = null; // Clear previous errors
+    try {
+      await _userPool.signUp(email, password);
+      // If no exception is thrown, Cognito has sent a confirmation code.
+      print(
+          'AuthService: SignUp successful for $email. Awaiting confirmation.');
+      return true;
+    } on CognitoClientException catch (e) {
+      // Handle known Cognito errors, e.g., UsernameExistsException
+      _internalErrorMessage = e.message ?? 'An unknown sign-up error occurred.';
+      print('AuthService: SignUp Error: $_internalErrorMessage');
+      return false;
+    } catch (e) {
+      _internalErrorMessage = 'An unexpected error occurred during sign-up.';
+      print('AuthService: SignUp Error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> confirmSignUp({
+    required String email,
+    required String confirmationCode,
+  }) async {
+    _internalErrorMessage = null; // Clear previous errors
+    final cognitoUser = CognitoUser(email, _userPool);
+    try {
+      // The `confirmRegistration` method returns a bool indicating success.
+      final isConfirmed =
+          await cognitoUser.confirmRegistration(confirmationCode);
+      print('AuthService: Confirmation for $email successful: $isConfirmed');
+      return isConfirmed;
+    } on CognitoClientException catch (e) {
+      // Handle known Cognito errors, e.g., CodeMismatchException
+      _internalErrorMessage =
+          e.message ?? 'An unknown confirmation error occurred.';
+      print('AuthService: Confirmation Error: $_internalErrorMessage');
+      return false;
+    } catch (e) {
+      _internalErrorMessage =
+          'An unexpected error occurred during confirmation.';
+      print('AuthService: Confirmation Error: $e');
+      return false;
+    }
+  }
+
   Future<bool> checkCurrentSessionStatus() async {
     _internalErrorMessage = null; // Clear previous error
     // If we already have a valid session in memory, return true immediately

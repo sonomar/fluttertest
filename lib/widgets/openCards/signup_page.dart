@@ -58,8 +58,11 @@ class SignupPageState extends State<SignupPage> {
               child: const Text('Confirm'),
               onPressed: () async {
                 final navigator = Navigator.of(context);
-                await emailConfirmUser(_emailController.text,
-                    _passwordController.text, _emailCodeController.text);
+                await emailConfirmUser(
+                    _emailController.text,
+                    _passwordController.text,
+                    _emailCodeController.text,
+                    context);
               },
             ),
             TextButton(

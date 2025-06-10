@@ -28,6 +28,11 @@ class AppAuthProvider with ChangeNotifier {
   String? get accessToken => _userSession?.getAccessToken().getJwtToken();
   String? get refreshToken => _userSession?.getRefreshToken()?.getToken();
 
+  void setErrorMessage(String? message) {
+    _errorMessage = message;
+    notifyListeners();
+  }
+
   Future<void> checkCurrentUser() async {
     print('AppAuthProvider: Initiating session check...');
     _status = AuthStatus.authenticating;
@@ -143,6 +148,37 @@ class AppAuthProvider with ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  Future<bool> signUp({
+    required String email,
+    required String password,
+  }) async {
+    _errorMessage = null; // Clear previous UI error
+    notifyListeners();
+    final success = await _authService.signUp(email: email, password: password);
+    if (!success) {
+      _errorMessage =
+          _authService.errorMessage; // Pass service error message to UI
+    }
+    notifyListeners();
+    return success;
+  }
+
+  Future<bool> confirmSignUp({
+    required String email,
+    required String confirmationCode,
+  }) async {
+    _errorMessage = null; // Clear previous UI error
+    notifyListeners();
+    final success = await _authService.confirmSignUp(
+        email: email, confirmationCode: confirmationCode);
+    if (!success) {
+      _errorMessage =
+          _authService.errorMessage; // Pass service error message to UI
+    }
+    notifyListeners();
+    return success;
   }
 
   Future<void> signOut() async {

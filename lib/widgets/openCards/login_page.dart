@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:kloppocar_app/widgets/openCards/signup_page.dart';
-import 'package:kloppocar_app/widgets/splash_screen.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_auth_provider.dart';
+
+enum AuthFormType { login, register, confirm }
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, this.userData});
@@ -13,199 +13,334 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  final TextEditingController _confirmationCodeController =
+      TextEditingController();
 
-  bool _isLoading = false;
-  String? _errorMessage;
+  var _formType = AuthFormType.login;
+  bool _isSubmitting = false;
+  bool isNewUser = false;
+  String _uiErrorMessage = '';
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _confirmationCodeController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  void _switchFormType() {
+    _formKey.currentState?.reset();
+    _uiErrorMessage = '';
+    // Clear the provider's error message when switching forms
+    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
     setState(() {
-      _isLoading = true;
-      _errorMessage = null; // Clear previous errors
+      _formType = (_formType == AuthFormType.login)
+          ? AuthFormType.register
+          : AuthFormType.login;
     });
+  }
 
-    final appAuthProvider =
-        Provider.of<AppAuthProvider>(context, listen: false);
+  //
 
-    try {
-      final success = await appAuthProvider.signIn(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
+  /// Main submission logic
+  Future<void> _submit() async {
+    // Clear previous UI-specific errors
+    setState(() {
+      _uiErrorMessage = '';
+    });
+    // Clear provider error
+    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
 
-      if (success) {
-        // If login was successful, RootApp will handle navigation to MyHomePage.
-        // No direct navigation from LoginPage needed here.
-        print('LoginPage: Login successful. RootApp will navigate.');
-      } else {
-        // Login failed, update UI with error message
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isSubmitting = true;
+      });
+
+      final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
+
+      bool success = false;
+
+      if (_formType == AuthFormType.login) {
+        // --- LOGIN LOGIC ---
+        await authProvider.signIn(email, password);
+        // The provider's status change will trigger navigation in main.dart
+        // No need to set isSubmitting to false if navigation occurs.
+        // If it fails, the provider will hold the error and notify listeners.
+      } else if (_formType == AuthFormType.register) {
+        // --- REGISTER LOGIC ---
+        success = await authProvider.signUp(email: email, password: password);
+        if (success) {
+          // If sign-up is successful, switch to the confirmation form
+          setState(() {
+            _formType = AuthFormType.confirm;
+            _isSubmitting = false;
+          });
+          return; // Return to prevent setting _isSubmitting to false again
+        }
+      } else if (_formType == AuthFormType.confirm) {
+        // --- CONFIRMATION LOGIC ---
+        final code = _confirmationCodeController.text.trim();
+        success = await authProvider.confirmSignUp(
+            email: email, confirmationCode: code);
+        if (success) {
+          // If confirmation is successful, automatically log the user in
+          // Use the isRegister flag to trigger user record update in your DB
+          await authProvider.signIn(email, password, isRegister: true);
+          return; // Navigation will be handled by the provider status change
+        }
+      }
+
+      // If we reach here, a step failed and did not navigate.
+      if (mounted) {
         setState(() {
-          _isLoading = false;
-          _errorMessage =
-              appAuthProvider.errorMessage ?? 'Login failed. Please try again.';
-          print('LoginPage: Login failed: $_errorMessage');
+          _isSubmitting = false;
         });
       }
-    } catch (e) {
-      // Handle any unexpected errors during the login process
-      // --- CRITICAL FIX: Check mounted here ---
-      if (!mounted) {
-        print(
-            'LoginPage: Widget unmounted, canceling state update after login error.');
-        return;
-      }
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'An unexpected error occurred: ${e.toString()}';
-        print('LoginPage: Unexpected login error: $_errorMessage');
-      });
     }
   }
 
+  // Future<void> getEmailCode() async {
+  //   return showDialog<void>(
+  //     context: context,
+  //     barrierDismissible: false, // user must tap button!
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Confirm Email'),
+  //         content: SingleChildScrollView(
+  //           child: ListBody(
+  //             children: <Widget>[
+  //               const Text(
+  //                   'Thank you for registering. You should receive an email shortly with a confirmation code.'),
+  //               const Text('Please enter your email confirmation code below'),
+  //               Material(
+  //                   child: Form(
+  //                 child: TextFormField(
+  //                   controller: _emailCodeController,
+  //                   style: TextStyle(color: Colors.black),
+  //                   decoration: InputDecoration(labelText: 'Email Code'),
+  //                   validator: (value) {
+  //                     if (value!.isEmpty) {
+  //                       return 'Please enter your confirmation code';
+  //                     }
+  //                     return null;
+  //                   },
+  //                 ),
+  //               )),
+  //               Text(
+  //                 _codeErrorMessage,
+  //                 style: TextStyle(color: Colors.red),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             child: const Text('Confirm'),
+  //             onPressed: () async {
+  //               final navigator = Navigator.of(context);
+  //               await emailConfirmUser(
+  //                   _emailController.text,
+  //                   _passwordController.text,
+  //                   _emailCodeController.text,
+  //                   context);
+  //             },
+  //           ),
+  //           TextButton(
+  //             child: const Text('Cancel'),
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AppAuthProvider>(context);
+    final providerErrorMessage = authProvider.errorMessage;
     return Scaffold(
       backgroundColor: Colors.black, // Page background is black
       appBar: AppBar(
-        title: const Text(
-          'Login',
-          style: TextStyle(color: Colors.white), // App bar title is white
-        ),
-        centerTitle: true,
         backgroundColor: Colors.black, // App bar background is black
         iconTheme: const IconThemeData(
             color: Colors.white), // Ensures back button/menu icons are white
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              // --- Image Logo ---
-              Align(
-                alignment: Alignment.center,
-                child: Image.asset(
-                  'assets/images/deins_logo.png', // Update this path to your logo!
-                  height: 120, // Adjust height as needed
-                  width: 120, // Adjust width as needed
-                ),
-              ),
-              const SizedBox(height: 32.0), // Space after the logo
-
-              TextField(
-                controller: _emailController,
-                style:
-                    const TextStyle(color: Colors.white), // Input text is white
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  labelStyle: TextStyle(color: Colors.white), // Label is white
-                  enabledBorder: OutlineInputBorder(
-                    // Border when not focused
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    // Border when focused
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  prefixIcon:
-                      Icon(Icons.email, color: Colors.white), // Icon is white
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16.0),
-              TextField(
-                controller: _passwordController,
-                style:
-                    const TextStyle(color: Colors.white), // Input text is white
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  labelStyle: TextStyle(color: Colors.white), // Label is white
-                  enabledBorder: OutlineInputBorder(
-                    // Border when not focused
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    // Border when focused
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  prefixIcon:
-                      Icon(Icons.lock, color: Colors.white), // Icon is white
-                ),
-                obscureText: true, // Hide password input
-              ),
-              const SizedBox(height: 24.0),
-              if (_errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Text(
-                    _errorMessage!,
-                    style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 14.0), // Error message is still red
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _handleLogin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white, // Button background is white
-                  foregroundColor: Colors.black, // Button text color is black
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  textStyle: const TextStyle(
-                      fontSize: 18.0, fontWeight: FontWeight.bold),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.black), // Spinner is black
-                      )
-                    : const Text('Login'),
-              ),
-              const SizedBox(height: 24.0),
-
-              // --- "Not registered? Sign up here" section ---
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => SignupPage()));
-                },
-                child: RichText(
+          padding: const EdgeInsets.symmetric(horizontal: 40.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  _formType == AuthFormType.login
+                      ? "Welcome Back"
+                      : _formType == AuthFormType.register
+                          ? "Create Account"
+                          : "Confirm Your Email",
                   textAlign: TextAlign.center,
-                  text: const TextSpan(
-                    // Changed to const as all children are const
-                    text: "Not registered? ",
-                    style: TextStyle(
-                      color:
-                          Colors.white70, // Slightly faded white for main text
-                      fontSize: 16,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 40),
+
+                // --- DYNAMIC FORM FIELDS ---
+                ..._buildFormFields(),
+                const SizedBox(height: 20),
+
+                // --- ERROR MESSAGE ---
+                if (providerErrorMessage != null || _uiErrorMessage.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      providerErrorMessage ?? _uiErrorMessage,
+                      style: const TextStyle(color: Colors.red, fontSize: 14),
+                      textAlign: TextAlign.center,
                     ),
+                  ),
+
+                // --- SUBMIT BUTTON ---
+                if (_isSubmitting)
+                  const Center(child: CircularProgressIndicator())
+                else
+                  ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      _formType == AuthFormType.login
+                          ? 'Login'
+                          : _formType == AuthFormType.register
+                              ? 'Create Account'
+                              : 'Confirm & Sign Up',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                const SizedBox(height: 20),
+
+                // --- FORM TYPE SWITCHER ---
+                if (_formType != AuthFormType.confirm)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      TextSpan(
-                        text: "Sign up here",
-                        style: TextStyle(
-                          color: Colors.white, // Pure white for the link
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline,
-                        ),
+                      Text(
+                        _formType == AuthFormType.login
+                            ? "Don't have an account?"
+                            : "Already have an account?",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      TextButton(
+                        onPressed: _isSubmitting ? null : _switchFormType,
+                        child: Text(_formType == AuthFormType.login
+                            ? 'Register'
+                            : 'Login'),
                       ),
                     ],
                   ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  List<Widget> _buildFormFields() {
+    if (_formType == AuthFormType.login) {
+      return [
+        TextFormField(
+          style: TextStyle(color: Colors.white),
+          controller: _emailController,
+          decoration: const InputDecoration(
+              labelText: 'Email', border: OutlineInputBorder()),
+          keyboardType: TextInputType.emailAddress,
+          validator: (value) =>
+              (value?.isEmpty ?? true) ? 'Please enter your email' : null,
+        ),
+        const SizedBox(height: 20),
+        TextFormField(
+          style: TextStyle(color: Colors.white),
+          controller: _passwordController,
+          decoration: const InputDecoration(
+              labelText: 'Password', border: OutlineInputBorder()),
+          obscureText: true,
+          validator: (value) =>
+              (value?.isEmpty ?? true) ? 'Please enter your password' : null,
+        ),
+      ];
+    } else if (_formType == AuthFormType.register) {
+      return [
+        TextFormField(
+          style: TextStyle(color: Colors.white),
+          controller: _emailController,
+          decoration: const InputDecoration(
+              labelText: 'Email', border: OutlineInputBorder()),
+          keyboardType: TextInputType.emailAddress,
+          validator: (value) =>
+              (value?.isEmpty ?? true) ? 'Please enter your email' : null,
+        ),
+        const SizedBox(height: 20),
+        TextFormField(
+          style: TextStyle(color: Colors.white),
+          controller: _passwordController,
+          decoration: const InputDecoration(
+              labelText: 'Password', border: OutlineInputBorder()),
+          obscureText: true,
+          validator: (value) => (value?.length ?? 0) < 8
+              ? 'Password must be at least 8 characters'
+              : null,
+        ),
+        const SizedBox(height: 20),
+        TextFormField(
+          style: TextStyle(color: Colors.white),
+          controller: _confirmPasswordController,
+          decoration: const InputDecoration(
+              labelText: 'Confirm Password', border: OutlineInputBorder()),
+          obscureText: true,
+          validator: (value) => value != _passwordController.text
+              ? 'Passwords do not match'
+              : null,
+        ),
+      ];
+    } else {
+      // AuthFormType.confirm
+      return [
+        Text(
+          "A confirmation code has been sent to:\n${_emailController.text}",
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+        ),
+        const SizedBox(height: 20),
+        TextFormField(
+          style: TextStyle(color: Colors.white),
+          controller: _confirmationCodeController,
+          decoration: const InputDecoration(
+              labelText: 'Confirmation Code', border: OutlineInputBorder()),
+          keyboardType: TextInputType.number,
+          textAlign: TextAlign.center,
+          validator: (value) =>
+              (value?.isEmpty ?? true) ? 'Please enter your code' : null,
+        ),
+      ];
+    }
   }
 }

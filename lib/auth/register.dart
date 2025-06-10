@@ -31,18 +31,10 @@ Future<bool> signUpUser(
       email,
       password,
     );
-
-    final appAuthProvider = context.read<AppAuthProvider>();
-    final bool loginSuccess =
-        await appAuthProvider.signIn(email, password, isRegister: true);
-
-    if (loginSuccess) {
-      print('Email confirmed and user logged in successfully.');
+    if (data != null) {
       return true;
-    } else {
-      print('Email confirmed, but automatic login failed.');
-      return false; // Return false if login failed after successful confirmation
     }
+    return false;
   } on CognitoClientException catch (e) {
     print('CognitoClientException during signUpUser: ${e.message}');
     // Specific error handling for Cognito, e.g., UsernameExistsException
@@ -53,7 +45,7 @@ Future<bool> signUpUser(
   }
 }
 
-Future<bool> emailConfirmUser(email, password, code) async {
+Future<bool> emailConfirmUser(email, password, code, context) async {
   await dotenv.load(fileName: ".env");
   final userPool = CognitoUserPool(
     clientRegion,
@@ -72,7 +64,17 @@ Future<bool> emailConfirmUser(email, password, code) async {
   // if (auth == true && registrationConfirmed == true) {
   //   return auth;
   // }
-  return false;
+  final appAuthProvider = context.read<AppAuthProvider>();
+  final bool loginSuccess =
+      await appAuthProvider.signIn(email, password, isRegister: true);
+
+  if (loginSuccess) {
+    print('Email confirmed and user logged in successfully.');
+    return true;
+  } else {
+    print('Email confirmed, but automatic login failed.');
+    return false; // Return false if login failed after successful confirmation
+  }
 }
 
 Future<void> emailResendConfirmation(email) async {
