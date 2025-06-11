@@ -200,24 +200,6 @@ class _CollectionScreenState extends State<CollectionScreen>
             fontWeight: FontWeight.w500,
           ),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(20), // Added const here
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CollectibleDetails(
-                      selectedCollectible: exampleWallet,
-                    ),
-                  ),
-                );
-              },
-              child: Image.asset("assets/images/wallet1.png"),
-            ),
-          )
-        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
