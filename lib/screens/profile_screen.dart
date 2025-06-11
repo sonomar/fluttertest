@@ -76,10 +76,10 @@ class ProfileScreen extends StatelessWidget {
         appBar: AppBar(
             scrolledUnderElevation: 0.0,
             backgroundColor: Colors.white,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
-            ),
+            // leading: IconButton(
+            //   icon: const Icon(Icons.arrow_back, color: Colors.black),
+            //   onPressed: () => Navigator.pop(context),
+            // ),
             title: const Text("Profile"),
             centerTitle: false,
             titleTextStyle: TextStyle(
