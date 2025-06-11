@@ -16,13 +16,6 @@ class NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
-    // Data loading is now handled by NotificationProvider's constructor or _handleUserChange
-    // Or, if you want to ensure it loads when page is opened:
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   Provider.of<NotificationProvider>(context, listen: false).loadUserNotifications();
-    // });
-    // However, NotificationProvider is set to lazy: false and listens to UserModel,
-    // so it should load when UserModel is ready.
   }
 
   String _shortPreview(String message) {

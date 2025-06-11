@@ -6,7 +6,7 @@ import 'screens/home_screen.dart';
 import 'widgets/openCards/login_page.dart';
 import 'screens/collection_screen.dart';
 import 'screens/scan_screen.dart';
-import 'screens/community_screen.dart';
+// import 'screens/community_screen.dart';
 import 'screens/profile_screen.dart';
 // import 'screens/game_screen.dart';
 import 'screens/subscreens/missions/missions.dart';
