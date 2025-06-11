@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/collectible.dart';
 import '../models/locale_provider.dart';
 import '../models/app_localizations.dart';
+import '../screens/subscreens/missions/award_screen.dart';
 import './subscreens/profile/account_settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -115,6 +116,15 @@ class ProfileScreen extends StatelessWidget {
                   _launchUrl(mailingListUrl);
                 },
                 title: "Imprint",
+                active: true),
+            ItemButton(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (context) => const AwardScreen()),
+                  );
+                },
+                title: "Awards",
                 active: true),
             ItemButton(
                 onTap: () {

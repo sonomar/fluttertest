@@ -6,6 +6,11 @@ import '../api/mission_user.dart';
 import '../helpers/sort_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum MissionSortBy {
+  title,
+  publicationDate,
+}
+
 class MissionModel extends ChangeNotifier {
   final AppAuthProvider _appAuthProvider;
   List<dynamic> _missions = [];
@@ -20,6 +25,8 @@ class MissionModel extends ChangeNotifier {
   bool get sort => _sort;
   String? get errorMessage => _errorMessage;
   MissionModel(this._appAuthProvider);
+  MissionSortBy _missionSortBy = MissionSortBy.publicationDate;
+  MissionSortBy get missionSortBy => _missionSortBy;
 
   Future<void> loadMissions() async {
     _isLoading = true;
@@ -95,5 +102,20 @@ class MissionModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void sortMissions(MissionSortBy sortBy) {
+    _missionSortBy = sortBy;
+    switch (sortBy) {
+      case MissionSortBy.title:
+        _missions.sort((a, b) => a['title'].compareTo(b['title']));
+        break;
+      case MissionSortBy.publicationDate:
+      default:
+        _missions.sort((a, b) => DateTime.parse(b['publicationDate'])
+            .compareTo(DateTime.parse(a['publicationDate'])));
+        break;
+    }
+    notifyListeners();
   }
 }
