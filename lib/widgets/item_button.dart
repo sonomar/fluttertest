@@ -29,7 +29,7 @@ class ItemButton extends StatelessWidget {
                 child: Ink(
                     decoration: BoxDecoration(
                       color: active == true
-                          ? Color.fromARGB(94, 214, 34, 202)
+                          ? Color.fromARGB(202, 214, 34, 202)
                           : Color(0x80999999),
                       borderRadius: BorderRadius.all(Radius.circular(20)),
                     ),

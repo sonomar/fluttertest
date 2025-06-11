@@ -7,6 +7,7 @@ import 'widgets/openCards/login_page.dart';
 import 'screens/collection_screen.dart';
 import 'screens/scan_screen.dart';
 import 'screens/community_screen.dart';
+import 'screens/profile_screen.dart';
 // import 'screens/game_screen.dart';
 import 'screens/subscreens/missions/missions.dart';
 import './models/collectible_model.dart';
@@ -226,8 +227,8 @@ class _MyHomePageState extends State<MyHomePage> {
       HomeScreen(key: const PageStorageKey('home'), qrcode: widget.qrcode),
       const CollectionScreen(key: PageStorageKey('collection')),
       ScanScreen(key: const PageStorageKey('scan'), userData: widget.userData),
-      const CommunityScreen(key: PageStorageKey('community')),
       Missions(key: PageStorageKey('mission'), userData: widget.userData),
+      const ProfileScreen(key: PageStorageKey('profile')),
     ];
   }
 
@@ -333,19 +334,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   width: 30,
                   height: 30,
                   child: SvgPicture.asset(
-                    'assets/images/community.svg',
-                    colorFilter: ColorFilter.mode(
-                        _currentIndex == 3 ? Color(0xffd622ca) : Colors.black,
-                        BlendMode.srcIn),
-                  ),
-                ),
-                label: 'Community',
-              ),
-              BottomNavigationBarItem(
-                icon: SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: SvgPicture.asset(
                     'assets/images/game.svg',
                     colorFilter: ColorFilter.mode(
                         _currentIndex == 4 ? Color(0xffd622ca) : Colors.black,
@@ -353,6 +341,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 label: 'Missions',
+              ),
+              BottomNavigationBarItem(
+                icon: SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: SvgPicture.asset(
+                    'assets/images/profil.svg',
+                    colorFilter: ColorFilter.mode(
+                        _currentIndex == 3 ? Color(0xffd622ca) : Colors.black,
+                        BlendMode.srcIn),
+                  ),
+                ),
+                label: 'Profile',
               ),
             ],
             unselectedIconTheme: const IconThemeData(color: Colors.black),

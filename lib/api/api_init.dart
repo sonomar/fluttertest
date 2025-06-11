@@ -101,6 +101,8 @@ Future<dynamic> apiGetRequest(
       print(
           'Unauthorized! Token might be expired. checkUser should handle this.');
       // You might want to trigger re-authentication or logout flow here
+      await authProvider.signOut();
+      return null;
     }
     return json.decode(response.body);
   }

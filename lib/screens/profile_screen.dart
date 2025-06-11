@@ -101,30 +101,18 @@ class ProfileScreen extends StatelessWidget {
                 active: true),
             ItemButton(
                 onTap: () {
-                  _launchUrl(mailingListUrl);
-                },
-                title: "Mailing List",
-                active: true),
-            ItemButton(
-                onTap: () {
-                  _launchUrl(ppUrl);
-                },
-                title: "Privacy Policy",
-                active: true),
-            ItemButton(
-                onTap: () {
-                  _launchUrl(mailingListUrl);
-                },
-                title: "Imprint",
-                active: true),
-            ItemButton(
-                onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                         builder: (context) => const AwardScreen()),
                   );
                 },
                 title: "Awards",
+                active: true),
+            ItemButton(
+                onTap: () {
+                  _launchUrl(ppUrl);
+                },
+                title: "Privacy Policy",
                 active: true),
             ItemButton(
                 onTap: () {
@@ -138,8 +126,6 @@ class ProfileScreen extends StatelessWidget {
                 active: true),
             ItemButton(
                 onTap: () {
-                  final navigator = Navigator.of(context);
-
                   Provider.of<AppAuthProvider>(context, listen: false)
                       .signOut();
                   if (context.mounted) {

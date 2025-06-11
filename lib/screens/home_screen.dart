@@ -205,40 +205,43 @@ class HomeScreenState extends State<HomeScreen>
                   child: Row(children: [
                     Padding(
                         padding: const EdgeInsets.only(left: 10.0),
-                        child: userPic != null
-                            ? getUserPic(
-                                userPic, 'assets/images/profile.jpg', 18.0)
-                            : shadowCircle(
-                                'assets/images/profile.jpg', 18, false)),
+                        child:
+                            // child: userPic != null
+                            // ? getUserPic(
+                            //     userPic, 'assets/images/profile.jpg', 18.0)
+                            // : shadowCircle(
+                            shadowCircle(
+                                'assets/images/kloppocarIcon.png', 18, false)),
                     Padding(
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(children: [
-                              Text(currentUser["username"],
+                              // Text(currentUser["username"],
+                              Text("Kloppocar",
                                   style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w200)),
-                              Padding(
-                                  padding: const EdgeInsets.only(left: 5.0),
-                                  child: SizedBox(
-                                      width: 20,
-                                      child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        ProfileScreen()));
-                                          },
-                                          child: Image.asset(
-                                              "assets/images/gear.png")))),
+                              // Padding(
+                              //     padding: const EdgeInsets.only(left: 5.0),
+                              //     child: SizedBox(
+                              //         width: 20,
+                              //         child: GestureDetector(
+                              //             onTap: () {
+                              //               Navigator.push(
+                              //                   context,
+                              //                   MaterialPageRoute(
+                              //                       builder: (context) =>
+                              //                           ProfileScreen()));
+                              //             },
+                              //             child: Image.asset(
+                              //                 "assets/images/gear.png")))),
                             ]),
                             Text(
                                 currentUser["userRank"] != null
                                     ? currentUser["userRank"]["title"]
-                                    : 'COLLECTOR',
+                                    : 'Collector',
                                 style: TextStyle(
                                     fontSize: 10, fontWeight: FontWeight.w700)),
                           ],

@@ -67,8 +67,12 @@ class MissionModel extends ChangeNotifier {
                     'WARNING: Mission with ID ${_missionUsers[i]["missionId"]} not found or returned null.');
               }
             } else {
-              print(
-                  'WARNING: _missionUsers[$i] or its "missionId" is null/invalid.');
+              _errorMessage = "Failed to load your mission data.";
+              _missionUsers = []; // Clear the lists
+              _missions = [];
+              _isLoading = false;
+              notifyListeners(); // Notify the UI of the error state
+              return;
             }
           }
           // --- IMPORTANT FIX HERE ---
