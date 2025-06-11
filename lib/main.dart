@@ -336,7 +336,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: SvgPicture.asset(
                     'assets/images/game.svg',
                     colorFilter: ColorFilter.mode(
-                        _currentIndex == 4 ? Color(0xffd622ca) : Colors.black,
+                        _currentIndex == 3 ? Color(0xffd622ca) : Colors.black,
                         BlendMode.srcIn),
                   ),
                 ),
@@ -349,7 +349,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: SvgPicture.asset(
                     'assets/images/profil.svg',
                     colorFilter: ColorFilter.mode(
-                        _currentIndex == 3 ? Color(0xffd622ca) : Colors.black,
+                        _currentIndex == 4 ? Color(0xffd622ca) : Colors.black,
                         BlendMode.srcIn),
                   ),
                 ),

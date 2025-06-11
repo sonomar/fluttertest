@@ -1,104 +1,118 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/mission_model.dart';
-import '../../../widgets/missions/mission_view.dart';
+import '../../../widgets/missions/mission_view.dart'; // Import for missionWidget
+import './award_screen.dart';
 
 class Missions extends StatefulWidget {
-  const Missions({super.key, PageStorageKey<String>? pageKey, this.userData});
+  const Missions({super.key, this.userData});
   final dynamic userData;
 
   @override
   State<Missions> createState() => _MissionsState();
 }
 
-class _MissionsState extends State<Missions>
-    with AutomaticKeepAliveClientMixin<Missions> {
-  @override
-  bool get wantKeepAlive => true;
-
+class _MissionsState extends State<Missions> {
   @override
   void initState() {
     super.initState();
-    Provider.of<MissionModel>(context, listen: false).loadMissions();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MissionModel>(context, listen: false).loadMissions();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    final missionModel = context.watch<MissionModel>();
-    final missions = missionModel.missions;
-    final missionUsers = missionModel.missionUsers;
-    final isLoading = missionModel.isLoading;
-    final errorMessage = missionModel.errorMessage;
-
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-          automaticallyImplyLeading: false,
-          scrolledUnderElevation: 0.0,
-          backgroundColor: Colors.white,
-          title: const Text("Missions"),
-          centerTitle: false,
-          titleTextStyle: TextStyle(
-            fontSize: 28,
-            color: Colors.black,
-            fontFamily: 'ChakraPetch',
-            fontWeight: FontWeight.w500,
-          )),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : errorMessage != null && errorMessage.isNotEmpty
-              ? Center(
-                  child: Text(
-                    'Error: $errorMessage\n\nNo missions could be loaded.',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red, fontSize: 16),
-                  ),
-                )
-              : missions.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No missions available.',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                    )
-                  : SingleChildScrollView(
-                      // <-- Wrapped the content here
-                      child: Container(
-                        // <-- Wrapped the content in a Container
-                        padding: const EdgeInsets.only(
-                            bottom: 5, left: 20, right: 20),
-                        child: Column(children: [
-                          ...missionUsers.map((missionUser) {
-                            // It's often cleaner to iterate over `missions` if that's what you're displaying
-                            // Find the corresponding missionUser for this mission
-                            final correspondingMission = missions.firstWhere(
-                              (user) =>
-                                  user['missionId'].toString() ==
-                                  missionUser['missionId'].toString(),
-                              orElse: () =>
-                                  null, // Return null if no matching mission is found
-                            );
+        scrolledUnderElevation: 0.0,
+        backgroundColor: Colors.white,
+        title: const Text("Missions"),
+        centerTitle: false,
+        titleTextStyle: const TextStyle(
+          fontSize: 28,
+          color: Colors.black,
+          fontFamily: 'ChakraPetch',
+          fontWeight: FontWeight.w500,
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: TextButton.icon(
+              icon: const Icon(Icons.emoji_events, color: Color(0xffd622ca)),
+              label: const Text('My Awards',
+                  style: TextStyle(color: Color(0xffd622ca))),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const AwardScreen()),
+                );
+              },
+            ),
+          )
+        ],
+      ),
+      body: Consumer<MissionModel>(
+        builder: (context, missionModel, child) {
+          if (missionModel.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (missionModel.missions.isEmpty) {
+            return const Center(child: Text("No missions available."));
+          }
 
-                            if (correspondingMission != null) {
-                              return Container(
-                                padding: const EdgeInsets.only(
-                                  top: 20,
-                                  left: 5,
-                                  right: 5,
-                                ),
-                                child: missionWidget(
-                                    context, correspondingMission, missionUser),
-                              );
-                            } else {
-                              return const SizedBox
-                                  .shrink(); // Handle cases where a mission has no associated user
-                            }
-                          }).toList(),
-                        ]),
-                      ),
-                    ),
+          // Create a combined list of missions with their user-specific data.
+          final List<Map<String, dynamic>> missionWithUserData = missionModel
+              .missions
+              .map((mission) {
+                final missionUser = missionModel.missionUsers.firstWhere(
+                  (mu) => mu['missionId'] == mission['missionId'],
+                  orElse: () => <String, dynamic>{},
+                );
+                return {'mission': mission, 'missionUser': missionUser};
+              })
+              .where((item) =>
+                  item['missionUser'] != null &&
+                  (item['missionUser'] as Map).isNotEmpty)
+              .toList();
+
+          // Sort the combined list: completed missions go to the bottom.
+          missionWithUserData.sort((a, b) {
+            bool isACompleted = a['missionUser']?['completed'] ?? false;
+            bool isBCompleted = b['missionUser']?['completed'] ?? false;
+
+            if (isACompleted && !isBCompleted) return 1;
+            if (!isACompleted && isBCompleted) return -1;
+            return 0;
+          });
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- START OF FIX ---
+              // The featured mission widget and the divider have been removed.
+              // The ListView.builder is now the only widget displaying the missions.
+              Expanded(
+                child: ListView.builder(
+                  // Added top padding to give the list some space from the AppBar.
+                  padding:
+                      const EdgeInsets.only(top: 15.0, left: 15.0, right: 15.0),
+                  itemCount: missionWithUserData.length,
+                  itemBuilder: (context, index) {
+                    final missionData = missionWithUserData[index];
+                    return missionWidget(
+                      context,
+                      missionData['mission'],
+                      missionData['missionUser'],
+                    );
+                  },
+                ),
+              ),
+              // --- END OF FIX ---
+            ],
+          );
+        },
+      ),
     );
   }
 }

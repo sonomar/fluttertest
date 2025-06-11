@@ -302,7 +302,6 @@ class HomeScreenState extends State<HomeScreen>
         ),
         body: SingleChildScrollView(
             child: Column(children: [
-          Text(AppLocalizations.of(context)!.translate('title')),
           Padding(
               padding: const EdgeInsets.all(10),
               child: Column(children: [

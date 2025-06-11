@@ -384,7 +384,6 @@ class _CollectionScreenState extends State<CollectionScreen>
               ],
             ),
           ),
-          Text(AppLocalizations.of(context)!.translate('title')),
         ],
       ),
     );
