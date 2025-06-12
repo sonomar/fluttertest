@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:kloppocar_app/widgets/profile/permissions_widgets.dart';
 import 'package:kloppocar_app/widgets/auth/auth_widgets.dart';
+import '../../../helpers/localization_helper.dart';
 
 class AccountSettingsScreen extends StatelessWidget {
   const AccountSettingsScreen({super.key});
@@ -8,7 +10,7 @@ class AccountSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Account Settings'),
+        title: Text(translate("account_header", context)),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -18,6 +20,8 @@ class AccountSettingsScreen extends StatelessWidget {
               ChangePasswordForm(),
               const SizedBox(height: 24),
               ChangeEmailForm(),
+              const SizedBox(height: 24),
+              const CameraPermissionSwitch(),
             ],
           ),
         ),

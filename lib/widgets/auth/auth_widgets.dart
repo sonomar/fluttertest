@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_auth_provider.dart';
+import '../../../helpers/localization_helper.dart';
 
 enum EmailFormStep { enterEmail, enterCode }
 
@@ -59,13 +60,15 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Change Password',
+              Text(translate("account_change_password_header", context),
                   style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _oldPasswordController,
-                decoration: const InputDecoration(
-                    labelText: 'Old Password', border: OutlineInputBorder()),
+                decoration: InputDecoration(
+                    labelText:
+                        translate("account_change_password_old", context),
+                    border: OutlineInputBorder()),
                 obscureText: true,
                 validator: (val) =>
                     val!.isEmpty ? 'Please enter your current password' : null,
@@ -73,8 +76,10 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _newPasswordController,
-                decoration: const InputDecoration(
-                    labelText: 'New Password', border: OutlineInputBorder()),
+                decoration: InputDecoration(
+                    labelText:
+                        translate("account_change_password_new", context),
+                    border: OutlineInputBorder()),
                 obscureText: true,
                 validator: (val) => (val?.length ?? 0) < 8
                     ? 'Password must be at least 8 characters'
@@ -83,8 +88,9 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _confirmPasswordController,
-                decoration: const InputDecoration(
-                    labelText: 'Confirm New Password',
+                decoration: InputDecoration(
+                    labelText:
+                        translate("account_change_password_confirm", context),
                     border: OutlineInputBorder()),
                 obscureText: true,
                 validator: (val) => val != _newPasswordController.text
@@ -96,7 +102,9 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
                 const Center(child: CircularProgressIndicator())
               else
                 ElevatedButton(
-                    onPressed: _submit, child: const Text('Update Password')),
+                    onPressed: _submit,
+                    child: Text(
+                        translate("account_change_password_button", context))),
               if (authProvider.errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
@@ -168,8 +176,7 @@ class _ChangeEmailFormState extends State<ChangeEmailForm> {
 
     if (success) {
       setState(() {
-        _successMessage =
-            'Email updated successfully! Please log out and log back in for the change to take full effect.';
+        _successMessage = translate("account_change_email_success", context);
         _currentStep = EmailFormStep.enterEmail;
         _formKey.currentState?.reset();
       });
@@ -192,14 +199,14 @@ class _ChangeEmailFormState extends State<ChangeEmailForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Change Email',
+              Text(translate("account_change_email_header", context),
                   style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 16),
               if (_currentStep == EmailFormStep.enterEmail) ...[
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                      labelText: 'New Email Address',
+                  decoration: InputDecoration(
+                      labelText: translate("account_change_email_new", context),
                       border: OutlineInputBorder()),
                   keyboardType: TextInputType.emailAddress,
                   validator: (val) => !(val?.contains('@') ?? false)
@@ -212,16 +219,18 @@ class _ChangeEmailFormState extends State<ChangeEmailForm> {
                 else
                   ElevatedButton(
                       onPressed: _submitEmail,
-                      child: const Text('Send Verification Code')),
+                      child: Text(
+                          translate("account_change_email_button", context))),
               ] else ...[
                 // enterCode step
                 Text(
-                    'A verification code was sent to ${_emailController.text}. Please enter it below.'),
+                    '${translate("account_change_email_message_a", context)} ${_emailController.text}. ${translate("account_change_email_message_b", context)}'),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _codeController,
-                  decoration: const InputDecoration(
-                      labelText: 'Verification Code',
+                  decoration: InputDecoration(
+                      labelText:
+                          translate("account_change_email_code", context),
                       border: OutlineInputBorder()),
                   keyboardType: TextInputType.number,
                   validator: (val) =>
@@ -233,7 +242,8 @@ class _ChangeEmailFormState extends State<ChangeEmailForm> {
                 else
                   ElevatedButton(
                       onPressed: _submitCode,
-                      child: const Text('Verify & Change Email')),
+                      child: Text(translate(
+                          "account_change_email_verify_button", context))),
               ],
               if (authProvider.errorMessage != null)
                 Padding(

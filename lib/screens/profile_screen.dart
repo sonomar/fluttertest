@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/collectible.dart';
 import '../models/locale_provider.dart';
 import '../models/app_localizations.dart';
+import '../helpers/localization_helper.dart';
 import '../screens/subscreens/missions/award_screen.dart';
 import './subscreens/profile/account_settings_screen.dart';
 
@@ -80,7 +81,7 @@ class ProfileScreen extends StatelessWidget {
             //   icon: const Icon(Icons.arrow_back, color: Colors.black),
             //   onPressed: () => Navigator.pop(context),
             // ),
-            title: const Text("Profile"),
+            title: Text(translate("profile_header", context)),
             centerTitle: false,
             titleTextStyle: TextStyle(
               fontSize: 28,
@@ -97,7 +98,8 @@ class ProfileScreen extends StatelessWidget {
                     builder: (context) => const AccountSettingsScreen(),
                   ));
                 },
-                title: "Account Settings", // Or separate buttons if you prefer
+                title: translate("profile_account_settings",
+                    context), // Or separate buttons if you prefer
                 active: true),
             ItemButton(
                 onTap: () {
@@ -106,13 +108,13 @@ class ProfileScreen extends StatelessWidget {
                         builder: (context) => const AwardScreen()),
                   );
                 },
-                title: "Awards",
+                title: translate("profile_awards", context),
                 active: true),
             ItemButton(
                 onTap: () {
                   _launchUrl(ppUrl);
                 },
-                title: "Privacy Policy",
+                title: translate("profile_pp_label", context),
                 active: true),
             ItemButton(
                 onTap: () {
@@ -121,8 +123,7 @@ class ProfileScreen extends StatelessWidget {
                       .toggleLocale();
                 },
                 // Use AppLocalizations to make the button text itself translatable
-                title: AppLocalizations.of(context)!
-                    .translate('profile_language_label'),
+                title: translate('profile_language_label', context),
                 active: true),
             ItemButton(
                 onTap: () {
@@ -133,7 +134,7 @@ class ProfileScreen extends StatelessWidget {
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   }
                 },
-                title: "Sign Out",
+                title: translate("profile_signout_label", context),
                 active: true),
           ],
         ));

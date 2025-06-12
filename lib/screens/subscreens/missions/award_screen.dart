@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/mission_model.dart';
+import '../../../helpers/localization_helper.dart';
 import './award_details.dart';
 
 class AwardScreen extends StatefulWidget {
@@ -28,7 +29,7 @@ class _AwardScreenState extends State<AwardScreen> {
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
         backgroundColor: Colors.white,
-        title: const Text("My Awards"),
+        title: Text(translate("missions_awards", context)),
         centerTitle: false,
         titleTextStyle: const TextStyle(
           fontSize: 28,

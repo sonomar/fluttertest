@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../helpers/localization_helper.dart';
 
 Widget communityProgressBar(pageContext, int communityGoal, progress) {
   double progressPercent = 0.0;
@@ -45,7 +46,7 @@ Widget communityProgressBar(pageContext, int communityGoal, progress) {
 }
 
 Widget communityChallengeWidget(
-    String time, pageContext, communityChallenge, progress) {
+    String time, pageContext, communityChallenge, progress, context) {
   final int communityGoal =
       (communityChallenge != null && communityChallenge['goal'] != null)
           ? communityChallenge['goal']
@@ -86,31 +87,31 @@ Widget communityChallengeWidget(
                       radius: 24,
                       backgroundImage: AssetImage('assets/images/paint.jpg'),
                     )),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Color(0xffd622ca),
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(8),
-                        bottomLeft: Radius.circular(8)),
-                  ),
-                  padding: const EdgeInsets.only(left: 12, right: 40),
-                  child: Text(
-                    time,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontFamily: 'ChakraPetch',
-                      fontWeight: FontWeight.w500,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ),
+                // Container(
+                //   decoration: BoxDecoration(
+                //     color: Color(0xffd622ca),
+                //     borderRadius: BorderRadius.only(
+                //         topLeft: Radius.circular(8),
+                //         bottomLeft: Radius.circular(8)),
+                //   ),
+                //   padding: const EdgeInsets.only(left: 12, right: 40),
+                //   child: Text(
+                //     time,
+                //     style: const TextStyle(
+                //       fontSize: 20,
+                //       color: Colors.white,
+                //       fontFamily: 'ChakraPetch',
+                //       fontWeight: FontWeight.w500,
+                //       fontStyle: FontStyle.italic,
+                //     ),
+                //   ),
+                // ),
               ]),
           SizedBox(
               child: Padding(
                   padding: EdgeInsets.only(left: 30, right: 30),
                   child: Text(
-                    'Community-Ziel läuft bald ab!',
+                    translate("banner_welcome_header", context),
                     style: TextStyle(
                       fontSize: 24,
                       color: Colors.white,
@@ -123,7 +124,7 @@ Widget communityChallengeWidget(
           Padding(
               padding: EdgeInsets.only(left: 30, right: 30, bottom: 20),
               child: Text(
-                'Es fehlen noch 212 Assets bis zum Ziel. Trage jetzt dazu bei und hole dir noch Assets. Zum Beispiel beim Formel 1-Rennen in Spielberg oder erfülle Challenges. Die Community zählt auf dich. Viel Glück!',
+                translate("banner_welcome_body", context),
                 style: GoogleFonts.roboto(
                     textStyle: TextStyle(
                   fontSize: 16,
@@ -132,36 +133,36 @@ Widget communityChallengeWidget(
                 )),
               )),
           const SizedBox(height: 15),
-          Container(
-              alignment: Alignment.center,
-              child:
-                  communityProgressBar(pageContext, communityGoal, progress)),
-          Padding(
-            padding: EdgeInsets.only(left: 35, top: 5, right: 35, bottom: 40),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  ChallengeTitle,
-                  style: GoogleFonts.roboto(
-                      textStyle: TextStyle(
-                    fontSize: 12,
-                    color: Color.fromARGB(255, 181, 181, 181),
-                    fontWeight: FontWeight.w300,
-                  )),
-                ),
-                Text(
-                  '$progress / $communityGoal',
-                  style: GoogleFonts.roboto(
-                      textStyle: TextStyle(
-                    fontSize: 12,
-                    color: Color.fromARGB(255, 181, 181, 181),
-                    fontWeight: FontWeight.w300,
-                  )),
-                )
-              ],
-            ),
-          ),
+          // Container(
+          //     alignment: Alignment.center,
+          //     child:
+          //         communityProgressBar(pageContext, communityGoal, progress)),
+          // Padding(
+          //   padding: EdgeInsets.only(left: 35, top: 5, right: 35, bottom: 40),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //     children: [
+          //       Text(
+          //         ChallengeTitle,
+          //         style: GoogleFonts.roboto(
+          //             textStyle: TextStyle(
+          //           fontSize: 12,
+          //           color: Color.fromARGB(255, 181, 181, 181),
+          //           fontWeight: FontWeight.w300,
+          //         )),
+          //       ),
+          //       Text(
+          //         '$progress / $communityGoal',
+          //         style: GoogleFonts.roboto(
+          //             textStyle: TextStyle(
+          //           fontSize: 12,
+          //           color: Color.fromARGB(255, 181, 181, 181),
+          //           fontWeight: FontWeight.w300,
+          //         )),
+          //       )
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     ),

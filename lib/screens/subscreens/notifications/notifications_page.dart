@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../helpers/localization_helper.dart';
 import 'package:kloppocar_app/models/notification_provider.dart';
 import 'package:kloppocar_app/screens/subscreens/notifications/notification_models.dart';
 import 'package:kloppocar_app/screens/subscreens/notifications/notification_detail_page.dart';
@@ -44,9 +45,9 @@ class NotificationsPageState extends State<NotificationsPage> {
             ),
           );
         } else if (provider.notificationsWithDetails.isEmpty) {
-          body = const Center(
+          body = Center(
             child: Text(
-              'No notifications',
+              translate("notifications_none", context),
               style: TextStyle(color: Colors.black, fontSize: 16),
             ),
           );
@@ -108,8 +109,8 @@ class NotificationsPageState extends State<NotificationsPage> {
             scrolledUnderElevation: 0.0,
             backgroundColor: Colors.white,
             elevation: 0,
-            title: const Text(
-              'My Notifications',
+            title: Text(
+              translate("notifications_header", context),
               style: TextStyle(color: Colors.black),
             ),
             leading: IconButton(

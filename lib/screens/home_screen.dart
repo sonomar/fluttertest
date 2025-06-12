@@ -17,6 +17,7 @@ import '../widgets/shadow_circle.dart';
 import '../widgets/object_viewer.dart';
 import '../widgets/community/community_missions.dart';
 import '../widgets/missions/latest_active_mission.dart';
+import '../helpers/localization_helper.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -219,7 +220,9 @@ class HomeScreenState extends State<HomeScreen>
                           children: [
                             Row(children: [
                               // Text(currentUser["username"],
-                              Text("Kloppocar",
+                              Text(
+                                  translate(
+                                      "home_header_username_default", context),
                                   style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w200)),
@@ -241,7 +244,8 @@ class HomeScreenState extends State<HomeScreen>
                             Text(
                                 currentUser["userRank"] != null
                                     ? currentUser["userRank"]["title"]
-                                    : 'Collector',
+                                    : translate(
+                                        "home_header_rank_default", context),
                                 style: TextStyle(
                                     fontSize: 10, fontWeight: FontWeight.w700)),
                           ],
@@ -337,17 +341,17 @@ class HomeScreenState extends State<HomeScreen>
                 getLatestActiveMission(
                     context, missions, missionUsers, recentColl),
               ])),
-          communityChallengeWidget(
-              _formatTime(_remainingTime), context, communityChallenge, 200),
+          communityChallengeWidget(_formatTime(_remainingTime), context,
+              communityChallenge, 200, context),
           Padding(
               padding: const EdgeInsets.only(left: 32, right: 32, top: 10),
               child: Column(children: [
-                sectionHeader('GAME CENTER'),
+                sectionHeader(translate("home_game_section_label", context)),
                 Container(
                     alignment: Alignment.center,
                     padding: EdgeInsets.all(15),
                     child: listMissions(context, missions, missionUsers)),
-                sectionHeader('Nachrichten'),
+                sectionHeader(translate("home_news_section_label", context)),
                 if (newsPosts.isNotEmpty) ...[
                   GestureDetector(
                     onTap: () {
@@ -375,20 +379,6 @@ class HomeScreenState extends State<HomeScreen>
                       newsPosts[1]["type"],
                       newsPosts[1]["updatedDt"],
                       newsPosts[1]["header"],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => NewsPostDetails(
-                                  selectedNewsPost: newsPosts[2])));
-                    },
-                    child: newsItem(
-                      newsPosts[2]["type"],
-                      newsPosts[2]["updatedDt"],
-                      newsPosts[2]["header"],
                     ),
                   ),
                 ] else ...[
@@ -446,8 +436,8 @@ class HomeScreenState extends State<HomeScreen>
                     topLeft: Radius.circular(12),
                     topRight: Radius.circular(12)),
               ),
-              child: const Text(
-                'Community-Challenge',
+              child: Text(
+                translate("banner_welcome_header", context),
                 style: TextStyle(
                   fontSize: 24,
                   color: Colors.white,
@@ -467,9 +457,9 @@ class HomeScreenState extends State<HomeScreen>
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
-                          'Vervollständige die Kloppocar-Puzzle-Collection.',
+                          translate("banner_welcome_body", context),
                           style: TextStyle(fontSize: 16, color: Colors.black),
                         ),
                       ],
@@ -478,37 +468,37 @@ class HomeScreenState extends State<HomeScreen>
                 ],
               ),
             ),
-            Container(
-                alignment: Alignment.center,
-                padding: EdgeInsets.all(5),
-                child: progressBar(.35)),
-            Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Kloppocar-Puzzle-Collection',
-                    style: GoogleFonts.roboto(
-                        textStyle: TextStyle(
-                      fontSize: 12,
-                      letterSpacing: 1,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w300,
-                    )),
-                  ),
-                  Text(
-                    '4/7',
-                    style: GoogleFonts.roboto(
-                        textStyle: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w300,
-                    )),
-                  )
-                ],
-              ),
-            ),
+            // Container(
+            //     alignment: Alignment.center,
+            //     padding: EdgeInsets.all(5),
+            //     child: progressBar(.35)),
+            // Padding(
+            //   padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: [
+            //       Text(
+            //         'Kloppocar-Puzzle-Collection',
+            //         style: GoogleFonts.roboto(
+            //             textStyle: TextStyle(
+            //           fontSize: 12,
+            //           letterSpacing: 1,
+            //           color: Colors.black,
+            //           fontWeight: FontWeight.w300,
+            //         )),
+            //       ),
+            //       Text(
+            //         '4/7',
+            //         style: GoogleFonts.roboto(
+            //             textStyle: TextStyle(
+            //           fontSize: 12,
+            //           color: Colors.black,
+            //           fontWeight: FontWeight.w300,
+            //         )),
+            //       )
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),

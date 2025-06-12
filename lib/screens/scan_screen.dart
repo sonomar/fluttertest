@@ -8,6 +8,7 @@ import '../models/collectible_model.dart';
 import '../api/user_collectible.dart';
 import '../models/app_auth_provider.dart';
 import '../models/user_model.dart';
+import '../helpers/localization_helper.dart';
 import '../main.dart'; // Assuming MyHomePage is in main.dart
 import '../helpers/get_random.dart'; // Import the new random mint generator
 
@@ -425,7 +426,7 @@ class _ScanScreenState extends State<ScanScreen>
       appBar: AppBar(
         automaticallyImplyLeading: false,
         scrolledUnderElevation: 0.0,
-        title: const Text("Scan/Enter Collectible Code"),
+        title: Text(translate("scan_sub_header", context)),
         centerTitle: false,
         titleTextStyle: const TextStyle(
           fontSize: 28,
@@ -482,7 +483,7 @@ class _ScanScreenState extends State<ScanScreen>
               TextField(
                 controller: _codeTextController,
                 decoration: InputDecoration(
-                  labelText: 'Or enter code manually',
+                  labelText: translate("scan_manual_text", context),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -517,7 +518,8 @@ class _ScanScreenState extends State<ScanScreen>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text('Submit Code'),
+                child:
+                    Text(translate("scan_manual_submit_button_text", context)),
               ),
             ],
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/mission_model.dart';
+import '../../../helpers/localization_helper.dart';
 import '../../../widgets/missions/mission_view.dart'; // Import for missionWidget
 import './award_screen.dart';
 
@@ -28,7 +29,7 @@ class _MissionsState extends State<Missions> {
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
         backgroundColor: Colors.white,
-        title: const Text("Missions"),
+        title: Text(translate("missions_header", context)),
         centerTitle: false,
         titleTextStyle: const TextStyle(
           fontSize: 28,
@@ -41,7 +42,7 @@ class _MissionsState extends State<Missions> {
             padding: const EdgeInsets.only(right: 8.0),
             child: TextButton.icon(
               icon: const Icon(Icons.emoji_events, color: Color(0xffd622ca)),
-              label: const Text('My Awards',
+              label: Text(translate("missions_awards", context),
                   style: TextStyle(color: Color(0xffd622ca))),
               onPressed: () {
                 Navigator.of(context).push(
@@ -58,7 +59,7 @@ class _MissionsState extends State<Missions> {
             return const Center(child: CircularProgressIndicator());
           }
           if (missionModel.missions.isEmpty) {
-            return const Center(child: Text("No missions available."));
+            return Center(child: Text(translate("missions_none", context)));
           }
 
           // Create a combined list of missions with their user-specific data.

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../helpers/localization_helper.dart';
 import './mission_view.dart';
 
 class AwardInfo extends StatelessWidget {
@@ -86,7 +87,8 @@ class AwardInfo extends StatelessWidget {
                       onPressed: () {
                         _qrDialog(context);
                       },
-                      child: Text('Transfer Asset',
+                      child: Text(
+                          translate("mission_details_transfer_button", context),
                           style: TextStyle(
                             fontSize: 20,
                             color: Colors.white,
@@ -156,7 +158,7 @@ class AwardInfo extends StatelessWidget {
                             selectedAward["createdDt"].toString())
                       ]))),
             ]),
-            Text("DATEN",
+            Text(translate("mission_details_info_section", context),
                 style: TextStyle(
                   backgroundColor: Colors.white,
                   fontSize: 20,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'subscreens/collectibles/collectible_details.dart';
 import '../models/collectible_model.dart';
+import '../helpers/localization_helper.dart';
 import '../models/app_localizations.dart';
 
 class CollectionScreen extends StatefulWidget {
@@ -191,8 +192,8 @@ class _CollectionScreenState extends State<CollectionScreen>
           fontSize: 30,
         ),
         centerTitle: false,
-        title: const Text(
-          "Galerie", // Added const here
+        title: Text(
+          translate("collection_header", context), // Added const here
           style: TextStyle(
             fontSize: 28,
             color: Colors.black,
@@ -218,7 +219,7 @@ class _CollectionScreenState extends State<CollectionScreen>
                 children: [
                   SizedBox(
                       child: Text(
-                    "$numAssets ASSETS",
+                    "$numAssets ${translate("collection_subheader_assets", context)}",
                     style: TextStyle(
                         fontSize: 14,
                         letterSpacing: 2.56,
@@ -234,7 +235,8 @@ class _CollectionScreenState extends State<CollectionScreen>
                             padding: const EdgeInsets.only(
                                 right: 10), // Added const here
                             child: Text(
-                              "NAME",
+                              translate(
+                                  "collection_subheader_sort_name", context),
                               style: TextStyle(
                                   fontSize: 14,
                                   letterSpacing: 2.56,
@@ -270,7 +272,8 @@ class _CollectionScreenState extends State<CollectionScreen>
                             padding: const EdgeInsets.only(
                                 left: 10, right: 10), // Added const here
                             child: Text(
-                              "DATE",
+                              translate(
+                                  "collection_subheader_sort_date", context),
                               style: TextStyle(
                                   fontSize: 14,
                                   letterSpacing: 2.56,
@@ -292,9 +295,9 @@ class _CollectionScreenState extends State<CollectionScreen>
                     20.0), // Ensure shadowCircle is defined
                 Padding(
                   padding: const EdgeInsets.only(left: 10.0),
-                  child: const Text(
+                  child: Text(
                     // Added const here
-                    'Kloppocar Puzzle Collection',
+                    translate("collection_sub_header", context),
                     style: TextStyle(
                       fontSize: 20,
                       color: Colors.black,
@@ -352,9 +355,9 @@ class _CollectionScreenState extends State<CollectionScreen>
                                 );
                               }).toList(),
                             )
-                          : const Center(
+                          : Center(
                               child: Text(
-                                'No collectibles found.',
+                                translate("collectibles_none", context),
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.grey,

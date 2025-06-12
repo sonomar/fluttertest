@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../helpers/localization_helper.dart';
 import '../missions/latest_active_mission.dart';
 
 class CardInfo extends StatelessWidget {
@@ -79,7 +80,9 @@ class CardInfo extends StatelessWidget {
                           onTradeInitiate!();
                         }
                       },
-                      child: Text('Transfer Asset',
+                      child: Text(
+                          translate(
+                              "collection_details_transfer_button", context),
                           style: TextStyle(
                             fontSize: 20,
                             color: Colors.white,
@@ -152,7 +155,7 @@ class CardInfo extends StatelessWidget {
                             selectedCollectible["publicationDate"].toString())
                       ]))),
             ]),
-            Text("DATEN",
+            Text(translate("collection_details_info_section", context),
                 style: TextStyle(
                   backgroundColor: Colors.white,
                   fontSize: 20,

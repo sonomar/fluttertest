@@ -20,6 +20,7 @@ import 'models/locale_provider.dart';
 import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
+import './helpers/localization_helper.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kloppocar_app/models/app_auth_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -302,7 +303,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           BlendMode.srcIn),
                     ),
                   ),
-                  label: 'Home'),
+                  label: translate("home_header", context)),
               BottomNavigationBarItem(
                 icon: SizedBox(
                   width: 30,
@@ -314,7 +315,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         BlendMode.srcIn),
                   ),
                 ),
-                label: 'Galerie',
+                label: translate("collection_header", context),
               ),
               BottomNavigationBarItem(
                 icon: SizedBox(
@@ -327,7 +328,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         BlendMode.srcIn),
                   ),
                 ),
-                label: 'Scan',
+                label: translate("scan_header", context),
               ),
               BottomNavigationBarItem(
                 icon: SizedBox(
@@ -340,7 +341,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         BlendMode.srcIn),
                   ),
                 ),
-                label: 'Missions',
+                label: translate("missions_header", context),
               ),
               BottomNavigationBarItem(
                 icon: SizedBox(
@@ -353,7 +354,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         BlendMode.srcIn),
                   ),
                 ),
-                label: 'Profile',
+                label: translate("profile_header", context),
               ),
             ],
             unselectedIconTheme: const IconThemeData(color: Colors.black),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../models/app_auth_provider.dart';
 import '../models/user_model.dart';
 import '../widgets/splash_screen.dart'; // Your existing SplashScreen widget
@@ -20,10 +21,11 @@ class _AuthLoadingScreenState extends State<AuthLoadingScreen> {
     super.initState();
     // This initState is called only once when AuthLoadingScreen is first built.
     // It provides a stable context to trigger loadUser().
-    _triggerLoadUser();
+    _triggerLoadUserAndPermissions();
   }
 
-  Future<void> _triggerLoadUser() async {
+  Future<void> _triggerLoadUserAndPermissions() async {
+    await _requestInitialPermissions();
     final userModel = Provider.of<UserModel>(context, listen: false);
     final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
 
@@ -63,6 +65,58 @@ class _AuthLoadingScreenState extends State<AuthLoadingScreen> {
     // and its state changed.
     if (mounted) {
       setState(() {}); // Force rebuild of AuthLoadingScreen
+    }
+  }
+
+  /// Requests necessary permissions when the app starts.
+  Future<void> _requestInitialPermissions() async {
+    print('AuthLoadingScreen: Requesting initial permissions...');
+
+    // Request Camera Permission
+    var cameraStatus = await Permission.camera.status;
+    if (cameraStatus.isDenied) {
+      // Corrected: Use isDenied to cover 'notDetermined' and 'denied'
+      print('Camera permission not determined or denied. Requesting...');
+      await Permission.camera
+          .request(); // This shows the iOS pop-up if not granted
+    } else {
+      print('Camera permission status: $cameraStatus');
+    }
+
+    // Request Location When In Use Permission
+    var locationStatus = await Permission.locationWhenInUse.status;
+    if (locationStatus.isDenied) {
+      // Corrected: Use isDenied
+      print('Location permission not determined or denied. Requesting...');
+      await Permission.locationWhenInUse
+          .request(); // This shows the iOS pop-up if not granted
+    } else {
+      print('Location permission status: $locationStatus');
+    }
+
+    // You can add more permissions here as needed, e.g.:
+    // var photosStatus = await Permission.photos.status;
+    // if (photosStatus.isDenied) { // Corrected: Use isDenied
+    //   print('Photos permission not determined or denied. Requesting...');
+    //   await Permission.photos.request();
+    // } else {
+    //   print('Photos permission status: $photosStatus');
+    // }
+
+    // If a permission is permanently denied, you might want to show a dialog
+    // guiding the user to app settings. This is typically done when the user
+    // tries to use a feature that requires the denied permission.
+    if (cameraStatus.isPermanentlyDenied) {
+      // Example of handling permanently denied permission
+      print('Camera permission permanently denied. Guide user to settings.');
+      // You could show a dialog here or a SnackBar
+      // if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              "If you wish to modify camera features, please enable in account settings."),
+        ),
+      );
     }
   }
 

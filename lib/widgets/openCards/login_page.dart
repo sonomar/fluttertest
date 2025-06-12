@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../helpers/localization_helper.dart';
 import '../../models/app_auth_provider.dart';
 
 enum AuthFormType { login, register, confirm }
@@ -192,10 +193,10 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 Text(
                   _formType == AuthFormType.login
-                      ? "Welcome Back"
+                      ? translate('login_header', context)
                       : _formType == AuthFormType.register
-                          ? "Create Account"
-                          : "Confirm Your Email",
+                          ? translate('register_header', context)
+                          : translate('confirm_header', context),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                       color: Colors.white,
@@ -232,10 +233,10 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Text(
                       _formType == AuthFormType.login
-                          ? 'Login'
+                          ? translate('login_header', context)
                           : _formType == AuthFormType.register
-                              ? 'Create Account'
-                              : 'Confirm & Sign Up',
+                              ? translate('register_header', context)
+                              : translate('confirm_header', context),
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),
@@ -248,16 +249,19 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Text(
                         _formType == AuthFormType.login
-                            ? "Don't have an account?"
-                            : "Already have an account?",
+                            ? translate("login_register_switch_text", context)
+                            : translate("register_login_switch_text", context),
                         style: TextStyle(color: Colors.white),
                       ),
                       TextButton(
-                        onPressed: _isSubmitting ? null : _switchFormType,
-                        child: Text(_formType == AuthFormType.login
-                            ? 'Register'
-                            : 'Login'),
-                      ),
+                          onPressed: _isSubmitting ? null : _switchFormType,
+                          child: Text(
+                            _formType == AuthFormType.login
+                                ? translate(
+                                    "login_register_switch_link", context)
+                                : translate(
+                                    "register_login_switch_link", context),
+                          )),
                     ],
                   ),
               ],
@@ -274,21 +278,25 @@ class _LoginPageState extends State<LoginPage> {
         TextFormField(
           style: TextStyle(color: Colors.white),
           controller: _emailController,
-          decoration: const InputDecoration(
-              labelText: 'Email', border: OutlineInputBorder()),
+          decoration: InputDecoration(
+              labelText: translate("login_email_label", context),
+              border: OutlineInputBorder()),
           keyboardType: TextInputType.emailAddress,
-          validator: (value) =>
-              (value?.isEmpty ?? true) ? 'Please enter your email' : null,
+          validator: (value) => (value?.isEmpty ?? true)
+              ? translate("login_email_validator", context)
+              : null,
         ),
         const SizedBox(height: 20),
         TextFormField(
           style: TextStyle(color: Colors.white),
           controller: _passwordController,
-          decoration: const InputDecoration(
-              labelText: 'Password', border: OutlineInputBorder()),
+          decoration: InputDecoration(
+              labelText: translate("login_password_label", context),
+              border: OutlineInputBorder()),
           obscureText: true,
-          validator: (value) =>
-              (value?.isEmpty ?? true) ? 'Please enter your password' : null,
+          validator: (value) => (value?.isEmpty ?? true)
+              ? translate("login_password_validator", context)
+              : null,
         ),
       ];
     } else if (_formType == AuthFormType.register) {
@@ -296,32 +304,36 @@ class _LoginPageState extends State<LoginPage> {
         TextFormField(
           style: TextStyle(color: Colors.white),
           controller: _emailController,
-          decoration: const InputDecoration(
-              labelText: 'Email', border: OutlineInputBorder()),
+          decoration: InputDecoration(
+              labelText: translate("register_email_label", context),
+              border: OutlineInputBorder()),
           keyboardType: TextInputType.emailAddress,
-          validator: (value) =>
-              (value?.isEmpty ?? true) ? 'Please enter your email' : null,
+          validator: (value) => (value?.isEmpty ?? true)
+              ? translate("register_email_validator", context)
+              : null,
         ),
         const SizedBox(height: 20),
         TextFormField(
           style: TextStyle(color: Colors.white),
           controller: _passwordController,
-          decoration: const InputDecoration(
-              labelText: 'Password', border: OutlineInputBorder()),
+          decoration: InputDecoration(
+              labelText: translate("register_password_label", context),
+              border: OutlineInputBorder()),
           obscureText: true,
           validator: (value) => (value?.length ?? 0) < 8
-              ? 'Password must be at least 8 characters'
+              ? translate("register_password_validator", context)
               : null,
         ),
         const SizedBox(height: 20),
         TextFormField(
           style: TextStyle(color: Colors.white),
           controller: _confirmPasswordController,
-          decoration: const InputDecoration(
-              labelText: 'Confirm Password', border: OutlineInputBorder()),
+          decoration: InputDecoration(
+              labelText: translate("register_reenter_password_label", context),
+              border: OutlineInputBorder()),
           obscureText: true,
           validator: (value) => value != _passwordController.text
-              ? 'Passwords do not match'
+              ? translate("register_reenter_password_validator", context)
               : null,
         ),
       ];
@@ -329,7 +341,7 @@ class _LoginPageState extends State<LoginPage> {
       // AuthFormType.confirm
       return [
         Text(
-          "A confirmation code has been sent to:\n${_emailController.text}",
+          translate("confirm_code_text", context),
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 16, color: Colors.grey[700]),
         ),
@@ -337,12 +349,14 @@ class _LoginPageState extends State<LoginPage> {
         TextFormField(
           style: TextStyle(color: Colors.white),
           controller: _confirmationCodeController,
-          decoration: const InputDecoration(
-              labelText: 'Confirmation Code', border: OutlineInputBorder()),
+          decoration: InputDecoration(
+              labelText: translate("confirm_code_label", context),
+              border: OutlineInputBorder()),
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
-          validator: (value) =>
-              (value?.isEmpty ?? true) ? 'Please enter your code' : null,
+          validator: (value) => (value?.isEmpty ?? true)
+              ? translate("confirm_code_validator", context)
+              : null,
         ),
       ];
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../helpers/localization_helper.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -16,7 +17,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         appBar: AppBar(
             automaticallyImplyLeading: false,
             scrolledUnderElevation: 0.0,
-            title: const Text("Community"),
+            title: Text(translate("community_header", context)),
             backgroundColor: Color(0xff333333),
             centerTitle: false,
             titleTextStyle: TextStyle(
