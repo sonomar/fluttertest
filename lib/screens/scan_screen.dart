@@ -221,7 +221,6 @@ class _ScanScreenState extends State<ScanScreen>
         }
 
         final String mint = generatedMint.toString();
-        print('heeeeres the fun!: $userId, $collectibleId, $mint');
         // Add user collectible with the newly generated mint
         await collectibleModel.addUserCollectible(userId, collectibleId, mint);
         await updateMissionProgress(
@@ -487,21 +486,12 @@ class _ScanScreenState extends State<ScanScreen>
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: () {
-                      if (_codeTextController.text.isNotEmpty) {
-                        _processCode(
-                            _codeTextController.text); // Process manual input
-                      }
-                    },
-                  ),
                 ),
-                onSubmitted: (value) {
-                  if (value.isNotEmpty) {
-                    _processCode(value); // Process manual input on submit
-                  }
-                },
+                // onSubmitted: (value) {
+                //   if (value.isNotEmpty) {
+                //     _processCode(value); // Process manual input on submit
+                //   }
+                // },
               ),
               const SizedBox(height: 16),
               ElevatedButton(
