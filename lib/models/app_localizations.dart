@@ -76,7 +76,7 @@ class _AppLocalizationsDelegate
   final ValueKey? key;
 
   @override
-  bool isSupported(Locale locale) => ['en', 'de'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => ['de', 'en'].contains(locale.languageCode);
 
   @override
   Future<AppLocalizations> load(Locale locale) async {

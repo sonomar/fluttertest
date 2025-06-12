@@ -74,8 +74,8 @@ Widget communityChallengeWidget(
               ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
             },
             blendMode: BlendMode.dstIn,
-            child:
-                Image.asset('assets/images/carheader.jpg', fit: BoxFit.cover),
+            child: Image.asset('assets/images/kloppofront2.png',
+                fit: BoxFit.cover),
           ),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -85,7 +85,8 @@ Widget communityChallengeWidget(
                     padding: EdgeInsets.only(left: 30, bottom: 10),
                     child: CircleAvatar(
                       radius: 24,
-                      backgroundImage: AssetImage('assets/images/paint.jpg'),
+                      backgroundImage:
+                          AssetImage('assets/images/kloppocarIcon.png'),
                     )),
                 // Container(
                 //   decoration: BoxDecoration(
