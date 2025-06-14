@@ -52,21 +52,22 @@ void main() async {
         },
         lazy: false, // Ensure it's created immediately
       ),
-      ChangeNotifierProxyProvider2<AppAuthProvider, UserModel,
-          CollectibleModel>(
-        create: (context) => CollectibleModel(
-          context.read<AppAuthProvider>(),
-          context.read<UserModel>(), // Pass the UserModel
-        ),
-        update: (_, appAuthProvider, userModel, previousCollectibleModel) =>
-            previousCollectibleModel ??
-            CollectibleModel(appAuthProvider, userModel),
-      ),
       ChangeNotifierProxyProvider<AppAuthProvider, UserModel>(
         create: (context) => UserModel(context.read<AppAuthProvider>()),
         update: (context, appAuthProvider, previousUserModel) {
           return previousUserModel ?? UserModel(appAuthProvider);
         },
+      ),
+      ChangeNotifierProxyProvider2<AppAuthProvider, UserModel,
+          CollectibleModel>(
+        create: (context) => CollectibleModel(
+          context.read<AppAuthProvider>(),
+          context.read<UserModel>(),
+        ),
+        update:
+            (context, appAuthProvider, userModel, previousCollectibleModel) =>
+                previousCollectibleModel ??
+                CollectibleModel(appAuthProvider, userModel),
       ),
       ChangeNotifierProxyProvider<AppAuthProvider, MissionModel>(
         create: (context) => MissionModel(context.read<AppAuthProvider>()),
