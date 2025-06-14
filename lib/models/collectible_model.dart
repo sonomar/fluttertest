@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../models/app_auth_provider.dart';
 import '../api/collectible.dart';
+import '../models/user_model.dart';
 import '../api/user_collectible.dart';
 import '../helpers/sort_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectibleModel extends ChangeNotifier {
   final AppAuthProvider _appAuthProvider;
+  final UserModel userModel;
   List<dynamic> _collectionCollectibles = [];
   List<dynamic> _userCollectibles = [];
   bool _isLoading = false;
@@ -20,7 +22,12 @@ class CollectibleModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get sortByName => _sortByName;
   String? get errorMessage => _errorMessage;
-  CollectibleModel(this._appAuthProvider);
+  CollectibleModel(this._appAuthProvider, this.userModel) {
+    // Check if a user is already loaded in UserModel before fetching collectibles.
+    if (userModel.currentUser != null) {
+      loadCollectibles();
+    }
+  }
 
   Future<void> loadCollectibles({bool forceClear = false}) async {
     _isLoading = true;
@@ -38,8 +45,11 @@ class CollectibleModel extends ChangeNotifier {
     notifyListeners(); // Notify UI it's loading, and lists might be empty if forceClear=true
 
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? userId = prefs.getString('userId');
+      final String? userId = userModel.currentUser?['userId']?.toString();
+
+      if (userId == null) {
+        throw Exception("User ID not available from UserModel.");
+      }
 
       _loadingMessage = "Fetching collectible templates...";
       notifyListeners();
