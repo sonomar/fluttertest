@@ -65,9 +65,15 @@ void main() async {
           context.read<UserModel>(),
         ),
         update:
-            (context, appAuthProvider, userModel, previousCollectibleModel) =>
-                previousCollectibleModel ??
-                CollectibleModel(appAuthProvider, userModel),
+            (context, appAuthProvider, userModel, previousCollectibleModel) {
+          final model = previousCollectibleModel ??
+              CollectibleModel(appAuthProvider, userModel);
+          if (appAuthProvider.status == AuthStatus.authenticated &&
+              userModel.currentUser != null) {
+            model.loadCollectibles();
+          }
+          return model;
+        },
       ),
       ChangeNotifierProxyProvider<AppAuthProvider, MissionModel>(
         create: (context) => MissionModel(context.read<AppAuthProvider>()),

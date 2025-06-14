@@ -13,6 +13,7 @@ class CollectibleModel extends ChangeNotifier {
   List<dynamic> _userCollectibles = [];
   bool _isLoading = false;
   bool _sortByName = false;
+  bool _hasLoaded = false;
   String? _errorMessage;
   String? _loadingMessage;
   String? get loadingMessage => _loadingMessage;
@@ -22,25 +23,18 @@ class CollectibleModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get sortByName => _sortByName;
   String? get errorMessage => _errorMessage;
-  CollectibleModel(this._appAuthProvider, this.userModel) {
-    // Check if a user is already loaded in UserModel before fetching collectibles.
-    if (userModel.currentUser != null) {
-      loadCollectibles();
-    }
-  }
+  CollectibleModel(this._appAuthProvider, this.userModel);
 
   Future<void> loadCollectibles({bool forceClear = false}) async {
-    _isLoading = true;
-    _errorMessage = null;
+    if (_isLoading || (_hasLoaded && !forceClear)) return;
 
     if (forceClear) {
-      // Clear local data to ensure a "from scratch" reload effect
+      _collectionCollectibles = [];
       _userCollectibles = [];
-      // Optionally clear _collectionCollectibles if they also need a hard refresh
-      // _collectionCollectibles = [];
-      print(
-          "CollectibleModel: Forcing clear of user collectibles before loading.");
+      _hasLoaded = false;
     }
+    _isLoading = true;
+    _errorMessage = null;
     _loadingMessage = "Starting data load...";
     notifyListeners(); // Notify UI it's loading, and lists might be empty if forceClear=true
 
