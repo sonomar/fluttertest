@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'subscreens/collectibles/collectible_details.dart';
 import '../models/collectible_model.dart';
 import '../helpers/localization_helper.dart';
@@ -126,16 +127,29 @@ class _CollectionScreenState extends State<CollectionScreen>
       child: Ink(
         decoration: BoxDecoration(
           color: Colors.white,
-          image: DecorationImage(
-            image: NetworkImage(colImage), // Use NetworkImage for URLs
-            fit: BoxFit.cover,
-            onError: (exception, stackTrace) {
-              // Handle image loading errors
-              print("Error loading image: $colImage, $exception");
-              // Optionally, display a placeholder
-            },
-          ),
         ),
+        child: colImage.isNotEmpty
+            ? CachedNetworkImage(
+                imageUrl: colImage,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2.0)),
+                // --- START OF DEBUGGING FIX ---
+                // Display the actual error message on screen for debugging.
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.red[100],
+                  padding: const EdgeInsets.all(4.0),
+                  child: Center(
+                    child: Text(
+                      'ERR:\n${error.toString()}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.red, fontSize: 8),
+                    ),
+                  ),
+                ),
+                // --- END OF DEBUGGING FIX ---
+              )
+            : const Icon(Icons.image_not_supported),
       ),
     ));
   }
@@ -153,13 +167,27 @@ class _CollectionScreenState extends State<CollectionScreen>
         width: 50,
         decoration: BoxDecoration(
           color: Colors.white,
-          image: DecorationImage(
-              image: NetworkImage(colImage),
-              fit: BoxFit.cover,
-              onError: (exception, stackTrace) {
-                //             print("Error loading unlinked image: $colImage, $exception");
-              }),
-        ), // Fixes border issues
+        ),
+        child: colImage.isNotEmpty
+            ? CachedNetworkImage(
+                imageUrl: colImage,
+                fit: BoxFit.cover,
+                // --- START OF DEBUGGING FIX ---
+                // Display the actual error message on screen for debugging.
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.red[100],
+                  padding: const EdgeInsets.all(4.0),
+                  child: Center(
+                    child: Text(
+                      'ERR:\n${error.toString()}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.red, fontSize: 8),
+                    ),
+                  ),
+                ),
+                // --- END OF DEBUGGING FIX ---
+              )
+            : const Icon(Icons.image_not_supported), // Fixes border issues
       ),
     );
   }
