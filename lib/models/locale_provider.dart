@@ -16,8 +16,11 @@ class LocaleProvider with ChangeNotifier {
     String? languageCode = prefs.getString('languageCode');
     if (languageCode != null) {
       _locale = Locale(languageCode);
-      notifyListeners();
+    } else {
+      // If no language preference is saved, default to German.
+      _locale = Locale('de');
     }
+    notifyListeners();
   }
 
   // Set the new locale and save it to device storage
