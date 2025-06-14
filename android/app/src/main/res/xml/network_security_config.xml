@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This file explicitly configures network security settings for your Android app.
+  It's the modern, recommended way to handle network permissions.
+-->
+<network-security-config>
+    <!-- 
+      By default, allow encrypted (HTTPS) traffic. This is the base policy.
+      This also includes system certificates, which is standard practice.
+    -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!--
+      Create a specific domain configuration for the S3 bucket where your images are hosted.
+      This tells Android to explicitly trust this domain.
+    -->
+    <domain-config>
+        <!-- The domain your images are loaded from. -->
+        <domain includeSubdomains="true">deins.s3.eu-central-1.amazonaws.com</domain>
+        <trust-anchors>
+            <certificates src="user" />
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

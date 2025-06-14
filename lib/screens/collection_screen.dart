@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'subscreens/collectibles/collectible_details.dart';
 import '../models/collectible_model.dart';
 import '../helpers/localization_helper.dart';
-import '../models/app_localizations.dart';
 
 class CollectionScreen extends StatefulWidget {
   const CollectionScreen({super.key, PageStorageKey<String>? pageKey});
@@ -331,7 +330,7 @@ class _CollectionScreenState extends State<CollectionScreen>
                                   .map<Widget>((collectibleTemplate) {
                                 bool isOwned = isUserOwned(
                                     collectibleTemplate, userCollectibles);
-                                Map? userCollectibleInstance;
+                                Map userCollectibleInstance = {};
                                 if (isOwned) {
                                   userCollectibleInstance =
                                       userCollectibles.firstWhere(
@@ -339,7 +338,7 @@ class _CollectionScreenState extends State<CollectionScreen>
                                         uc['collectibleId'].toString() ==
                                         collectibleTemplate['collectibleId']
                                             .toString(),
-                                    orElse: () => null,
+                                    orElse: () => {},
                                   );
                                 }
 
@@ -348,7 +347,7 @@ class _CollectionScreenState extends State<CollectionScreen>
                                       vertical: 10,
                                       horizontal: 5), // Adjusted padding
                                   child: isOwned &&
-                                          userCollectibleInstance != null
+                                          userCollectibleInstance.isNotEmpty
                                       ? linkedInkwell(collectibleTemplate,
                                           userCollectibleInstance, context)
                                       : unlinkedInkwell(collectibleTemplate),
