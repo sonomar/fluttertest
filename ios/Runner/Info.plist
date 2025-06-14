@@ -32,7 +32,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>The camera feature is only for scanning new cards. Scan a card QR code now!</string>
+	<string>Mit Kamerazugriff kannst du QR-Codes scannen und digitale Souvenirs sammeln.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
