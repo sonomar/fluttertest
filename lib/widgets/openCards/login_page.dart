@@ -349,9 +349,8 @@ class _LoginPageState extends State<LoginPage> {
         TextFormField(
           style: TextStyle(color: Colors.white),
           controller: _confirmationCodeController,
-          decoration: InputDecoration(
-              labelText: translate("confirm_code_validator", context),
-              border: OutlineInputBorder()),
+          decoration:
+              InputDecoration(labelText: "code", border: OutlineInputBorder()),
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
           validator: (value) => (value?.isEmpty ?? true)

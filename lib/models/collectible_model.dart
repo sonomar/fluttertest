@@ -35,7 +35,7 @@ class CollectibleModel extends ChangeNotifier {
     }
     _isLoading = true;
     _errorMessage = null;
-    _loadingMessage = "Starting data load...";
+    _loadingMessage = "Loading...";
     notifyListeners(); // Notify UI it's loading, and lists might be empty if forceClear=true
 
     try {
@@ -44,9 +44,6 @@ class CollectibleModel extends ChangeNotifier {
       if (userId == null) {
         throw Exception("User ID not available from UserModel.");
       }
-
-      _loadingMessage = "Fetching collectible templates...";
-      notifyListeners();
 
       // Load collection templates (usually less volatile than user-specific data)
       final dynamic fetchedCollectionData =
@@ -72,8 +69,6 @@ class CollectibleModel extends ChangeNotifier {
         print(
             'CollectibleModel: User ID is null, cannot fetch user collectibles.');
       } else {
-        _loadingMessage = "Fetching your owned collectibles...";
-        notifyListeners();
         final dynamic fetchedUserData =
             await getUserCollectiblesByOwnerId(userId, _appAuthProvider); //
         if (fetchedUserData is List) {
@@ -103,7 +98,6 @@ class CollectibleModel extends ChangeNotifier {
       _userCollectibles = [];
     } finally {
       _isLoading = false;
-      _loadingMessage = "Load complete.";
       notifyListeners(); // Notify UI with the final state
     }
   }
