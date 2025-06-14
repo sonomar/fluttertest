@@ -146,15 +146,6 @@ class MyApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        localeResolutionCallback: (locale, supportedLocales) {
-          // This callback is still useful as a fallback for the initial load.
-          for (var supportedLocale in supportedLocales) {
-            if (supportedLocale.languageCode == locale?.languageCode) {
-              return supportedLocale;
-            }
-          }
-          return supportedLocales.first;
-        },
         home: Consumer<AppAuthProvider>(
           builder: (context, authProvider, _) {
             print(
