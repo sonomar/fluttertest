@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../helpers/localization_helper.dart';
-import 'package:kloppocar_app/models/notification_provider.dart';
-import 'package:kloppocar_app/screens/subscreens/notifications/notification_models.dart';
-import 'package:kloppocar_app/screens/subscreens/notifications/notification_detail_page.dart';
+import 'package:deins_app/models/notification_provider.dart';
+import 'package:deins_app/screens/subscreens/notifications/notification_models.dart';
+import 'package:deins_app/screens/subscreens/notifications/notification_detail_page.dart';
 // Removed: import 'notification_service.dart';
 
 class NotificationsPage extends StatefulWidget {

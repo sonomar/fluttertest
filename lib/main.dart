@@ -22,7 +22,7 @@ import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
 import './helpers/localization_helper.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:kloppocar_app/models/app_auth_provider.dart';
+import 'package:deins_app/models/app_auth_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './app_lifefycle_observer.dart';

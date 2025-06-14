@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:kloppocar_app/api/notification.dart';
-import 'package:kloppocar_app/api/notification_user.dart';
-import 'package:kloppocar_app/models/app_auth_provider.dart';
-import 'package:kloppocar_app/models/user_model.dart';
-import 'package:kloppocar_app/screens/subscreens/notifications/notification_models.dart';
+import 'package:deins_app/api/notification.dart';
+import 'package:deins_app/api/notification_user.dart';
+import 'package:deins_app/models/app_auth_provider.dart';
+import 'package:deins_app/models/user_model.dart';
+import 'package:deins_app/screens/subscreens/notifications/notification_models.dart';
 
 class NotificationProvider with ChangeNotifier {
   final AppAuthProvider _appAuthProvider;

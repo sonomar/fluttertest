@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kloppocar_app/widgets/splash_screen.dart';
+import 'package:deins_app/widgets/splash_screen.dart';
 import 'login_page.dart';
 import '../../auth/register.dart';
 

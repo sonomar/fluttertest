@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kloppocar_app/widgets/profile/permissions_widgets.dart';
-import 'package:kloppocar_app/widgets/auth/auth_widgets.dart';
+import 'package:deins_app/widgets/profile/permissions_widgets.dart';
+import 'package:deins_app/widgets/auth/auth_widgets.dart';
 import '../../../helpers/localization_helper.dart';
 
 class AccountSettingsScreen extends StatelessWidget {

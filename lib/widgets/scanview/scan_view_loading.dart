@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kloppocar_app/screens/subscreens/collectibles/collectible.dart';
+import 'package:deins_app/screens/subscreens/collectibles/collectible.dart';
 import './scan_view_success.dart';
 import './scan_view_error.dart';
 import 'package:lottie/lottie.dart';

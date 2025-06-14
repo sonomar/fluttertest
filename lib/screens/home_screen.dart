@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/app_localizations.dart';
-import 'package:kloppocar_app/screens/subscreens/news_posts/news_post_details.dart';
+import 'package:deins_app/screens/subscreens/news_posts/news_post_details.dart';
 import 'package:provider/provider.dart';
-import 'package:kloppocar_app/screens/subscreens/collectibles/collectible_details.dart';
-import 'package:kloppocar_app/screens/profile_screen.dart';
+import 'package:deins_app/screens/subscreens/collectibles/collectible_details.dart';
+import 'package:deins_app/screens/profile_screen.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'dart:async';
 import 'subscreens/notifications/notifications_page.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:kloppocar_app/models/notification_provider.dart';
-import 'package:kloppocar_app/screens/subscreens/notifications/notification_models.dart';
+import 'package:deins_app/models/notification_provider.dart';
+import 'package:deins_app/screens/subscreens/notifications/notification_models.dart';
 
 class NotificationDetailPage extends StatefulWidget {
   final UserNotification userNotification; // Receive UserNotification object

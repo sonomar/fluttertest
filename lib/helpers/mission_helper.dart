@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:kloppocar_app/models/mission_model.dart';
-import 'package:kloppocar_app/models/collectible_model.dart';
-import 'package:kloppocar_app/models/app_auth_provider.dart';
-import 'package:kloppocar_app/api/mission_user.dart';
+import 'package:deins_app/models/mission_model.dart';
+import 'package:deins_app/models/collectible_model.dart';
+import 'package:deins_app/models/app_auth_provider.dart';
+import 'package:deins_app/api/mission_user.dart';
 
 // An enum to make the operation clear
 enum MissionProgressOperation { increment, decrement }
