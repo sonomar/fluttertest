@@ -337,63 +337,80 @@ class _CollectionScreenState extends State<CollectionScreen>
             ),
           ),
           Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: collectibleModel.isLoading
-                      ? const Center(
-                          child:
-                              CircularProgressIndicator()) // Added const here
-                      : (collectionCollectibles != null &&
-                              collectionCollectibles.isNotEmpty)
-                          ? GridView.count(
-                              primary: false,
-                              padding:
-                                  const EdgeInsets.only(top: 20, bottom: 20),
-                              crossAxisCount: 4,
-                              crossAxisSpacing: 5,
-                              mainAxisSpacing: 5,
-                              childAspectRatio: (6 / 10),
-                              children: collectionCollectibles
-                                  .map<Widget>((collectibleTemplate) {
-                                bool isOwned = isUserOwned(
-                                    collectibleTemplate, userCollectibles);
-                                Map userCollectibleInstance = {};
-                                if (isOwned) {
-                                  userCollectibleInstance =
-                                      userCollectibles.firstWhere(
-                                    (uc) =>
-                                        uc['collectibleId'].toString() ==
-                                        collectibleTemplate['collectibleId']
-                                            .toString(),
-                                    orElse: () => {},
-                                  );
-                                }
+            child: Builder(
+              builder: (context) {
+                // State 1: Loading
+                if (collectibleModel.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                                return Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10,
-                                      horizontal: 5), // Adjusted padding
-                                  child: isOwned &&
-                                          userCollectibleInstance.isNotEmpty
-                                      ? linkedInkwell(collectibleTemplate,
-                                          userCollectibleInstance, context)
-                                      : unlinkedInkwell(collectibleTemplate),
-                                );
-                              }).toList(),
-                            )
-                          : Center(
-                              child: Text(
-                                translate("collectibles_none", context),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
-                                  fontFamily: 'ChakraPetch',
-                                ),
-                              ),
-                            ),
-                )
-              ],
+                // State 2: Error
+                // If an error occurred during loading, display it.
+                if (collectibleModel.errorMessage != null) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Failed to load collectibles:\n${collectibleModel.errorMessage}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red, fontSize: 16),
+                      ),
+                    ),
+                  );
+                }
+
+                // State 3: Success with Data
+                // If loading is finished and there are no errors, build the grid.
+                if (collectionCollectibles.isNotEmpty) {
+                  return GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      crossAxisSpacing: 5,
+                      mainAxisSpacing: 5,
+                      childAspectRatio: (6 / 10),
+                    ),
+                    padding: const EdgeInsets.only(top: 20, bottom: 20),
+                    itemCount: collectionCollectibles.length,
+                    itemBuilder: (context, index) {
+                      final collectibleTemplate = collectionCollectibles[index];
+                      bool isOwned =
+                          isUserOwned(collectibleTemplate, userCollectibles);
+
+                      Map userCollectibleInstance = {};
+                      if (isOwned) {
+                        userCollectibleInstance = userCollectibles.firstWhere(
+                          (uc) =>
+                              uc['collectibleId'].toString() ==
+                              collectibleTemplate['collectibleId'].toString(),
+                          orElse: () => {},
+                        );
+                      }
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 5),
+                        child: isOwned && userCollectibleInstance.isNotEmpty
+                            ? linkedInkwell(collectibleTemplate,
+                                userCollectibleInstance, context)
+                            : unlinkedInkwell(collectibleTemplate),
+                      );
+                    },
+                  );
+                } else {
+                  // State 4: Success with No Data
+                  return Center(
+                    child: Text(
+                      translate("collectibles_none", context),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        fontFamily: 'ChakraPetch',
+                      ),
+                    ),
+                  );
+                }
+              },
             ),
           ),
         ],
