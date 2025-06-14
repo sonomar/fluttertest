@@ -12,6 +12,8 @@ class CollectibleModel extends ChangeNotifier {
   bool _isLoading = false;
   bool _sortByName = false;
   String? _errorMessage;
+  String? _loadingMessage;
+  String? get loadingMessage => _loadingMessage;
 
   List<dynamic> get collectionCollectibles => _collectionCollectibles;
   List<dynamic> get userCollectibles => _userCollectibles;
@@ -23,6 +25,7 @@ class CollectibleModel extends ChangeNotifier {
   Future<void> loadCollectibles({bool forceClear = false}) async {
     _isLoading = true;
     _errorMessage = null;
+
     if (forceClear) {
       // Clear local data to ensure a "from scratch" reload effect
       _userCollectibles = [];
@@ -31,11 +34,15 @@ class CollectibleModel extends ChangeNotifier {
       print(
           "CollectibleModel: Forcing clear of user collectibles before loading.");
     }
+    _loadingMessage = "Starting data load...";
     notifyListeners(); // Notify UI it's loading, and lists might be empty if forceClear=true
 
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? userId = prefs.getString('userId');
+
+      _loadingMessage = "Fetching collectible templates...";
+      notifyListeners();
 
       // Load collection templates (usually less volatile than user-specific data)
       final dynamic fetchedCollectionData =
@@ -61,6 +68,8 @@ class CollectibleModel extends ChangeNotifier {
         print(
             'CollectibleModel: User ID is null, cannot fetch user collectibles.');
       } else {
+        _loadingMessage = "Fetching your owned collectibles...";
+        notifyListeners();
         final dynamic fetchedUserData =
             await getUserCollectiblesByOwnerId(userId, _appAuthProvider); //
         if (fetchedUserData is List) {
@@ -90,6 +99,7 @@ class CollectibleModel extends ChangeNotifier {
       _userCollectibles = [];
     } finally {
       _isLoading = false;
+      _loadingMessage = "Load complete.";
       notifyListeners(); // Notify UI with the final state
     }
   }

@@ -339,13 +339,27 @@ class _CollectionScreenState extends State<CollectionScreen>
           Expanded(
             child: Builder(
               builder: (context) {
-                // State 1: Loading
+                // State 1: Loading - Now with live status message
                 if (collectibleModel.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 16),
+                        // This will show you exactly which step it's on
+                        Text(
+                          collectibleModel.loadingMessage ?? 'Initializing...',
+                          textAlign: TextAlign.center,
+                          style:
+                              const TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  );
                 }
 
                 // State 2: Error
-                // If an error occurred during loading, display it.
                 if (collectibleModel.errorMessage != null) {
                   return Center(
                     child: Padding(
@@ -360,7 +374,6 @@ class _CollectionScreenState extends State<CollectionScreen>
                 }
 
                 // State 3: Success with Data
-                // If loading is finished and there are no errors, build the grid.
                 if (collectionCollectibles.isNotEmpty) {
                   return GridView.builder(
                     gridDelegate:
