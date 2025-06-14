@@ -196,7 +196,7 @@ class _LoginPageState extends State<LoginPage> {
                       ? translate('login_header', context)
                       : _formType == AuthFormType.register
                           ? translate('register_header', context)
-                          : translate('confirm_header', context),
+                          : translate('confirm_code_header', context),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                       color: Colors.white,
@@ -236,7 +236,7 @@ class _LoginPageState extends State<LoginPage> {
                           ? translate('login_header', context)
                           : _formType == AuthFormType.register
                               ? translate('register_header', context)
-                              : translate('confirm_header', context),
+                              : translate('confirm_code_header', context),
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),
@@ -350,7 +350,7 @@ class _LoginPageState extends State<LoginPage> {
           style: TextStyle(color: Colors.white),
           controller: _confirmationCodeController,
           decoration: InputDecoration(
-              labelText: translate("confirm_code_label", context),
+              labelText: translate("confirm_code_validator", context),
               border: OutlineInputBorder()),
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
