@@ -76,10 +76,10 @@ class _ObjectViewerState extends State<ObjectViewer> {
         ),
 
         // --- Loading Indicator ---
-        if (!_isModelLoaded)
-          const Center(
-            child: CircularProgressIndicator(),
-          ),
+        // if (!_isModelLoaded)
+        //   const Center(
+        //     child: CircularProgressIndicator(),
+        //   ),
       ],
     );
   }
