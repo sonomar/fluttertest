@@ -1,86 +1,73 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_3d_controller/flutter_3d_controller.dart';
+import 'package:model_viewer_plus/model_viewer_plus.dart';
+import '../services/asset_cache_service.dart';
 
 class ObjectViewer extends StatefulWidget {
-  const ObjectViewer({
-    super.key,
-    required this.asset,
-    required this.placeholder,
-  });
   final String asset;
   final String placeholder;
 
+  const ObjectViewer(
+      {super.key, required this.asset, required this.placeholder});
+
   @override
-  State<ObjectViewer> createState() => _ObjectViewerState();
+  ObjectViewerState createState() => ObjectViewerState();
 }
 
-class _ObjectViewerState extends State<ObjectViewer> {
-  final Flutter3DController _controller = Flutter3DController();
-  bool _isModelLoaded = false;
+class ObjectViewerState extends State<ObjectViewer> {
+  late final Future<String?> _preparedGltfDataUrlFuture;
 
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+    // Start the process of preparing the self-contained data URL.
+    // This will be instant if the model has already been viewed once.
+    _preparedGltfDataUrlFuture =
+        AssetCacheService.instance.getPreparedGltfDataUrl(widget.asset);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        // --- 3D Viewer ---
-        Flutter3DViewer(
-          activeGestureInterceptor: true,
-          progressBarColor: Colors.transparent,
-          enableTouch: true,
-          onProgress: (double progressValue) {
-            // This is great for debugging to see that loading is happening.
-            debugPrint('model loading progress : $progressValue');
-          },
-          onLoad: (String modelAddress) {
-            print('testtesttest');
-            debugPrint(
-                'onLoad callback triggered: model loaded at $modelAddress');
-            // Check if the widget is still mounted before calling setState
-            if (mounted) {
-              setState(() {
-                _isModelLoaded = true;
-              });
-            }
-          },
-          onError: (String error) {
-            debugPrint('model failed to load : $error');
-            // Optionally, handle the error state in the UI
-          },
-          src: widget.asset,
-          controller: _controller,
-        ),
+    return FutureBuilder<String?>(
+      future: _preparedGltfDataUrlFuture,
+      builder: (context, snapshot) {
+        // Case 1: Still preparing the data URL (only happens on first load)
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // While waiting, we show a simple spinner. The ModelViewer's `poster`
+          // property will be responsible for showing the placeholder image.
+          return const Center(child: CircularProgressIndicator());
+        }
 
-        // --- Placeholder ---
-        IgnorePointer(
-          ignoring:
-              _isModelLoaded, // Also disable pointer events when not visible
-          child: AnimatedOpacity(
-              opacity: _isModelLoaded ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 100),
-              child: Padding(
-                  padding: EdgeInsets.all(40),
-                  child: Image.network(
-                    widget.placeholder,
-                  ))),
-        ),
+        // Case 2: An error occurred during preparation
+        if (snapshot.hasError || snapshot.data == null) {
+          return const Center(
+            child: Icon(Icons.error, color: Colors.red, size: 48),
+          );
+        }
 
-        // --- Loading Indicator ---
-        // if (!_isModelLoaded)
-        //   const Center(
-        //     child: CircularProgressIndicator(),
-        //   ),
-      ],
+        // Case 3: Success! We have the prepared data URL.
+        // --- START OF FIX ---
+        // The ModelViewer now fills its parent container, ensuring the final
+        // 3D object is full-size.
+        return ModelViewer(
+          src: snapshot.data!,
+          poster: widget.placeholder,
+          loading: Loading.eager,
+          reveal: Reveal.auto,
+          alt: "A 3D model",
+          ar: true,
+          autoRotate: true,
+          cameraControls: true,
+          disableZoom: true,
+          disablePan: true,
+          backgroundColor: Colors.transparent,
+          // This attribute adjusts the initial camera view. The third value is the
+          // radius (distance from the object). A smaller value "zooms in".
+          // The '100%' value makes the object fit the vertical viewport.
+          // You can adjust this to best match your placeholder's scale.
+          cameraOrbit: "0deg 75deg 90%",
+        );
+        // --- END OF FIX ---
+      },
     );
   }
 }

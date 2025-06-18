@@ -17,6 +17,7 @@ import 'models/mission_model.dart';
 import 'models/community_model.dart';
 import 'models/news_post_model.dart';
 import 'models/locale_provider.dart';
+import 'models/asset_provider.dart';
 import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
@@ -74,6 +75,9 @@ void main() async {
           }
           return model;
         },
+      ),
+      ChangeNotifierProvider<AssetProvider>(
+        create: (context) => AssetProvider(),
       ),
       ChangeNotifierProxyProvider<AppAuthProvider, MissionModel>(
         create: (context) => MissionModel(context.read<AppAuthProvider>()),

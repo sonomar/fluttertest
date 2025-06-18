@@ -1,29 +1,16 @@
-// import 'dart:async';
-// import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-// import '../models/user_model.dart';
-// import '../models/app_auth_provider.dart';
-// import '../main.dart';
-// import '../widgets/openCards/login_page.dart';
 import 'package:lottie/lottie.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import '../models/asset_provider.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
-  SplashScreenState createState() => SplashScreenState();
-}
-
-class SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Watch the AssetProvider to get live updates on the pre-loading status.
+    final assetProvider = context.watch<AssetProvider>();
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
@@ -36,13 +23,24 @@ class SplashScreenState extends State<SplashScreen> {
               height: 200,
               width: 200,
             ),
-            SizedBox(
+            const SizedBox(
               height: 40,
             ),
             SizedBox(
                 height: 40,
                 width: 40,
                 child: Lottie.asset('assets/lottie/pinkspin1.json')),
+            const SizedBox(height: 20),
+
+            // --- START OF FIX ---
+            // This text will dynamically update based on the AssetProvider's state.
+            Text(
+              assetProvider.isReady
+                  ? 'Assets Loaded!'
+                  : 'Loading Essential Assets...',
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+            // --- END OF FIX ---
           ],
         ),
       ),
