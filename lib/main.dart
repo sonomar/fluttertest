@@ -20,6 +20,8 @@ import 'models/locale_provider.dart';
 import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
+import './models/asset_provider.dart';
+import 'package:path_provider/path_provider.dart';
 import './helpers/localization_helper.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:deins_app/models/app_auth_provider.dart';
@@ -27,6 +29,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './app_lifefycle_observer.dart';
 import './screens/auth_loading_screen.dart';
+import 'dart:io'; // Import dart:io
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,6 +77,9 @@ void main() async {
           }
           return model;
         },
+      ),
+      ChangeNotifierProvider<AssetProvider>(
+        create: (context) => AssetProvider(),
       ),
       ChangeNotifierProxyProvider<AppAuthProvider, MissionModel>(
         create: (context) => MissionModel(context.read<AppAuthProvider>()),
@@ -157,31 +163,32 @@ class MyApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        home: Consumer<AppAuthProvider>(
-          builder: (context, authProvider, _) {
+        home: Consumer2<AppAuthProvider, AssetProvider>(
+          builder: (context, authProvider, assetProvider, _) {
+            // The SplashScreen will be shown if EITHER the assets aren't ready
+            // OR the initial authentication check hasn't finished.
+            if (!assetProvider.isReady ||
+                authProvider.status == AuthStatus.uninitialized) {
+              return const SplashScreen();
+            }
+
             print(
                 'RootApp Consumer (Auth): Status = ${authProvider.status}'); // Debug print
 
             switch (authProvider.status) {
               case AuthStatus.uninitialized:
               case AuthStatus.authenticating:
+                // This state can appear briefly after initialization, so we still show splash.
                 return const SplashScreen();
-
               case AuthStatus.authenticated:
-                print(
-                    'RootApp: Returning AuthLoadingScreen() at ${DateTime.now()}.');
                 return const AuthLoadingScreen();
-
               case AuthStatus.unauthenticated:
-                print(
-                    'RootApp: Navigating to LoginPage (unauthenticated).'); // Debug print
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (context.mounted) {
                     Provider.of<UserModel>(context, listen: false).clearUser();
                   }
                 });
-                return const LoginPage(
-                    userData: {}); // <--- This is the correct way
+                return const LoginPage(userData: {});
             }
           },
         ),
