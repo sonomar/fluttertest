@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/app_localizations.dart';
 import 'package:deins_app/screens/subscreens/news_posts/news_post_details.dart';
 import 'package:provider/provider.dart';
 import 'package:deins_app/screens/subscreens/collectibles/collectible_details.dart';
-import 'package:deins_app/screens/profile_screen.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'dart:async';
 import 'subscreens/notifications/notifications_page.dart';
@@ -45,11 +43,7 @@ class HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-    print('>>> MyHomePage: initState called at ${DateTime.now()} <<<');
-    // Defer the calls to load data until after the first frame is rendered.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<MissionModel>(context, listen: false).loadMissions();
-      Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
       Provider.of<NewsPostModel>(context, listen: false).loadNewsPosts();
       Provider.of<CommunityModel>(context, listen: false)
           .loadCommunityChallenge();
@@ -184,13 +178,15 @@ class HomeScreenState extends State<HomeScreen>
     final newsPostModel = context.watch<NewsPostModel>();
     final newsPosts = newsPostModel.newsPosts;
     final collectibleModel = context.watch<CollectibleModel>();
+    final allCollectibles = collectibleModel.collectionCollectibles;
     final collectibles = collectibleModel.collectionCollectibles;
     final userCollectibles = collectibleModel.userCollectibles;
     final notificationProvider = context.watch<NotificationProvider>();
     final int unreadNotifications =
         notificationProvider.unreadNotificationCount;
 
-    final recentColl = getLatestCollectible(collectibles, userCollectibles);
+    final recentColl =
+        allCollectibles.isNotEmpty ? allCollectibles.first : null;
     final recentUrls = _getAssetUrlFromCollectible(recentColl);
     return Scaffold(
         backgroundColor: Colors.white,

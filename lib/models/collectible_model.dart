@@ -26,17 +26,15 @@ class CollectibleModel extends ChangeNotifier {
   CollectibleModel(this._appAuthProvider, this.userModel);
 
   Future<void> loadCollectibles({bool forceClear = false}) async {
-    if (_isLoading || (_hasLoaded && !forceClear)) return;
+    if (_isLoading) return;
+    if (_hasLoaded && !forceClear) return;
 
-    if (forceClear) {
-      _collectionCollectibles = [];
-      _userCollectibles = [];
-      _hasLoaded = false;
-    }
     _isLoading = true;
     _errorMessage = null;
     _loadingMessage = "Loading...";
-    notifyListeners(); // Notify UI it's loading, and lists might be empty if forceClear=true
+    if (forceClear) {
+      notifyListeners();
+    }
 
     try {
       final String? userId = userModel.currentUser?['userId']?.toString();
@@ -45,46 +43,28 @@ class CollectibleModel extends ChangeNotifier {
         throw Exception("User ID not available from UserModel.");
       }
 
-      // Load collection templates (usually less volatile than user-specific data)
-      final dynamic fetchedCollectionData =
-          await getCollectiblesByCollectionId('1', _appAuthProvider); //
+      // Perform both API calls concurrently for better performance.
+      final results = await Future.wait([
+        getCollectiblesByCollectionId('1', _appAuthProvider),
+        getUserCollectiblesByOwnerId(userId, _appAuthProvider)
+      ]);
+
+      final dynamic fetchedCollectionData = results[0];
+      final dynamic fetchedUserData = results[1];
       if (fetchedCollectionData is List) {
         _collectionCollectibles = fetchedCollectionData;
       } else {
-        if (forceClear || _collectionCollectibles.isNotEmpty) {
-          _collectionCollectibles = []; // Ensure it's a list
-        }
-        _errorMessage =
-            '${_errorMessage ?? ''} Failed to load collection data: Unexpected format.';
+        _collectionCollectibles = [];
         print('CollectibleModel: Fetched collection data was not a List.');
       }
-
-      // Load user-specific collectibles
-      if (userId == null) {
-        if (forceClear || _userCollectibles.isNotEmpty) {
-          _userCollectibles = []; // Ensure it's a list
-        }
-        _errorMessage =
-            '${_errorMessage ?? ''} User ID not found for user collectibles.';
-        print(
-            'CollectibleModel: User ID is null, cannot fetch user collectibles.');
+      if (fetchedUserData is List) {
+        _userCollectibles = fetchedUserData;
       } else {
-        final dynamic fetchedUserData =
-            await getUserCollectiblesByOwnerId(userId, _appAuthProvider); //
-        if (fetchedUserData is List) {
-          _userCollectibles = fetchedUserData;
-        } else {
-          if (forceClear || _userCollectibles.isNotEmpty) {
-            _userCollectibles = []; // Ensure it's a list
-          }
-          _errorMessage =
-              '${_errorMessage ?? ''} Failed to load user collectibles: Unexpected format.';
-          print('CollectibleModel: Fetched user data was not a List.');
-        }
+        _userCollectibles = [];
+        print('CollectibleModel: Fetched user data was not a List.');
       }
-      // print('DEBUG: User collectibles loaded. Count: ${_userCollectibles.length}');
-      // print('DEBUG: Collection collectibles loaded. Count: ${_collectionCollectibles.length}');
-
+      _hasLoaded = true; // Mark that a successful load has occurred.
+      sortCollectiblesByColumn(_sortByName ? "name" : "label");
       // Re-apply sorting if needed
       // if (_collectionCollectibles.isNotEmpty && _sortByName) {
       //   sortCollectiblesByColumn("name");
@@ -94,11 +74,11 @@ class CollectibleModel extends ChangeNotifier {
     } catch (e) {
       _errorMessage = 'Error loading collectible data: ${e.toString()}';
       print('CollectibleModel: Error in loadCollectibles: $e');
-      _collectionCollectibles = []; // Ensure lists are empty on error
+      _collectionCollectibles = [];
       _userCollectibles = [];
     } finally {
       _isLoading = false;
-      notifyListeners(); // Notify UI with the final state
+      notifyListeners();
     }
   }
 
@@ -119,7 +99,6 @@ class CollectibleModel extends ChangeNotifier {
   }
 
   Future<void> addUserCollectible(userId, collectibleId, mint) async {
-    // ... (ensure this method calls loadCollectibles(forceClear: true) or manually adds then notifies)
     try {
       await createUserCollectible(userId.toString(), collectibleId.toString(),
           mint.toString(), _appAuthProvider); //
@@ -133,6 +112,7 @@ class CollectibleModel extends ChangeNotifier {
   Future<void> updateCollectible(body) async {
     try {
       await updateCollectibleByCollectibleId(body, _appAuthProvider);
+      await loadCollectibles(forceClear: true);
     } catch (e) {
       print('Error creating userCollectible data: $e');
     } finally {
@@ -142,8 +122,8 @@ class CollectibleModel extends ChangeNotifier {
 
   Future<bool> updateUserCollectibleStatus(String userCollectibleId,
       bool isActive, String? newOwnerId, String? previousOwnerId) async {
-    _isLoading = true;
-    notifyListeners();
+    // _isLoading = true;
+    // notifyListeners();
     try {
       final Map<String, dynamic> body = {
         "active": isActive ? 1 : 0,
@@ -159,52 +139,10 @@ class CollectibleModel extends ChangeNotifier {
       }
 
       await updateUserCollectibleByUserCollectibleId(body, _appAuthProvider); //
-
-      // --- Revised Local State Update Logic ---
-      final prefs = await SharedPreferences.getInstance();
-      final String? currentModelUserId = prefs.getString('userId');
-
-      final localUserCollectibleIndex = _userCollectibles.indexWhere(
-          (uc) => uc['userCollectibleId'].toString() == userCollectibleId);
-
-      if (newOwnerId != null && newOwnerId != currentModelUserId) {
-        // This means the current user (who owns this CollectibleModel instance) was the GIVER,
-        // and the item has been transferred to someone else (newOwnerId).
-        // So, remove it from the giver's local list if it was there.
-        if (localUserCollectibleIndex != -1) {
-          // Check if the item's owner was indeed this currentModelUserId before removing
-          if (_userCollectibles[localUserCollectibleIndex]['ownerId']
-                  ?.toString() ==
-              currentModelUserId) {
-            _userCollectibles.removeAt(localUserCollectibleIndex);
-            print(
-                "UserCollectible $userCollectibleId removed from local list of giver $currentModelUserId.");
-          }
-        }
-      } else if (newOwnerId == null && localUserCollectibleIndex != -1) {
-        // No ownership change, just an active status update for the current owner.
-        // (e.g., giver initiates trade by setting active=false, or cancels by setting active=true)
-        if (_userCollectibles[localUserCollectibleIndex]['ownerId']
-                ?.toString() ==
-            currentModelUserId) {
-          _userCollectibles[localUserCollectibleIndex]['active'] = isActive;
-          print(
-              "UserCollectible $userCollectibleId active status updated locally for owner $currentModelUserId.");
-        }
-      }
-      // If newOwnerId IS currentModelUserId (i.e., this user is the RECEIVER):
-      // The item wasn't in _userCollectibles to begin with.
-      // The `loadCollectibles()` call, which should be made in `ScanScreen._processTrade`
-      // AFTER this `updateUserCollectibleStatus` returns true, will fetch the updated
-      // list from the backend, including the newly acquired item.
-
-      _isLoading = false;
-      notifyListeners();
+      await loadCollectibles(forceClear: true);
       return true;
     } catch (e) {
       _errorMessage = 'Error updating UserCollectible: ${e.toString()}';
-      print(_errorMessage);
-      _isLoading = false;
       notifyListeners();
       return false;
     }

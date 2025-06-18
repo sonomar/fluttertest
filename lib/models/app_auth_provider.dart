@@ -235,4 +235,19 @@ class AppAuthProvider with ChangeNotifier {
     notifyListeners();
     return success;
   }
+
+  Future<bool> deleteAccount({required String userId}) async {
+    _errorMessage = null;
+    notifyListeners();
+    // Pass the userId along to the auth service.
+    final success = await _authService.deleteAccount(userId: userId);
+    if (!success) {
+      _errorMessage = _authService.errorMessage;
+      notifyListeners();
+    } else {
+      // If deletion is successful, trigger the sign out process.
+      await signOut();
+    }
+    return success;
+  }
 }

@@ -90,5 +90,6 @@
   "disable_camera_message": "Zum Deaktivieren gehe in die App-Einstellungen deines Geräts.",
   "cancel_button": "Abbrechen",
   "open_settings_button": "Einstellungen öffnen",
-  "got_it_button": "Verstanden"
+  "got_it_button": "Verstanden",
+  "delete_account_button": ""
 }

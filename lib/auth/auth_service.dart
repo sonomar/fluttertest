@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/app_auth_provider.dart';
+import '../api/user.dart';
 
 // Helper to get environment variables safely
 String getEnvItem(String item) {
@@ -443,6 +444,43 @@ class AuthService {
     } catch (e) {
       _internalErrorMessage = 'An unexpected error occurred.';
       print('AuthService: VerifyEmail Error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> deleteAccount({required String userId}) async {
+    _internalErrorMessage = null;
+    // Ensure we have a valid, authenticated user to delete.
+    if (_cognitoUser == null || _session == null || !_session!.isValid()) {
+      _internalErrorMessage = "You must be logged in to delete your account.";
+      return false;
+    }
+
+    try {
+      // Step 1: Deactivate the user in your backend database.
+      print('AuthService: Deactivating user in backend database...');
+      final userUpdateBody = {
+        "userId": userId,
+        "active": false,
+      };
+      await updateUserByUserId(userUpdateBody, _appAuthProvider);
+      print('AuthService: Backend user record deactivated.');
+
+      // Step 2: Delete the user from the Cognito User Pool.
+      print('AuthService: Deleting user from Cognito...');
+      await _cognitoUser!.deleteUser();
+      print('AuthService: Cognito user deleted successfully.');
+
+      return true;
+    } on CognitoClientException catch (e) {
+      _internalErrorMessage =
+          e.message ?? "An error occurred while deleting your Cognito account.";
+      print('AuthService: DeleteAccount Error: $_internalErrorMessage');
+      return false;
+    } catch (e) {
+      _internalErrorMessage =
+          'An unexpected error occurred during account deletion.';
+      print('AuthService: DeleteAccount Error: $e');
       return false;
     }
   }

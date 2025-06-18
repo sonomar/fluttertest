@@ -17,9 +17,6 @@ class _MissionsState extends State<Missions> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<MissionModel>(context, listen: false).loadMissions();
-    });
   }
 
   @override
