@@ -28,9 +28,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './app_lifefycle_observer.dart';
 import './screens/auth_loading_screen.dart';
+import './services/asset_cache_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AssetCacheService.instance.initialize();
   await dotenv.load(fileName: ".env");
   runApp(
     MultiProvider(providers: [

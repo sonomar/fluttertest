@@ -3,9 +3,8 @@ import '../services/asset_cache_service.dart';
 
 class AssetProvider with ChangeNotifier {
   // --- Configuration ---
-  // The URL of the specific .gltf file you want to preload for the HomeScreen.
   static const String _homeScreenGltfUrl =
-      'https://deins.s3.eu-central-1.amazonaws.com/path/to/your/home_screen_model.gltf'; // IMPORTANT: Replace with your actual URL
+      'https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/KloppoCar_01.gltf';
 
   // --- State ---
   bool _isReady = false;
@@ -20,15 +19,17 @@ class AssetProvider with ChangeNotifier {
   }
 
   Future<void> _initializeAssets() async {
-    // Step 1: Initialize the cache service (downloads .bin file if needed).
-    await AssetCacheService.instance.initialize();
+    // --- START OF FIX ---
+    // The call to AssetCacheService.instance.initialize() has been removed.
+    // We now assume the service is already initialized from main().
 
-    // Step 2: Pre-load the specific .gltf for the home screen.
-    // This prepares the self-contained data URL and stores it.
+    // Pre-load the specific .gltf for the home screen.
+    // This will be fast because the .bin file is already cached.
     _homeScreenGltfDataUrl = await AssetCacheService.instance
         .getPreparedGltfDataUrl(_homeScreenGltfUrl);
+    // --- END OF FIX ---
 
-    // Step 3: Notify the app that all essential assets are ready.
+    // Notify the app that pre-loading is complete.
     _isReady = true;
     notifyListeners();
   }

@@ -55,7 +55,7 @@ class ObjectViewerState extends State<ObjectViewer> {
           reveal: Reveal.auto,
           alt: "A 3D model",
           ar: true,
-          autoRotate: true,
+          autoRotate: false,
           cameraControls: true,
           disableZoom: true,
           disablePan: true,
@@ -66,7 +66,6 @@ class ObjectViewerState extends State<ObjectViewer> {
           // You can adjust this to best match your placeholder's scale.
           cameraOrbit: "0deg 75deg 90%",
         );
-        // --- END OF FIX ---
       },
     );
   }
