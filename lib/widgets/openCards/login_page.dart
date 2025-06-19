@@ -1,7 +1,15 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../helpers/localization_helper.dart';
 import '../../models/app_auth_provider.dart';
+import 'package:crypto/crypto.dart';
+
+String encryptPassword(String password) {
+  final bytes = utf8.encode(password);
+  final hash = sha256.convert(bytes);
+  return hash.toString();
+}
 
 enum AuthFormType { login, register, confirm }
 
@@ -78,7 +86,16 @@ class _LoginPageState extends State<LoginPage> {
         // If it fails, the provider will hold the error and notify listeners.
       } else if (_formType == AuthFormType.register) {
         // --- REGISTER LOGIC ---
-        success = await authProvider.signUp(email: email, password: password);
+        final hashPass = encryptPassword(password);
+        final customAttributes = {
+          'passwordHashed': hashPass,
+          'appUsername': 'test',
+        };
+        success = await authProvider.signUp(
+          email: email,
+          password: password,
+          customAttributes: customAttributes,
+        );
         if (success) {
           // If sign-up is successful, switch to the confirmation form
           setState(() {
