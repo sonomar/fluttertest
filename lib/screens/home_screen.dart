@@ -133,7 +133,8 @@ class HomeScreenState extends State<HomeScreen>
 
   dynamic _getAssetUrlFromCollectible(dynamic collectibleData) {
     dynamic urls = {
-      'url': 'https://deins.s3.eu-central-1.amazonaws.com/images/car3.png',
+      'url':
+          'https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/KloppoCar_01.gltf',
       'placeholder':
           'https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/images/k1.png'
     };

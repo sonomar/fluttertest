@@ -9,25 +9,16 @@ class AssetProvider with ChangeNotifier {
   // --- State ---
   bool _isReady = false;
   String? _homeScreenGltfDataUrl;
-  String _loadingMessage = 'Initializing...';
 
   // --- Getters ---
   bool get isReady => _isReady;
   String? get homeScreenGltfDataUrl => _homeScreenGltfDataUrl;
-  String get loadingMessage => _loadingMessage;
 
-  AssetProvider() {
-    _initializeAssets();
-  }
+  AssetProvider();
 
-  Future<void> _initializeAssets() async {
-    // Pre-load the specific .gltf for the home screen.
-    // This will be fast because the .bin file is already cached.
+  Future<void> loadInitialAssets() async {
     _homeScreenGltfDataUrl = await AssetCacheService.instance
         .getPreparedGltfDataUrl(_homeScreenGltfUrl);
-    // --- END OF FIX ---
-
-    // Notify the app that pre-loading is complete.
     _isReady = true;
     notifyListeners();
   }

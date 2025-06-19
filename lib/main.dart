@@ -159,35 +159,7 @@ class MyApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        home: Consumer2<AppAuthProvider, AssetProvider>(
-          builder: (context, authProvider, assetProvider, _) {
-            // The SplashScreen will be shown if EITHER the assets aren't ready
-            // OR the initial authentication check hasn't finished.
-            if (!assetProvider.isReady ||
-                authProvider.status == AuthStatus.uninitialized) {
-              return const SplashScreen();
-            }
-
-            print(
-                'RootApp Consumer (Auth): Status = ${authProvider.status}'); // Debug print
-
-            switch (authProvider.status) {
-              case AuthStatus.uninitialized:
-              case AuthStatus.authenticating:
-                // This state can appear briefly after initialization, so we still show splash.
-                return const SplashScreen();
-              case AuthStatus.authenticated:
-                return const AuthLoadingScreen();
-              case AuthStatus.unauthenticated:
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (context.mounted) {
-                    Provider.of<UserModel>(context, listen: false).clearUser();
-                  }
-                });
-                return const LoginPage(userData: {});
-            }
-          },
-        ),
+        home: const SplashScreen(),
       ),
     );
   }
