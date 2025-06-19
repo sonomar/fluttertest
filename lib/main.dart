@@ -17,6 +17,7 @@ import 'models/mission_model.dart';
 import 'models/community_model.dart';
 import 'models/news_post_model.dart';
 import 'models/locale_provider.dart';
+import 'models/asset_provider.dart';
 import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
@@ -30,9 +31,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import './app_lifefycle_observer.dart';
 import './screens/auth_loading_screen.dart';
 import 'dart:io'; // Import dart:io
+import './services/asset_cache_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AssetCacheService.instance.initialize();
   await dotenv.load(fileName: ".env");
   runApp(
     MultiProvider(providers: [
