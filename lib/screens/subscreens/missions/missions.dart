@@ -17,6 +17,10 @@ class _MissionsState extends State<Missions> {
   @override
   void initState() {
     super.initState();
+    // --- REMOVED ---
+    // The call to loadMissions() is no longer needed here.
+    // The provider in main.dart now handles this automatically whenever
+    // the user is authenticated and has loaded their profile data.
   }
 
   @override
@@ -40,7 +44,7 @@ class _MissionsState extends State<Missions> {
             child: TextButton.icon(
               icon: const Icon(Icons.emoji_events, color: Color(0xffd622ca)),
               label: Text(translate("missions_awards", context),
-                  style: TextStyle(color: Color(0xffd622ca))),
+                  style: const TextStyle(color: Color(0xffd622ca))),
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const AwardScreen()),
@@ -50,6 +54,8 @@ class _MissionsState extends State<Missions> {
           )
         ],
       ),
+      // The Consumer widget will now automatically display the missions
+      // once they are loaded by the provider.
       body: Consumer<MissionModel>(
         builder: (context, missionModel, child) {
           if (missionModel.isLoading) {
@@ -59,7 +65,7 @@ class _MissionsState extends State<Missions> {
             return Center(child: Text(translate("missions_none", context)));
           }
 
-          // Create a combined list of missions with their user-specific data.
+          // The rest of your build logic remains unchanged.
           final List<Map<String, dynamic>> missionWithUserData = missionModel
               .missions
               .map((mission) {
@@ -74,7 +80,6 @@ class _MissionsState extends State<Missions> {
                   (item['missionUser'] as Map).isNotEmpty)
               .toList();
 
-          // Sort the combined list: completed missions go to the bottom.
           missionWithUserData.sort((a, b) {
             bool isACompleted = a['missionUser']?['completed'] ?? false;
             bool isBCompleted = b['missionUser']?['completed'] ?? false;
@@ -87,12 +92,8 @@ class _MissionsState extends State<Missions> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- START OF FIX ---
-              // The featured mission widget and the divider have been removed.
-              // The ListView.builder is now the only widget displaying the missions.
               Expanded(
                 child: ListView.builder(
-                  // Added top padding to give the list some space from the AppBar.
                   padding:
                       const EdgeInsets.only(top: 15.0, left: 15.0, right: 15.0),
                   itemCount: missionWithUserData.length,
@@ -106,7 +107,6 @@ class _MissionsState extends State<Missions> {
                   },
                 ),
               ),
-              // --- END OF FIX ---
             ],
           );
         },

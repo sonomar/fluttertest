@@ -77,10 +77,26 @@ void main() async {
       ChangeNotifierProvider<AssetProvider>(
         create: (context) => AssetProvider(),
       ),
-      ChangeNotifierProxyProvider<AppAuthProvider, MissionModel>(
-        create: (context) => MissionModel(context.read<AppAuthProvider>()),
-        update: (context, appAuthProvider, previousMissionModel) {
-          return previousMissionModel ?? MissionModel(appAuthProvider);
+      ChangeNotifierProxyProvider2<AppAuthProvider, UserModel, MissionModel>(
+        create: (context) => MissionModel(
+          context.read<AppAuthProvider>(),
+          context.read<UserModel>(),
+        ),
+        update: (context, appAuthProvider, userModel, previousMissionModel) {
+          // Ensure the model instance is never null
+          final model =
+              previousMissionModel ?? MissionModel(appAuthProvider, userModel);
+
+          // 1. Update the model with the latest dependencies.
+          model.update(appAuthProvider, userModel);
+
+          // 2. Automatically load missions only when the user is authenticated
+          //    and the user's profile data is available.
+          if (appAuthProvider.status == AuthStatus.authenticated &&
+              userModel.currentUser != null) {
+            model.loadMissions();
+          }
+          return model;
         },
       ),
       ChangeNotifierProxyProvider<AppAuthProvider, NewsPostModel>(
