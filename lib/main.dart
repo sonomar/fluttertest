@@ -35,7 +35,6 @@ import './services/asset_cache_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AssetCacheService.instance.initialize();
   await dotenv.load(fileName: ".env");
   runApp(
     MultiProvider(providers: [

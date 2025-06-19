@@ -117,10 +117,23 @@ class AuthService {
   // Expose internal error messages
   String? get errorMessage => _internalErrorMessage;
 
-  Future<bool> signUp({required String email, required String password}) async {
-    _internalErrorMessage = null; // Clear previous errors
+  Future<bool> signUp(
+      {required String email,
+      required String password,
+      required Map customAttributes}) async {
+    _internalErrorMessage = null;
+    final List<AttributeArg> userAttributes = [
+      // Always include the email as a standard attribute.
+      AttributeArg(name: 'email', value: email),
+    ];
+
+    // Add your custom attributes, ensuring they are prefixed with 'custom:'.
+    customAttributes.forEach((key, value) {
+      // Use the AttributeArg class here as well.
+      userAttributes.add(AttributeArg(name: 'custom:$key', value: value));
+    });
     try {
-      await _userPool.signUp(email, password);
+      await _userPool.signUp(email, password, userAttributes: userAttributes);
       // If no exception is thrown, Cognito has sent a confirmation code.
       print(
           'AuthService: SignUp successful for $email. Awaiting confirmation.');
