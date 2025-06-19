@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../services/asset_cache_service.dart';
 
 class ObjectViewer extends StatefulWidget {
@@ -19,52 +20,64 @@ class ObjectViewerState extends State<ObjectViewer> {
   @override
   void initState() {
     super.initState();
-    // Start the process of preparing the self-contained data URL.
-    // This will be instant if the model has already been viewed once.
     _preparedGltfDataUrlFuture =
         AssetCacheService.instance.getPreparedGltfDataUrl(widget.asset);
   }
 
+  // --- NEW AND IMPROVED build METHOD ---
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String?>(
       future: _preparedGltfDataUrlFuture,
       builder: (context, snapshot) {
-        // Case 1: Still preparing the data URL (only happens on first load)
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // While waiting, we show a simple spinner. The ModelViewer's `poster`
-          // property will be responsible for showing the placeholder image.
-          return const Center(child: CircularProgressIndicator());
-        }
+        // Determine the state of the model loading process.
+        final bool modelIsLoaded =
+            snapshot.connectionState == ConnectionState.done &&
+                snapshot.data != null;
 
-        // Case 2: An error occurred during preparation
-        if (snapshot.hasError || snapshot.data == null) {
-          return const Center(
-            child: Icon(Icons.error, color: Colors.red, size: 48),
-          );
-        }
+        // Determine if an error occurred.
+        final bool hasError = snapshot.hasError ||
+            (snapshot.connectionState == ConnectionState.done &&
+                !modelIsLoaded);
 
-        // Case 3: Success! We have the prepared data URL.
-        // --- START OF FIX ---
-        // The ModelViewer now fills its parent container, ensuring the final
-        // 3D object is full-size.
-        return ModelViewer(
-          src: snapshot.data!,
-          poster: widget.placeholder,
-          loading: Loading.eager,
-          reveal: Reveal.auto,
-          alt: "A 3D model",
-          ar: true,
-          autoRotate: false,
-          cameraControls: true,
-          disableZoom: true,
-          disablePan: true,
-          backgroundColor: Colors.transparent,
-          // This attribute adjusts the initial camera view. The third value is the
-          // radius (distance from the object). A smaller value "zooms in".
-          // The '100%' value makes the object fit the vertical viewport.
-          // You can adjust this to best match your placeholder's scale.
-          cameraOrbit: "0deg 75deg 90%",
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            // 1. Show the placeholder image:
+            //    This will only be visible while the model is loading and there's no error.
+            if (widget.placeholder.isNotEmpty && !modelIsLoaded && !hasError)
+              CachedNetworkImage(
+                imageUrl: widget.placeholder,
+                fit: BoxFit.contain,
+                placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2.0)),
+                errorWidget: (context, url, error) =>
+                    const Icon(Icons.image_not_supported, color: Colors.grey),
+              ),
+
+            // 2. Show the 3D model:
+            //    This is only added to the widget tree when the data is successfully loaded.
+            //    When it appears, the placeholder above is removed in the same build frame.
+            if (modelIsLoaded)
+              ModelViewer(
+                src: snapshot.data!,
+                alt: "A 3D model",
+                ar: false,
+                disablePan: true,
+                disableZoom: true,
+                disableTap: true,
+                autoRotate: false,
+                cameraControls: true,
+                cameraOrbit: "0deg 75deg 90%",
+              ),
+
+            // 3. Show an error icon:
+            //    This is only added to the widget tree if the future fails.
+            if (hasError)
+              const Center(
+                child: Icon(Icons.error, color: Colors.red, size: 48),
+              ),
+          ],
         );
       },
     );

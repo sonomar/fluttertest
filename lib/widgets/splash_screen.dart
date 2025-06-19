@@ -31,16 +31,6 @@ class SplashScreen extends StatelessWidget {
                 width: 40,
                 child: Lottie.asset('assets/lottie/pinkspin1.json')),
             const SizedBox(height: 20),
-
-            // --- START OF FIX ---
-            // This text will dynamically update based on the AssetProvider's state.
-            Text(
-              assetProvider.isReady
-                  ? 'Assets Loaded!'
-                  : 'Loading Essential Assets...',
-              style: const TextStyle(color: Colors.white70, fontSize: 16),
-            ),
-            // --- END OF FIX ---
           ],
         ),
       ),

@@ -9,20 +9,18 @@ class AssetProvider with ChangeNotifier {
   // --- State ---
   bool _isReady = false;
   String? _homeScreenGltfDataUrl;
+  String _loadingMessage = 'Initializing...';
 
   // --- Getters ---
   bool get isReady => _isReady;
   String? get homeScreenGltfDataUrl => _homeScreenGltfDataUrl;
+  String get loadingMessage => _loadingMessage;
 
   AssetProvider() {
     _initializeAssets();
   }
 
   Future<void> _initializeAssets() async {
-    // --- START OF FIX ---
-    // The call to AssetCacheService.instance.initialize() has been removed.
-    // We now assume the service is already initialized from main().
-
     // Pre-load the specific .gltf for the home screen.
     // This will be fast because the .bin file is already cached.
     _homeScreenGltfDataUrl = await AssetCacheService.instance
