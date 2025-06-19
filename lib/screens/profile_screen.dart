@@ -129,10 +129,6 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () {
                   Provider.of<AppAuthProvider>(context, listen: false)
                       .signOut();
-                  if (context.mounted) {
-                    // Check if context is still valid
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  }
                 },
                 title: translate("profile_signout_label", context),
                 active: true),

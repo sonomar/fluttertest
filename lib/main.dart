@@ -159,7 +159,24 @@ class MyApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        home: const SplashScreen(),
+        home: Consumer<AppAuthProvider>(
+          builder: (context, auth, _) {
+            switch (auth.status) {
+              case AuthStatus.authenticated:
+                // User has a valid session. Hand control to AuthLoadingScreen
+                // to fetch the user profile and then show the main app.
+                return const AuthLoadingScreen();
+              case AuthStatus.unauthenticated:
+                // No session or signed out. Show the LoginPage.
+                return const LoginPage();
+              case AuthStatus.uninitialized:
+              case AuthStatus.authenticating:
+              default:
+                // App is starting up or checking session. Show SplashScreen.
+                return const SplashScreen();
+            }
+          },
+        ),
       ),
     );
   }
