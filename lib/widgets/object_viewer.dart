@@ -54,6 +54,12 @@ class ObjectViewerState extends State<ObjectViewer> {
             if (srcIsReady)
               ModelViewer(
                 src: snapshot.data!,
+                relatedCss: '''
+                  model-viewer {
+                    --progress-bar-color: none !important;
+                    --progress-bar-height: 0px !important;
+                  }
+                ''',
                 onWebViewCreated: (WebViewController controller) {
                   // 1. Add the channel immediately so it's ready.
                   controller.addJavaScriptChannel(
