@@ -21,13 +21,9 @@ import 'models/asset_provider.dart';
 import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
-import './models/asset_provider.dart';
-import 'package:path_provider/path_provider.dart';
 import './helpers/localization_helper.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:deins_app/models/app_auth_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import './app_lifefycle_observer.dart';
 import './screens/auth_loading_screen.dart';
 
