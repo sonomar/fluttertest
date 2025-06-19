@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import '../services/asset_cache_service.dart';
-
-// The static ID constant is no longer needed.
 
 class ObjectViewer extends StatefulWidget {
   final String asset;
@@ -20,8 +17,6 @@ class ObjectViewer extends StatefulWidget {
 class ObjectViewerState extends State<ObjectViewer> {
   late final Future<String?> _preparedGltfDataUrlFuture;
 
-  bool _isModelRendered = false;
-
   @override
   void initState() {
     super.initState();
@@ -29,23 +24,28 @@ class ObjectViewerState extends State<ObjectViewer> {
         AssetCacheService.instance.getPreparedGltfDataUrl(widget.asset);
   }
 
+  // --- NEW AND IMPROVED build METHOD ---
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String?>(
       future: _preparedGltfDataUrlFuture,
       builder: (context, snapshot) {
-        final bool srcIsReady =
+        // Determine the state of the model loading process.
+        final bool modelIsLoaded =
             snapshot.connectionState == ConnectionState.done &&
                 snapshot.data != null;
 
+        // Determine if an error occurred.
         final bool hasError = snapshot.hasError ||
-            (snapshot.connectionState == ConnectionState.done && !srcIsReady);
+            (snapshot.connectionState == ConnectionState.done &&
+                !modelIsLoaded);
 
         return Stack(
           alignment: Alignment.center,
           children: [
-            // --- Layer 1 (Bottom): The Placeholder ---
-            if (!_isModelRendered && !hasError)
+            // 1. Show the placeholder image:
+            //    This will only be visible while the model is loading and there's no error.
+            if (widget.placeholder.isNotEmpty && !modelIsLoaded && !hasError)
               CachedNetworkImage(
                 imageUrl: widget.placeholder,
                 fit: BoxFit.contain,
@@ -55,45 +55,12 @@ class ObjectViewerState extends State<ObjectViewer> {
                     const Icon(Icons.image_not_supported, color: Colors.grey),
               ),
 
-            // --- Layer 2 (Top): The 3D Model Viewer ---
-            if (srcIsReady)
+            // 2. Show the 3D model:
+            //    This is only added to the widget tree when the data is successfully loaded.
+            //    When it appears, the placeholder above is removed in the same build frame.
+            if (modelIsLoaded)
               ModelViewer(
-                // The `id` property is no longer needed.
                 src: snapshot.data!,
-                onWebViewCreated: (WebViewController controller) {
-                  controller.addJavaScriptChannel(
-                    'ModelViewerChannel',
-                    onMessageReceived: (message) {
-                      if (message.message == 'load' &&
-                          mounted &&
-                          !_isModelRendered) {
-                        setState(() {
-                          _isModelRendered = true;
-                        });
-                      } else {
-                        // Add a print statement to see any other messages for debugging.
-                        debugPrint('Message from WebView: ${message.message}');
-                      }
-                    },
-                  );
-                  // --- CORRECTED: Using a more robust tag name selector ---
-                  controller.runJavaScript('''
-                    document.addEventListener('DOMContentLoaded', () => {
-                      // Select the model-viewer element by its tag name.
-                      const modelViewer = document.querySelector('model-viewer');
-                      
-                      if (modelViewer) {
-                          modelViewer.addEventListener('load', () => {
-                            ModelViewerChannel.postMessage('load');
-                          }, { once: true });
-                      } else {
-                          // Send an error back if the element is not found.
-                          ModelViewerChannel.postMessage('error: model-viewer element not found');
-                      }
-                    });
-                  ''');
-                },
-                backgroundColor: Colors.transparent,
                 alt: "A 3D model",
                 ar: false,
                 disablePan: true,
@@ -104,7 +71,8 @@ class ObjectViewerState extends State<ObjectViewer> {
                 cameraOrbit: "0deg 75deg 90%",
               ),
 
-            // --- The Error Icon ---
+            // 3. Show an error icon:
+            //    This is only added to the widget tree if the future fails.
             if (hasError)
               const Center(
                 child: Icon(Icons.error, color: Colors.red, size: 48),
