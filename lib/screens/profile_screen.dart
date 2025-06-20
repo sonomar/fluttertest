@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/app_auth_provider.dart';
 import '../widgets/openCards/login_page.dart';
 import '../widgets/item_button.dart';
+import '../widgets/splash_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/collectible.dart';
 import '../models/locale_provider.dart';
@@ -126,9 +127,19 @@ class ProfileScreen extends StatelessWidget {
                 title: translate('profile_language_label', context),
                 active: true),
             ItemButton(
-                onTap: () {
-                  Provider.of<AppAuthProvider>(context, listen: false)
+                onTap: () async {
+                  await Provider.of<AppAuthProvider>(context, listen: false)
                       .signOut();
+
+                  // After sign-out, navigate to a new LoginPage and remove all
+                  // previous screens from the navigation stack.
+                  if (context.mounted) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (context) => const SplashScreen()),
+                      (Route<dynamic> route) => false,
+                    );
+                  }
                 },
                 title: translate("profile_signout_label", context),
                 active: true),

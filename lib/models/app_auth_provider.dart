@@ -14,7 +14,8 @@ class AppAuthProvider with ChangeNotifier {
 
   AuthStatus _status = AuthStatus.uninitialized;
   CognitoUserSession? _userSession; // Holds the active session if authenticated
-  String? _errorMessage; // Error message for the UI
+  String? _errorMessage;
+  bool isNewUser = false; // Error message for the UI
 
   AppAuthProvider(this._authService) {
     // Immediately attempt to check current user session on provider creation
@@ -32,6 +33,14 @@ class AppAuthProvider with ChangeNotifier {
   void setErrorMessage(String? message) {
     _errorMessage = message;
     notifyListeners();
+  }
+
+  void completeNewUserOnboarding() {
+    if (isNewUser) {
+      isNewUser = false;
+      // Notify listeners in case any part of the UI needs to react to this change.
+      notifyListeners();
+    }
   }
 
   Future<void> checkCurrentUser() async {
@@ -86,6 +95,9 @@ class AppAuthProvider with ChangeNotifier {
         'AppAuthProvider: signIn started for $username. Current status: $_status at ${DateTime.now()}');
     _status = AuthStatus.authenticating;
     _errorMessage = null;
+    if (isRegister) {
+      isNewUser = true;
+    }
     print(
         'AppAuthProvider: signIn status set to authenticating. Notifying. at ${DateTime.now()}');
     notifyListeners();
@@ -120,6 +132,7 @@ class AppAuthProvider with ChangeNotifier {
           _errorMessage = _authService.errorMessage ??
               'Login succeeded, but session could not be confirmed as valid. at ${DateTime.now()}';
           print('AppAuthProvider: $_errorMessage');
+          isNewUser = false;
           _status = AuthStatus.unauthenticated;
           _userSession = null;
           print(

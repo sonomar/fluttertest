@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import './models/app_localizations.dart';
 import 'screens/home_screen.dart';
 import 'widgets/openCards/login_page.dart';
+import './widgets/auth/onboarding.dart';
 import 'screens/collection_screen.dart';
 import 'screens/scan_screen.dart';
 // import 'screens/community_screen.dart';
@@ -175,24 +176,7 @@ class MyApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        home: Consumer<AppAuthProvider>(
-          builder: (context, auth, _) {
-            switch (auth.status) {
-              case AuthStatus.authenticated:
-                // User has a valid session. Hand control to AuthLoadingScreen
-                // to fetch the user profile and then show the main app.
-                return const AuthLoadingScreen();
-              case AuthStatus.unauthenticated:
-                // No session or signed out. Show the LoginPage.
-                return const LoginPage();
-              case AuthStatus.uninitialized:
-              case AuthStatus.authenticating:
-              default:
-                // App is starting up or checking session. Show SplashScreen.
-                return const SplashScreen();
-            }
-          },
-        ),
+        home: const SplashScreen(),
       ),
     );
   }
@@ -241,6 +225,18 @@ class _MyHomePageState extends State<MyHomePage> {
       Missions(key: PageStorageKey('mission'), userData: widget.userData),
       const ProfileScreen(key: PageStorageKey('profile')),
     ];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = context.read<AppAuthProvider>();
+      if (authProvider.isNewUser) {
+        showDialog(
+          context: context,
+          barrierDismissible: false, // User cannot dismiss by tapping outside
+          builder: (BuildContext context) {
+            return const Onboarding();
+          },
+        );
+      }
+    });
   }
 
   @override

@@ -21,6 +21,55 @@ class UserModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> updateUsername(String newUsername) async {
+    if (currentUser == null) {
+      _errorMessage = "Cannot update username: current user is null.";
+      notifyListeners();
+      return false;
+    }
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final userId = _currentUser['userId'];
+      final userUpdateBody = {"userId": userId, "username": newUsername};
+
+      // Call the API function from api/user.dart
+      final result = await updateUserByUserId(userUpdateBody, _appAuthProvider);
+
+      // Your API should ideally return a clear success/error state.
+      // We'll assume a non-null response indicates success for now.
+      if (result != null) {
+        // --- OPTIMISTIC UPDATE ---
+        // Instead of calling loadUser() and causing a race condition,
+        // we update the local user object directly.
+        _currentUser['username'] = newUsername;
+        _isLoading = false;
+        notifyListeners(); // Notify the UI of the updated username.
+        return true;
+      } else {
+        // Handle cases where the API call fails or returns an error.
+        _errorMessage =
+            "Failed to update username. The username might already be taken.";
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      // If the API throws an exception (e.g., for duplicate username), catch it.
+      if (e.toString().toLowerCase().contains('duplicate')) {
+        _errorMessage = 'Username already in use. Please try another.';
+      } else {
+        _errorMessage = "An error occurred: ${e.toString()}";
+      }
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> loadUser() async {
     print(
         '>>> UserModel: ENTERING loadUser() method at ${DateTime.now()} <<<'); // Should be the very first print inside loadUser()
