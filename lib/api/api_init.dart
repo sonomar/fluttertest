@@ -1,6 +1,5 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:provider/provider.dart';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:amazon_cognito_identity_dart_2/sig_v4.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,6 +24,15 @@ final userPool = CognitoUserPool(
   clientRegion,
   clientId,
 );
+
+String? _getCurrentUserSub(AppAuthProvider authProvider) {
+  final userSub = authProvider.authService.currentUserSub;
+  if (userSub == null) {
+    print('API Call failed: Could not retrieve userSub from auth service.');
+    return null;
+  }
+  return userSub;
+}
 
 Future<Map<String, String>> _getHeaders(AppAuthProvider? provider) async {
   final prefs = await SharedPreferences.getInstance();
@@ -56,10 +64,17 @@ Future<dynamic> apiGetRequest(
   if (currentIdToken == null) {
     print('Current ID Token: $currentIdToken');
     print('API Call failed: No valid ID token found after checkUser.');
-    // Handle unauthenticated state, e.g., throw an error, return null,
-    // or navigate to login. For now, we'll just return null.
     return null;
   }
+
+  final userSub = authProvider.authService.currentUserSub;
+  if (userSub == null) {
+    print('API Call failed: Could not retrieve userSub.');
+    return null;
+  }
+  paramsContent['userId'] = userSub;
+  paramsContent['sub'] = userSub;
+
   await credentials.getAwsCredentials(currentIdToken);
   print(credentials.accessKeyId);
   print(credentials.secretAccessKey);
@@ -123,10 +138,17 @@ Future<dynamic> apiPatchRequest(
   if (currentIdToken == null) {
     print('Current ID Token: $currentIdToken');
     print('API Call failed: No valid ID token found after checkUser.');
-    // Handle unauthenticated state, e.g., throw an error, return null,
-    // or navigate to login. For now, we'll just return null.
     return null;
   }
+
+  final userSub = authProvider.authService.currentUserSub;
+  if (userSub == null) {
+    print('API Call failed: Could not retrieve userSub.');
+    return null;
+  }
+  bodyContent['userId'] = userSub;
+  bodyContent['sub'] = userSub;
+
   await credentials.getAwsCredentials(currentIdToken);
   print(credentials.accessKeyId);
   print(credentials.secretAccessKey);
@@ -181,10 +203,17 @@ Future<dynamic> apiPostRequest(
   if (currentIdToken == null) {
     print('Current ID Token: $currentIdToken');
     print('API Call failed: No valid ID token found after checkUser.');
-    // Handle unauthenticated state, e.g., throw an error, return null,
-    // or navigate to login. For now, we'll just return null.
     return null;
   }
+
+  final userSub = authProvider.authService.currentUserSub;
+  if (userSub == null) {
+    print('API Call failed: Could not retrieve userSub.');
+    return null;
+  }
+  bodyContent['userId'] = userSub;
+  bodyContent['sub'] = userSub;
+
   await credentials.getAwsCredentials(currentIdToken);
   print(credentials.accessKeyId);
   print(credentials.secretAccessKey);
@@ -238,10 +267,17 @@ apiDeleteRequest(
   if (currentIdToken == null) {
     print('Current ID Token: $currentIdToken');
     print('API Call failed: No valid ID token found after checkUser.');
-    // Handle unauthenticated state, e.g., throw an error, return null,
-    // or navigate to login. For now, we'll just return null.
     return null;
   }
+
+  final userSub = authProvider.authService.currentUserSub;
+  if (userSub == null) {
+    print('API Call failed: Could not retrieve userSub.');
+    return null;
+  }
+  paramsContent['userId'] = userSub;
+  paramsContent['sub'] = userSub;
+
   await credentials.getAwsCredentials(currentIdToken);
   print(credentials.accessKeyId);
   print(credentials.secretAccessKey);

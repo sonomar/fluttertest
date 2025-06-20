@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/app_auth_provider.dart';
@@ -96,8 +97,26 @@ class AuthService {
           storage: SecureCognitoStorage(),
         );
 
-  // Default constructor (if you still have one) or remove it if uninitialized() is primary
-  // AuthService() : this.uninitialized(); // Example if you want a default that calls the named one
+  String? get currentUserSub {
+    if (_session != null && _session!.isValid()) {
+      final idToken = _session!.getIdToken().getJwtToken();
+      if (idToken == null) return null;
+      final parts = idToken.split('.');
+      if (parts.length != 3) {
+        // Not a valid JWT structure
+        return null;
+      }
+      final payloadString =
+          utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+      final payloadMap = json.decode(payloadString);
+      if (payloadMap is Map<String, dynamic>) {
+        debugPrint('tesst: ${payloadMap['sub']}');
+        return payloadMap['sub'];
+      }
+    }
+    return null;
+  }
+
   // Setter to inject AppAuthProvider AFTER AuthService is created
   void setAppAuthProvider(AppAuthProvider provider) {
     _appAuthProvider = provider;

@@ -22,6 +22,7 @@ class AppAuthProvider with ChangeNotifier {
   }
 
   AuthStatus get status => _status;
+  AuthService get authService => _authService;
   CognitoUserSession? get userSession => _userSession;
   String? get errorMessage => _errorMessage;
   String? get idToken => _userSession?.getIdToken().getJwtToken();
