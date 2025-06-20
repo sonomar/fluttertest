@@ -72,7 +72,7 @@ Future<dynamic> apiGetRequest(
     print('API Call failed: Could not retrieve userSub.');
     return null;
   }
-  paramsContent['userId'] = userSub;
+  paramsContent['username'] = userSub;
   paramsContent['sub'] = userSub;
 
   await credentials.getAwsCredentials(currentIdToken);
@@ -146,7 +146,7 @@ Future<dynamic> apiPatchRequest(
     print('API Call failed: Could not retrieve userSub.');
     return null;
   }
-  bodyContent['userId'] = userSub;
+  bodyContent['username'] = userSub;
   bodyContent['sub'] = userSub;
 
   await credentials.getAwsCredentials(currentIdToken);
@@ -211,7 +211,7 @@ Future<dynamic> apiPostRequest(
     print('API Call failed: Could not retrieve userSub.');
     return null;
   }
-  bodyContent['userId'] = userSub;
+  bodyContent['username'] = userSub;
   bodyContent['sub'] = userSub;
 
   await credentials.getAwsCredentials(currentIdToken);
@@ -275,7 +275,7 @@ apiDeleteRequest(
     print('API Call failed: Could not retrieve userSub.');
     return null;
   }
-  paramsContent['userId'] = userSub;
+  paramsContent['username'] = userSub;
   paramsContent['sub'] = userSub;
 
   await credentials.getAwsCredentials(currentIdToken);

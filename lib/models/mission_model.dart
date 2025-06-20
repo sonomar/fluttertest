@@ -49,7 +49,7 @@ class MissionModel extends ChangeNotifier {
     try {
       // This now reliably gets the userId from the updated userModel.
       final userId = _userModel.currentUser?['userId']?.toString();
-
+      print('test3: $userId');
       if (userId == null) {
         print(
             'WARNING: userId is null in UserModel. Cannot fetch user missions.');
@@ -62,12 +62,14 @@ class MissionModel extends ChangeNotifier {
 
         if (fetchedUserData is List) {
           _missionUsers = fetchedUserData;
+          print('test1: $_missionUsers');
           final List<dynamic> fetchedCollectionData = [];
           for (var userMission in _missionUsers) {
             if (userMission != null && userMission["missionId"] != null) {
               var missionData = await getMissionByMissionId(
                   userMission["missionId"].toString(), _appAuthProvider);
               if (missionData != null) {
+                print('test2: $missionData');
                 fetchedCollectionData.add(missionData);
               }
             }

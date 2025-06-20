@@ -84,19 +84,26 @@ void main() async {
           context.read<UserModel>(),
         ),
         update: (context, appAuthProvider, userModel, previousMissionModel) {
+          print("--- MissionModel Provider Update Triggered ---");
           // Ensure the model instance is never null
           final model =
               previousMissionModel ?? MissionModel(appAuthProvider, userModel);
 
           // 1. Update the model with the latest dependencies.
           model.update(appAuthProvider, userModel);
+          print("Auth Status: ${appAuthProvider.status}");
+          print("User Loaded: ${userModel.currentUser != null}");
 
           // 2. Automatically load missions only when the user is authenticated
           //    and the user's profile data is available.
           if (appAuthProvider.status == AuthStatus.authenticated &&
               userModel.currentUser != null) {
+            print(
+                "CONDITION MET: Calling loadMissions() from main.dart provider.");
             model.loadMissions();
           }
+          print("CONDITION NOT MET");
+          model.loadMissions();
           return model;
         },
       ),

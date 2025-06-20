@@ -17,10 +17,17 @@ class _MissionsState extends State<Missions> {
   @override
   void initState() {
     super.initState();
-    // --- REMOVED ---
-    // The call to loadMissions() is no longer needed here.
-    // The provider in main.dart now handles this automatically whenever
-    // the user is authenticated and has loaded their profile data.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            print("MissionsScreen: initState is calling loadMissions().");
+            context.read<MissionModel>().loadMissions();
+          }
+        });
+        context.read<MissionModel>().loadMissions();
+      }
+    });
   }
 
   @override
@@ -54,8 +61,6 @@ class _MissionsState extends State<Missions> {
           )
         ],
       ),
-      // The Consumer widget will now automatically display the missions
-      // once they are loaded by the provider.
       body: Consumer<MissionModel>(
         builder: (context, missionModel, child) {
           if (missionModel.isLoading) {
@@ -65,7 +70,6 @@ class _MissionsState extends State<Missions> {
             return Center(child: Text(translate("missions_none", context)));
           }
 
-          // The rest of your build logic remains unchanged.
           final List<Map<String, dynamic>> missionWithUserData = missionModel
               .missions
               .map((mission) {
