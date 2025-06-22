@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../widgets/object_viewer.dart';
 import '../../../widgets/missions/award_info.dart';
-import '../../../widgets/drag_scroll_sheet.dart';
-import './award.dart';
+import '../../../widgets/interactive_drag_scroll_sheet.dart';
 
 class AwardDetails extends StatefulWidget {
   const AwardDetails(
@@ -17,17 +16,20 @@ class AwardDetails extends StatefulWidget {
 }
 
 class _AwardDetailsState extends State<AwardDetails> {
+  bool _isEnlarged = false;
+  double _sheetPosition = 0.25;
+
   Widget lineItem(key, value) {
     return Column(children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Text(key,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               color: Colors.black,
               fontFamily: 'Roboto',
             )),
         Text(value,
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 12,
                 color: Colors.black,
                 fontFamily: 'Roboto',
@@ -41,6 +43,7 @@ class _AwardDetailsState extends State<AwardDetails> {
   Widget build(BuildContext context) {
     final bool isCompleted = widget.selectedAwardUser['completed'];
     final String missionImage = widget.selectedAward['imgRef']['load'];
+
     return Scaffold(
         appBar: AppBar(
             scrolledUnderElevation: 0.0,
@@ -50,25 +53,36 @@ class _AwardDetailsState extends State<AwardDetails> {
             ),
             title: Text(widget.selectedAward["title"]),
             actions: [
-              Padding(
-                padding: EdgeInsets.all(15),
-                child: isCompleted
-                    ? GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Award(
-                                      selectedAward: widget.selectedAward)));
-                        },
-                        child: Image.asset("assets/images/enlarge.png"),
-                      )
-                    : SizedBox.shrink(),
-              )
+              if (isCompleted)
+                Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isEnlarged = !_isEnlarged;
+                        if (!_isEnlarged) {
+                          _sheetPosition = 0.25;
+                        }
+                      });
+                    },
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: _isEnlarged
+                          ? const Icon(Icons.fullscreen_exit,
+                              key: ValueKey('shrink'), color: Colors.black)
+                          : Image.asset("assets/images/enlarge.png",
+                              key: const ValueKey('enlarge')),
+                    ),
+                  ),
+                )
             ]),
-        body: Stack(alignment: Alignment.center, children: [
-          Container(
-              decoration: BoxDecoration(
+        body: LayoutBuilder(builder: (context, constraints) {
+          final double objectViewerHeight =
+              constraints.maxHeight * (1 - _sheetPosition);
+
+          return Stack(alignment: Alignment.center, children: [
+            Container(
+              decoration: const BoxDecoration(
                 gradient: RadialGradient(
                   colors: [
                     Color(0xffd622ca),
@@ -80,46 +94,53 @@ class _AwardDetailsState extends State<AwardDetails> {
               ),
               height: double.infinity,
               width: double.infinity,
-              child: Align(
-                  alignment: Alignment.center,
-                  child: Column(children: [
-                    Padding(
-                        padding:
-                            EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
-                        child: SizedBox(
-                          height: 500,
-                          width: double.infinity,
-                          child: isCompleted
-                              ? ObjectViewer(
-                                  asset: widget.selectedAward['embedRef']
-                                      ['url'],
-                                  placeholder: widget.selectedAward['imgRef']
-                                      ['load'])
-                              : Center(
-                                  child: ColorFiltered(
-                                    colorFilter: ColorFilter.matrix(<double>[
-                                      // Greyscale matrix that preserves the alpha channel
-                                      0.2126, 0.7152, 0.0722, 0, 0,
-                                      0.2126, 0.7152, 0.0722, 0, 0,
-                                      0.2126, 0.7152, 0.0722, 0, 0,
-                                      0, 0, 0, 1, 0,
-                                    ]),
-                                    child: Image.network(
-                                      missionImage,
-                                      width: 350,
-                                      height: 350,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                ),
-                        )),
-                  ]))),
-          SizedBox(
-              height: MediaQuery.of(context).size.height,
-              child: DragScrollSheet(
+            ),
+            Positioned(
+              top: 0,
+              left: 20,
+              right: 20,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 100),
+                curve: Curves.linear,
+                height: _isEnlarged
+                    ? constraints.maxHeight * 0.85
+                    : objectViewerHeight,
+                child: isCompleted
+                    ? ObjectViewer(
+                        asset: widget.selectedAward['embedRef']['url'],
+                        placeholder: widget.selectedAward['imgRef']['load'])
+                    : Center(
+                        child: ColorFiltered(
+                          colorFilter: const ColorFilter.matrix(<double>[
+                            // Greyscale matrix
+                            0.2126, 0.7152, 0.0722, 0, 0,
+                            0.2126, 0.7152, 0.0722, 0, 0,
+                            0.2126, 0.7152, 0.0722, 0, 0,
+                            0, 0, 0, 1, 0,
+                          ]),
+                          child: Image.network(
+                            missionImage,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+            if (!_isEnlarged)
+              InteractiveDragScrollSheet(
+                  onSheetMoved: (position) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted && _sheetPosition != position) {
+                        setState(() {
+                          _sheetPosition = position;
+                        });
+                      }
+                    });
+                  },
                   contents: AwardInfo(
                       selectedAward: widget.selectedAward,
-                      selectedAwardUser: widget.selectedAwardUser))),
-        ]));
+                      selectedAwardUser: widget.selectedAwardUser)),
+          ]);
+        }));
   }
 }

@@ -6,9 +6,8 @@ import '../../../models/mission_model.dart';
 import '../../../models/user_model.dart';
 import '../../../widgets/object_viewer.dart';
 import '../../../widgets/collectibles/card_info.dart';
-import '../../../widgets/drag_scroll_sheet.dart';
+import '../../../widgets/interactive_drag_scroll_sheet.dart';
 import '../../../widgets/missions/latest_active_mission.dart';
-import 'collectible.dart';
 
 class CollectibleDetails extends StatefulWidget {
   const CollectibleDetails({
@@ -24,18 +23,20 @@ class CollectibleDetails extends StatefulWidget {
 }
 
 class _CollectibleDetailsState extends State<CollectibleDetails> {
+  bool _isEnlarged = false;
+  double _sheetPosition = 0.25;
+
   @override
   void initState() {
     super.initState();
-    // Defer the calls to load data until after the first frame is rendered.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<MissionModel>(context, listen: false).loadMissions();
       Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
     });
   }
 
+  // ... (showTradeQrDialog and lineItem methods remain unchanged)
   Future<void> _showTradeQrDialog(BuildContext context) async {
-    // Use widget.selectedUserCollectibleInstance for trade-specific data
     final dynamic userInstanceForTrade = widget.selectedUserCollectible;
 
     if (userInstanceForTrade == null ||
@@ -64,7 +65,6 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
       return;
     }
 
-    // Ensure the current user is the owner of this specific instance before proceeding
     if (userInstanceForTrade['ownerId']?.toString() != giverUserId) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -88,7 +88,6 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
 
     final String qrData = "deinsQr-trade-$giverUserId-$userCollectibleId";
 
-    // ignore: use_build_context_synchronously
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -103,7 +102,6 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                   width: 200,
                   height: 200,
                   child: QrImageView(
-                    // Using QrImage from qr_flutter_new
                     data: qrData,
                     version: QrVersions.auto,
                     size: 200.0,
@@ -123,7 +121,6 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                 Navigator.of(dialogContext).pop();
                 await collectibleModel.updateUserCollectibleStatus(
                     userCollectibleId, true, null, null);
-                // ignore: use_build_context_synchronously
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Trade Process Complete.")),
                 );
@@ -139,13 +136,13 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
     return Column(children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Text(key,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               color: Colors.black,
               fontFamily: 'Roboto',
             )),
         Text(value,
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 12,
                 color: Colors.black,
                 fontFamily: 'Roboto',
@@ -166,76 +163,101 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
     final recentColl = getLatestCollectible(collectibles, userCollectibles);
 
     return Scaffold(
-        appBar: AppBar(
-            scrolledUnderElevation: 0.0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
+      appBar: AppBar(
+        scrolledUnderElevation: 0.0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(widget.selectedCollectible["name"]),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(15),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _isEnlarged = !_isEnlarged;
+                  // BUG FIX: When shrinking, reset the sheet position
+                  // to its default starting size.
+                  if (!_isEnlarged) {
+                    _sheetPosition = 0.25;
+                  }
+                });
+              },
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _isEnlarged
+                    ? const Icon(Icons.fullscreen_exit,
+                        key: ValueKey('shrink'), color: Colors.black)
+                    : Image.asset("assets/images/enlarge.png",
+                        key: const ValueKey('enlarge')),
+              ),
             ),
-            title: Text(widget.selectedCollectible["name"]),
-            actions: [
-              Padding(
-                padding: EdgeInsets.all(15),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Collectible(
-                                selectedCollectible:
-                                    widget.selectedCollectible)));
-                  },
-                  child: Image.asset("assets/images/enlarge.png"),
-                ),
-              )
-            ]),
-        body: Stack(alignment: Alignment.center, children: [
-          Container(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  colors: [
-                    Color(0xffd622ca),
-                    Color(0xff333333),
-                  ],
-                  center: Alignment.center,
-                  radius: 0.8,
+          )
+        ],
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final double objectViewerHeight =
+              constraints.maxHeight * (1 - _sheetPosition);
+
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [Color(0xffd622ca), Color(0xff333333)],
+                    center: Alignment.center,
+                    radius: 0.8,
+                  ),
                 ),
               ),
-              height: double.infinity,
-              width: double.infinity,
-              child: Align(
-                  alignment: Alignment.center,
-                  child: Column(children: [
-                    Padding(
-                      padding:
-                          EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
-                      child: SizedBox(
-                          height: 500,
-                          width: double.infinity,
-                          child: widget.selectedCollectible["name"] ==
-                                  "3D Wallet"
-                              ? ObjectViewer(
-                                  asset:
-                                      "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/KloppoCar_4.gltf",
-                                  placeholder:
-                                      "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/images/k4.png")
-                              : ObjectViewer(
-                                  asset: widget.selectedCollectible['embedRef']
-                                      ['url'],
-                                  placeholder:
-                                      widget.selectedCollectible['imageRef']
-                                          ['load'])),
-                    )
-                  ]))),
-          SizedBox(
-              height: MediaQuery.of(context).size.height,
-              child: DragScrollSheet(
+              Positioned(
+                top: 0,
+                left: 20,
+                right: 20,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 100),
+                  curve: Curves.linear,
+                  height: _isEnlarged
+                      ? constraints.maxHeight * 0.85
+                      : objectViewerHeight,
+                  child: widget.selectedCollectible["name"] == "3D Wallet"
+                      ? const ObjectViewer(
+                          asset:
+                              "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/KloppoCar_4.gltf",
+                          placeholder:
+                              "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/images/k4.png")
+                      : ObjectViewer(
+                          asset: widget.selectedCollectible['embedRef']['url'],
+                          placeholder: widget.selectedCollectible['imageRef']
+                              ['load']),
+                ),
+              ),
+              if (!_isEnlarged)
+                InteractiveDragScrollSheet(
+                  onSheetMoved: (position) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted && _sheetPosition != position) {
+                        setState(() {
+                          _sheetPosition = position;
+                        });
+                      }
+                    });
+                  },
                   contents: CardInfo(
-                      selectedCollectible: widget.selectedCollectible,
-                      missions: missions,
-                      missionUsers: missionUsers,
-                      onTradeInitiate: () => _showTradeQrDialog(context),
-                      recentColl: recentColl))),
-        ]));
+                    selectedCollectible: widget.selectedCollectible,
+                    missions: missions,
+                    missionUsers: missionUsers,
+                    onTradeInitiate: () => _showTradeQrDialog(context),
+                    recentColl: recentColl,
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
   }
 }
