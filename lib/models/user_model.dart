@@ -70,6 +70,44 @@ class UserModel extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateUserProfileImg(String newProfileImgUrl) async {
+    if (currentUser == null) {
+      _errorMessage = "Cannot update profile image: current user is null.";
+      notifyListeners();
+      return false;
+    }
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final userId = _currentUser['userId'];
+      // The body for the API call, assuming it accepts a 'profileImg' field.
+      final userUpdateBody = {"userId": userId, "profileImg": newProfileImgUrl};
+
+      final result = await updateUserByUserId(userUpdateBody, _appAuthProvider);
+
+      if (result != null) {
+        // Optimistic update: update the local user object directly for instant UI feedback.
+        _currentUser['profileImg'] = newProfileImgUrl;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = "Failed to update profile image.";
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = "An error occurred: ${e.toString()}";
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> loadUser() async {
     print(
         '>>> UserModel: ENTERING loadUser() method at ${DateTime.now()} <<<'); // Should be the very first print inside loadUser()

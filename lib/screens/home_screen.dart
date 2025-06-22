@@ -79,6 +79,110 @@ class HomeScreenState extends State<HomeScreen>
     super.dispose();
   }
 
+  Future<void> _showProfilePicModal(BuildContext context) async {
+    // List of available profile pictures.
+    final List<String> profilePicOptions = List.generate(
+        5,
+        (index) =>
+            'https://deins.s3.eu-central-1.amazonaws.com/profile/p${index + 1}.png');
+    String? selectedImageUrl;
+    bool isUpdating = false;
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return AlertDialog(
+              title: const Text('Choose a Profile Picture'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: isUpdating
+                    ? const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16.0),
+                          Text("Updating...")
+                        ],
+                      )
+                    : GridView.builder(
+                        shrinkWrap: true,
+                        itemCount: profilePicOptions.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 10.0,
+                          mainAxisSpacing: 10.0,
+                        ),
+                        itemBuilder: (context, index) {
+                          final imageUrl = profilePicOptions[index];
+                          final isSelected = selectedImageUrl == imageUrl;
+
+                          return GestureDetector(
+                            onTap: () {
+                              setModalState(() {
+                                selectedImageUrl = imageUrl;
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: isSelected
+                                    ? Border.all(color: Colors.purple, width: 3)
+                                    : null,
+                              ),
+                              child: shadowCircle(imageUrl, 30, true),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: isUpdating
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(),
+                ),
+                ElevatedButton(
+                  // Button is disabled if no new image is selected or if updating.
+                  onPressed: (selectedImageUrl == null || isUpdating)
+                      ? null
+                      : () async {
+                          setModalState(() {
+                            isUpdating = true;
+                          });
+
+                          final userModel =
+                              Provider.of<UserModel>(context, listen: false);
+                          bool success = await userModel
+                              .updateUserProfileImg(selectedImageUrl!);
+
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(success
+                                    ? "Profile picture updated!"
+                                    : userModel.errorMessage ??
+                                        "Failed to update."),
+                                backgroundColor:
+                                    success ? Colors.green : Colors.red,
+                              ),
+                            );
+                            Navigator.of(dialogContext).pop();
+                          }
+                        },
+                  child: const Text('Change'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget newsItem(type, postedDate, header) {
     return Padding(
         padding: const EdgeInsets.only(top: 10),
@@ -179,18 +283,10 @@ class HomeScreenState extends State<HomeScreen>
     final missionUsers = missionModel.missionUsers;
     final newsPostModel = context.watch<NewsPostModel>();
     final newsPosts = newsPostModel.newsPosts;
-
-    // --- START OF FIX ---
-    // Get all collectible data directly from the provider. This ensures
-    // this screen is always looking at the same data as the CollectionScreen.
     final collectibleModel = context.watch<CollectibleModel>();
     final allCollectibles = collectibleModel.collectionCollectibles;
-
-    // The logic to get the "latest" collectible is now derived from the provider's state.
-    // This removes the competing data source.
     final recentColl =
         allCollectibles.isNotEmpty ? allCollectibles.first : null;
-    // --- END OF FIX ---
 
     final notificationProvider = context.watch<NotificationProvider>();
     final int unreadNotifications =
@@ -209,10 +305,15 @@ class HomeScreenState extends State<HomeScreen>
               : Padding(
                   padding: const EdgeInsets.only(top: 0),
                   child: Row(children: [
-                    Padding(
-                        padding: const EdgeInsets.only(left: 10.0),
-                        child: shadowCircle(
-                            'assets/images/kloppocarIcon.png', 18, false)),
+                    GestureDetector(
+                      onTap: () {
+                        _showProfilePicModal(context);
+                      },
+                      child: Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: getUserPic(userPic,
+                              'assets/images/kloppocarIcon.png', 18.0)),
+                    ),
                     Padding(
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Column(
