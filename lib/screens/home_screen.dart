@@ -43,11 +43,16 @@ class HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
+    // --- START OF FIX ---
+    // The data loading for collectibles and missions is now handled reactively
+    // by the providers in main.dart. Calling them here causes race conditions.
+    // We only load data specific to this screen.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<NewsPostModel>(context, listen: false).loadNewsPosts();
       Provider.of<CommunityModel>(context, listen: false)
           .loadCommunityChallenge();
     });
+    // --- END OF FIX ---
     _startTimer();
   }
 
@@ -86,7 +91,7 @@ class HomeScreenState extends State<HomeScreen>
                   color: Colors.black,
                   borderRadius: const BorderRadius.all(Radius.circular(20))),
               child: Text(type,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 8,
                       letterSpacing: 2.56,
                       color: Colors.white,
@@ -98,7 +103,7 @@ class HomeScreenState extends State<HomeScreen>
                 child: Text(
                   postedDate,
                   style: GoogleFonts.roboto(
-                      textStyle: TextStyle(
+                      textStyle: const TextStyle(
                     fontSize: 12,
                     letterSpacing: 1,
                     color: Colors.black,
@@ -111,7 +116,7 @@ class HomeScreenState extends State<HomeScreen>
               child: Text(
                 header,
                 style: GoogleFonts.roboto(
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                   fontSize: 14,
                   letterSpacing: 1,
                   color: Colors.black,
@@ -148,9 +153,6 @@ class HomeScreenState extends State<HomeScreen>
     }
     urls['url'] = embedRef['url'];
     urls['placeholder'] = imageRef['load'];
-    if (urls.isNotEmpty) {
-      return urls;
-    }
     return urls;
   }
 
@@ -160,7 +162,6 @@ class HomeScreenState extends State<HomeScreen>
     final userModel = context.watch<UserModel>();
     final currentUser = userModel.currentUser;
     if (userModel.isLoading && currentUser == null) {
-      // More specific loading condition
       return const Scaffold(
           backgroundColor: Colors.white,
           body: Center(child: CircularProgressIndicator()));
@@ -178,16 +179,23 @@ class HomeScreenState extends State<HomeScreen>
     final missionUsers = missionModel.missionUsers;
     final newsPostModel = context.watch<NewsPostModel>();
     final newsPosts = newsPostModel.newsPosts;
+
+    // --- START OF FIX ---
+    // Get all collectible data directly from the provider. This ensures
+    // this screen is always looking at the same data as the CollectionScreen.
     final collectibleModel = context.watch<CollectibleModel>();
     final allCollectibles = collectibleModel.collectionCollectibles;
-    final collectibles = collectibleModel.collectionCollectibles;
-    final userCollectibles = collectibleModel.userCollectibles;
+
+    // The logic to get the "latest" collectible is now derived from the provider's state.
+    // This removes the competing data source.
+    final recentColl =
+        allCollectibles.isNotEmpty ? allCollectibles.first : null;
+    // --- END OF FIX ---
+
     final notificationProvider = context.watch<NotificationProvider>();
     final int unreadNotifications =
         notificationProvider.unreadNotificationCount;
 
-    final recentColl =
-        allCollectibles.isNotEmpty ? allCollectibles.first : null;
     final recentUrls = _getAssetUrlFromCollectible(recentColl);
     return Scaffold(
         backgroundColor: Colors.white,
@@ -197,53 +205,33 @@ class HomeScreenState extends State<HomeScreen>
           backgroundColor: Colors.white,
           centerTitle: false,
           title: userModel.isLoading
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : Padding(
                   padding: const EdgeInsets.only(top: 0),
                   child: Row(children: [
                     Padding(
                         padding: const EdgeInsets.only(left: 10.0),
-                        child:
-                            // child: userPic != null
-                            // ? getUserPic(
-                            //     userPic, 'assets/images/profile.jpg', 18.0)
-                            // : shadowCircle(
-                            shadowCircle(
-                                'assets/images/kloppocarIcon.png', 18, false)),
+                        child: shadowCircle(
+                            'assets/images/kloppocarIcon.png', 18, false)),
                     Padding(
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(children: [
-                              // Text(currentUser["username"],
                               Text(
                                   translate(
                                       "home_header_username_default", context),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w200)),
-                              // Padding(
-                              //     padding: const EdgeInsets.only(left: 5.0),
-                              //     child: SizedBox(
-                              //         width: 20,
-                              //         child: GestureDetector(
-                              //             onTap: () {
-                              //               Navigator.push(
-                              //                   context,
-                              //                   MaterialPageRoute(
-                              //                       builder: (context) =>
-                              //                           ProfileScreen()));
-                              //             },
-                              //             child: Image.asset(
-                              //                 "assets/images/gear.png")))),
                             ]),
                             Text(
                                 currentUser["userRank"] != null
                                     ? currentUser["userRank"]["title"]
                                     : translate(
                                         "home_header_rank_default", context),
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontSize: 10, fontWeight: FontWeight.w700)),
                           ],
                         ))
@@ -258,7 +246,7 @@ class HomeScreenState extends State<HomeScreen>
                         color: Colors.white,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Color(0xffd622ca),
+                          color: const Color(0xffd622ca),
                           width: 1,
                         ),
                       ),
@@ -282,7 +270,6 @@ class HomeScreenState extends State<HomeScreen>
                         shape: BoxShape.circle,
                       ),
                       constraints: const BoxConstraints(
-                        // Ensure minimum size
                         minWidth: 18,
                         minHeight: 18,
                       ),
@@ -307,13 +294,14 @@ class HomeScreenState extends State<HomeScreen>
               padding: const EdgeInsets.all(10),
               child: Column(children: [
                 Stack(alignment: Alignment.center, children: [
-                  Divider(height: 20, thickness: 1, color: Color(0x80999999)),
+                  const Divider(
+                      height: 20, thickness: 1, color: Color(0x80999999)),
                   shadowCircle('assets/images/car.jpg', 20.0, false),
                 ]),
                 Align(
                   alignment: Alignment.center,
                   child: Padding(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      padding: const EdgeInsets.only(top: 10, bottom: 10),
                       child: GestureDetector(
                           onTap: () {
                             if (recentColl != null) {
@@ -322,17 +310,13 @@ class HomeScreenState extends State<HomeScreen>
                                   MaterialPageRoute(
                                       builder: (context) => CollectibleDetails(
                                           selectedCollectible: recentColl)));
-                            } else {
-                              {}
                             }
                           },
                           child: SizedBox(
                             height: 400,
                             child: ObjectViewer(
                                 asset: recentUrls['url'],
-                                placeholder: recentUrls[
-                                    'placeholder'] // Provide a default or handle null
-                                ),
+                                placeholder: recentUrls['placeholder']),
                           ))),
                 ),
                 getLatestActiveMission(
@@ -346,7 +330,7 @@ class HomeScreenState extends State<HomeScreen>
                 sectionHeader(translate("home_game_section_label", context)),
                 Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.all(15),
+                    padding: const EdgeInsets.all(15),
                     child: listMissions(context, missions, missionUsers)),
                 sectionHeader(translate("home_news_section_label", context)),
                 if (newsPosts.isNotEmpty) ...[
@@ -379,7 +363,6 @@ class HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                 ] else ...[
-                  // Show a loading indicator while news is being fetched
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 20.0),
                     child: Center(child: CircularProgressIndicator()),
@@ -415,7 +398,6 @@ class HomeScreenState extends State<HomeScreen>
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              // ignore: deprecated_member_use
               color: Colors.black.withOpacity(0.1),
               blurRadius: 10,
             ),
@@ -427,15 +409,15 @@ class HomeScreenState extends State<HomeScreen>
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.black,
-                borderRadius: const BorderRadius.only(
+                borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(12),
                     topRight: Radius.circular(12)),
               ),
               child: Text(
                 translate("banner_welcome_header", context),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24,
                   color: Colors.white,
                   fontFamily: 'ChakraPetch',
@@ -457,7 +439,8 @@ class HomeScreenState extends State<HomeScreen>
                       children: [
                         Text(
                           translate("banner_welcome_body", context),
-                          style: TextStyle(fontSize: 16, color: Colors.black),
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.black),
                         ),
                       ],
                     ),
@@ -465,37 +448,6 @@ class HomeScreenState extends State<HomeScreen>
                 ],
               ),
             ),
-            // Container(
-            //     alignment: Alignment.center,
-            //     padding: EdgeInsets.all(5),
-            //     child: progressBar(.35)),
-            // Padding(
-            //   padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-            //   child: Row(
-            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //     children: [
-            //       Text(
-            //         'Kloppocar-Puzzle-Collection',
-            //         style: GoogleFonts.roboto(
-            //             textStyle: TextStyle(
-            //           fontSize: 12,
-            //           letterSpacing: 1,
-            //           color: Colors.black,
-            //           fontWeight: FontWeight.w300,
-            //         )),
-            //       ),
-            //       Text(
-            //         '4/7',
-            //         style: GoogleFonts.roboto(
-            //             textStyle: TextStyle(
-            //           fontSize: 12,
-            //           color: Colors.black,
-            //           fontWeight: FontWeight.w300,
-            //         )),
-            //       )
-            //     ],
-            //   ),
-            // ),
           ],
         ),
       ),
@@ -507,7 +459,7 @@ class HomeScreenState extends State<HomeScreen>
         width: MediaQuery.of(context).size.width - 50,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          border: Border.all(color: Color(0x80999999)),
+          border: Border.all(color: const Color(0x80999999)),
           borderRadius: BorderRadius.circular(90),
         ),
         child: Padding(
@@ -520,7 +472,7 @@ class HomeScreenState extends State<HomeScreen>
             percent: progressPercent,
             backgroundColor: Colors.transparent,
             barRadius: const Radius.circular(90),
-            progressColor: Color(0xffd622ca),
+            progressColor: const Color(0xffd622ca),
           ),
         ));
   }

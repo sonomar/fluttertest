@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:cached_network_image/cached_network_image.dart'; // Temporarily unused for debugging
 import 'subscreens/collectibles/collectible_details.dart';
 import '../models/collectible_model.dart';
 import '../helpers/localization_helper.dart';
@@ -52,22 +51,6 @@ class _CollectionScreenState extends State<CollectionScreen>
     return false;
   }
 
-  // Future<void> readItemJson() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   final String response =
-  //       await rootBundle.loadString('assets/json/example.json');
-  //   final data = await json.decode(response);
-  //   setState(() {
-  //     _items = data['collectibles'];
-  //   });
-  //   for (int i = 0; i < _items.length; i++) {
-  //     var foundItem = _items[i]['label'];
-  //     setState(() {
-  //       _cardStatus[foundItem] = prefs.getBool(foundItem);
-  //     });
-  //   }
-  // }
-
   Widget shadowCircle(imageLink, radius) {
     return Container(
       decoration: BoxDecoration(
@@ -84,113 +67,78 @@ class _CollectionScreenState extends State<CollectionScreen>
     );
   }
 
+  // --- START OF FIX: Using Image.network for debugging ---
+  Widget _buildImageWidget(String imageUrl) {
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      // This builder shows a spinner while the image is loading.
+      loadingBuilder: (BuildContext context, Widget child,
+          ImageChunkEvent? loadingProgress) {
+        if (loadingProgress == null)
+          return child; // If loaded, return the image
+        return Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 2.0,
+            value: loadingProgress.expectedTotalBytes != null
+                ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                : null,
+          ),
+        );
+      },
+      // This builder shows an error icon if the image fails to load.
+      errorBuilder: (context, error, stackTrace) {
+        print('Image.network Error: $error'); // Log the specific error
+        return const Center(
+            child: Icon(Icons.error_outline, color: Colors.red));
+      },
+    );
+  }
+
   Widget linkedInkwell(Map collectibleTemplate, Map? userCollectibleInstance,
       BuildContext context) {
-    // Ensure imageRef and url are present and not null
-    final String colImage =
-        collectibleTemplate['imageRef']?['url'] ?? 'assets/images/car1.png';
+    final String colImage = collectibleTemplate['imageRef']?['url'] ?? '';
 
     return Material(
         child: InkWell(
       onTap: () {
         if (userCollectibleInstance != null) {
-          // Ensure instance is found
           Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) => CollectibleDetails(
-                    selectedCollectible:
-                        collectibleTemplate, // This is the template
-                    selectedUserCollectible:
-                        userCollectibleInstance // This is the specific instance
-                    )),
-          );
-        } else {
-          // Fallback or error if instance not found, though isUserOwned should prevent this
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Owned instance details not found.")),
-          );
-          // Optionally, navigate to details view without trade capability
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => CollectibleDetails(
-                      selectedCollectible: collectibleTemplate,
-                    )),
+                    selectedCollectible: collectibleTemplate,
+                    selectedUserCollectible: userCollectibleInstance)),
           );
         }
       },
       splashColor: const Color.fromARGB(80, 214, 34, 202),
-      splashFactory: InkSparkle.splashFactory,
-      radius: (MediaQuery.of(context).size.width / 4) -
-          10, // Approximate radius based on grid item size
       child: Ink(
-        decoration: BoxDecoration(
-          color: Colors.white,
-        ),
+        decoration: const BoxDecoration(color: Colors.white),
         child: colImage.isNotEmpty
-            ? CachedNetworkImage(
-                imageUrl: colImage,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2.0)),
-                // --- START OF DEBUGGING FIX ---
-                // Display the actual error message on screen for debugging.
-                errorWidget: (context, url, error) => Container(
-                  color: Colors.red[100],
-                  padding: const EdgeInsets.all(4.0),
-                  child: Center(
-                    child: Text(
-                      'ERR:\n${error.toString()}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red, fontSize: 8),
-                    ),
-                  ),
-                ),
-                // --- END OF DEBUGGING FIX ---
-              )
+            ? _buildImageWidget(colImage)
             : const Icon(Icons.image_not_supported),
       ),
     ));
   }
 
   Widget unlinkedInkwell(Map collectible) {
-    final colImage =
-        collectible['imageRef']?['url'] ?? 'assets/images/car1.png';
+    final colImage = collectible['imageRef']?['url'] ?? '';
     return Material(
       child: Container(
         foregroundDecoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withOpacity(0.7),
           backgroundBlendMode: BlendMode.saturation,
         ),
-        height: 80,
-        width: 50,
-        decoration: BoxDecoration(
-          color: Colors.white,
-        ),
+        decoration: BoxDecoration(color: Colors.grey[200]),
         child: colImage.isNotEmpty
-            ? CachedNetworkImage(
-                imageUrl: colImage,
-                fit: BoxFit.cover,
-                // --- START OF DEBUGGING FIX ---
-                // Display the actual error message on screen for debugging.
-                errorWidget: (context, url, error) => Container(
-                  color: Colors.red[100],
-                  padding: const EdgeInsets.all(4.0),
-                  child: Center(
-                    child: Text(
-                      'ERR:\n${error.toString()}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red, fontSize: 8),
-                    ),
-                  ),
-                ),
-                // --- END OF DEBUGGING FIX ---
-              )
-            : const Icon(Icons.image_not_supported), // Fixes border issues
+            ? _buildImageWidget(colImage)
+            : const Icon(Icons.image_not_supported),
       ),
     );
   }
+  // --- END OF FIX ---
 
   @override
   void initState() {
@@ -212,7 +160,6 @@ class _CollectionScreenState extends State<CollectionScreen>
         automaticallyImplyLeading: false,
         scrolledUnderElevation: 0.0,
         titleTextStyle: const TextStyle(
-          // Added const here
           fontWeight: FontWeight.w700,
           color: Colors.black,
           fontFamily: 'ChakraPetch',
@@ -220,8 +167,8 @@ class _CollectionScreenState extends State<CollectionScreen>
         ),
         centerTitle: false,
         title: Text(
-          translate("collection_header", context), // Added const here
-          style: TextStyle(
+          translate("collection_header", context),
+          style: const TextStyle(
             fontSize: 28,
             color: Colors.black,
             fontFamily: 'ChakraPetch',
@@ -234,20 +181,20 @@ class _CollectionScreenState extends State<CollectionScreen>
         children: [
           Container(
             height: 100,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 border: Border(
-              bottom: BorderSide(color: const Color(0x80999999)),
-              top: BorderSide(color: const Color(0x80999999)),
+              bottom: BorderSide(color: Color(0x80999999)),
+              top: BorderSide(color: Color(0x80999999)),
             )),
             child: Padding(
-              padding: const EdgeInsets.all(20), // Added const here
+              padding: const EdgeInsets.all(20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
                       child: Text(
                     "$numAssets ${translate("collection_subheader_assets", context)}",
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 14,
                         letterSpacing: 2.56,
                         color: Colors.black,
@@ -259,12 +206,11 @@ class _CollectionScreenState extends State<CollectionScreen>
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                         Padding(
-                            padding: const EdgeInsets.only(
-                                right: 10), // Added const here
+                            padding: const EdgeInsets.only(right: 10),
                             child: Text(
                               translate(
                                   "collection_subheader_sort_name", context),
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 14,
                                   letterSpacing: 2.56,
                                   color: Colors.black,
@@ -296,12 +242,11 @@ class _CollectionScreenState extends State<CollectionScreen>
                           },
                         ),
                         Padding(
-                            padding: const EdgeInsets.only(
-                                left: 10, right: 10), // Added const here
+                            padding: const EdgeInsets.only(left: 10, right: 10),
                             child: Text(
                               translate(
                                   "collection_subheader_sort_date", context),
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 14,
                                   letterSpacing: 2.56,
                                   color: Colors.black,
@@ -318,14 +263,12 @@ class _CollectionScreenState extends State<CollectionScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                shadowCircle('assets/images/caricon.jpg',
-                    20.0), // Ensure shadowCircle is defined
+                shadowCircle('assets/images/caricon.jpg', 20.0),
                 Padding(
                   padding: const EdgeInsets.only(left: 10.0),
                   child: Text(
-                    // Added const here
                     translate("collection_sub_header", context),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 20,
                       color: Colors.black,
                       fontFamily: 'ChakraPetch',
@@ -339,7 +282,6 @@ class _CollectionScreenState extends State<CollectionScreen>
           Expanded(
             child: Builder(
               builder: (context) {
-                // State 1: Loading - Now with live status message
                 if (collectibleModel.isLoading) {
                   return Center(
                     child: Column(
@@ -347,7 +289,6 @@ class _CollectionScreenState extends State<CollectionScreen>
                       children: [
                         const CircularProgressIndicator(),
                         const SizedBox(height: 16),
-                        // This will show you exactly which step it's on
                         Text(
                           collectibleModel.loadingMessage ?? 'Initializing...',
                           textAlign: TextAlign.center,
@@ -359,7 +300,6 @@ class _CollectionScreenState extends State<CollectionScreen>
                   );
                 }
 
-                // State 2: Error
                 if (collectibleModel.errorMessage != null) {
                   return Center(
                     child: Padding(
@@ -373,7 +313,6 @@ class _CollectionScreenState extends State<CollectionScreen>
                   );
                 }
 
-                // State 3: Success with Data
                 if (collectionCollectibles.isNotEmpty) {
                   return GridView.builder(
                     gridDelegate:
@@ -411,7 +350,6 @@ class _CollectionScreenState extends State<CollectionScreen>
                     },
                   );
                 } else {
-                  // State 4: Success with No Data
                   return Center(
                     child: Text(
                       translate("collectibles_none", context),
