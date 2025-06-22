@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:deins_app/widgets/profile/permissions_widgets.dart';
 import 'package:deins_app/widgets/auth/auth_widgets.dart';
 import '../../../helpers/localization_helper.dart';
 import 'package:provider/provider.dart';
@@ -14,10 +13,11 @@ class AccountSettingsScreen extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
-        // A loading state local to the dialog
         bool isDeleting = false;
         return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: const Text('Delete Account?'),
             content: SingleChildScrollView(
               child: ListBody(
@@ -36,25 +36,25 @@ class AccountSettingsScreen extends StatelessWidget {
             actions: <Widget>[
               TextButton(
                 child: const Text('Cancel'),
-                // Disable cancel button while deleting
                 onPressed: isDeleting
                     ? null
                     : () {
                         Navigator.of(dialogContext).pop();
                       },
               ),
-              TextButton(
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                // Disable delete button while deleting
+              // Styled Delete Button
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12))),
                 onPressed: isDeleting
                     ? null
                     : () async {
-                        // --- START OF FIX ---
-                        // Show a loading indicator inside the dialog
                         setState(() {
                           isDeleting = true;
                         });
-
                         final authProvider = Provider.of<AppAuthProvider>(
                             context,
                             listen: false);
@@ -72,17 +72,12 @@ class AccountSettingsScreen extends StatelessWidget {
                           return;
                         }
 
-                        final success =
-                            await authProvider.deleteAccount(userId: userId);
+                        await authProvider.deleteAccount(userId: userId);
 
-                        // After the operation, regardless of success or failure,
-                        // if the dialog is still visible, close it.
-                        // The authProvider's state change will handle navigating to the login screen.
                         if (dialogContext.mounted) {
                           Navigator.of(dialogContext)
                               .popUntil((route) => route.isFirst);
                         }
-                        // --- END OF FIX ---
                       },
                 child: const Text('Delete'),
               ),
@@ -96,46 +91,75 @@ class AccountSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FC),
       appBar: AppBar(
         title: Text(translate("account_header", context)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.black, // Makes back button black
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              ChangePasswordForm(),
+              // The form widgets will be styled in the next step
+              const ChangePasswordForm(),
               const SizedBox(height: 24),
-              ChangeEmailForm(),
-              const SizedBox(height: 24),
-              const CameraPermissionSwitch(),
-              const Divider(thickness: 1, color: Colors.black),
-              Padding(
-                  padding: EdgeInsets.only(top: 10),
-                  child: Card(
-                    color: Colors.red[50],
-                    elevation: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextButton.icon(
-                        onPressed: () => _showDeleteConfirmationDialog(context),
-                        icon: const Icon(Icons.warning, color: Colors.red),
-                        label: const Text(
-                          'Delete Account',
-                          style: TextStyle(
-                              color: Colors.red, fontWeight: FontWeight.bold),
-                        ),
-                      ),
+              const ChangeEmailForm(),
+              const SizedBox(height: 40),
+
+              // Restyled Delete Button Section
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.red.withOpacity(0.2))),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.warning_amber_rounded, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text("Danger Zone",
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red)),
+                      ],
                     ),
-                  )),
+                    const SizedBox(height: 8),
+                    const Text(
+                        "This action cannot be undone. All your data and collectibles will be permanently removed.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.redAccent)),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () => _showDeleteConfirmationDialog(context),
+                      icon: const Icon(Icons.delete_forever),
+                      label: const Text('Delete My Account Permanently'),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12))),
+                    ),
+                  ],
+                ),
+              ),
+
               Consumer<AppAuthProvider>(
                 builder: (context, authProvider, _) {
                   if (authProvider.errorMessage != null) {
                     return Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
+                      padding: const EdgeInsets.only(top: 16.0),
                       child: Text(
                         authProvider.errorMessage!,
-                        style: const TextStyle(color: Colors.red),
+                        style: const TextStyle(color: Colors.red, fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
                     );

@@ -2,70 +2,73 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import '../models/app_auth_provider.dart';
-import '../widgets/openCards/login_page.dart';
-import '../widgets/item_button.dart';
 import '../widgets/splash_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../api/collectible.dart';
 import '../models/locale_provider.dart';
-import '../models/app_localizations.dart';
 import '../helpers/localization_helper.dart';
-import '../screens/subscreens/missions/award_screen.dart';
+import './subscreens/missions/award_screen.dart';
 import './subscreens/profile/account_settings_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
+  // A custom widget for the styled list items
+  Widget _buildProfileMenuItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color color = Colors.black,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            child: Row(
+              children: [
+                Icon(icon, color: color, size: 24),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: GoogleFonts.roboto(
+                      textStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios,
+                    color: Colors.grey[400], size: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Uri imprintUrl = Uri.parse('https://deins.io/Imprint');
     final Uri ppUrl = Uri.parse('https://deins.io/data-privacy');
-    final Uri mailingListUrl = Uri.parse('https://deins.io/data-privacy');
-
-    Future<String?> getUserEmail() async {
-      final prefs = await SharedPreferences.getInstance();
-      var email = prefs.getString('email');
-      if (email != null) {
-        return email;
-      } else {
-        return 'no email found';
-      }
-    }
-
-    Future<void> resetDemo() async {
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setBool('item-test1', true);
-      prefs.setBool('item-test2', false);
-      prefs.setBool('item-test3', false);
-      prefs.setBool('item-test4', false);
-      prefs.setBool('item-test5', false);
-      prefs.setBool('item-test6', false);
-      return showDialog<void>(
-        context: context,
-        barrierDismissible: true, // user must tap button!
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Demo Reset'),
-            content: const SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  Text('You have reset the demo.'),
-                  Text('You now have only the first collectible.'),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
 
     Future<void> _launchUrl(url) async {
       if (!await launchUrl(url)) {
@@ -74,76 +77,75 @@ class ProfileScreen extends StatelessWidget {
     }
 
     return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-            scrolledUnderElevation: 0.0,
-            backgroundColor: Colors.white,
-            // leading: IconButton(
-            //   icon: const Icon(Icons.arrow_back, color: Colors.black),
-            //   onPressed: () => Navigator.pop(context),
-            // ),
-            title: Text(translate("profile_header", context)),
-            centerTitle: false,
-            titleTextStyle: TextStyle(
-              fontSize: 28,
-              color: Colors.black,
-              fontFamily: 'ChakraPetch',
-              fontWeight: FontWeight.w500,
-            )),
-        body: ListView(
-          padding: const EdgeInsets.all(8),
-          children: <Widget>[
-            ItemButton(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const AccountSettingsScreen(),
-                  ));
-                },
-                title: translate("profile_account_settings",
-                    context), // Or separate buttons if you prefer
-                active: true),
-            ItemButton(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (context) => const AwardScreen()),
-                  );
-                },
-                title: translate("profile_awards", context),
-                active: true),
-            ItemButton(
-                onTap: () {
-                  _launchUrl(ppUrl);
-                },
-                title: translate("profile_pp_label", context),
-                active: true),
-            ItemButton(
-                onTap: () {
-                  // Use the provider to toggle the locale
-                  Provider.of<LocaleProvider>(context, listen: false)
-                      .toggleLocale();
-                },
-                // Use AppLocalizations to make the button text itself translatable
-                title: translate('profile_language_label', context),
-                active: true),
-            ItemButton(
-                onTap: () async {
-                  await Provider.of<AppAuthProvider>(context, listen: false)
-                      .signOut();
-
-                  // After sign-out, navigate to a new LoginPage and remove all
-                  // previous screens from the navigation stack.
-                  if (context.mounted) {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                          builder: (context) => const SplashScreen()),
-                      (Route<dynamic> route) => false,
-                    );
-                  }
-                },
-                title: translate("profile_signout_label", context),
-                active: true),
-          ],
-        ));
+      backgroundColor:
+          const Color(0xFFF7F8FC), // A modern, slightly off-white background
+      appBar: AppBar(
+        scrolledUnderElevation: 0.0,
+        backgroundColor: Colors.transparent, // Make AppBar transparent
+        elevation: 0,
+        title: Text(
+          translate("profile_header", context),
+          style: const TextStyle(
+            fontSize: 28,
+            color: Colors.black,
+            fontFamily: 'ChakraPetch',
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        centerTitle: false,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.only(top: 20),
+        children: <Widget>[
+          _buildProfileMenuItem(
+            icon: Icons.manage_accounts_outlined,
+            title: translate("profile_account_settings", context),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => const AccountSettingsScreen(),
+              ));
+            },
+          ),
+          _buildProfileMenuItem(
+            icon: Icons.emoji_events_outlined,
+            title: translate("profile_awards", context),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const AwardScreen()),
+              );
+            },
+          ),
+          _buildProfileMenuItem(
+            icon: Icons.gavel_outlined,
+            title: translate("profile_pp_label", context),
+            onTap: () => _launchUrl(ppUrl),
+          ),
+          _buildProfileMenuItem(
+            icon: Icons.language_outlined,
+            title: translate('profile_language_label', context),
+            onTap: () {
+              Provider.of<LocaleProvider>(context, listen: false)
+                  .toggleLocale();
+            },
+          ),
+          const SizedBox(height: 20),
+          _buildProfileMenuItem(
+            icon: Icons.logout,
+            title: translate("profile_signout_label", context),
+            color: Colors.red,
+            onTap: () async {
+              await Provider.of<AppAuthProvider>(context, listen: false)
+                  .signOut();
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const SplashScreen()),
+                  (Route<dynamic> route) => false,
+                );
+              }
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
