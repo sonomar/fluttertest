@@ -196,6 +196,8 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
     final missionUsers = missionModel.missionUsers;
     final Map<String, dynamic> currentMint =
         widget.userCollectibleInstances[_currentMintIndex];
+    final bool showCarousel = widget.userCollectibleInstances.length > 1 &&
+        (_sheetPosition > 0.7 || _isEnlarged);
     final collectibleModel = context.watch<CollectibleModel>();
     final collectibles = collectibleModel.collectionCollectibles;
     final userCollectibles = collectibleModel.userCollectibles;
@@ -260,7 +262,7 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                   height: _isEnlarged
                       ? constraints.maxHeight * 0.85
                       : objectViewerHeight,
-                  child: widget.userCollectibleInstances.length > 1
+                  child: showCarousel
                       ? CarouselSlider.builder(
                           carouselController: carouselController,
                           itemCount: widget.userCollectibleInstances.length,
@@ -273,7 +275,7 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                             height: _isEnlarged
                                 ? constraints.maxHeight * 0.8
                                 : objectViewerHeight,
-                            viewportFraction: 0.6,
+                            viewportFraction: _isEnlarged ? 0.6 : 0.4,
                             enlargeCenterPage: true,
                             enlargeFactor: 0.2,
                             enableInfiniteScroll: false,
@@ -285,7 +287,6 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                             },
                           ),
                         )
-                      // If there's only one mint, just show the ObjectViewer.
                       : ObjectViewer(
                           asset: widget.selectedCollectible['embedRef']['url'],
                           placeholder: widget.selectedCollectible['imageRef']
