@@ -9,9 +9,13 @@ import '../services/asset_cache_service.dart';
 class ObjectViewer extends StatefulWidget {
   final String asset;
   final String placeholder;
+  final bool isFront;
 
   const ObjectViewer(
-      {super.key, required this.asset, required this.placeholder});
+      {super.key,
+      required this.asset,
+      required this.placeholder,
+      this.isFront = false});
 
   @override
   ObjectViewerState createState() => ObjectViewerState();
@@ -112,8 +116,8 @@ class ObjectViewerState extends State<ObjectViewer> {
                 disablePan: true,
                 disableZoom: true,
                 disableTap: true,
-                autoRotate: true,
-                cameraControls: true,
+                autoRotate: widget.isFront ? true : false,
+                cameraControls: widget.isFront ? false : true,
                 cameraOrbit: "0deg 75deg 90%",
               ),
             if (hasError)

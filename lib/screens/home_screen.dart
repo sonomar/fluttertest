@@ -417,7 +417,8 @@ class HomeScreenState extends State<HomeScreen>
                             height: 400,
                             child: ObjectViewer(
                                 asset: recentUrls['url'],
-                                placeholder: recentUrls['placeholder']),
+                                placeholder: recentUrls['placeholder'],
+                                isFront: true),
                           ))),
                 ),
                 getLatestActiveMission(
