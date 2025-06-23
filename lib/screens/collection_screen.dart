@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// import 'package:cached_network_image/cached_network_image.dart'; // Temporarily unused for debugging
 import 'subscreens/collectibles/collectible_details.dart';
 import '../models/collectible_model.dart';
 import '../helpers/localization_helper.dart';
+import '../widgets/shadow_circle.dart';
 
 class CollectionScreen extends StatefulWidget {
   const CollectionScreen({super.key, PageStorageKey<String>? pageKey});
@@ -17,29 +17,16 @@ class _CollectionScreenState extends State<CollectionScreen>
   @override
   bool get wantKeepAlive => true;
 
-  Map exampleWallet = {
-    "collectibleId": 99,
-    "label": "item-test77",
-    "name": "3D Wallet",
-    "category": 1,
-    "collection": 1,
-    "description":
-        "This is a sample 3D Wallet. This Shows off what DEINS 3D objects will look like in the future.",
-    "imageRef": "assets/images/car1.png",
-    "vidRef": "assets/images/car1.png",
-    "QRRef": "assets/images/car1.png",
-    "EmbedRef": "assets/images/car1.png",
-    "createdDt": "2024-11-18 10:36:22.640",
-    "updatedDt": "2024-11-18 10:36:22.640",
-    "active": true,
-    "collection-name": "Kloppocar-Puzzle-Collection",
-    "collection-number": "01-01",
-    "community": "Kloppocar Community",
-    "sponsor": "Mini-Cooper",
-    "sponsor-url": "https://www.mini.com",
-    "circulation": "20,000",
-    "publication-date": "20.03.2025"
-  };
+  int countOwnedMints(Map collectible, List userCollectibles) {
+    int count = 0;
+    for (int i = 0; i < userCollectibles.length; i++) {
+      if (userCollectibles[i]['collectibleId'] ==
+          collectible['collectibleId']) {
+        count++;
+      }
+    }
+    return count;
+  }
 
   bool isUserOwned(collectible, userCollectibles) {
     for (int i = 0; i < userCollectibles.length; i++) {
@@ -49,22 +36,6 @@ class _CollectionScreenState extends State<CollectionScreen>
       }
     }
     return false;
-  }
-
-  Widget shadowCircle(imageLink, radius) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(blurRadius: 5, color: Colors.black, spreadRadius: 0)
-        ],
-      ),
-      child: CircleAvatar(
-        radius: radius,
-        backgroundImage: AssetImage(imageLink),
-      ),
-    );
   }
 
   // --- START OF FIX: Using Image.network for debugging ---
@@ -96,41 +67,77 @@ class _CollectionScreenState extends State<CollectionScreen>
     );
   }
 
-  Widget linkedInkwell(Map collectibleTemplate, Map? userCollectibleInstance,
-      BuildContext context) {
+  Widget linkedInkwell(Map collectibleTemplate,
+      List<Map<String, dynamic>> userCollectibleInstances, int mintCount) {
     final String colImage = collectibleTemplate['imageRef']?['url'] ?? '';
 
     return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          // When tapped, pass the first instance to the details page.
+          // The details page could be expanded later to show all mints.
+          if (userCollectibleInstances.isNotEmpty) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CollectibleDetails(
+                      selectedCollectible: collectibleTemplate,
+                      selectedUserCollectible: userCollectibleInstances.first)),
+            );
+          }
+        },
+        splashColor: const Color.fromARGB(80, 214, 34, 202),
         child: Card(
-            elevation: 4.0,
-            clipBehavior: Clip.antiAlias,
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Padding(
-                padding: EdgeInsets.all(10.0),
-                child: InkWell(
-                  onTap: () {
-                    if (userCollectibleInstance != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => CollectibleDetails(
-                                selectedCollectible: collectibleTemplate,
-                                selectedUserCollectible:
-                                    userCollectibleInstance)),
-                      );
-                    }
-                  },
-                  splashColor: const Color.fromARGB(80, 214, 34, 202),
-                  child: Ink(
-                    decoration: const BoxDecoration(color: Colors.white),
-                    child: colImage.isNotEmpty
-                        ? _buildImageWidget(colImage)
-                        : const Icon(Icons.image_not_supported),
+          elevation: 4.0,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // The collectible image fills the card.
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: colImage.isNotEmpty
+                    ? _buildImageWidget(colImage)
+                    : const Icon(Icons.image_not_supported),
+              ),
+              // The mint count badge is positioned in the top-right corner.
+              if (mintCount > 1)
+                Positioned(
+                  top: 5,
+                  right: 5,
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 214, 34, 202)
+                          .withOpacity(0.9),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 28,
+                      minHeight: 28,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$mintCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
-                ))));
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget unlinkedInkwell(Map collectible) {
@@ -157,7 +164,6 @@ class _CollectionScreenState extends State<CollectionScreen>
               ),
             )));
   }
-  // --- END OF FIX ---
 
   @override
   void initState() {
@@ -285,7 +291,7 @@ class _CollectionScreenState extends State<CollectionScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                shadowCircle('assets/images/caricon.jpg', 20.0),
+                shadowCircle('assets/images/caricon.jpg', 20.0, false),
                 Padding(
                   padding: const EdgeInsets.only(left: 10.0),
                   child: Text(
@@ -348,27 +354,23 @@ class _CollectionScreenState extends State<CollectionScreen>
                     itemCount: collectionCollectibles.length,
                     itemBuilder: (context, index) {
                       final collectibleTemplate = collectionCollectibles[index];
-                      bool isOwned =
-                          isUserOwned(collectibleTemplate, userCollectibles);
-
-                      Map userCollectibleInstance = {};
+                      final int ownedMints = countOwnedMints(
+                          collectibleTemplate, userCollectibles);
+                      bool isOwned = ownedMints > 0;
                       if (isOwned) {
-                        userCollectibleInstance = userCollectibles.firstWhere(
-                          (uc) =>
-                              uc['collectibleId'].toString() ==
-                              collectibleTemplate['collectibleId'].toString(),
-                          orElse: () => {},
-                        );
-                      }
+                        // Get all instances of this collectible owned by the user.
+                        final instances = userCollectibles
+                            .where((uc) =>
+                                uc['collectibleId'] ==
+                                collectibleTemplate['collectibleId'])
+                            .map((e) => e as Map<String, dynamic>)
+                            .toList();
 
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 5),
-                        child: isOwned && userCollectibleInstance.isNotEmpty
-                            ? linkedInkwell(collectibleTemplate,
-                                userCollectibleInstance, context)
-                            : unlinkedInkwell(collectibleTemplate),
-                      );
+                        return linkedInkwell(
+                            collectibleTemplate, instances, ownedMints);
+                      } else {
+                        return unlinkedInkwell(collectibleTemplate);
+                      }
                     },
                   );
                 } else {
