@@ -85,6 +85,7 @@ Widget communityChallengeWidget(
                     padding: EdgeInsets.only(left: 30, bottom: 10),
                     child: CircleAvatar(
                       radius: 24,
+                      backgroundColor: Colors.white,
                       backgroundImage:
                           AssetImage('assets/images/kloppocarIcon.png'),
                     )),

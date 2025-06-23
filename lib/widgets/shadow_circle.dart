@@ -19,6 +19,7 @@ Widget shadowCircle(String imageLink, double radius, bool isWeb) {
         ? CircleAvatar(
             radius: radius, // Receives double
             backgroundImage: NetworkImage(imageLink),
+            backgroundColor: Colors.white,
             onBackgroundImageError:
                 imageLink.startsWith('http') || imageLink.startsWith('https')
                     ? (exception, stackTrace) {

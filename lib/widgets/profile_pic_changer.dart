@@ -19,6 +19,7 @@ Future<void> showProfilePicModal(BuildContext context) async {
         builder: (context, setModalState) {
           return AlertDialog(
             title: const Text('Choose a Profile Picture'),
+            backgroundColor: Colors.white,
             content: SizedBox(
               width: double.maxFinite,
               child: isUpdating
