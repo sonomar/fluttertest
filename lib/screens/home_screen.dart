@@ -184,6 +184,7 @@ class HomeScreenState extends State<HomeScreen>
     final allCollectibles = collectibleModel.collectionCollectibles;
     final recentColl =
         allCollectibles.isNotEmpty ? allCollectibles.first : null;
+    final userCollectibles = collectibleModel.userCollectibles;
 
     final notificationProvider = context.watch<NotificationProvider>();
     final int unreadNotifications =
@@ -303,11 +304,31 @@ class HomeScreenState extends State<HomeScreen>
                       child: GestureDetector(
                           onTap: () {
                             if (recentColl != null) {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => CollectibleDetails(
-                                          selectedCollectible: recentColl)));
+                              // Find all instances of the tapped collectible
+                              final instances = userCollectibles
+                                  .where((uc) =>
+                                      uc['collectibleId'] ==
+                                      recentColl['collectibleId'])
+                                  .map((e) => e as Map<String, dynamic>)
+                                  .toList();
+
+                              if (instances.isNotEmpty) {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            CollectibleDetails(
+                                              selectedCollectible: recentColl,
+                                              userCollectibleInstances:
+                                                  instances,
+                                            )));
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          "You don't own this collectible yet to see its details.")),
+                                );
+                              }
                             }
                           },
                           child: SizedBox(

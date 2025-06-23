@@ -9,9 +9,11 @@ class CardInfo extends StatelessWidget {
     required this.missions,
     required this.missionUsers,
     required this.recentColl,
+    required this.selectedUserCollectible,
     this.onTradeInitiate,
   });
   final Map selectedCollectible;
+  final Map selectedUserCollectible;
   final List<dynamic> missions;
   final List<dynamic> missionUsers;
   final dynamic recentColl;
@@ -149,6 +151,10 @@ class CardInfo extends StatelessWidget {
                       child: Column(children: [
                         lineItem("Kartennummer",
                             selectedCollectible["collectibleId"].toString()),
+                        lineItem(
+                            "Mint",
+                            selectedUserCollectible['mint']?.toString() ??
+                                'N/A'),
                         lineItem("Auflage",
                             selectedCollectible["circulation"].toString()),
                         lineItem("Erscheinungsdatum",

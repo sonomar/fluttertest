@@ -82,8 +82,9 @@ class _CollectionScreenState extends State<CollectionScreen>
               context,
               MaterialPageRoute(
                   builder: (context) => CollectibleDetails(
-                      selectedCollectible: collectibleTemplate,
-                      selectedUserCollectible: userCollectibleInstances.first)),
+                        selectedCollectible: collectibleTemplate,
+                        userCollectibleInstances: userCollectibleInstances,
+                      )),
             );
           }
         },

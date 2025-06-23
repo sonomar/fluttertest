@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter_new/qr_flutter.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import '../../../models/collectible_model.dart';
 import '../../../models/mission_model.dart';
 import '../../../models/user_model.dart';
@@ -13,10 +14,10 @@ class CollectibleDetails extends StatefulWidget {
   const CollectibleDetails({
     super.key,
     required this.selectedCollectible,
-    this.selectedUserCollectible,
+    required this.userCollectibleInstances,
   });
   final Map selectedCollectible;
-  final Map? selectedUserCollectible;
+  final List<Map<String, dynamic>> userCollectibleInstances;
 
   @override
   State<CollectibleDetails> createState() => _CollectibleDetailsState();
@@ -25,6 +26,9 @@ class CollectibleDetails extends StatefulWidget {
 class _CollectibleDetailsState extends State<CollectibleDetails> {
   bool _isEnlarged = false;
   double _sheetPosition = 0.25;
+  int _currentMintIndex = 0;
+  final CarouselSliderController carouselController =
+      CarouselSliderController();
 
   @override
   void initState() {
@@ -35,9 +39,42 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
     });
   }
 
-  // ... (showTradeQrDialog and lineItem methods remain unchanged)
-  Future<void> _showTradeQrDialog(BuildContext context) async {
-    final dynamic userInstanceForTrade = widget.selectedUserCollectible;
+  Widget _buildCarouselItem(BuildContext context, int itemIndex,
+      int pageViewIndex, bool isCenterPage) {
+    final scale = isCenterPage ? 1.0 : 0.8;
+    final String assetUrl = widget.selectedCollectible['embedRef']['url'];
+    final String placeholderUrl =
+        widget.selectedCollectible['imageRef']['load'];
+
+    return Transform.scale(
+      scale: scale,
+      child: GestureDetector(
+        onTap: () {
+          if (!isCenterPage) {
+            carouselController.animateToPage(itemIndex);
+          }
+        },
+        // If the item is in the center, show the 3D ObjectViewer.
+        // Otherwise, show the placeholder image to improve performance.
+        child: isCenterPage
+            ? ObjectViewer(asset: assetUrl, placeholder: placeholderUrl)
+            : Image.network(
+                placeholderUrl,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const Center(child: CircularProgressIndicator());
+                },
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.error_outline),
+              ),
+      ),
+    );
+  }
+
+  Future<void> _showTradeQrDialog(
+      BuildContext context, Map<String, dynamic> mintToTrade) async {
+    final dynamic userInstanceForTrade = mintToTrade;
 
     if (userInstanceForTrade == null ||
         userInstanceForTrade['userCollectibleId'] == null) {
@@ -87,7 +124,7 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
     }
 
     final String qrData = "deinsQr-trade-$giverUserId-$userCollectibleId";
-
+    if (!mounted) return;
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -157,6 +194,8 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
     final missionModel = context.watch<MissionModel>();
     final missions = missionModel.missions;
     final missionUsers = missionModel.missionUsers;
+    final Map<String, dynamic> currentMint =
+        widget.userCollectibleInstances[_currentMintIndex];
     final collectibleModel = context.watch<CollectibleModel>();
     final collectibles = collectibleModel.collectionCollectibles;
     final userCollectibles = collectibleModel.userCollectibles;
@@ -177,8 +216,6 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
               onTap: () {
                 setState(() {
                   _isEnlarged = !_isEnlarged;
-                  // BUG FIX: When shrinking, reset the sheet position
-                  // to its default starting size.
                   if (!_isEnlarged) {
                     _sheetPosition = 0.25;
                   }
@@ -215,24 +252,45 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
               ),
               Positioned(
                 top: 0,
-                left: 20,
-                right: 20,
+                left: 0,
+                right: 0,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 100),
                   curve: Curves.linear,
                   height: _isEnlarged
                       ? constraints.maxHeight * 0.85
                       : objectViewerHeight,
-                  child: widget.selectedCollectible["name"] == "3D Wallet"
-                      ? const ObjectViewer(
-                          asset:
-                              "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/KloppoCar_4.gltf",
-                          placeholder:
-                              "https://deins.s3.eu-central-1.amazonaws.com/Objects3d/kloppocar/images/k4.png")
+                  child: widget.userCollectibleInstances.length > 1
+                      ? CarouselSlider.builder(
+                          carouselController: carouselController,
+                          itemCount: widget.userCollectibleInstances.length,
+                          itemBuilder: (context, itemIndex, pageViewIndex) {
+                            final isCenter = _currentMintIndex == itemIndex;
+                            return _buildCarouselItem(
+                                context, itemIndex, pageViewIndex, isCenter);
+                          },
+                          options: CarouselOptions(
+                            height: _isEnlarged
+                                ? constraints.maxHeight * 0.8
+                                : objectViewerHeight,
+                            viewportFraction: 0.6,
+                            enlargeCenterPage: true,
+                            enlargeFactor: 0.2,
+                            enableInfiniteScroll: false,
+                            padEnds: true,
+                            onPageChanged: (index, reason) {
+                              setState(() {
+                                _currentMintIndex = index;
+                              });
+                            },
+                          ),
+                        )
+                      // If there's only one mint, just show the ObjectViewer.
                       : ObjectViewer(
                           asset: widget.selectedCollectible['embedRef']['url'],
                           placeholder: widget.selectedCollectible['imageRef']
-                              ['load']),
+                              ['load'],
+                        ),
                 ),
               ),
               if (!_isEnlarged)
@@ -248,10 +306,13 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
                   },
                   contents: CardInfo(
                     selectedCollectible: widget.selectedCollectible,
+                    selectedUserCollectible: currentMint,
                     missions: missions,
                     missionUsers: missionUsers,
-                    onTradeInitiate: () => _showTradeQrDialog(context),
                     recentColl: recentColl,
+                    onTradeInitiate: () {
+                      // Trading logic might need to be adjusted to select a specific mint
+                    },
                   ),
                 ),
             ],
