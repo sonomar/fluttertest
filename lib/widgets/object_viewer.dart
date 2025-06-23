@@ -112,7 +112,7 @@ class ObjectViewerState extends State<ObjectViewer> {
                 disablePan: true,
                 disableZoom: true,
                 disableTap: true,
-                autoRotate: false,
+                autoRotate: true,
                 cameraControls: true,
                 cameraOrbit: "0deg 75deg 90%",
               ),

@@ -332,8 +332,8 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               BottomNavigationBarItem(
                 icon: SizedBox(
-                  width: 40,
-                  height: 40,
+                  width: 50,
+                  height: 50,
                   child: SvgPicture.asset(
                     'assets/images/scan.svg',
                     colorFilter: ColorFilter.mode(

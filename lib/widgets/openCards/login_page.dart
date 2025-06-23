@@ -119,89 +119,107 @@ class _LoginPageState extends State<LoginPage> {
     final providerErrorMessage = authProvider.errorMessage;
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 40.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  _formType == AuthFormType.login
-                      ? translate('login_header', context)
-                      : _formType == AuthFormType.register
-                          ? translate('register_header', context)
-                          : translate('confirm_code_header', context),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 40),
-                ..._buildFormFields(),
-                const SizedBox(height: 20),
-                if (providerErrorMessage != null || _uiErrorMessage.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      providerErrorMessage ?? _uiErrorMessage,
-                      style: const TextStyle(color: Colors.red, fontSize: 14),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                if (_isSubmitting)
-                  const Center(child: CircularProgressIndicator())
-                else
-                  ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text(
+      body: Container(
+          alignment: Alignment.topCenter,
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              colors: [
+                Color.fromARGB(255, 214, 34, 112),
+                Color.fromARGB(255, 150, 21, 141),
+                Color(0xff333333),
+              ],
+              center: Alignment.topCenter,
+              radius: 0.7,
+            ),
+          ),
+          child: Column(children: [
+            Padding(
+                padding: EdgeInsets.only(
+                    top: 200.0, bottom: 50.0, left: 40.0, right: 40.0),
+                child: SizedBox(
+                    child: Image.asset('assets/images/deins_logo.png'))),
+            SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 40.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
                       _formType == AuthFormType.login
                           ? translate('login_header', context)
                           : _formType == AuthFormType.register
                               ? translate('register_header', context)
                               : translate('confirm_code_header', context),
-                      style: const TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold),
                     ),
-                  ),
-                const SizedBox(height: 20),
-                if (_formType != AuthFormType.confirm)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _formType == AuthFormType.login
-                            ? translate("login_register_switch_text", context)
-                            : translate("register_login_switch_text", context),
-                        style: const TextStyle(color: Colors.white),
+                    const SizedBox(height: 40),
+                    ..._buildFormFields(),
+                    const SizedBox(height: 20),
+                    if (providerErrorMessage != null ||
+                        _uiErrorMessage.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Text(
+                          providerErrorMessage ?? _uiErrorMessage,
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      TextButton(
-                          onPressed: _isSubmitting ? null : _switchFormType,
-                          child: Text(
+                    if (_isSubmitting)
+                      const Center(child: CircularProgressIndicator())
+                    else
+                      ElevatedButton(
+                        onPressed: _submit,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(
+                          _formType == AuthFormType.login
+                              ? translate('login_header', context)
+                              : _formType == AuthFormType.register
+                                  ? translate('register_header', context)
+                                  : translate('confirm_code_header', context),
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    const SizedBox(height: 20),
+                    if (_formType != AuthFormType.confirm)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
                             _formType == AuthFormType.login
                                 ? translate(
-                                    "login_register_switch_link", context)
+                                    "login_register_switch_text", context)
                                 : translate(
-                                    "register_login_switch_link", context),
-                          )),
-                    ],
-                  ),
-              ],
+                                    "register_login_switch_text", context),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          TextButton(
+                              onPressed: _isSubmitting ? null : _switchFormType,
+                              child: Text(
+                                _formType == AuthFormType.login
+                                    ? translate(
+                                        "login_register_switch_link", context)
+                                    : translate(
+                                        "register_login_switch_link", context),
+                              )),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
+          ])),
     );
   }
 
