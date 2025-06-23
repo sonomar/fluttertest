@@ -4,6 +4,8 @@ import '../../../helpers/localization_helper.dart';
 import 'package:provider/provider.dart';
 import '../../../models/app_auth_provider.dart';
 import '../../../models/user_model.dart';
+import '../../../widgets/profile/profile_menu_item.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AccountSettingsScreen extends StatelessWidget {
   const AccountSettingsScreen({super.key});
@@ -90,6 +92,7 @@ class AccountSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Uri ppUrl = Uri.parse('https://deins.io/data-privacy');
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FC),
       appBar: AppBar(
@@ -104,6 +107,12 @@ class AccountSettingsScreen extends StatelessWidget {
           child: Column(
             children: [
               // The form widgets will be styled in the next step
+              ProfileMenuItem(
+                icon: Icons.gavel_outlined,
+                title: translate("profile_pp_label", context),
+                onTap: () => launchUrlHelper(ppUrl),
+              ),
+              const SizedBox(height: 24),
               const ChangePasswordForm(),
               const SizedBox(height: 24),
               const ChangeEmailForm(),

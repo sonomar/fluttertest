@@ -4,77 +4,24 @@ import 'package:provider/provider.dart';
 import '../models/app_auth_provider.dart';
 import '../widgets/splash_screen.dart';
 import '../models/locale_provider.dart';
+import '../models/user_model.dart';
 import '../helpers/localization_helper.dart';
 import './subscreens/missions/award_screen.dart';
 import './subscreens/profile/account_settings_screen.dart';
+import '../widgets/profile_pic_changer.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../widgets/shadow_circle.dart';
+import '../widgets/profile/profile_menu_item.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  // A custom widget for the styled list items
-  Widget _buildProfileMenuItem({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    Color color = Colors.black,
-  }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-            child: Row(
-              children: [
-                Icon(icon, color: color, size: 24),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: GoogleFonts.roboto(
-                      textStyle: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: color,
-                      ),
-                    ),
-                  ),
-                ),
-                Icon(Icons.arrow_forward_ios,
-                    color: Colors.grey[400], size: 16),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final Uri ppUrl = Uri.parse('https://deins.io/data-privacy');
-
-    Future<void> _launchUrl(url) async {
-      if (!await launchUrl(url)) {
-        throw Exception('Could not launch $url');
-      }
-    }
+    final userModel = context.watch<UserModel>();
+    final currentUser = userModel.currentUser;
+    final userPic = currentUser?['profileImg'];
+    final username = currentUser?['username'] ?? 'User';
 
     return Scaffold(
       backgroundColor:
@@ -97,7 +44,31 @@ class ProfileScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.only(top: 20),
         children: <Widget>[
-          _buildProfileMenuItem(
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              children: [
+                shadowCircle(userPic ?? 'assets/images/profile.jpg', 32.0,
+                    userPic != null),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    username,
+                    style: GoogleFonts.chakraPetch(
+                      textStyle: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 30, thickness: 1, indent: 16, endIndent: 16),
+          ProfileMenuItem(
             icon: Icons.manage_accounts_outlined,
             title: translate("profile_account_settings", context),
             onTap: () {
@@ -106,7 +77,12 @@ class ProfileScreen extends StatelessWidget {
               ));
             },
           ),
-          _buildProfileMenuItem(
+          ProfileMenuItem(
+            icon: Icons.image_outlined,
+            title: "Change Profile Picture",
+            onTap: () => showProfilePicModal(context),
+          ),
+          ProfileMenuItem(
             icon: Icons.emoji_events_outlined,
             title: translate("profile_awards", context),
             onTap: () {
@@ -115,12 +91,7 @@ class ProfileScreen extends StatelessWidget {
               );
             },
           ),
-          _buildProfileMenuItem(
-            icon: Icons.gavel_outlined,
-            title: translate("profile_pp_label", context),
-            onTap: () => _launchUrl(ppUrl),
-          ),
-          _buildProfileMenuItem(
+          ProfileMenuItem(
             icon: Icons.language_outlined,
             title: translate('profile_language_label', context),
             onTap: () {
@@ -129,7 +100,7 @@ class ProfileScreen extends StatelessWidget {
             },
           ),
           const SizedBox(height: 20),
-          _buildProfileMenuItem(
+          ProfileMenuItem(
             icon: Icons.logout,
             title: translate("profile_signout_label", context),
             color: Colors.red,

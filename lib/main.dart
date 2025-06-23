@@ -348,7 +348,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   width: 30,
                   height: 30,
                   child: SvgPicture.asset(
-                    'assets/images/game.svg',
+                    'assets/images/trophy.svg',
                     colorFilter: ColorFilter.mode(
                         _currentIndex == 3 ? Color(0xffd622ca) : Colors.black,
                         BlendMode.srcIn),
