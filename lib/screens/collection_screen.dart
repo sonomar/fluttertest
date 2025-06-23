@@ -238,15 +238,18 @@ class _CollectionScreenState extends State<CollectionScreen>
                             )),
                         Switch(
                           value: collectibleModel.sortByName,
-                          activeColor: Colors.purple,
+                          activeColor: Color.fromARGB(255, 214, 34, 202),
                           activeTrackColor: Colors.white,
+                          trackOutlineColor:
+                              WidgetStateProperty.all(Colors.black),
+                          trackOutlineWidth: WidgetStateProperty.all(1.0),
                           thumbIcon: WidgetStateProperty.resolveWith<Icon>(
                             (Set<WidgetState> states) {
                               return const Icon(Icons.circle,
-                                  color: Colors.purple);
+                                  color: Color.fromARGB(255, 214, 34, 202));
                             },
                           ),
-                          inactiveThumbColor: Colors.purple,
+                          inactiveThumbColor: Color.fromARGB(255, 214, 34, 202),
                           inactiveTrackColor: Colors.white,
                           onChanged: (bool value) {
                             if (collectibleModel.sortByName == true) {
