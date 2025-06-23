@@ -74,82 +74,87 @@ class _AwardScreenState extends State<AwardScreen> {
           return Column(
             children: [
               // --- Sorting Dropdown ---
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const Text('Sort by: '),
-                    DropdownButton<MissionSortBy>(
-                      value: missionModel.missionSortBy,
-                      onChanged: (MissionSortBy? newValue) {
-                        if (newValue != null) {
-                          missionModel.sortMissions(newValue);
-                        }
-                      },
-                      items: MissionSortBy.values
-                          .map<DropdownMenuItem<MissionSortBy>>(
-                              (MissionSortBy value) {
-                        return DropdownMenuItem<MissionSortBy>(
-                          value: value,
-                          child: Text(
-                            value == MissionSortBy.title ? 'Title' : 'Date',
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ),
+              // Padding(
+              //   padding:
+              //       const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.end,
+              //     children: [
+              //       const Text('Sort by: '),
+              //       DropdownButton<MissionSortBy>(
+              //         value: missionModel.missionSortBy,
+              //         onChanged: (MissionSortBy? newValue) {
+              //           if (newValue != null) {
+              //             missionModel.sortMissions(newValue);
+              //           }
+              //         },
+              //         items: MissionSortBy.values
+              //             .map<DropdownMenuItem<MissionSortBy>>(
+              //                 (MissionSortBy value) {
+              //           return DropdownMenuItem<MissionSortBy>(
+              //             value: value,
+              //             child: Text(
+              //               value == MissionSortBy.title ? 'Title' : 'Date',
+              //             ),
+              //           );
+              //         }).toList(),
+              //       ),
+              //     ],
+              //   ),
+              // ),
               // --- Awards Grid ---
               Expanded(
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(10),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.75,
-                  ),
-                  itemCount: completedAwards.length,
-                  itemBuilder: (context, index) {
-                    final awardData = completedAwards[index]!;
-                    final mission = awardData['mission'];
-                    final missionUser = awardData['missionUser'];
-                    final imageUrl = mission['imgRef']?['load'];
+                child: Padding(
+                  padding: EdgeInsets.only(top: 20.0),
+                  child: GridView.builder(
+                    padding: const EdgeInsets.all(10),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 0.75,
+                    ),
+                    itemCount: completedAwards.length,
+                    itemBuilder: (context, index) {
+                      final awardData = completedAwards[index]!;
+                      final mission = awardData['mission'];
+                      final missionUser = awardData['missionUser'];
+                      final imageUrl = mission['imgRef']?['load'];
 
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AwardDetails(
-                              selectedAward: mission,
-                              selectedAwardUser: missionUser,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Card(
-                        elevation: 4.0,
-                        clipBehavior: Clip.antiAlias,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: imageUrl != null
-                            ? Image.network(imageUrl, fit: BoxFit.cover)
-                            : Container(
-                                color: Colors.grey[200],
-                                child: const Center(
-                                  child: Icon(Icons.image_not_supported),
-                                ),
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AwardDetails(
+                                selectedAward: mission,
+                                selectedAwardUser: missionUser,
                               ),
-                      ),
-                    );
-                  },
+                            ),
+                          );
+                        },
+                        child: Card(
+                          elevation: 4.0,
+                          clipBehavior: Clip.antiAlias,
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: imageUrl != null
+                              ? Image.network(imageUrl, fit: BoxFit.cover)
+                              : Container(
+                                  color: Colors.grey[200],
+                                  child: const Center(
+                                    child: Icon(Icons.image_not_supported),
+                                  ),
+                                ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
+              )
             ],
           );
         },

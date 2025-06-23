@@ -101,42 +101,61 @@ class _CollectionScreenState extends State<CollectionScreen>
     final String colImage = collectibleTemplate['imageRef']?['url'] ?? '';
 
     return Material(
-        child: InkWell(
-      onTap: () {
-        if (userCollectibleInstance != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => CollectibleDetails(
-                    selectedCollectible: collectibleTemplate,
-                    selectedUserCollectible: userCollectibleInstance)),
-          );
-        }
-      },
-      splashColor: const Color.fromARGB(80, 214, 34, 202),
-      child: Ink(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: colImage.isNotEmpty
-            ? _buildImageWidget(colImage)
-            : const Icon(Icons.image_not_supported),
-      ),
-    ));
+        child: Card(
+            elevation: 4.0,
+            clipBehavior: Clip.antiAlias,
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(
+                padding: EdgeInsets.all(10.0),
+                child: InkWell(
+                  onTap: () {
+                    if (userCollectibleInstance != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => CollectibleDetails(
+                                selectedCollectible: collectibleTemplate,
+                                selectedUserCollectible:
+                                    userCollectibleInstance)),
+                      );
+                    }
+                  },
+                  splashColor: const Color.fromARGB(80, 214, 34, 202),
+                  child: Ink(
+                    decoration: const BoxDecoration(color: Colors.white),
+                    child: colImage.isNotEmpty
+                        ? _buildImageWidget(colImage)
+                        : const Icon(Icons.image_not_supported),
+                  ),
+                ))));
   }
 
   Widget unlinkedInkwell(Map collectible) {
     final colImage = collectible['imageRef']?['url'] ?? '';
     return Material(
-      child: Container(
-        foregroundDecoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.7),
-          backgroundBlendMode: BlendMode.saturation,
-        ),
-        decoration: BoxDecoration(color: Colors.grey[200]),
-        child: colImage.isNotEmpty
-            ? _buildImageWidget(colImage)
-            : const Icon(Icons.image_not_supported),
-      ),
-    );
+        child: Card(
+            elevation: 4.0,
+            clipBehavior: Clip.antiAlias,
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Container(
+                foregroundDecoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  backgroundBlendMode: BlendMode.saturation,
+                ),
+                decoration: BoxDecoration(color: Colors.grey[200]),
+                child: colImage.isNotEmpty
+                    ? _buildImageWidget(colImage)
+                    : const Icon(Icons.image_not_supported),
+              ),
+            )));
   }
   // --- END OF FIX ---
 
@@ -259,7 +278,7 @@ class _CollectionScreenState extends State<CollectionScreen>
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 12.0, top: 20),
+            padding: const EdgeInsets.only(left: 12.0, top: 20, bottom: 20.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -320,9 +339,9 @@ class _CollectionScreenState extends State<CollectionScreen>
                       crossAxisCount: 4,
                       crossAxisSpacing: 5,
                       mainAxisSpacing: 5,
-                      childAspectRatio: (6 / 10),
+                      childAspectRatio: (11 / 16),
                     ),
-                    padding: const EdgeInsets.only(top: 20, bottom: 20),
+                    padding: const EdgeInsets.only(bottom: 20),
                     itemCount: collectionCollectibles.length,
                     itemBuilder: (context, index) {
                       final collectibleTemplate = collectionCollectibles[index];
