@@ -29,10 +29,17 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
   int _currentMintIndex = 0;
   final CarouselSliderController carouselController =
       CarouselSliderController();
+  late List<Map<String, dynamic>> _sortedInstances;
 
   @override
   void initState() {
     super.initState();
+    _sortedInstances = List.from(widget.userCollectibleInstances);
+    _sortedInstances.sort((a, b) {
+      final int mintA = a['mint'] ?? 0;
+      final int mintB = b['mint'] ?? 0;
+      return mintA.compareTo(mintB);
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<MissionModel>(context, listen: false).loadMissions();
       Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
@@ -195,7 +202,7 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
     final missions = missionModel.missions;
     final missionUsers = missionModel.missionUsers;
     final Map<String, dynamic> currentMint =
-        widget.userCollectibleInstances[_currentMintIndex];
+        _sortedInstances[_currentMintIndex];
     final bool showCarousel = widget.userCollectibleInstances.length > 1 &&
         (_sheetPosition > 0.7 || _isEnlarged);
     final collectibleModel = context.watch<CollectibleModel>();
