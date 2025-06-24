@@ -43,23 +43,29 @@ class _AwardScreenState extends State<AwardScreen> {
           if (missionModel.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-
-          // Create a list of completed awards by combining Mission and MissionUser data.
           final completedAwards = missionModel.missionUsers
               .where((mu) => mu['completed'] == true)
               .map((mu) {
-                // Find the corresponding mission details for this missionUser
                 final mission = missionModel.missions.firstWhere(
                   (m) => m['missionId'] == mu['missionId'],
-                  orElse: () =>
-                      null, // Return null if no matching mission is found
+                  orElse: () => null,
                 );
                 if (mission == null) return null;
-                // Return a combined object
                 return {'missionUser': mu, 'mission': mission};
               })
               .where((item) => item != null) // Filter out any nulls
               .toList();
+          completedAwards.sort((a, b) {
+            final dateA = a!['missionUser']['dateCompleted'];
+            final dateB = b!['missionUser']['dateCompleted'];
+
+            if (dateA == null && dateB == null) return 0;
+            if (dateA == null) return 1; // Put items without a date at the end.
+            if (dateB == null) return -1; // Keep items with a date at the top.
+
+            // Compare the DateTime objects.
+            return DateTime.parse(dateB).compareTo(DateTime.parse(dateA));
+          });
 
           if (completedAwards.isEmpty) {
             return const Center(
@@ -73,36 +79,6 @@ class _AwardScreenState extends State<AwardScreen> {
 
           return Column(
             children: [
-              // --- Sorting Dropdown ---
-              // Padding(
-              //   padding:
-              //       const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.end,
-              //     children: [
-              //       const Text('Sort by: '),
-              //       DropdownButton<MissionSortBy>(
-              //         value: missionModel.missionSortBy,
-              //         onChanged: (MissionSortBy? newValue) {
-              //           if (newValue != null) {
-              //             missionModel.sortMissions(newValue);
-              //           }
-              //         },
-              //         items: MissionSortBy.values
-              //             .map<DropdownMenuItem<MissionSortBy>>(
-              //                 (MissionSortBy value) {
-              //           return DropdownMenuItem<MissionSortBy>(
-              //             value: value,
-              //             child: Text(
-              //               value == MissionSortBy.title ? 'Title' : 'Date',
-              //             ),
-              //           );
-              //         }).toList(),
-              //       ),
-              //     ],
-              //   ),
-              // ),
-              // --- Awards Grid ---
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(top: 20.0),

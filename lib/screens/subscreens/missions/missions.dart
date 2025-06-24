@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/mission_model.dart';
 import '../../../helpers/localization_helper.dart';
-import '../../../widgets/missions/mission_view.dart'; // Import for missionWidget
+import '../../../widgets/missions/mission_view.dart';
 import './award_screen.dart';
 
 class Missions extends StatefulWidget {
@@ -19,12 +19,6 @@ class _MissionsState extends State<Missions> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            print("MissionsScreen: initState is calling loadMissions().");
-            context.read<MissionModel>().loadMissions();
-          }
-        });
         context.read<MissionModel>().loadMissions();
       }
     });
@@ -85,12 +79,31 @@ class _MissionsState extends State<Missions> {
               .toList();
 
           missionWithUserData.sort((a, b) {
-            bool isACompleted = a['missionUser']?['completed'] ?? false;
-            bool isBCompleted = b['missionUser']?['completed'] ?? false;
+            final int progressA = a['missionUser']?['progress'] ?? 0;
+            final int goalA = a['mission']?['goal'] ?? 1;
+            final bool isAGoalReached = goalA > 0 && progressA >= goalA;
+            final bool isACompleted = a['missionUser']?['completed'] ?? false;
 
-            if (isACompleted && !isBCompleted) return 1;
-            if (!isACompleted && isBCompleted) return -1;
-            return 0;
+            final int progressB = b['missionUser']?['progress'] ?? 0;
+            final int goalB = b['mission']?['goal'] ?? 1;
+            final bool isBGoalReached = goalB > 0 && progressB >= goalB;
+            final bool isBCompleted = b['missionUser']?['completed'] ?? false;
+
+            int getStateValue(bool goalReached, bool completed) {
+              if (completed) {
+                return 3; // Completed missions go to the bottom.
+              }
+              if (goalReached) {
+                return 1; // Claimable (goal reached) missions go to the top.
+              }
+              return 2; // In-progress missions are in the middle.
+            }
+
+            final stateA = getStateValue(isAGoalReached, isACompleted);
+            final stateB = getStateValue(isBGoalReached, isBCompleted);
+
+            // Compare the states to sort the list.
+            return stateA.compareTo(stateB);
           });
 
           return Column(

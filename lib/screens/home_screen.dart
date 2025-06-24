@@ -300,11 +300,24 @@ class HomeScreenState extends State<HomeScreen>
                 Align(
                   alignment: Alignment.center,
                   child: Padding(
-                      padding: const EdgeInsets.only(top: 10, bottom: 10),
-                      child: GestureDetector(
+                    padding: const EdgeInsets.only(top: 10, bottom: 10),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // The 3D object is the bottom layer. It can still be
+                        // interacted with (e.g., rotated) by the user.
+                        SizedBox(
+                          height: 400,
+                          child: ObjectViewer(
+                              asset: recentUrls['url'],
+                              placeholder: recentUrls['placeholder'],
+                              isFront: true),
+                        ),
+                        // This GestureDetector sits on top as a transparent layer.
+                        // It captures the tap gesture for navigation.
+                        GestureDetector(
                           onTap: () {
                             if (recentColl != null) {
-                              // Find all instances of the tapped collectible
                               final instances = userCollectibles
                                   .where((uc) =>
                                       uc['collectibleId'] ==
@@ -314,14 +327,14 @@ class HomeScreenState extends State<HomeScreen>
 
                               if (instances.isNotEmpty) {
                                 Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            CollectibleDetails(
-                                              selectedCollectible: recentColl,
-                                              userCollectibleInstances:
-                                                  instances,
-                                            )));
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CollectibleDetails(
+                                      selectedCollectible: recentColl,
+                                      userCollectibleInstances: instances,
+                                    ),
+                                  ),
+                                );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -331,13 +344,16 @@ class HomeScreenState extends State<HomeScreen>
                               }
                             }
                           },
-                          child: SizedBox(
+                          // This container ensures the GestureDetector has a tappable area.
+                          child: Container(
                             height: 400,
-                            child: ObjectViewer(
-                                asset: recentUrls['url'],
-                                placeholder: recentUrls['placeholder'],
-                                isFront: true),
-                          ))),
+                            color: Colors
+                                .transparent, // Makes the container tappable but invisible
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 getLatestActiveMission(
                     context, missions, missionUsers, recentColl),

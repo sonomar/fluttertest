@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../helpers/localization_helper.dart';
+import '../../../models/mission_model.dart';
+import '../../../screens/subscreens/missions/award_screen.dart';
 import './mission_view.dart';
 
 class AwardInfo extends StatelessWidget {
@@ -7,8 +10,36 @@ class AwardInfo extends StatelessWidget {
       {super.key,
       required this.selectedAward,
       required this.selectedAwardUser});
+
   final dynamic selectedAward;
   final dynamic selectedAwardUser;
+
+  Future<void> _claimReward(BuildContext context) async {
+    final missionModel = Provider.of<MissionModel>(context, listen: false);
+    bool success =
+        await missionModel.updateMissionCompletion(selectedAwardUser);
+
+    if (success && context.mounted) {
+      // Navigate to the awards screen, clearing the history so the user can't go back.
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const AwardScreen()),
+        (Route<dynamic> route) => route.isFirst,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Reward Claimed!"),
+          backgroundColor: Color.fromARGB(255, 214, 34, 202),
+        ),
+      );
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(missionModel.errorMessage ?? "Failed to claim reward."),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   Widget lineItem(key, value) {
     return Column(children: [
@@ -48,90 +79,56 @@ class AwardInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final int missionGoal = selectedAward?['goal'] ?? 99999;
+    final int missionProgress = selectedAwardUser?['progress'] ?? 0;
+    final bool isCompleted = selectedAwardUser?['completed'] ?? false;
+    final bool goalReached = missionProgress >= missionGoal;
     return Column(children: [
-      IntrinsicHeight(
-          child: Stack(children: [
+      // Conditionally show the 'Claim Reward' button.
+      if (goalReached && !isCompleted)
         Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x80999999),
-                  spreadRadius: .5,
-                  blurRadius: 10,
-                  offset: Offset(0, 10), // changes position of shadow
-                ),
-              ],
-            )),
-        Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                bottom: BorderSide(
-                  //                   <--- left side
-                  color: Color(0x80999999),
-                  width: 1.0,
-                ),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          color: Colors.white,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xffd622ca),
+              padding: const EdgeInsets.symmetric(vertical: 15),
+            ),
+            onPressed: () => _claimReward(context),
+            child: const Text(
+              'Claim Reward',
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                fontFamily: 'ChakraPetch',
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 10, bottom: 10),
-                  child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xffd622ca),
-                      ),
-                      onPressed: () {
-                        _qrDialog(context);
-                      },
-                      child: Text(
-                          translate("mission_details_transfer_button", context),
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                            fontFamily: 'ChakraPetch',
-                          ))),
-                )
-              ],
-            )),
-      ])),
+          ),
+        ),
       Padding(
           padding: const EdgeInsets.only(left: 20.0, top: 20.0, bottom: 20.0),
           child: Row(children: [
             Padding(
-                padding: EdgeInsets.only(left: 20),
-                child: Text(
-                  '4  |',
-                  style: TextStyle(
-                      fontFamily: 'ChakraPetch',
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 153, 153, 153),
-                      fontSize: 26),
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 10),
+                padding: const EdgeInsets.only(left: 20),
                 child: SizedBox(
                     width: 400,
                     child: Text(selectedAward["title"],
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.black,
                           fontSize: 30,
                           fontFamily: 'ChakraPetch',
                           fontWeight: FontWeight.bold,
                         )))),
           ])),
-      (selectedAward != null && selectedAwardUser != null)
-          ? viewMissionWidget(context, selectedAward, selectedAwardUser)
-          : SizedBox.shrink(),
+      if (selectedAward != null && selectedAwardUser != null)
+        viewMissionWidget(context, selectedAward, selectedAwardUser),
       Padding(
           padding: const EdgeInsets.only(left: 10.0, right: 20.0, bottom: 10.0),
           child: SizedBox(
               width: 400,
               child: Text(selectedAward["description"],
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     color: Colors.black,
                     fontFamily: 'Roboto',
@@ -140,7 +137,7 @@ class AwardInfo extends StatelessWidget {
           padding: const EdgeInsets.all(20.0),
           child: Stack(alignment: Alignment.topCenter, children: [
             Column(children: [
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               Container(
                   margin: const EdgeInsets.all(10.0),
                   padding: const EdgeInsets.all(10.0),
@@ -159,7 +156,7 @@ class AwardInfo extends StatelessWidget {
                       ]))),
             ]),
             Text(translate("mission_details_info_section", context),
-                style: TextStyle(
+                style: const TextStyle(
                   backgroundColor: Colors.white,
                   fontSize: 20,
                   fontFamily: 'ChakraPetch',

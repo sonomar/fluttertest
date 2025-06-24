@@ -17,7 +17,7 @@ class AwardDetails extends StatefulWidget {
 
 class _AwardDetailsState extends State<AwardDetails> {
   bool _isEnlarged = false;
-  double _sheetPosition = 0.25;
+  double _sheetPosition = 0.75;
 
   Widget lineItem(key, value) {
     return Column(children: [
@@ -61,7 +61,7 @@ class _AwardDetailsState extends State<AwardDetails> {
                       setState(() {
                         _isEnlarged = !_isEnlarged;
                         if (!_isEnlarged) {
-                          _sheetPosition = 0.25;
+                          _sheetPosition = 0.75;
                         }
                       });
                     },
@@ -128,6 +128,7 @@ class _AwardDetailsState extends State<AwardDetails> {
             ),
             if (!_isEnlarged)
               InteractiveDragScrollSheet(
+                  initialChildSize: 0.75,
                   onSheetMoved: (position) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted && _sheetPosition != position) {

@@ -118,7 +118,8 @@ class ObjectViewerState extends State<ObjectViewer> {
                 disableTap: true,
                 autoRotate: widget.isFront ? true : false,
                 cameraControls: widget.isFront ? false : true,
-                cameraOrbit: "0deg 75deg 90%",
+                cameraOrbit:
+                    widget.isFront ? "0deg 75deg 100%" : "0deg 75deg 90%",
               ),
             if (hasError)
               const Center(

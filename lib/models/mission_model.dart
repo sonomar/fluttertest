@@ -11,7 +11,6 @@ enum MissionSortBy {
 }
 
 class MissionModel extends ChangeNotifier {
-  // --- CORRECTED: These are no longer final to allow them to be updated. ---
   AppAuthProvider _appAuthProvider;
   UserModel _userModel;
 
@@ -30,12 +29,9 @@ class MissionModel extends ChangeNotifier {
   MissionSortBy _missionSortBy = MissionSortBy.publicationDate;
   MissionSortBy get missionSortBy => _missionSortBy;
 
-  // --- ADDED: An update method to receive new provider instances ---
   void update(AppAuthProvider authProvider, UserModel userModel) {
     _appAuthProvider = authProvider;
     _userModel = userModel;
-    // We don't need to call notifyListeners() here, because the logic that
-    // calls this method will decide if a data fetch is necessary.
   }
 
   Future<void> loadMissions() async {
@@ -92,6 +88,48 @@ class MissionModel extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> updateMissionCompletion(dynamic missionUser) async {
+    if (missionUser == null || missionUser['missionUserId'] == null) {
+      _errorMessage = "Invalid mission data provided.";
+      notifyListeners();
+      return false;
+    }
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final updateBody = {
+        "missionUserId": missionUser['missionUserId'],
+        "completed": true,
+        "dateCompleted": DateTime.now().toIso8601String(),
+      };
+
+      // Assumes an API function exists to update the missionUser record.
+      final result =
+          await updateMissionUserByMissionUserId(updateBody, _appAuthProvider);
+
+      if (result != null) {
+        // Refresh the mission list to reflect the change.
+        await loadMissions();
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = "Failed to claim reward.";
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = "An error occurred while claiming reward: $e";
+      _isLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 
