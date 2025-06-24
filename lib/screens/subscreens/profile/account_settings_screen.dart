@@ -128,24 +128,7 @@ class AccountSettingsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.warning_amber_rounded, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text("Danger Zone",
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red)),
-                      ],
-                    ),
                     const SizedBox(height: 8),
-                    const Text(
-                        "This action cannot be undone. All your data and collectibles will be permanently removed.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.redAccent)),
-                    const SizedBox(height: 16),
                     ElevatedButton.icon(
                       onPressed: () => _showDeleteConfirmationDialog(context),
                       icon: const Icon(Icons.delete_forever),
@@ -157,6 +140,13 @@ class AccountSettingsScreen extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12))),
                     ),
+                    Padding(
+                        padding: EdgeInsets.only(top: 10.0),
+                        child: const Text(
+                            "This action cannot be undone. All your data and collectibles will be permanently removed.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.redAccent))),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -176,6 +166,7 @@ class AccountSettingsScreen extends StatelessWidget {
                   return const SizedBox.shrink();
                 },
               ),
+              const SizedBox(height: 30),
             ],
           ),
         ),
