@@ -153,41 +153,52 @@ class MissionModel extends ChangeNotifier {
 
   Future<bool> updateMissionCompletion(dynamic missionUser) async {
     if (missionUser == null || missionUser['missionUserId'] == null) {
-      _errorMessage = "Invalid mission data provided.";
+      _errorMessage = "Invalid mission data provided for completion.";
       notifyListeners();
       return false;
     }
 
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    final missionUserId = missionUser['missionUserId'];
+    final index =
+        _missionUsers.indexWhere((mu) => mu['missionUserId'] == missionUserId);
 
+    if (index != -1) {
+      // Optimistically update the local cache for an instant UI response.
+      _missionUsers[index]['completed'] = true;
+      _missionUsers[index]['dateCompleted'] = DateTime.now().toIso8601String();
+      notifyListeners();
+    } else {
+      _errorMessage = "Could not find mission to complete in cache.";
+      notifyListeners();
+      return false;
+    }
+
+    // Now, attempt to sync this change with the backend.
     try {
       final updateBody = {
         "missionUserId": missionUser['missionUserId'],
         "completed": true,
         "dateCompleted": DateTime.now().toIso8601String(),
       };
-
-      // Assumes an API function exists to update the missionUser record.
       final result =
           await updateMissionUserByMissionUserId(updateBody, _appAuthProvider);
 
       if (result != null) {
-        // Refresh the mission list to reflect the change.
-        await loadMissions();
-        _isLoading = false;
-        notifyListeners();
+        // The backend update was successful.
         return true;
       } else {
-        _errorMessage = "Failed to claim reward.";
-        _isLoading = false;
+        // The backend update failed. Revert the optimistic change.
+        _errorMessage = "Failed to save completion status to the server.";
+        _missionUsers[index]['completed'] = false;
+        _missionUsers[index]['dateCompleted'] = null;
         notifyListeners();
         return false;
       }
     } catch (e) {
       _errorMessage = "An error occurred while claiming reward: $e";
-      _isLoading = false;
+      // Revert the change on error.
+      _missionUsers[index]['completed'] = false;
+      _missionUsers[index]['dateCompleted'] = null;
       notifyListeners();
       return false;
     }

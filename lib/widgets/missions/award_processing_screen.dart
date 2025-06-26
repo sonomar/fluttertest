@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import '../../../models/mission_model.dart';
-import '../../screens/subscreens/missions/award_screen.dart';
+import '../../../models/collectible_model.dart';
+import '../../../models/user_model.dart';
+import '../../../main.dart';
 
 // Enum to manage the visual state of the screen
-enum AwardProcessingState { processing, success, error }
+enum AwardProcessingState { processing, success, finalizing, error }
 
 class AwardProcessingScreen extends StatefulWidget {
   final dynamic selectedAward;
@@ -30,13 +32,10 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
   @override
   void initState() {
     super.initState();
-    // Initialize the animation controller for the success Lottie file.
     _successController = AnimationController(
       vsync: this,
-      duration:
-          const Duration(seconds: 6), // The duration of the success animation.
+      duration: const Duration(seconds: 2),
     );
-    // Start the award claim process as soon as the screen loads.
     _processAwardClaim();
   }
 
@@ -46,10 +45,8 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
     super.dispose();
   }
 
-  /// Handles the logic for claiming the award by calling the MissionModel.
   Future<void> _processAwardClaim() async {
-    // A small delay to allow the initial "processing" animation to be seen.
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 6));
     if (!mounted) return;
 
     final missionModel = context.read<MissionModel>();
@@ -63,39 +60,55 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
     }
   }
 
-  /// Handles the UI transition and navigation on a successful claim.
+  /// Handles the UI transition and data refresh on a successful claim.
   void _handleSuccess() async {
     if (!mounted) return;
     setState(() => _currentState = AwardProcessingState.success);
 
-    // Wait for the success animation to complete before navigating.
     await _successController.forward();
     if (!mounted) return;
 
-    // Navigate to the AwardScreen, clearing the navigation stack.
+    // Add a finalizing step to show the user that data is being synced.
+    setState(() => _currentState = AwardProcessingState.finalizing);
+
+    // Force-refresh both the mission and collectible models.
+    try {
+      await Future.wait([
+        context.read<MissionModel>().loadMissions(),
+        context.read<CollectibleModel>().loadCollectibles(forceClear: true),
+      ]);
+    } catch (e) {
+      print("Error during final data refresh after award claim: $e");
+    }
+
+    if (!mounted) return;
+    final userData = context.read<UserModel>().currentUser;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const AwardScreen()),
+      MaterialPageRoute(
+        builder: (context) => MyHomePage(
+          title: "Kloppocar Home",
+          // Provide a sensible default value for qrcode
+          qrcode: "award_claimed",
+          userData: userData,
+        ),
+      ),
       (Route<dynamic> route) => false,
     );
   }
 
-  /// Handles the UI transition on a failed claim.
   void _handleError(String message) async {
     if (!mounted) return;
     setState(() {
       _currentState = AwardProcessingState.error;
       _errorMessage = message;
     });
-    // Wait for 3 seconds to show the error message.
     await Future.delayed(const Duration(seconds: 3));
     if (!mounted) return;
-    // Go back to the previous screen.
     Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
-    // The main build method returns a Scaffold with a black background.
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
@@ -104,7 +117,6 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
     );
   }
 
-  /// A helper method to build the content based on the current state.
   Widget _buildContent() {
     switch (_currentState) {
       case AwardProcessingState.processing:
@@ -114,6 +126,8 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
           controller: _successController,
           imageUrl: widget.selectedAward['imgRef']['load'],
         );
+      case AwardProcessingState.finalizing:
+        return _FinalizingWidget();
       case AwardProcessingState.error:
         return _ErrorWidget(message: _errorMessage);
       default:
@@ -152,18 +166,35 @@ class _SuccessWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use a Stack to overlay the award image on top of the Lottie animation.
     return Stack(
       alignment: Alignment.center,
       children: [
-        // The success checkmark animation is the bottom layer.
         Lottie.asset('assets/lottie/success2.json',
             controller: controller, width: 300),
-        // Fade in the award image as the checkmark animation plays.
         FadeTransition(
           opacity: CurvedAnimation(parent: controller, curve: Curves.easeIn),
-          child: Image.network(imageUrl, height: 300),
+          child: Image.network(imageUrl, height: 400),
         ),
+      ],
+    );
+  }
+}
+
+class _FinalizingWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset('assets/images/deins_logo.png', height: 200, width: 200),
+        const SizedBox(height: 20),
+        const Text('Updating Your Collection...',
+            style: TextStyle(color: Colors.white, fontSize: 16)),
+        const SizedBox(height: 20),
+        SizedBox(
+            height: 40,
+            width: 40,
+            child: Lottie.asset('assets/lottie/pinkspin1.json')),
       ],
     );
   }
