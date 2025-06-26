@@ -16,6 +16,7 @@ import '../widgets/object_viewer.dart';
 import '../widgets/community/community_missions.dart';
 import '../widgets/missions/latest_active_mission.dart';
 import '../helpers/localization_helper.dart';
+import '../helpers/date_formatter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/profile_pic_changer.dart';
@@ -102,7 +103,8 @@ class HomeScreenState extends State<HomeScreen>
             Padding(
                 padding: const EdgeInsets.only(left: 10),
                 child: Text(
-                  postedDate,
+                  formatDate(context, postedDate,
+                      format: "d MMMM, yyyy - h:mm"),
                   style: GoogleFonts.roboto(
                       textStyle: const TextStyle(
                     fontSize: 12,

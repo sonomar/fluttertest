@@ -125,9 +125,6 @@ Widget getLatestActiveMission(
       return isViewer
           ? viewMissionWidget(context, mission, correspondingMissionUser)
           : homeMissionWidget(context, mission, correspondingMissionUser);
-    } else {
-      print(
-          'DEBUG: Mission ID $missionId is completed (progress == goal). Skipping.');
     }
   }
 

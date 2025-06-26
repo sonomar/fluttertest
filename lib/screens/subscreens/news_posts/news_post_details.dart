@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../widgets/news_posts/news_item.dart'; // Import the new reusable widget
+import 'package:provider/provider.dart';
+import '../../../models/locale_provider.dart';
+import '../../../widgets/news_posts/news_item.dart';
+import '../../../helpers/date_formatter.dart';
 
 class NewsPostDetails extends StatefulWidget {
   const NewsPostDetails({
@@ -14,22 +17,9 @@ class NewsPostDetails extends StatefulWidget {
 }
 
 class _NewsPostDetailsDetailsState extends State<NewsPostDetails> {
-  /// Formats the date string for the AppBar title.
-  String _formatDate(String dateString) {
-    try {
-      final DateTime dateTime = DateTime.parse(dateString);
-      // Example format: 30 June, 2025 - 10:30am GMT
-      final DateFormat formatter = DateFormat("d MMMM, yyyy - h:mma 'GMT'");
-      return formatter.format(dateTime.toUtc());
-    } catch (e) {
-      // If parsing fails, return the original string as a fallback.
-      print("Error parsing date: $e");
-      return dateString;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final locale = Provider.of<LocaleProvider>(context, listen: false).locale;
     final date = widget.selectedNewsPost['updatedDt'] ?? '';
 
     return Scaffold(
@@ -40,7 +30,7 @@ class _NewsPostDetailsDetailsState extends State<NewsPostDetails> {
           onPressed: () => Navigator.pop(context),
         ),
         // Use the formatted date in the title.
-        title: Text(_formatDate(date)),
+        title: Text(formatDate(context, date, format: "d MMMM, yyyy - h:mm")),
         titleTextStyle: const TextStyle(
           fontSize: 14,
           color: Colors.black54,

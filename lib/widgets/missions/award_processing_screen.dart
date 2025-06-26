@@ -34,7 +34,7 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
     super.initState();
     _successController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 6),
     );
     _processAwardClaim();
   }
