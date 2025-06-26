@@ -204,7 +204,8 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
     final Map<String, dynamic> currentMint =
         _sortedInstances[_currentMintIndex];
     final bool showCarousel = widget.userCollectibleInstances.length > 1 &&
-        (_sheetPosition > 0.7 || _isEnlarged);
+        (_sheetPosition > 0.7) &&
+        !_isEnlarged;
     final collectibleModel = context.watch<CollectibleModel>();
     final collectibles = collectibleModel.collectionCollectibles;
     final userCollectibles = collectibleModel.userCollectibles;
