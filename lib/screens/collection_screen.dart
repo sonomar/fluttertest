@@ -89,32 +89,23 @@ class _CollectionScreenState extends State<CollectionScreen>
           }
         },
         splashColor: const Color.fromARGB(80, 214, 34, 202),
-        child: Card(
+        child: Material(
           elevation: 4.0,
           clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
           child: Stack(
-            fit: StackFit.expand,
+            fit: StackFit.passthrough,
             children: [
-              // The collectible image fills the card.
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: colImage.isNotEmpty
-                    ? _buildImageWidget(colImage)
-                    : const Icon(Icons.image_not_supported),
-              ),
-              // The mint count badge is positioned in the top-right corner.
+              colImage.isNotEmpty
+                  ? _buildImageWidget(colImage)
+                  : const Icon(Icons.image_not_supported),
               if (mintCount > 1)
                 Positioned(
                   top: 5,
-                  right: 5,
+                  right: 0,
                   child: Container(
                     padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 214, 34, 202)
-                          .withOpacity(0.9),
+                      color: const Color.fromARGB(163, 255, 255, 255),
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 1.5),
                     ),
@@ -124,9 +115,9 @@ class _CollectionScreenState extends State<CollectionScreen>
                     ),
                     child: Center(
                       child: Text(
-                        '$mintCount',
+                        'x$mintCount',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -144,25 +135,19 @@ class _CollectionScreenState extends State<CollectionScreen>
   Widget unlinkedInkwell(Map collectible) {
     final colImage = collectible['imageRef']?['url'] ?? '';
     return Material(
-        child: Card(
+        child: Material(
             elevation: 4.0,
             clipBehavior: Clip.antiAlias,
             color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(10.0),
-              child: Container(
-                foregroundDecoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
-                  backgroundBlendMode: BlendMode.saturation,
-                ),
-                decoration: BoxDecoration(color: Colors.grey[200]),
-                child: colImage.isNotEmpty
-                    ? _buildImageWidget(colImage)
-                    : const Icon(Icons.image_not_supported),
+            child: Container(
+              foregroundDecoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.7),
+                backgroundBlendMode: BlendMode.saturation,
               ),
+              decoration: BoxDecoration(color: Colors.grey[200]),
+              child: colImage.isNotEmpty
+                  ? _buildImageWidget(colImage)
+                  : const Icon(Icons.image_not_supported),
             )));
   }
 
