@@ -19,6 +19,7 @@ import 'models/community_model.dart';
 import 'models/news_post_model.dart';
 import 'models/locale_provider.dart';
 import 'models/asset_provider.dart';
+import 'models/mission_model.dart';
 import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
@@ -66,13 +67,8 @@ void main() async {
         ),
         update:
             (context, appAuthProvider, userModel, previousCollectibleModel) {
-          final model = previousCollectibleModel ??
+          return previousCollectibleModel ??
               CollectibleModel(appAuthProvider, userModel);
-          if (appAuthProvider.status == AuthStatus.authenticated &&
-              userModel.currentUser != null) {
-            model.loadCollectibles();
-          }
-          return model;
         },
       ),
       ChangeNotifierProvider<AssetProvider>(
@@ -84,26 +80,9 @@ void main() async {
           context.read<UserModel>(),
         ),
         update: (context, appAuthProvider, userModel, previousMissionModel) {
-          print("--- MissionModel Provider Update Triggered ---");
-          // Ensure the model instance is never null
           final model =
               previousMissionModel ?? MissionModel(appAuthProvider, userModel);
-
-          // 1. Update the model with the latest dependencies.
           model.update(appAuthProvider, userModel);
-          print("Auth Status: ${appAuthProvider.status}");
-          print("User Loaded: ${userModel.currentUser != null}");
-
-          // 2. Automatically load missions only when the user is authenticated
-          //    and the user's profile data is available.
-          if (appAuthProvider.status == AuthStatus.authenticated &&
-              userModel.currentUser != null) {
-            print(
-                "CONDITION MET: Calling loadMissions() from main.dart provider.");
-            model.loadMissions();
-          }
-          print("CONDITION NOT MET");
-          model.loadMissions();
           return model;
         },
       ),
@@ -250,8 +229,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final collectibleModel =
         Provider.of<CollectibleModel>(context, listen: false);
-    // final missionModel = Provider.of<MissionModel>(context, listen: false); // If HomeScreen's missions need explicit refresh too
-    // final userModel = Provider.of<UserModel>(context, listen: false); // If user data affecting screens needs refresh
+    final missionModel = Provider.of<MissionModel>(context, listen: false);
     return Scaffold(
         backgroundColor: Colors.white,
         body: PageStorage(
@@ -270,21 +248,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   false; // Flag to see if a relevant screen is being targeted
 
               if (index == 0) {
-                // HomeScreen
-                print(
-                    "BottomNav: Tapped HomeScreen (index 0). Forcing CollectibleModel reload for recentColl.");
                 collectibleModel.loadCollectibles(forceClear: true);
-                // HomeScreen also loads missions/user in its own initState, which should be fine.
-                // If other models shown on HomeScreen need a direct refresh:
-                // Provider.of<MissionModel>(context, listen: false).loadMissions();
-                // Provider.of<UserModel>(context, listen: false).loadUser();
+                missionModel.loadMissions(forceClear: true);
                 dataMayHaveChanged = true;
               } else if (index == 1) {
-                // CollectionScreen
-                print(
-                    "BottomNav: Tapped CollectionScreen (index 1). Forcing CollectibleModel reload.");
                 collectibleModel.loadCollectibles(forceClear: true);
                 dataMayHaveChanged = true;
+              } else if (index == 3) {
+                missionModel.loadMissions(forceClear: true);
               }
               // Add similar logic for other screens if they depend on shared, mutable models
               // and are not reliably refreshed by their own initState after global state changes.

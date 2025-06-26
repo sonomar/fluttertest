@@ -18,6 +18,8 @@ class MissionModel extends ChangeNotifier {
   List<dynamic> _missionUsers = [];
   bool _isLoading = false;
   String? _errorMessage;
+  // Add a flag to track if the initial load has happened.
+  bool _hasLoaded = false;
 
   List<dynamic> get missions => _missions;
   List<dynamic> get missionUsers => _missionUsers;
@@ -34,23 +36,21 @@ class MissionModel extends ChangeNotifier {
     _userModel = userModel;
   }
 
-  Future<void> loadMissions() async {
-    // Prevent re-fetching if already loading.
+  /// MODIFIED: This function now accepts a `forceClear` parameter to control caching.
+  Future<void> loadMissions({bool forceClear = false}) async {
+    // Prevent re-fetching if already loading or if data has loaded and not forced.
     if (_isLoading) return;
+    if (_hasLoaded && !forceClear) return;
 
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      // This now reliably gets the userId from the updated userModel.
       final userId = _userModel.currentUser?['userId']?.toString();
-      print('test3: $userId');
       if (userId == null) {
-        print(
-            'WARNING: userId is null in UserModel. Cannot fetch user missions.');
         _errorMessage = 'User ID not found.';
-        _missions = []; // Clear data on failure
+        _missions = [];
         _missionUsers = [];
       } else {
         final dynamic fetchedUserData =
@@ -58,14 +58,12 @@ class MissionModel extends ChangeNotifier {
 
         if (fetchedUserData is List) {
           _missionUsers = fetchedUserData;
-          print('test1: $_missionUsers');
           final List<dynamic> fetchedCollectionData = [];
           for (var userMission in _missionUsers) {
             if (userMission != null && userMission["missionId"] != null) {
               var missionData = await getMissionByMissionId(
                   userMission["missionId"].toString(), _appAuthProvider);
               if (missionData != null) {
-                print('test2: $missionData');
                 fetchedCollectionData.add(missionData);
               }
             }
@@ -81,6 +79,8 @@ class MissionModel extends ChangeNotifier {
       if (_missions.isNotEmpty) {
         sortData(_missions, "title");
       }
+      // Set the flag to true after a successful load.
+      _hasLoaded = true;
     } catch (e) {
       _errorMessage = 'Error loading mission data: ${e.toString()}';
       _missions = [];
@@ -102,25 +102,19 @@ class MissionModel extends ChangeNotifier {
     final missionUserId = missionUser['missionUserId'];
     int? originalProgress;
 
-    // --- OPTIMISTIC UPDATE ---
-    // Find the missionUser in the local list to update it.
     final index =
         _missionUsers.indexWhere((mu) => mu['missionUserId'] == missionUserId);
 
     if (index != -1) {
-      // Save the original progress in case we need to revert the change.
       originalProgress = _missionUsers[index]['progress'];
-      // Update the local cache immediately for a responsive UI.
       _missionUsers[index]['progress'] = newProgress;
-      // Notify listeners to reflect the change instantly.
       notifyListeners();
     } else {
       _errorMessage = "Could not find mission user in cache to update.";
       notifyListeners();
-      return false; // Cannot proceed if the user isn't in the cache.
+      return false;
     }
 
-    // --- API SYNCHRONIZATION ---
     try {
       final body = {
         "missionUserId": missionUserId,
@@ -132,21 +126,19 @@ class MissionModel extends ChangeNotifier {
       if (result != null) {
         return true;
       } else {
-        // API call failed. Revert the local change to maintain data integrity.
         _errorMessage = "Failed to save mission progress.";
         if (originalProgress != null) {
           _missionUsers[index]['progress'] = originalProgress;
         }
-        notifyListeners(); // Notify UI of the reverted state.
+        notifyListeners();
         return false;
       }
     } catch (e) {
-      // An exception occurred during the API call. Revert the local change.
       _errorMessage = "An error occurred updating mission progress: $e";
       if (originalProgress != null) {
         _missionUsers[index]['progress'] = originalProgress;
       }
-      notifyListeners(); // Notify UI of the reverted state.
+      notifyListeners();
       return false;
     }
   }
@@ -163,7 +155,6 @@ class MissionModel extends ChangeNotifier {
         _missionUsers.indexWhere((mu) => mu['missionUserId'] == missionUserId);
 
     if (index != -1) {
-      // Optimistically update the local cache for an instant UI response.
       _missionUsers[index]['completed'] = true;
       _missionUsers[index]['dateCompleted'] = DateTime.now().toIso8601String();
       notifyListeners();
@@ -173,7 +164,6 @@ class MissionModel extends ChangeNotifier {
       return false;
     }
 
-    // Now, attempt to sync this change with the backend.
     try {
       final updateBody = {
         "missionUserId": missionUser['missionUserId'],
@@ -184,10 +174,8 @@ class MissionModel extends ChangeNotifier {
           await updateMissionUserByMissionUserId(updateBody, _appAuthProvider);
 
       if (result != null) {
-        // The backend update was successful.
         return true;
       } else {
-        // The backend update failed. Revert the optimistic change.
         _errorMessage = "Failed to save completion status to the server.";
         _missionUsers[index]['completed'] = false;
         _missionUsers[index]['dateCompleted'] = null;
@@ -196,7 +184,6 @@ class MissionModel extends ChangeNotifier {
       }
     } catch (e) {
       _errorMessage = "An error occurred while claiming reward: $e";
-      // Revert the change on error.
       _missionUsers[index]['completed'] = false;
       _missionUsers[index]['dateCompleted'] = null;
       notifyListeners();
