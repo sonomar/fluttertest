@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../../helpers/localization_helper.dart';
-import '../../../models/mission_model.dart';
-import '../../../screens/subscreens/missions/award_screen.dart';
+import './award_processing_screen.dart';
 import './mission_view.dart';
 
 class AwardInfo extends StatelessWidget {
@@ -14,31 +12,16 @@ class AwardInfo extends StatelessWidget {
   final dynamic selectedAward;
   final dynamic selectedAwardUser;
 
-  Future<void> _claimReward(BuildContext context) async {
-    final missionModel = Provider.of<MissionModel>(context, listen: false);
-    bool success =
-        await missionModel.updateMissionCompletion(selectedAwardUser);
-
-    if (success && context.mounted) {
-      // Navigate to the awards screen, clearing the history so the user can't go back.
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const AwardScreen()),
-        (Route<dynamic> route) => route.isFirst,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Reward Claimed!"),
-          backgroundColor: Color.fromARGB(255, 214, 34, 202),
+  void _claimReward(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AwardProcessingScreen(
+          selectedAward: selectedAward,
+          selectedAwardUser: selectedAwardUser,
         ),
-      );
-    } else if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(missionModel.errorMessage ?? "Failed to claim reward."),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+      ),
+    );
   }
 
   Widget lineItem(key, value) {

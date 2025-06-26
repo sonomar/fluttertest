@@ -91,6 +91,66 @@ class MissionModel extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateMissionProgress(
+      dynamic missionUser, int newProgress) async {
+    if (missionUser == null || missionUser['missionUserId'] == null) {
+      _errorMessage = "Invalid mission user data provided for progress update.";
+      notifyListeners();
+      return false;
+    }
+
+    final missionUserId = missionUser['missionUserId'];
+    int? originalProgress;
+
+    // --- OPTIMISTIC UPDATE ---
+    // Find the missionUser in the local list to update it.
+    final index =
+        _missionUsers.indexWhere((mu) => mu['missionUserId'] == missionUserId);
+
+    if (index != -1) {
+      // Save the original progress in case we need to revert the change.
+      originalProgress = _missionUsers[index]['progress'];
+      // Update the local cache immediately for a responsive UI.
+      _missionUsers[index]['progress'] = newProgress;
+      // Notify listeners to reflect the change instantly.
+      notifyListeners();
+    } else {
+      _errorMessage = "Could not find mission user in cache to update.";
+      notifyListeners();
+      return false; // Cannot proceed if the user isn't in the cache.
+    }
+
+    // --- API SYNCHRONIZATION ---
+    try {
+      final body = {
+        "missionUserId": missionUserId,
+        "progress": newProgress,
+      };
+      final result =
+          await updateMissionUserByMissionUserId(body, _appAuthProvider);
+
+      if (result != null) {
+        return true;
+      } else {
+        // API call failed. Revert the local change to maintain data integrity.
+        _errorMessage = "Failed to save mission progress.";
+        if (originalProgress != null) {
+          _missionUsers[index]['progress'] = originalProgress;
+        }
+        notifyListeners(); // Notify UI of the reverted state.
+        return false;
+      }
+    } catch (e) {
+      // An exception occurred during the API call. Revert the local change.
+      _errorMessage = "An error occurred updating mission progress: $e";
+      if (originalProgress != null) {
+        _missionUsers[index]['progress'] = originalProgress;
+      }
+      notifyListeners(); // Notify UI of the reverted state.
+      return false;
+    }
+  }
+
   Future<bool> updateMissionCompletion(dynamic missionUser) async {
     if (missionUser == null || missionUser['missionUserId'] == null) {
       _errorMessage = "Invalid mission data provided.";

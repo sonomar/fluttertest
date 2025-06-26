@@ -46,7 +46,7 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
   void initState() {
     super.initState();
     _successLottieController = AnimationController(
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 4),
       vsync: this,
     );
     // Immediately start processing the code when this screen is opened.
@@ -228,8 +228,7 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
   void _handleSuccess(String code) async {
     if (!mounted) return;
     setState(() => _currentScanState = ScanState.success);
-    _successLottieController.forward();
-    await Future.delayed(const Duration(seconds: 2));
+    await _successLottieController.forward();
     if (!mounted) return;
     setState(() => _currentScanState = ScanState.received);
     await Future.delayed(const Duration(seconds: 1));
