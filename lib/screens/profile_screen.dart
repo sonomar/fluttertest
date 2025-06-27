@@ -49,7 +49,7 @@ class ProfileScreen extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Row(
               children: [
-                shadowCircle(userPic ?? 'assets/images/profile.jpg', 32.0,
+                shadowCircle(userPic ?? 'assets/images/kloppocarIcon.png', 32.0,
                     userPic != null),
                 const SizedBox(width: 16),
                 Expanded(
