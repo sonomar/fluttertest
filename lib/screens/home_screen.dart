@@ -45,16 +45,11 @@ class HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-    // --- START OF FIX ---
-    // The data loading for collectibles and missions is now handled reactively
-    // by the providers in main.dart. Calling them here causes race conditions.
-    // We only load data specific to this screen.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<NewsPostModel>(context, listen: false).loadNewsPosts();
       Provider.of<CommunityModel>(context, listen: false)
           .loadCommunityChallenge();
     });
-    // --- END OF FIX ---
     _startTimer();
   }
 
@@ -310,8 +305,6 @@ class HomeScreenState extends State<HomeScreen>
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        // The 3D object is the bottom layer. It can still be
-                        // interacted with (e.g., rotated) by the user.
                         SizedBox(
                           height: 400,
                           child: ObjectViewer(
@@ -319,8 +312,6 @@ class HomeScreenState extends State<HomeScreen>
                               placeholder: recentUrls['placeholder'],
                               isFront: true),
                         ),
-                        // This GestureDetector sits on top as a transparent layer.
-                        // It captures the tap gesture for navigation.
                         GestureDetector(
                           onTap: () {
                             if (recentColl != null) {
@@ -330,7 +321,6 @@ class HomeScreenState extends State<HomeScreen>
                                       recentColl['collectibleId'])
                                   .map((e) => e as Map<String, dynamic>)
                                   .toList();
-
                               if (instances.isNotEmpty) {
                                 Navigator.push(
                                   context,

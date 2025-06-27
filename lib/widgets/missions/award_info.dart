@@ -95,7 +95,6 @@ class AwardInfo extends StatelessWidget {
             Padding(
                 padding: const EdgeInsets.only(left: 20),
                 child: SizedBox(
-                    width: 400,
                     child: Text(selectedAward["title"],
                         style: const TextStyle(
                           color: Colors.black,
@@ -105,9 +104,10 @@ class AwardInfo extends StatelessWidget {
                         )))),
           ])),
       if (selectedAward != null && selectedAwardUser != null)
-        viewMissionWidget(context, selectedAward, selectedAwardUser),
+        viewMissionWidget(context, selectedAward, selectedAwardUser,
+            isMission: true),
       Padding(
-          padding: const EdgeInsets.only(left: 10.0, right: 20.0, bottom: 10.0),
+          padding: const EdgeInsets.only(left: 40.0, right: 40.0, bottom: 10.0),
           child: SizedBox(
               width: 400,
               child: Text(selectedAward["description"],
@@ -134,7 +134,7 @@ class AwardInfo extends StatelessWidget {
                         lineItem("Missionnummer",
                             selectedAward["missionId"].toString()),
                         lineItem("Reward", selectedAward["reward"].toString()),
-                        lineItem("Challenge Start",
+                        lineItem("Mission Start",
                             selectedAward["createdDt"].toString())
                       ]))),
             ]),

@@ -263,16 +263,13 @@ Widget homeMissionWidget(pageContext, mission, missionUser) {
       ]));
 }
 
-Widget viewMissionWidget(pageContext, mission, missionUser) {
+Widget viewMissionWidget(pageContext, mission, missionUser,
+    {isMission = false}) {
   final getMission = mission;
   final getMissionUser = missionUser;
   final String getTitle = (getMission != null && getMission['title'] != null)
       ? getMission['title']
       : 'No Title'; // Default value
-  final String getLogo =
-      (getMission != null && getMission['imgRef']['url'] != null)
-          ? getMission['imgRef']['url']
-          : 'assets/images/deins_logo.png'; // Default value
   final String missionGoal = (getMission != null && getMission['goal'] != null)
       ? getMission['goal'].toString()
       : '0'; // Default value
@@ -283,30 +280,32 @@ Widget viewMissionWidget(pageContext, mission, missionUser) {
   return Padding(
       padding: const EdgeInsets.only(top: 20.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-                padding: const EdgeInsets.only(left: 15.0),
-                child: Text(
-                  getTitle,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontFamily: 'ChakraPetch',
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
-                )),
-            Padding(
-                padding:
-                    const EdgeInsets.only(left: 40.0, bottom: 10, right: 20),
-                child: getMission['imgRef']['url'] != null
-                    ? Image.network(getMission['imgRef']['url'],
-                        width: 50, fit: BoxFit.fill)
-                    : Image.asset('assets/images/car1.png',
-                        width: 120, height: 50, fit: BoxFit.fill)),
-          ],
-        ),
+        isMission == false
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                      padding: const EdgeInsets.only(left: 15.0),
+                      child: Text(
+                        getTitle,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontFamily: 'ChakraPetch',
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      )),
+                  Padding(
+                      padding: const EdgeInsets.only(
+                          left: 40.0, bottom: 10, right: 20),
+                      child: getMission['imgRef']['url'] != null
+                          ? Image.network(getMission['imgRef']['url'],
+                              width: 50, fit: BoxFit.fill)
+                          : Image.asset('assets/images/car1.png',
+                              width: 120, height: 50, fit: BoxFit.fill)),
+                ],
+              )
+            : SizedBox.shrink(),
         Container(
             alignment: Alignment.center,
             child: progressBar(pageContext, mission, missionUser)),
