@@ -367,7 +367,7 @@ class HomeScreenState extends State<HomeScreen>
           communityChallengeWidget(_formatTime(_remainingTime), context,
               communityChallenge, 200, context),
           Padding(
-              padding: const EdgeInsets.only(left: 32, right: 32, top: 10),
+              padding: const EdgeInsets.only(left: 32, right: 32),
               child: Column(children: [
                 if (missions.isNotEmpty) ...[
                   sectionHeader(translate("home_game_section_label", context)),

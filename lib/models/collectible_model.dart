@@ -12,7 +12,7 @@ class CollectibleModel extends ChangeNotifier {
   List<dynamic> _collectionCollectibles = [];
   List<dynamic> _userCollectibles = [];
   bool _isLoading = false;
-  bool _sortByName = false;
+  bool _sortByName = true;
   bool _hasLoaded = false;
   String? _errorMessage;
   String? _loadingMessage;
@@ -64,7 +64,7 @@ class CollectibleModel extends ChangeNotifier {
         print('CollectibleModel: Fetched user data was not a List.');
       }
       _hasLoaded = true; // Mark that a successful load has occurred.
-      sortCollectiblesByColumn(_sortByName ? "name" : "label");
+      sortData(_collectionCollectibles, _sortByName ? "name" : "label");
       // Re-apply sorting if needed
       // if (_collectionCollectibles.isNotEmpty && _sortByName) {
       //   sortCollectiblesByColumn("name");
@@ -80,6 +80,18 @@ class CollectibleModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void toggleSortPreference() {
+    _sortByName = !_sortByName;
+    String columnToSortBy = _sortByName ? "name" : "label";
+
+    try {
+      sortData(_collectionCollectibles, columnToSortBy);
+    } catch (e) {
+      print('Error sorting collectible data: $e');
+    }
+    notifyListeners();
   }
 
   Future<void> sortCollectiblesByColumn(column) async {

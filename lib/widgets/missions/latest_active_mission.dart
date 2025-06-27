@@ -162,7 +162,6 @@ Widget listMissions(context, getMissions, getMissionUsers) {
           padding: const EdgeInsets.only(
             left: 5,
             right: 5,
-            bottom: 20,
           ),
           child: missionWidget(context, correspondingMission, missionUser),
         ),

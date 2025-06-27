@@ -71,7 +71,7 @@ Widget missionWidget(BuildContext pageContext, Map? mission, Map? missionUser) {
                 );
               },
         child: Container(
-          margin: const EdgeInsets.only(bottom: 20.0),
+          margin: const EdgeInsets.only(top: 20.0),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),

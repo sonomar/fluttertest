@@ -244,15 +244,9 @@ class _CollectionScreenState extends State<CollectionScreen>
                           inactiveThumbColor: Color.fromARGB(255, 214, 34, 202),
                           inactiveTrackColor: Colors.white,
                           onChanged: (bool value) {
-                            if (collectibleModel.sortByName == true) {
-                              Provider.of<CollectibleModel>(context,
-                                      listen: false)
-                                  .sortCollectiblesByColumn('name');
-                            } else {
-                              Provider.of<CollectibleModel>(context,
-                                      listen: false)
-                                  .sortCollectiblesByColumn('label');
-                            }
+                            context
+                                .read<CollectibleModel>()
+                                .toggleSortPreference();
                           },
                         ),
                         Padding(
