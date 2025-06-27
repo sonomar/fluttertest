@@ -191,6 +191,9 @@ class HomeScreenState extends State<HomeScreen>
         notificationProvider.unreadNotificationCount;
 
     final recentUrls = _getAssetUrlFromCollectible(recentColl);
+    final String? username = currentUser['username'];
+    final bool showUsername = username != null;
+
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -219,8 +222,11 @@ class HomeScreenState extends State<HomeScreen>
                           children: [
                             Row(children: [
                               Text(
-                                  translate(
-                                      "home_header_username_default", context),
+                                  showUsername
+                                      ? username!
+                                      : translate(
+                                          "home_header_username_default",
+                                          context),
                                   style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w200)),
@@ -363,11 +369,13 @@ class HomeScreenState extends State<HomeScreen>
           Padding(
               padding: const EdgeInsets.only(left: 32, right: 32, top: 10),
               child: Column(children: [
-                sectionHeader(translate("home_game_section_label", context)),
-                Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(15),
-                    child: listMissions(context, missions, missionUsers)),
+                if (missions.isNotEmpty) ...[
+                  sectionHeader(translate("home_game_section_label", context)),
+                  Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.all(15),
+                      child: listMissions(context, missions, missionUsers)),
+                ],
                 sectionHeader(translate("home_news_section_label", context)),
                 if (newsPosts.isNotEmpty) ...[
                   GestureDetector(
