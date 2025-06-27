@@ -123,13 +123,18 @@ class _ScanScreenState extends State<ScanScreen> {
                     _triggerCodeProcessing(_codeTextController.text),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
+                  backgroundColor: Color.fromARGB(202, 214, 34, 202),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child:
-                    Text(translate("scan_manual_submit_button_text", context)),
-              ),
+                child: Text(
+                  translate("scan_manual_submit_button_text", context),
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              )
             ],
           ),
         ),

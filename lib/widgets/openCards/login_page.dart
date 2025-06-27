@@ -95,17 +95,12 @@ class _LoginPageState extends State<LoginPage> {
               await authProvider.signIn(email, password, isRegister: true);
         }
       }
-
-      // --- CORRECTED NAVIGATION ---
-      // If any step resulted in a successful authentication, navigate to the
-      // SplashScreen. It will handle the rest of the logic.
       if (mounted && success) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const SplashScreen()),
         );
         return;
       }
-
       // If we reach here, a step failed. Reset the submitting state.
       if (mounted) {
         setState(() => _isSubmitting = false);

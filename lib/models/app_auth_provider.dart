@@ -199,15 +199,21 @@ class AppAuthProvider with ChangeNotifier {
 
   Future<void> signOut() async {
     print('AppAuthProvider: Initiating sign-out...');
-    _status = AuthStatus.authenticating; // Indicate sign out is in progress
+    _status = AuthStatus.authenticating;
     _errorMessage = null;
     notifyListeners();
-    await _authService
-        .signOut(); // This clears Cognito's local cache and SharedPreferences
-    _userSession = null; // Explicitly clear local session
-    _status = AuthStatus.unauthenticated;
-    print('AppAuthProvider: Signed out successfully.');
-    notifyListeners();
+
+    try {
+      await _authService.signOut();
+    } catch (e) {
+      print(
+          "AppAuthProvider: Error during _authService.signOut(), but proceeding with local sign-out. Error: $e");
+    } finally {
+      _userSession = null;
+      _status = AuthStatus.unauthenticated;
+      print('AppAuthProvider: Local sign-out complete.');
+      notifyListeners();
+    }
   }
 
   Future<bool> changePassword({

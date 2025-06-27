@@ -61,7 +61,10 @@ class _MissionsState extends State<Missions> {
             return const Center(child: CircularProgressIndicator());
           }
           if (missionModel.missions.isEmpty) {
-            return Center(child: Text(translate("missions_none", context)));
+            return Padding(
+                padding: EdgeInsets.all(40.0),
+                child:
+                    Center(child: Text(translate("missions_none", context))));
           }
 
           final List<Map<String, dynamic>> missionWithUserData = missionModel

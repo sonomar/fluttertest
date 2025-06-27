@@ -130,13 +130,11 @@ class HomeScreenState extends State<HomeScreen>
         ]));
   }
 
-  Widget getUserPic(userPic, defaultImg, radius) {
-    final subStrings = <String>["png", "jpg", "jpeg", "gif"];
-    var result = subStrings.any(userPic.contains);
-    if (result == true) {
-      return shadowCircle(userPic, radius, true);
+  Widget getUserPic(String? userPic, String defaultImg, double radius) {
+    if (userPic == null || !userPic.startsWith('http')) {
+      return shadowCircle(defaultImg, radius, false);
     }
-    return shadowCircle(defaultImg, radius, false);
+    return shadowCircle(userPic, radius, true);
   }
 
   dynamic _getAssetUrlFromCollectible(dynamic collectibleData) {
@@ -341,7 +339,7 @@ class HomeScreenState extends State<HomeScreen>
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Text(
-                                          "You don't own this collectible yet to see its details.")),
+                                          "You don't own any collectibles yet. Scan a collectible to get started!")),
                                 );
                               }
                             }
