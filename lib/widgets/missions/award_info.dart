@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../helpers/localization_helper.dart';
 import './award_processing_screen.dart';
 import './mission_view.dart';
+import '../../helpers/date_formatter.dart';
 
 class AwardInfo extends StatelessWidget {
   const AwardInfo(
@@ -134,8 +135,11 @@ class AwardInfo extends StatelessWidget {
                         lineItem("Missionnummer",
                             selectedAward["missionId"].toString()),
                         lineItem("Reward", selectedAward["reward"].toString()),
-                        lineItem("Mission Start",
-                            selectedAward["createdDt"].toString())
+                        lineItem(
+                            "Mission Start",
+                            formatDate(
+                                context, selectedAward["createdDt"].toString(),
+                                format: "d MMMM, yyyy - h:mm"))
                       ]))),
             ]),
             Text(translate("mission_details_info_section", context),

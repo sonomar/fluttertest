@@ -106,17 +106,35 @@ class AccountSettingsScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // The form widgets will be styled in the next step
-              ProfileMenuItem(
-                icon: Icons.gavel_outlined,
-                title: translate("profile_pp_label", context),
-                onTap: () => launchUrlHelper(ppUrl),
-              ),
               const SizedBox(height: 24),
               const ChangePasswordForm(),
               const SizedBox(height: 24),
               const ChangeEmailForm(),
               const SizedBox(height: 40),
+              Center(
+                  child: InkWell(
+                child: Text(
+                  'Terms & Conditions',
+                  style: TextStyle(
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+                onTap: () =>
+                    launchUrl(Uri.parse('https://deins.io/data-privacy')),
+              )),
+              const SizedBox(height: 24),
+              Center(
+                  child: InkWell(
+                child: Text(
+                  'Privacy Policy',
+                  style: TextStyle(
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+                onTap: () =>
+                    launchUrl(Uri.parse('https://deins.io/data-privacy')),
+              )),
+              const SizedBox(height: 24),
 
               // Restyled Delete Button Section
               Container(

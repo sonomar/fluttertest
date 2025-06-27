@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../helpers/localization_helper.dart';
 import '../missions/latest_active_mission.dart';
+import '../../helpers/date_formatter.dart';
 
 class CardInfo extends StatelessWidget {
   const CardInfo({
@@ -96,36 +97,24 @@ class CardInfo extends StatelessWidget {
       ])),
       Padding(
           padding: const EdgeInsets.only(left: 20.0, top: 20.0, bottom: 20.0),
-          child: Row(children: [
-            Padding(
-                padding: EdgeInsets.only(left: 20),
-                child: Text(
-                  '4  |',
-                  style: TextStyle(
-                      fontFamily: 'ChakraPetch',
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 153, 153, 153),
-                      fontSize: 26),
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 10),
-                child: SizedBox(
-                    width: 400,
-                    child: Text(selectedCollectible["name"],
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 30,
-                          fontFamily: 'ChakraPetch',
-                          fontWeight: FontWeight.bold,
-                        ))))
-          ])),
+          child: Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: SizedBox(
+                  width: 400,
+                  child: Text(selectedCollectible["name"],
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 30,
+                        fontFamily: 'ChakraPetch',
+                        fontWeight: FontWeight.bold,
+                      ))))),
       Padding(
           padding: const EdgeInsets.only(left: 10.0, right: 20.0, bottom: 10.0),
           child: getLatestActiveMission(
               context, missions, missionUsers, recentColl,
               isViewer: true)),
       Padding(
-          padding: const EdgeInsets.only(left: 10.0, right: 20.0, bottom: 10.0),
+          padding: const EdgeInsets.only(left: 40.0, right: 40.0, bottom: 10.0),
           child: SizedBox(
               width: 400,
               child: Text(selectedCollectible["description"],
@@ -157,8 +146,13 @@ class CardInfo extends StatelessWidget {
                                 'N/A'),
                         lineItem("Auflage",
                             selectedCollectible["circulation"].toString()),
-                        lineItem("Erscheinungsdatum",
-                            selectedCollectible["publicationDate"].toString())
+                        lineItem(
+                            "Erscheinungsdatum",
+                            formatDate(
+                                context,
+                                selectedCollectible["publicationDate"]
+                                    .toString(),
+                                format: "d MMMM, yyyy"))
                       ]))),
             ]),
             Text(translate("collection_details_info_section", context),

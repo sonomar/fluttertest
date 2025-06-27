@@ -238,7 +238,7 @@ Widget homeMissionWidget(pageContext, mission, missionUser) {
               },
               child: Padding(
                   padding:
-                      const EdgeInsets.only(left: 40.0, bottom: 10, right: 20),
+                      const EdgeInsets.only(left: 40.0, bottom: 10, right: 10),
                   child: getMission['imgRef']['url'] != null
                       ? Image.network(getMission['imgRef']['url'],
                           width: 50, fit: BoxFit.fill)
@@ -297,7 +297,7 @@ Widget viewMissionWidget(pageContext, mission, missionUser,
                       )),
                   Padding(
                       padding: const EdgeInsets.only(
-                          left: 40.0, bottom: 10, right: 20),
+                          left: 40.0, bottom: 10, right: 10),
                       child: getMission['imgRef']['url'] != null
                           ? Image.network(getMission['imgRef']['url'],
                               width: 50, fit: BoxFit.fill)
@@ -310,7 +310,8 @@ Widget viewMissionWidget(pageContext, mission, missionUser,
             alignment: Alignment.center,
             child: progressBar(pageContext, mission, missionUser)),
         Padding(
-          padding: EdgeInsets.only(left: 15, top: 5, right: 20, bottom: 5),
+          padding: EdgeInsets.only(
+              left: 15, top: 5, right: isMission ? 30.0 : 20.0, bottom: 5),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
