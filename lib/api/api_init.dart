@@ -4,13 +4,7 @@ import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:amazon_cognito_identity_dart_2/sig_v4.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-Future<String> getJWTCode(code) async {
-  // ignore: avoid_print
-  print('STEP 2');
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getString(code) as String;
-}
+import '../models/app_auth_provider.dart';
 
 getEnvItem(item) {
   var endpoint = dotenv.env[item];
@@ -31,18 +25,57 @@ final userPool = CognitoUserPool(
   clientId,
 );
 
-apiGetRequest(
+String? _getCurrentUserSub(AppAuthProvider authProvider) {
+  final userSub = authProvider.authService.currentUserSub;
+  if (userSub == null) {
+    print('API Call failed: Could not retrieve userSub from auth service.');
+    return null;
+  }
+  return userSub;
+}
+
+Future<Map<String, String>> _getHeaders(AppAuthProvider? provider) async {
+  final prefs = await SharedPreferences.getInstance();
+
+  // The ONLY source of truth for the token will be SharedPreferences.
+  // The 'provider' argument is now ignored for auth purposes.
+  final token = prefs.getString('jwtIdCode');
+
+  print(
+      'API Init: Reading token directly from storage. Token is present: $token');
+
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
+}
+
+Future<dynamic> apiGetRequest(
   String path,
   Map<String, dynamic> paramsContent,
+  AppAuthProvider authProvider,
 ) async {
   await dotenv.load(fileName: ".env");
   // ignore: avoid_print
   final credentials = CognitoCredentials(identityPool, userPool);
-  var code = await getJWTCode('jwtIdCode');
-  var userCode = await getJWTCode('jwtCode');
-  // ignore: avoid_print
-  print('CODE: $code');
-  await credentials.getAwsCredentials(code);
+  final currentIdToken = authProvider.idToken;
+  final headers = await _getHeaders(authProvider);
+
+  if (currentIdToken == null) {
+    print('Current ID Token: $currentIdToken');
+    print('API Call failed: No valid ID token found after checkUser.');
+    return null;
+  }
+
+  final userSub = authProvider.authService.currentUserSub;
+  if (userSub == null) {
+    print('API Call failed: Could not retrieve userSub.');
+    return null;
+  }
+  paramsContent['username'] = userSub;
+  paramsContent['sub'] = userSub;
+
+  await credentials.getAwsCredentials(currentIdToken);
   print(credentials.accessKeyId);
   print(credentials.secretAccessKey);
   print(credentials.sessionToken);
@@ -60,11 +93,7 @@ apiGetRequest(
     awsSigV4Client,
     method: 'GET',
     path: path,
-    headers: {
-      'Authorization': code,
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    },
+    headers: headers,
     //body: Map<String, String>.from({}),
     queryParams: Map<String, String>.from(paramsContent),
     body: Map<String, dynamic>.from(paramsContent),
@@ -75,32 +104,52 @@ apiGetRequest(
   try {
     response = await http.get(
       Uri.parse(signedRequest.url ?? 'no request found'),
-      headers: Map<String, String>.from(
-          {'Content-Type': 'application/json', 'Authorization': code}),
+      headers: headers,
     );
   } catch (e) {
     // ignore: avoid_print
-    print('ERROR');
+    print('ERROR during GET request: $e');
   }
-  // ignore: avoid_print
-  print(response?.body);
+  print('Response body: ${response?.body}');
   if (response != null) {
+    if (response.statusCode == 401) {
+      print(
+          'Unauthorized! Token might be expired. checkUser should handle this.');
+      // You might want to trigger re-authentication or logout flow here
+      await authProvider.signOut();
+      return null;
+    }
     return json.decode(response.body);
   }
+  return null; // Or throw a specific exception
 }
 
-apiPatchRequest(
+Future<dynamic> apiPatchRequest(
   String path,
   Map<String, dynamic> bodyContent,
+  AppAuthProvider authProvider,
 ) async {
   await dotenv.load(fileName: ".env");
   // ignore: avoid_print
   final credentials = CognitoCredentials(identityPool, userPool);
-  var code = await getJWTCode('jwtIdCode');
-  var userCode = await getJWTCode('jwtCode');
-  // ignore: avoid_print
-  print('CODE: $code');
-  await credentials.getAwsCredentials(code);
+  final currentIdToken = authProvider.idToken;
+  final headers = await _getHeaders(authProvider);
+
+  if (currentIdToken == null) {
+    print('Current ID Token: $currentIdToken');
+    print('API Call failed: No valid ID token found after checkUser.');
+    return null;
+  }
+
+  final userSub = authProvider.authService.currentUserSub;
+  if (userSub == null) {
+    print('API Call failed: Could not retrieve userSub.');
+    return null;
+  }
+  bodyContent['username'] = userSub;
+  bodyContent['sub'] = userSub;
+
+  await credentials.getAwsCredentials(currentIdToken);
   print(credentials.accessKeyId);
   print(credentials.secretAccessKey);
   print(credentials.sessionToken);
@@ -117,20 +166,18 @@ apiPatchRequest(
   final signedRequest = SigV4Request(awsSigV4Client,
       method: 'PATCH',
       path: path,
-      headers: {'Authorization': code, 'Content-Type': 'application/json'},
+      headers: headers,
       //body: Map<String, String>.from({}),
       body: Map<String, dynamic>.from(bodyContent));
 
   http.Response? response;
   print(signedRequest.url ?? 'no request found');
+  // ignore: prefer_interpolation_to_compose_strings
   try {
-    response =
-        await http.patch(Uri.parse(signedRequest.url ?? 'no request found'),
-            headers: Map<String, String>.from({
-              'Authorization': code,
-              'Content-Type': 'application/json',
-            }),
-            body: signedRequest.body);
+    response = await http.patch(
+        Uri.parse(signedRequest.url ?? 'no request found'),
+        headers: headers,
+        body: signedRequest.body);
   } catch (e) {
     // ignore: avoid_print
     print('ERROR');
@@ -142,18 +189,32 @@ apiPatchRequest(
   }
 }
 
-apiPostRequest(
+Future<dynamic> apiPostRequest(
   String path,
   Map<String, dynamic> bodyContent,
+  AppAuthProvider authProvider,
 ) async {
   await dotenv.load(fileName: ".env");
   // ignore: avoid_print
   final credentials = CognitoCredentials(identityPool, userPool);
-  var code = await getJWTCode('jwtIdCode');
-  var userCode = await getJWTCode('jwtCode');
-  // ignore: avoid_print
-  print('CODE: $code');
-  await credentials.getAwsCredentials(code);
+  final currentIdToken = authProvider.idToken;
+  final headers = await _getHeaders(authProvider);
+
+  if (currentIdToken == null) {
+    print('Current ID Token: $currentIdToken');
+    print('API Call failed: No valid ID token found after checkUser.');
+    return null;
+  }
+
+  final userSub = authProvider.authService.currentUserSub;
+  if (userSub == null) {
+    print('API Call failed: Could not retrieve userSub.');
+    return null;
+  }
+  bodyContent['username'] = userSub;
+  bodyContent['sub'] = userSub;
+
+  await credentials.getAwsCredentials(currentIdToken);
   print(credentials.accessKeyId);
   print(credentials.secretAccessKey);
   print(credentials.sessionToken);
@@ -170,20 +231,17 @@ apiPostRequest(
   final signedRequest = SigV4Request(awsSigV4Client,
       method: 'POST',
       path: path,
-      headers: {'Authorization': code, 'Content-Type': 'application/json'},
+      headers: headers,
       //body: Map<String, String>.from({}),
       body: Map<String, dynamic>.from(bodyContent));
 
   http.Response? response;
   print(signedRequest.url ?? 'no request found');
   try {
-    response =
-        await http.post(Uri.parse(signedRequest.url ?? 'no request found'),
-            headers: Map<String, String>.from({
-              'Authorization': code,
-              'Content-Type': 'application/json',
-            }),
-            body: signedRequest.body);
+    response = await http.post(
+        Uri.parse(signedRequest.url ?? 'no request found'),
+        headers: headers,
+        body: signedRequest.body);
   } catch (e) {
     // ignore: avoid_print
     print('ERROR');
@@ -198,15 +256,29 @@ apiPostRequest(
 apiDeleteRequest(
   String path,
   Map<String, dynamic> paramsContent,
+  AppAuthProvider authProvider,
 ) async {
   await dotenv.load(fileName: ".env");
   // ignore: avoid_print
   final credentials = CognitoCredentials(identityPool, userPool);
-  var code = await getJWTCode('jwtIdCode');
-  // var userCode = await getJWTCode('jwtCode');
-  // ignore: avoid_print
-  print('CODE: $code');
-  await credentials.getAwsCredentials(code);
+  final currentIdToken = authProvider.idToken;
+  final headers = await _getHeaders(authProvider);
+
+  if (currentIdToken == null) {
+    print('Current ID Token: $currentIdToken');
+    print('API Call failed: No valid ID token found after checkUser.');
+    return null;
+  }
+
+  final userSub = authProvider.authService.currentUserSub;
+  if (userSub == null) {
+    print('API Call failed: Could not retrieve userSub.');
+    return null;
+  }
+  paramsContent['username'] = userSub;
+  paramsContent['sub'] = userSub;
+
+  await credentials.getAwsCredentials(currentIdToken);
   print(credentials.accessKeyId);
   print(credentials.secretAccessKey);
   print(credentials.sessionToken);
@@ -224,7 +296,7 @@ apiDeleteRequest(
     awsSigV4Client,
     method: 'DELETE',
     path: path,
-    headers: {'Authorization': code, 'Content-Type': 'application/json'},
+    headers: headers,
     //body: Map<String, String>.from({}),
     queryParams: Map<String, String>.from(paramsContent),
     body: Map<String, dynamic>.from(paramsContent),
@@ -235,11 +307,7 @@ apiDeleteRequest(
   try {
     response = await http.delete(
         Uri.parse(signedRequest.url ?? 'no request found'),
-        headers: Map<String, String>.from({
-          'Authorization': code,
-          'Content-Type': 'application/json',
-          'Accept': "*/*"
-        }),
+        headers: headers,
         body: signedRequest.body);
   } catch (e) {
     // ignore: avoid_print

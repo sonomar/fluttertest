@@ -1,52 +1,149 @@
-import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import './home_screen.dart';
-import './collection_screen.dart';
-import './scan_screen.dart';
-import './community_screen.dart';
-import './game_screen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import './models/app_localizations.dart';
+import 'screens/home_screen.dart';
+import 'widgets/openCards/login_page.dart';
+import './widgets/auth/onboarding.dart';
+import 'screens/collection_screen.dart';
+import 'screens/scan_screen.dart';
+// import 'screens/community_screen.dart';
+import 'screens/profile_screen.dart';
+// import 'screens/game_screen.dart';
+import 'screens/subscreens/missions/missions.dart';
 import './models/collectible_model.dart';
+import './models/notification_provider.dart';
 import './models/user_model.dart';
-import './openCards/login_page.dart';
-import 'package:lottie/lottie.dart';
-// import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'models/mission_model.dart';
+import 'models/community_model.dart';
+import 'models/news_post_model.dart';
+import 'models/locale_provider.dart';
+import 'models/asset_provider.dart';
+import 'models/mission_model.dart';
+import './widgets/splash_screen.dart';
+import 'auth/auth_service.dart';
+import './models/app_auth_provider.dart';
+import './helpers/localization_helper.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import './app_lifefycle_observer.dart';
+import './screens/auth_loading_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(
     MultiProvider(providers: [
-      ChangeNotifierProvider(create: (context) => CollectibleModel()),
-      ChangeNotifierProvider(create: (context) => UserModel()),
+      ChangeNotifierProvider<LocaleProvider>(
+        create: (context) => LocaleProvider(),
+      ),
+      Provider<AuthService>(
+        create: (context) => AuthService.uninitialized(),
+        lazy: false, // Ensure it's created immediately
+      ),
+      ChangeNotifierProvider<AppAuthProvider>(
+        create: (context) {
+          final authService =
+              context.read<AuthService>(); // Get the AuthService instance
+          final appAuthProvider =
+              AppAuthProvider(authService); // Create AppAuthProvider
+          // Now, inject AppAuthProvider back into AuthService
+          authService.setAppAuthProvider(appAuthProvider);
+          return appAuthProvider;
+        },
+        lazy: false, // Ensure it's created immediately
+      ),
+      ChangeNotifierProxyProvider<AppAuthProvider, UserModel>(
+        create: (context) => UserModel(context.read<AppAuthProvider>()),
+        update: (context, appAuthProvider, previousUserModel) {
+          return previousUserModel ?? UserModel(appAuthProvider);
+        },
+      ),
+      ChangeNotifierProxyProvider2<AppAuthProvider, UserModel,
+          CollectibleModel>(
+        create: (context) => CollectibleModel(
+          context.read<AppAuthProvider>(),
+          context.read<UserModel>(),
+        ),
+        update:
+            (context, appAuthProvider, userModel, previousCollectibleModel) {
+          return previousCollectibleModel ??
+              CollectibleModel(appAuthProvider, userModel);
+        },
+      ),
+      ChangeNotifierProvider<AssetProvider>(
+        create: (context) => AssetProvider(),
+      ),
+      ChangeNotifierProxyProvider2<AppAuthProvider, UserModel, MissionModel>(
+        create: (context) => MissionModel(
+          context.read<AppAuthProvider>(),
+          context.read<UserModel>(),
+        ),
+        update: (context, appAuthProvider, userModel, previousMissionModel) {
+          final model =
+              previousMissionModel ?? MissionModel(appAuthProvider, userModel);
+          model.update(appAuthProvider, userModel);
+          return model;
+        },
+      ),
+      ChangeNotifierProxyProvider<AppAuthProvider, NewsPostModel>(
+        create: (context) => NewsPostModel(context.read<AppAuthProvider>()),
+        update: (context, appAuthProvider, previousNewsPostModel) {
+          return previousNewsPostModel ?? NewsPostModel(appAuthProvider);
+        },
+      ),
+      ChangeNotifierProxyProvider<AppAuthProvider, CommunityModel>(
+        create: (context) => CommunityModel(context.read<AppAuthProvider>()),
+        update: (context, appAuthProvider, previousCommunityModel) {
+          return previousCommunityModel ?? CommunityModel(appAuthProvider);
+        },
+      ),
+      ChangeNotifierProxyProvider2<AppAuthProvider, UserModel,
+          NotificationProvider>(
+        create: (context) => NotificationProvider(
+          context.read<AppAuthProvider>(),
+          context.read<UserModel>(),
+        ),
+        update: (context, appAuthProvider, userModel,
+            previousNotificationProvider) {
+          // Re-create or update. Simpler to re-create if dependencies change significantly.
+          // Or, if NotificationProvider has an update method: previousNotificationProvider..updateDependencies(appAuthProvider, userModel);
+          return previousNotificationProvider ??
+              NotificationProvider(appAuthProvider, userModel);
+        },
+        lazy: false, // Load it eagerly
+      ),
     ], child: const MyApp()),
   );
 }
 
 class MyApp extends StatelessWidget {
+  // Keep as StatelessWidget as the Observer handles lifecycle
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    final localeProvider = Provider.of<LocaleProvider>(context);
+    // Wrap your MaterialApp with AppLifecycleObserver
+    return AppLifecycleObserver(
+      onAppResumed: () {
+        print(
+            'AppLifecycleObserver: App resumed callback triggered in main.dart. Checking user session...');
+        // Access AppAuthProvider and call checkCurrentUser here
+        // Check if context is mounted before using it (good practice, though usually true here)
+        if (context.mounted) {
+          Provider.of<AppAuthProvider>(context, listen: false)
+              .checkCurrentUser();
+        }
+      },
+      onAppPaused: () {
+        print(
+            'AppLifecycleObserver: App paused callback triggered in main.dart.');
+        // Optional: Perform actions when app is paused
+      },
+      child: MaterialApp(
         title: 'Kloppocar App',
         theme: ThemeData(
-            // This is the theme of your application.
-            //
-            // TRY THIS: Try running your application with "flutter run". You'll see
-            // the application has a purple toolbar. Then, without quitting the app,
-            // try changing the seedColor in the colorScheme below to Colors.green
-            // and then invoke "hot reload" (save your changes or press the "hot
-            // reload" button in a Flutter-supported IDE, or press "r" if you used
-            // the command line to start the app).
-            //
-            // Notice that the counter didn't reset back to zero; the application
-            // state is not lost during the reload. To reset the state, use hot
-            // restart instead.
-            //
-            // This works for code too, not just values: Most code changes can be
-            // tested with just a hot reload.
             fontFamily: 'ChakraPetch',
             useMaterial3: true,
             bottomSheetTheme:
@@ -54,69 +151,29 @@ class MyApp extends StatelessWidget {
             appBarTheme: AppBarTheme(backgroundColor: Colors.white),
             scaffoldBackgroundColor: Colors.white),
         debugShowCheckedModeBanner: false,
-        home: const SplashScreen());
-  }
-}
-
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  SplashScreenState createState() => SplashScreenState();
-}
-
-class SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    final navigator = Navigator.of(context);
-    SharedPreferences.getInstance().then((prefValue) =>
-        Future.delayed(const Duration(seconds: 3)).then((value) => {
-              if ((prefValue.containsKey('jwtCode')))
-                {
-                  navigator.pushReplacement(MaterialPageRoute(
-                      builder: (context) => const MyHomePage(
-                          title: 'Kloppocar App Home',
-                          qrcode: 'Scan a Collectible!'))),
-                }
-              else
-                {
-                  navigator.pushReplacement(MaterialPageRoute(
-                      builder: (context) => const LoginPage())),
-                }
-            }));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // logo here
-            Image.asset(
-              'assets/images/deins_logo.png',
-              height: 200,
-              width: 200,
-            ),
-            SizedBox(
-              height: 40,
-            ),
-            SizedBox(
-                height: 40,
-                width: 40,
-                child: Lottie.asset('assets/lottie/pinkspin1.json')),
-          ],
-        ),
+        locale: localeProvider.locale, // Use the locale from the provider
+        supportedLocales: [
+          Locale('en', ''),
+          Locale('de', ''),
+        ],
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: const SplashScreen(),
       ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title, required this.qrcode});
+  const MyHomePage(
+      {super.key,
+      required this.title,
+      required this.qrcode,
+      required this.userData});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -129,6 +186,7 @@ class MyHomePage extends StatefulWidget {
 
   final String title;
   final String qrcode;
+  final dynamic userData;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -149,34 +207,29 @@ class _MyHomePageState extends State<MyHomePage> {
     _screens = [
       HomeScreen(key: const PageStorageKey('home'), qrcode: widget.qrcode),
       const CollectionScreen(key: PageStorageKey('collection')),
-      const ScanScreen(key: PageStorageKey('scan')),
-      const CommunityScreen(key: PageStorageKey('community')),
-      const GameScreen(key: PageStorageKey('game')),
+      ScanScreen(key: const PageStorageKey('scan'), userData: widget.userData),
+      Missions(key: PageStorageKey('mission'), userData: widget.userData),
+      const ProfileScreen(key: PageStorageKey('profile')),
     ];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = context.read<AppAuthProvider>();
+      if (authProvider.isNewUser) {
+        showDialog(
+          context: context,
+          barrierDismissible: false, // User cannot dismiss by tapping outside
+          builder: (BuildContext context) {
+            return const Onboarding();
+          },
+        );
+      }
+    });
   }
-
-  // Future<void> _setUsername() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     _username = prefs.setString('username', _username) as String;
-  //   });
-  // }
-
-  // Future<void> _getUsername() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     _username = prefs.getString('username') as String;
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final collectibleModel =
+        Provider.of<CollectibleModel>(context, listen: false);
+    final missionModel = Provider.of<MissionModel>(context, listen: false);
     return Scaffold(
         backgroundColor: Colors.white,
         body: PageStorage(
@@ -191,9 +244,35 @@ class _MyHomePageState extends State<MyHomePage> {
             backgroundColor: Colors.white,
             elevation: 0,
             onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
+              bool dataMayHaveChanged =
+                  false; // Flag to see if a relevant screen is being targeted
+
+              if (index == 0) {
+                collectibleModel.loadCollectibles(forceClear: true);
+                missionModel.loadMissions(forceClear: true);
+                dataMayHaveChanged = true;
+              } else if (index == 1) {
+                collectibleModel.loadCollectibles(forceClear: true);
+                dataMayHaveChanged = true;
+              } else if (index == 3) {
+                missionModel.loadMissions(forceClear: true);
+              }
+              // Add similar logic for other screens if they depend on shared, mutable models
+              // and are not reliably refreshed by their own initState after global state changes.
+
+              // Only update the index if it actually changes,
+              // or always update if you want the tap on current tab to re-render (though reload is separate)
+              if (_currentIndex != index || dataMayHaveChanged) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              } else if (_currentIndex == index) {
+                // If tapping the current tab again, and it's one we want to refresh:
+                if (index == 0 || index == 1) {
+                  print(
+                      "BottomNav: Re-tapped current relevant screen. Data reload already triggered.");
+                }
+              }
             },
             type: BottomNavigationBarType.fixed,
             items: <BottomNavigationBarItem>[
@@ -208,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           BlendMode.srcIn),
                     ),
                   ),
-                  label: 'Home'),
+                  label: translate("home_header", context)),
               BottomNavigationBarItem(
                 icon: SizedBox(
                   width: 30,
@@ -220,12 +299,12 @@ class _MyHomePageState extends State<MyHomePage> {
                         BlendMode.srcIn),
                   ),
                 ),
-                label: 'Galerie',
+                label: translate("collection_header", context),
               ),
               BottomNavigationBarItem(
                 icon: SizedBox(
-                  width: 40,
-                  height: 40,
+                  width: 50,
+                  height: 50,
                   child: SvgPicture.asset(
                     'assets/images/scan.svg',
                     colorFilter: ColorFilter.mode(
@@ -233,20 +312,20 @@ class _MyHomePageState extends State<MyHomePage> {
                         BlendMode.srcIn),
                   ),
                 ),
-                label: 'Scan',
+                label: translate("scan_header", context),
               ),
               BottomNavigationBarItem(
                 icon: SizedBox(
                   width: 30,
                   height: 30,
                   child: SvgPicture.asset(
-                    'assets/images/community.svg',
+                    'assets/images/trophy.svg',
                     colorFilter: ColorFilter.mode(
                         _currentIndex == 3 ? Color(0xffd622ca) : Colors.black,
                         BlendMode.srcIn),
                   ),
                 ),
-                label: 'Community',
+                label: translate("missions_header", context),
               ),
               BottomNavigationBarItem(
                 icon: SizedBox(
@@ -259,7 +338,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         BlendMode.srcIn),
                   ),
                 ),
-                label: 'Game Center',
+                label: translate("profile_header", context),
               ),
             ],
             unselectedIconTheme: const IconThemeData(color: Colors.black),

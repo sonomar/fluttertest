@@ -6,14 +6,14 @@
     [
       "/Users/lawsonmarlowe/Library/Android/sdk/cmake/3.22.1/bin/ninja",
       "-C",
-      "/Users/lawsonmarlowe/Desktop/projects/flutter-app/f-project1/kloppocar_app/android/app/.cxx/Debug/3b484kx3/arm64-v8a",
+      "/Users/lawsonmarlowe/Desktop/projects/flutter-app/f-project1/deins_app/android/app/.cxx/Debug/3b484kx3/arm64-v8a",
       "clean"
     ]
   ],
   "buildTargetsCommandComponents": [
     "/Users/lawsonmarlowe/Library/Android/sdk/cmake/3.22.1/bin/ninja",
     "-C",
-    "/Users/lawsonmarlowe/Desktop/projects/flutter-app/f-project1/kloppocar_app/android/app/.cxx/Debug/3b484kx3/arm64-v8a",
+    "/Users/lawsonmarlowe/Desktop/projects/flutter-app/f-project1/deins_app/android/app/.cxx/Debug/3b484kx3/arm64-v8a",
     "{LIST_OF_TARGETS_TO_BUILD}"
   ],
   "libraries": {},

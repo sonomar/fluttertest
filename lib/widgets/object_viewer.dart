@@ -1,51 +1,133 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_3d_controller/flutter_3d_controller.dart';
+// lib/widgets/object_viewer.dart
 
-class ObjectViewer extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import '../services/asset_cache_service.dart';
+
+class ObjectViewer extends StatefulWidget {
   final String asset;
-  const ObjectViewer({super.key, required this.asset});
+  final String placeholder;
+  final bool isFront;
+
+  const ObjectViewer(
+      {super.key,
+      required this.asset,
+      required this.placeholder,
+      this.isFront = false});
+
+  @override
+  ObjectViewerState createState() => ObjectViewerState();
+}
+
+class ObjectViewerState extends State<ObjectViewer> {
+  late final Future<String?> _preparedGltfDataUrlFuture;
+  bool _isModelRendered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _preparedGltfDataUrlFuture =
+        AssetCacheService.instance.getPreparedGltfDataUrl(widget.asset);
+  }
 
   @override
   Widget build(BuildContext context) {
-    Flutter3DController controller = Flutter3DController();
-    controller.onModelLoaded.addListener(() async {
-      debugPrint('model is loaded : ${controller.onModelLoaded.value}');
-      var test = await controller.getAvailableTextures();
-      controller.setTexture(textureName: '(0) JadrianClark_18_frei');
-      debugPrint('testing: $test');
-    });
+    return FutureBuilder<String?>(
+      future: _preparedGltfDataUrlFuture,
+      builder: (context, snapshot) {
+        final bool srcIsReady =
+            snapshot.connectionState == ConnectionState.done &&
+                snapshot.data != null;
+        final bool hasError = snapshot.hasError ||
+            (snapshot.connectionState == ConnectionState.done && !srcIsReady);
 
-    // controller.setTexture(textureName: 'chosenTexture');
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            if (!_isModelRendered && !hasError)
+              CachedNetworkImage(
+                imageUrl: widget.placeholder,
+                fit: BoxFit.contain,
+                placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2.0)),
+                errorWidget: (context, url, error) =>
+                    const Icon(Icons.image_not_supported, color: Colors.grey),
+              ),
+            if (srcIsReady)
+              ModelViewer(
+                src: snapshot.data!,
+                relatedCss: '''
+                  model-viewer {
+                    --progress-bar-color: none !important;
+                    --progress-bar-height: 0px !important;
+                  }
+                ''',
+                onWebViewCreated: (WebViewController controller) {
+                  // 1. Add the channel immediately so it's ready.
+                  controller.addJavaScriptChannel(
+                    'ModelViewerChannel',
+                    onMessageReceived: (message) {
+                      debugPrint('Message from WebView: ${message.message}');
+                      if (message.message == 'load' &&
+                          mounted &&
+                          !_isModelRendered) {
+                        setState(() {
+                          _isModelRendered = true;
+                        });
+                      }
+                    },
+                  );
 
-    return Stack(children: [
-      SizedBox(
-        height: 500,
-        child: Flutter3DViewer(
-            //If you pass 'true' the flutter_3d_controller will add gesture interceptor layer
-            //to prevent gesture recognizers from malfunctioning on iOS and some Android devices.
-            //the default value is true
-            activeGestureInterceptor: true,
-            //If you don't pass progressBarColor, the color of defaultLoadingProgressBar will be grey.
-            //You can set your custom color or use [Colors.transparent] for hiding loadingProgressBar.
-            progressBarColor: Colors.transparent,
-            //You can disable viewer touch response by setting 'enableTouch' to 'false'
-            enableTouch: true,
-            //This callBack will return the loading progress value between 0 and 1.0
-            onProgress: (double progressValue) {
-              debugPrint('model loading progress : $progressValue');
-            },
-            //This callBack will call after model loaded successfully and will return model address
-            onLoad: (String modelAddress) {
-              debugPrint('model loaded : $modelAddress');
-            },
-            //this callBack will call when model failed to load and will return failure error
-            onError: (String error) {
-              debugPrint('model failed to load : $error');
-            },
-            src: asset,
-            controller: controller),
-      ),
-      SizedBox(height: 500)
-    ]);
+                  // 2. Set a NavigationDelegate to listen for page events.
+                  controller.setNavigationDelegate(
+                    NavigationDelegate(
+                      // --- THIS IS THE KEY ---
+                      // This callback fires when the WebView has finished loading the page.
+                      onPageFinished: (String url) {
+                        // 3. Now it is safe to run our JavaScript.
+                        controller.runJavaScript('''
+                          try {
+                            const modelViewer = document.querySelector('model-viewer');
+                            if (modelViewer) {
+                              modelViewer.addEventListener('load', () => {
+                                ModelViewerChannel.postMessage('load');
+                              }, { once: true });
+                            } else {
+                              ModelViewerChannel.postMessage('error: element_not_found');
+                            }
+                          } catch (e) {
+                            ModelViewerChannel.postMessage('error: ' + e.toString());
+                          }
+                        ''');
+                      },
+                      // Optional: Catch web-related errors.
+                      onWebResourceError: (WebResourceError error) {
+                        debugPrint(
+                            'Page resource error: ${error.errorCode}, ${error.description}');
+                      },
+                    ),
+                  );
+                },
+                backgroundColor: Colors.transparent,
+                alt: "A 3D model",
+                ar: false,
+                disablePan: true,
+                disableZoom: true,
+                disableTap: true,
+                autoRotate: widget.isFront ? true : false,
+                cameraControls: widget.isFront ? false : true,
+                cameraOrbit:
+                    widget.isFront ? "0deg 75deg 100%" : "0deg 75deg 90%",
+              ),
+            if (hasError)
+              const Center(
+                child: Icon(Icons.error, color: Colors.red, size: 48),
+              ),
+          ],
+        );
+      },
+    );
   }
 }

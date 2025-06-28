@@ -4,8 +4,9 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 
 class ScanViewReceive extends StatefulWidget {
-  const ScanViewReceive({super.key, required this.qrcode});
+  const ScanViewReceive({super.key, required this.qrcode, this.userData});
   final String qrcode;
+  final dynamic userData;
 
   @override
   State<ScanViewReceive> createState() => _ScanViewReceiveState();
@@ -38,9 +39,9 @@ class _ScanViewReceiveState extends State<ScanViewReceive>
     for (int i = 0; i < data['collectibles'].length; i++) {
       if (data['collectibles'][i]['label'] == widget.qrcode) {
         setState(() {
-          _item = data['collectibles'][i]['imageRef'];
+          _item = data['collectibles'][i]['imageRef']['url'];
         });
-        return data['collectibles'][i]['imageRef'];
+        return data['collectibles'][i]['imageRef']['url'];
       }
     }
     setState(() {
@@ -62,7 +63,9 @@ class _ScanViewReceiveState extends State<ScanViewReceive>
                   {
                     navigator.pushReplacement(MaterialPageRoute(
                         builder: (context) => MyHomePage(
-                            title: "Kloppocar Home", qrcode: qrcode))),
+                            title: "Kloppocar Home",
+                            qrcode: qrcode,
+                            userData: widget.userData))),
                   }
               })
         });
@@ -81,8 +84,10 @@ class _ScanViewReceiveState extends State<ScanViewReceive>
               _clicked = true;
             });
             navigator.pushReplacement(MaterialPageRoute(
-                builder: (context) =>
-                    MyHomePage(title: "Kloppocar Home", qrcode: qrcode)));
+                builder: (context) => MyHomePage(
+                    title: "Kloppocar Home",
+                    qrcode: qrcode,
+                    userData: widget.userData)));
           },
           child: Center(
             child: Column(
