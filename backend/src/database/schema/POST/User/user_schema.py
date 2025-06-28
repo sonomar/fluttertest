@@ -11,3 +11,4 @@ class UserCreate(BaseModel):
     deviceId: Optional[str] = None
     passwordHashed: str # Password provided during creation
     userType: Optional[UserTypeEnum] = None
+    authToken: Optional[str] = None
