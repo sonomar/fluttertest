@@ -259,6 +259,35 @@ class AppAuthProvider with ChangeNotifier {
     return success;
   }
 
+  Future<bool> forgotPassword(String email) async {
+    _errorMessage = null;
+    notifyListeners();
+    final success = await _authService.forgotPassword(email);
+    if (!success) {
+      _errorMessage = _authService.errorMessage;
+    }
+    notifyListeners();
+    return success;
+  }
+
+  Future<bool> confirmForgotPassword({
+    required String email,
+    required String confirmationCode,
+    required String newPassword,
+  }) async {
+    _errorMessage = null;
+    notifyListeners();
+    final success = await _authService.confirmForgotPassword(
+        email: email,
+        confirmationCode: confirmationCode,
+        newPassword: newPassword);
+    if (!success) {
+      _errorMessage = _authService.errorMessage;
+    }
+    notifyListeners();
+    return success;
+  }
+
   Future<bool> updateUserEmail({
     required String newEmail,
   }) async {

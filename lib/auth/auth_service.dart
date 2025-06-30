@@ -471,6 +471,59 @@ class AuthService {
     }
   }
 
+  Future<bool> forgotPassword(String email) async {
+    _internalErrorMessage = null;
+    final cognitoUser = CognitoUser(email, _userPool);
+    try {
+      await cognitoUser.forgotPassword();
+      // Store the user object so we can use it in the confirmation step.
+      _cognitoUser = cognitoUser;
+      print('AuthService: Forgot password process initiated for $email.');
+      return true;
+    } on CognitoClientException catch (e) {
+      _internalErrorMessage = e.message ?? 'An unknown error occurred.';
+      print('AuthService: ForgotPassword Error: $_internalErrorMessage');
+      return false;
+    } catch (e) {
+      _internalErrorMessage = 'An unexpected error occurred.';
+      print('AuthService: ForgotPassword Error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> confirmForgotPassword({
+    required String email,
+    required String confirmationCode,
+    required String newPassword,
+  }) async {
+    _internalErrorMessage = null;
+    // Use the stored user from the previous step, or create a new one.
+    final cognitoUser = _cognitoUser ?? CognitoUser(email, _userPool);
+
+    try {
+      final bool passwordConfirmed =
+          await cognitoUser.confirmPassword(confirmationCode, newPassword);
+      if (!passwordConfirmed) {
+        _internalErrorMessage =
+            "Password could not be confirmed. The code may be incorrect or expired.";
+        return false;
+      }
+      print('AuthService: Password confirmed successfully for $email.');
+      return true;
+    } on CognitoClientException catch (e) {
+      _internalErrorMessage =
+          e.message ?? 'An error occurred during password confirmation.';
+      print(
+          'AuthService: Cognito ConfirmPassword Error: $_internalErrorMessage');
+      return false;
+    } catch (e) {
+      _internalErrorMessage =
+          'An unexpected error occurred during password confirmation.';
+      print('AuthService: Internal ConfirmPassword Error: $e');
+      return false;
+    }
+  }
+
   /// Initiates the process of updating the user's email address.
   /// This will send a verification code to the [newEmail].
   Future<bool> updateUserEmail({

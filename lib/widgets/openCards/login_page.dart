@@ -17,7 +17,9 @@ enum AuthFormType {
   loginWithPassword,
   loginWithEmailCode,
   register,
-  confirm
+  confirm,
+  forgotPassword,
+  resetPassword
 }
 
 class LoginPage extends StatefulWidget {
@@ -63,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Cancel', style: TextStyle(color: Colors.red)),
+            child: const Text('Go Back', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -80,6 +82,13 @@ class _LoginPageState extends State<LoginPage> {
         _formType = AuthFormType.loginInitial;
       });
     }
+  }
+
+  void _clearControllers() {
+    _emailController.clear();
+    _passwordController.clear();
+    _confirmPasswordController.clear();
+    _loginCodeController.clear();
   }
 
   void _switchFormType() {
@@ -180,6 +189,65 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _handleForgotPassword() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() {
+      _isSubmitting = true;
+      _uiErrorMessage = '';
+    });
+    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
+
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+    final success =
+        await authProvider.forgotPassword(_emailController.text.trim());
+
+    if (success && mounted) {
+      setState(() {
+        _formType = AuthFormType.resetPassword;
+        _isSubmitting = false;
+        _passwordController.clear();
+        _confirmPasswordController.clear();
+        _loginCodeController.clear();
+      });
+    } else if (mounted) {
+      setState(() => _isSubmitting = false);
+    }
+  }
+
+  Future<void> _handleResetPassword() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() {
+      _isSubmitting = true;
+      _uiErrorMessage = '';
+    });
+    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
+
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+    final success = await authProvider.confirmForgotPassword(
+      email: _emailController.text.trim(),
+      confirmationCode: _loginCodeController.text.trim(),
+      newPassword: _passwordController.text.trim(),
+    );
+
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Your password has been successfully reset.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      setState(() {
+        _formKey.currentState?.reset();
+        _clearControllers();
+        _uiErrorMessage = '';
+        _formType = AuthFormType.loginInitial;
+        _isSubmitting = false;
+      });
+    } else if (mounted) {
+      setState(() => _isSubmitting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AppAuthProvider>(context);
@@ -187,102 +255,103 @@ class _LoginPageState extends State<LoginPage> {
     final bool showBackButton = _formType != AuthFormType.loginInitial &&
         _formType != AuthFormType.register;
     return PopScope(
-      canPop: !showBackButton, // Prevent popping if a back button is shown
+      canPop: !showBackButton,
       onPopInvoked: (didPop) {
         if (didPop) return;
         _handleBackPress();
       },
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        // NEW: AppBar with a conditional back button.
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: showBackButton
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: _handleBackPress,
-                )
-              : null,
-        ),
-        body: Container(
-          alignment: Alignment.topCenter,
-          decoration: const BoxDecoration(
-            gradient: RadialGradient(
-              colors: [
-                Color.fromARGB(255, 214, 34, 112),
-                Color.fromARGB(255, 150, 21, 141),
-                Color(0xff333333),
-              ],
-              center: Alignment.topCenter,
-              radius: 0.7,
+      // MODIFIED: Use a Stack to layer the gradient behind the Scaffold.
+      child: Stack(
+        children: [
+          // This Container provides the full-screen gradient background.
+          Container(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                colors: [
+                  Color.fromARGB(255, 214, 34, 112),
+                  Color.fromARGB(255, 150, 21, 141),
+                  Color(0xff333333),
+                ],
+                center: Alignment.topCenter,
+                radius: 0.7,
+              ),
             ),
           ),
-          child: SingleChildScrollView(
-            // Changed to allow scrolling
-            child: Column(children: [
-              Padding(
-                  padding: const EdgeInsets.only(
-                      top: 100.0,
-                      bottom: 50.0,
-                      left: 40.0,
-                      right: 40.0), // Reduced top padding
-                  child: SizedBox(
-                      child: Image.asset('assets/images/deins_logo.png'))),
-              Padding(
-                // Changed from SingleChildScrollView
-                padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        _getHeaderText(context),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 40),
-                      ..._buildFormFields(),
-                      const SizedBox(height: 20),
-                      if (providerErrorMessage != null ||
-                          _uiErrorMessage.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Text(
-                            providerErrorMessage ?? _uiErrorMessage,
-                            style: const TextStyle(
-                                color: Colors.red, fontSize: 14),
-                            textAlign: TextAlign.center,
+          // The Scaffold is now transparent to let the gradient show through.
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: showBackButton
+                  ? IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: _handleBackPress,
+                    )
+                  : null,
+            ),
+            // The body no longer needs its own decoration.
+            body: SingleChildScrollView(
+              child: Column(children: [
+                Padding(
+                    padding: const EdgeInsets.only(
+                        top: 100.0, bottom: 50.0, left: 40.0, right: 40.0),
+                    child: SizedBox(
+                        child: Image.asset('assets/images/deins_logo.png'))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          _getHeaderText(context),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 40),
+                        ..._buildFormFields(),
+                        const SizedBox(height: 20),
+                        if (providerErrorMessage != null ||
+                            _uiErrorMessage.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Text(
+                              providerErrorMessage ?? _uiErrorMessage,
+                              style: const TextStyle(
+                                  color: Colors.red, fontSize: 14),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                        ),
-                      ..._buildActionButtons(),
-                      const SizedBox(height: 20),
-                      if (_formType == AuthFormType.loginInitial ||
-                          _formType == AuthFormType.loginWithPassword ||
-                          _formType == AuthFormType.loginWithEmailCode)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text("Don't have an account?",
-                                style: TextStyle(color: Colors.white)),
-                            TextButton(
-                                onPressed:
-                                    _isSubmitting ? null : _switchFormType,
-                                child: const Text("Register")),
-                          ],
-                        ),
-                    ],
+                        ..._buildActionButtons(),
+                        const SizedBox(height: 20),
+                        if (_formType == AuthFormType.loginInitial ||
+                            _formType == AuthFormType.loginWithPassword ||
+                            _formType == AuthFormType.loginWithEmailCode)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text("Don't have an account?",
+                                  style: TextStyle(color: Colors.white)),
+                              TextButton(
+                                  onPressed:
+                                      _isSubmitting ? null : _switchFormType,
+                                  child: const Text("Register")),
+                            ],
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ]),
+              ]),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -297,6 +366,10 @@ class _LoginPageState extends State<LoginPage> {
       case AuthFormType.loginWithEmailCode:
       case AuthFormType.confirm:
         return translate('confirm_code_header', context);
+      case AuthFormType.forgotPassword:
+        return 'Forgot Your Password?';
+      case AuthFormType.resetPassword:
+        return 'Reset Your Password';
     }
   }
 
@@ -324,7 +397,19 @@ class _LoginPageState extends State<LoginPage> {
         ];
       case AuthFormType.loginWithPassword:
         return [
-          ElevatedButton(onPressed: _submit, child: const Text("Log In"))
+          ElevatedButton(onPressed: _submit, child: const Text("Log In")),
+          // New "Forgot Password" button
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _formKey.currentState?.reset();
+                _uiErrorMessage = '';
+                _formType = AuthFormType.forgotPassword;
+              });
+            },
+            child: const Text('Forgot Your Password?',
+                style: TextStyle(color: Colors.white70)),
+          ),
         ];
       case AuthFormType.loginWithEmailCode:
       case AuthFormType.confirm:
@@ -335,10 +420,20 @@ class _LoginPageState extends State<LoginPage> {
         return [
           ElevatedButton(onPressed: _submit, child: const Text("Register"))
         ];
+      // New cases for forgot/reset password
+      case AuthFormType.forgotPassword:
+        return [
+          ElevatedButton(
+              onPressed: _handleForgotPassword, child: const Text("Submit"))
+        ];
+      case AuthFormType.resetPassword:
+        return [
+          ElevatedButton(
+              onPressed: _handleResetPassword, child: const Text("Confirm"))
+        ];
     }
   }
 
-  /// MODIFIED: This function now correctly returns a list of widgets for every case.
   List<Widget> _buildFormFields() {
     switch (_formType) {
       case AuthFormType.loginInitial:
@@ -437,6 +532,69 @@ class _LoginPageState extends State<LoginPage> {
             validator: (value) => value != _passwordController.text
                 ? translate("register_reenter_password_validator", context)
                 : null,
+          ),
+        ];
+      // New cases for forgot/reset password
+      case AuthFormType.forgotPassword:
+        return [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              'Enter your email below to receive a code to reset your password.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+          ),
+          TextFormField(
+            controller: _emailController,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+                labelText: 'Email', border: OutlineInputBorder()),
+            keyboardType: TextInputType.emailAddress,
+            validator: (v) =>
+                (v?.isEmpty ?? true) ? 'Please enter your email' : null,
+          ),
+        ];
+      case AuthFormType.resetPassword:
+        return [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              'Please enter the code from your email below and enter your new password twice to add your new password.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+          ),
+          TextFormField(
+            controller: _loginCodeController,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+                labelText: 'Code', border: OutlineInputBorder()),
+            validator: (v) => (v?.isEmpty ?? true)
+                ? 'Please enter the code from your email'
+                : null,
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            controller: _passwordController,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+                labelText: 'New Password', border: OutlineInputBorder()),
+            obscureText: true,
+            validator: (v) => (v?.length ?? 0) < 8
+                ? 'Password must be at least 8 characters'
+                : null,
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            controller: _confirmPasswordController,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+                labelText: 'Confirm New Password',
+                border: OutlineInputBorder()),
+            obscureText: true,
+            validator: (v) =>
+                v != _passwordController.text ? 'Passwords do not match' : null,
           ),
         ];
     }
