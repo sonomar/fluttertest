@@ -282,19 +282,6 @@ class AuthService {
         print('AuthService: ID Token saved to SharedPreferences.');
       }
 
-      // // Handle user registration update if needed
-      // if (token != null && isRegister == true) {
-      //   final encryptedPassword = encryptPassword(password);
-      //   final getUser = await getUserByEmail(email, _appAuthProvider);
-      //   final userId = getUser['userId'];
-      //   final userUpdateBody = {
-      //     "userId": userId,
-      //     "passwordHashed": encryptedPassword,
-      //     "authToken": token
-      //   };
-      //   await updateUserByUserId(userUpdateBody, _appAuthProvider);
-      // }
-
       print(
           'AuthService: User $email signed in successfully. Session valid: ${_session!.isValid()}');
       return true; // Successfully authenticated and cached
@@ -347,6 +334,68 @@ class AuthService {
       print(
           'AuthService: Attempt failed for user $email due to unexpected error. Signing out.');
       await _forceSignOutAndClearLocal(); // Call the consolidated sign-out
+      return false;
+    }
+  }
+
+  Future<bool> signInWithEmailCode(String email) async {
+    _internalErrorMessage = null;
+    _cognitoUser = CognitoUser(email, _userPool);
+
+    try {
+      // This call will trigger your 'Define Auth Challenge' Lambda.
+      await _cognitoUser!.initiateAuth(AuthenticationDetails(username: email));
+      return true;
+    } on CognitoUserCustomChallengeException {
+      // This is the expected successful outcome. It means Cognito is asking for the code.
+      return true;
+    } catch (e) {
+      _internalErrorMessage = "Error initiating email login: ${e.toString()}";
+      return false;
+    }
+  }
+
+  /// NEW: Verifies the code sent to the user's email to complete the login.
+  Future<bool> answerEmailCodeChallenge(String answer) async {
+    _internalErrorMessage = null;
+    if (_cognitoUser == null) {
+      _internalErrorMessage = "Login session expired. Please try again.";
+      return false;
+    }
+    try {
+      _session = await _cognitoUser!.sendCustomChallengeAnswer(answer);
+      if (_session?.isValid() ?? false) {
+        // Persist the session tokens to secure storage.
+        await _cognitoUser!.cacheTokens();
+        final prefs = await SharedPreferences.getInstance();
+        if (_cognitoUser!.username != null) {
+          prefs.setString('email', _cognitoUser!.username!);
+        }
+
+        final token = _session?.getAccessToken().getJwtToken();
+        final idToken = _session?.getIdToken().getJwtToken();
+        if (token != null) {
+          prefs.setString('jwtCode', token);
+        }
+        if (idToken != null) {
+          prefs.setString('jwtIdCode', idToken);
+        }
+
+        final attributes = await _cognitoUser!.getUserAttributes();
+        final userIdAttr = attributes?.firstWhere(
+            (attr) => attr.getName() == 'custom:userId',
+            orElse: () =>
+                CognitoUserAttribute(name: 'custom:userId', value: null));
+        if (userIdAttr?.getValue() != null) {
+          await prefs.setString('userId', userIdAttr!.getValue()!);
+        }
+
+        return true;
+      }
+      return false;
+    } catch (e) {
+      _internalErrorMessage =
+          "Failed to verify code. It may be incorrect or expired.";
       return false;
     }
   }

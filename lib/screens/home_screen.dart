@@ -126,10 +126,13 @@ class HomeScreenState extends State<HomeScreen>
   }
 
   Widget getUserPic(String? userPic, String defaultImg, double radius) {
-    if (userPic == null || !userPic.startsWith('http')) {
+    if (userPic == null || userPic.isEmpty) {
       return shadowCircle(defaultImg, radius, false);
     }
-    return shadowCircle(userPic, radius, true);
+    if (userPic.startsWith('http')) {
+      return shadowCircle(userPic, radius, true);
+    }
+    return shadowCircle(defaultImg, radius, false);
   }
 
   dynamic _getAssetUrlFromCollectible(dynamic collectibleData) {

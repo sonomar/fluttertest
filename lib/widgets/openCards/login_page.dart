@@ -12,7 +12,13 @@ String encryptPassword(String password) {
   return hash.toString();
 }
 
-enum AuthFormType { login, register, confirm }
+enum AuthFormType {
+  loginInitial,
+  loginWithPassword,
+  loginWithEmailCode,
+  register,
+  confirm
+}
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, this.userData});
@@ -28,10 +34,9 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  final TextEditingController _confirmationCodeController =
-      TextEditingController();
+  final TextEditingController _loginCodeController = TextEditingController();
 
-  var _formType = AuthFormType.login;
+  var _formType = AuthFormType.loginInitial;
   bool _isSubmitting = false;
   String _uiErrorMessage = '';
 
@@ -40,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _confirmationCodeController.dispose();
+    _loginCodeController.dispose();
     super.dispose();
   }
 
@@ -49,62 +54,96 @@ class _LoginPageState extends State<LoginPage> {
     _uiErrorMessage = '';
     Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
     setState(() {
-      _formType = (_formType == AuthFormType.login)
-          ? AuthFormType.register
-          : AuthFormType.login;
+      _formType = (_formType == AuthFormType.register)
+          ? AuthFormType.loginInitial
+          : AuthFormType.register;
     });
   }
 
   Future<void> _submit() async {
-    setState(() => _uiErrorMessage = '');
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    setState(() {
+      _isSubmitting = true;
+      _uiErrorMessage = '';
+    });
     Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
 
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isSubmitting = true);
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    bool success = false;
+    bool shouldNavigateToSplash = false;
 
-      final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
-      final email = _emailController.text.trim();
-      final password = _passwordController.text.trim();
-      final hashPass = encryptPassword(password);
-      final customAttributes = {
-        'passwordHashed': hashPass,
-        'appUsername': 'test',
-      };
-      bool success = false;
-
-      if (_formType == AuthFormType.login) {
+    switch (_formType) {
+      case AuthFormType.loginWithPassword:
         success = await authProvider.signIn(email, password);
-      } else if (_formType == AuthFormType.register) {
+        if (success) shouldNavigateToSplash = true;
+        break;
+      case AuthFormType.loginWithEmailCode:
+        success = await authProvider
+            .answerEmailCodeChallenge(_loginCodeController.text.trim());
+        if (success) shouldNavigateToSplash = true;
+        break;
+      case AuthFormType.register:
         success = await authProvider.signUp(
-            email: email,
-            password: password,
-            customAttributes: customAttributes);
+          email: email,
+          password: password,
+          customAttributes: {
+            'passwordHashed': encryptPassword(password),
+            'appUsername': 'test'
+          },
+        );
         if (success) {
-          setState(() {
-            _formType = AuthFormType.confirm;
-            _isSubmitting = false;
-          });
+          if (mounted) {
+            setState(() {
+              _formType = AuthFormType.confirm;
+              _isSubmitting = false;
+            });
+          }
           return;
         }
-      } else if (_formType == AuthFormType.confirm) {
-        final code = _confirmationCodeController.text.trim();
+        break;
+      case AuthFormType.confirm:
         success = await authProvider.confirmSignUp(
-            email: email, confirmationCode: code);
+            email: email, confirmationCode: _loginCodeController.text.trim());
         if (success) {
           success =
               await authProvider.signIn(email, password, isRegister: true);
+          if (success) shouldNavigateToSplash = true;
         }
-      }
-      if (mounted && success) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const SplashScreen()),
-        );
-        return;
-      }
-      // If we reach here, a step failed. Reset the submitting state.
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
+        break;
+      default:
+        break;
+    }
+
+    if (shouldNavigateToSplash && mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const SplashScreen()),
+      );
+      return;
+    }
+
+    if (mounted) {
+      setState(() => _isSubmitting = false);
+    }
+  }
+
+  Future<void> _handleEmailLoginRequest() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _isSubmitting = true);
+
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+    final success =
+        await authProvider.initiateEmailLogin(_emailController.text.trim());
+
+    if (success && mounted) {
+      setState(() {
+        _formType = AuthFormType.loginWithEmailCode;
+      });
+    }
+    if (mounted) {
+      setState(() => _isSubmitting = false);
     }
   }
 
@@ -116,7 +155,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Colors.black,
       body: Container(
           alignment: Alignment.topCenter,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: RadialGradient(
               colors: [
                 Color.fromARGB(255, 214, 34, 112),
@@ -129,7 +168,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           child: Column(children: [
             Padding(
-                padding: EdgeInsets.only(
+                padding: const EdgeInsets.only(
                     top: 200.0, bottom: 50.0, left: 40.0, right: 40.0),
                 child: SizedBox(
                     child: Image.asset('assets/images/deins_logo.png'))),
@@ -142,11 +181,7 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      _formType == AuthFormType.login
-                          ? translate('login_header', context)
-                          : _formType == AuthFormType.register
-                              ? translate('register_header', context)
-                              : translate('confirm_code_header', context),
+                      _getHeaderText(context),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                           color: Colors.white,
@@ -167,47 +202,18 @@ class _LoginPageState extends State<LoginPage> {
                           textAlign: TextAlign.center,
                         ),
                       ),
-                    if (_isSubmitting)
-                      const Center(child: CircularProgressIndicator())
-                    else
-                      ElevatedButton(
-                        onPressed: _submit,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                        child: Text(
-                          _formType == AuthFormType.login
-                              ? translate('login_header', context)
-                              : _formType == AuthFormType.register
-                                  ? translate('register_header', context)
-                                  : translate('confirm_code_header', context),
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ),
+                    ..._buildActionButtons(),
                     const SizedBox(height: 20),
-                    if (_formType != AuthFormType.confirm)
+                    if (_formType == AuthFormType.loginInitial ||
+                        _formType == AuthFormType.loginWithPassword)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            _formType == AuthFormType.login
-                                ? translate(
-                                    "login_register_switch_text", context)
-                                : translate(
-                                    "register_login_switch_text", context),
-                            style: const TextStyle(color: Colors.white),
-                          ),
+                          const Text("Don't have an account?",
+                              style: TextStyle(color: Colors.white)),
                           TextButton(
                               onPressed: _isSubmitting ? null : _switchFormType,
-                              child: Text(
-                                _formType == AuthFormType.login
-                                    ? translate(
-                                        "login_register_switch_link", context)
-                                    : translate(
-                                        "register_login_switch_link", context),
-                              )),
+                              child: const Text("Register")),
                         ],
                       ),
                   ],
@@ -218,93 +224,158 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  String _getHeaderText(BuildContext context) {
+    switch (_formType) {
+      case AuthFormType.loginInitial:
+      case AuthFormType.loginWithPassword:
+        return translate('login_header', context);
+      case AuthFormType.register:
+        return translate('register_header', context);
+      case AuthFormType.loginWithEmailCode:
+      case AuthFormType.confirm:
+        return translate('confirm_code_header', context);
+    }
+  }
+
+  List<Widget> _buildActionButtons() {
+    if (_isSubmitting) {
+      return [const Center(child: CircularProgressIndicator())];
+    }
+    switch (_formType) {
+      case AuthFormType.loginInitial:
+        return [
+          ElevatedButton(
+            onPressed: _handleEmailLoginRequest,
+            child: const Text('Log in with Email'),
+          ),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: () {
+              if (_formKey.currentState?.validate() ?? false) {
+                setState(() => _formType = AuthFormType.loginWithPassword);
+              }
+            },
+            child: const Text('Log in with Password',
+                style: TextStyle(color: Colors.white70)),
+          ),
+        ];
+      case AuthFormType.loginWithPassword:
+        return [
+          ElevatedButton(onPressed: _submit, child: const Text("Log In"))
+        ];
+      case AuthFormType.loginWithEmailCode:
+      case AuthFormType.confirm:
+        return [
+          ElevatedButton(onPressed: _submit, child: const Text("Confirm Code"))
+        ];
+      case AuthFormType.register:
+        return [
+          ElevatedButton(onPressed: _submit, child: const Text("Register"))
+        ];
+    }
+  }
+
+  /// MODIFIED: This function now correctly returns a list of widgets for every case.
   List<Widget> _buildFormFields() {
-    // This logic remains the same as your version.
-    if (_formType == AuthFormType.login) {
-      return [
-        TextFormField(
-          style: const TextStyle(color: Colors.white),
-          controller: _emailController,
-          decoration: InputDecoration(
-              labelText: translate("login_email_label", context),
-              border: const OutlineInputBorder()),
-          keyboardType: TextInputType.emailAddress,
-          validator: (value) => (value?.isEmpty ?? true)
-              ? translate("login_email_validator", context)
-              : null,
-        ),
-        const SizedBox(height: 20),
-        TextFormField(
-          style: const TextStyle(color: Colors.white),
-          controller: _passwordController,
-          decoration: InputDecoration(
-              labelText: translate("login_password_label", context),
-              border: const OutlineInputBorder()),
-          obscureText: true,
-          validator: (value) => (value?.isEmpty ?? true)
-              ? translate("login_password_validator", context)
-              : null,
-        ),
-      ];
-    } else if (_formType == AuthFormType.register) {
-      return [
-        TextFormField(
-          style: const TextStyle(color: Colors.white),
-          controller: _emailController,
-          decoration: InputDecoration(
-              labelText: translate("register_email_label", context),
-              border: const OutlineInputBorder()),
-          keyboardType: TextInputType.emailAddress,
-          validator: (value) => (value?.isEmpty ?? true)
-              ? translate("register_email_validator", context)
-              : null,
-        ),
-        const SizedBox(height: 20),
-        TextFormField(
-          style: const TextStyle(color: Colors.white),
-          controller: _passwordController,
-          decoration: InputDecoration(
-              labelText: translate("register_password_label", context),
-              border: const OutlineInputBorder()),
-          obscureText: true,
-          validator: (value) => (value?.length ?? 0) < 8
-              ? translate("register_password_validator", context)
-              : null,
-        ),
-        const SizedBox(height: 20),
-        TextFormField(
-          style: const TextStyle(color: Colors.white),
-          controller: _confirmPasswordController,
-          decoration: InputDecoration(
-              labelText: translate("register_reenter_password_label", context),
-              border: const OutlineInputBorder()),
-          obscureText: true,
-          validator: (value) => value != _passwordController.text
-              ? translate("register_reenter_password_validator", context)
-              : null,
-        ),
-      ];
-    } else {
-      // AuthFormType.confirm
-      return [
-        Text(
-          translate("confirm_code_text", context),
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-        ),
-        const SizedBox(height: 20),
-        TextFormField(
-          style: const TextStyle(color: Colors.white),
-          controller: _confirmationCodeController,
-          decoration: const InputDecoration(
-              labelText: "code", border: OutlineInputBorder()),
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.center,
-          validator: (value) => (value?.isEmpty ?? true)
-              ? translate("confirm_code_validator", context)
-              : null,
-        ),
-      ];
+    switch (_formType) {
+      case AuthFormType.loginInitial:
+        return [
+          TextFormField(
+            controller: _emailController,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+                labelText: translate("login_email_label", context),
+                border: const OutlineInputBorder()),
+            validator: (v) =>
+                (v?.isEmpty ?? true) ? 'Please enter your email' : null,
+          ),
+        ];
+      case AuthFormType.loginWithPassword:
+        return [
+          TextFormField(
+            controller: _emailController,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+                labelText: translate("login_email_label", context),
+                border: const OutlineInputBorder()),
+            validator: (v) =>
+                (v?.isEmpty ?? true) ? 'Please enter your email' : null,
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            controller: _passwordController,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+                labelText: translate("login_password_label", context),
+                border: const OutlineInputBorder()),
+            obscureText: true,
+            validator: (v) =>
+                (v?.isEmpty ?? true) ? 'Please enter your password' : null,
+          ),
+        ];
+      case AuthFormType.loginWithEmailCode:
+      case AuthFormType.confirm:
+        return [
+          TextFormField(
+            controller: _emailController,
+            style: const TextStyle(color: Colors.grey),
+            decoration: const InputDecoration(
+                labelText: 'Email', border: OutlineInputBorder()),
+            enabled: false,
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            controller: _loginCodeController,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+                labelText: _formType == AuthFormType.loginWithEmailCode
+                    ? 'Login Code'
+                    : 'Confirmation Code',
+                border: const OutlineInputBorder()),
+            validator: (v) => (v?.isEmpty ?? true)
+                ? 'Please enter the code from your email'
+                : null,
+          ),
+        ];
+      case AuthFormType.register:
+        return [
+          TextFormField(
+            style: const TextStyle(color: Colors.white),
+            controller: _emailController,
+            decoration: InputDecoration(
+                labelText: translate("register_email_label", context),
+                border: const OutlineInputBorder()),
+            keyboardType: TextInputType.emailAddress,
+            validator: (value) => (value?.isEmpty ?? true)
+                ? translate("register_email_validator", context)
+                : null,
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            style: const TextStyle(color: Colors.white),
+            controller: _passwordController,
+            decoration: InputDecoration(
+                labelText: translate("register_password_label", context),
+                border: const OutlineInputBorder()),
+            obscureText: true,
+            validator: (value) => (value?.length ?? 0) < 8
+                ? translate("register_password_validator", context)
+                : null,
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            style: const TextStyle(color: Colors.white),
+            controller: _confirmPasswordController,
+            decoration: InputDecoration(
+                labelText:
+                    translate("register_reenter_password_label", context),
+                border: const OutlineInputBorder()),
+            obscureText: true,
+            validator: (value) => value != _passwordController.text
+                ? translate("register_reenter_password_validator", context)
+                : null,
+          ),
+        ];
     }
   }
 }

@@ -115,15 +115,10 @@ class AppAuthProvider with ChangeNotifier {
           _status = AuthStatus.authenticated;
           print(
               'AppAuthProvider: signIn status set to authenticated. Notifying. at ${DateTime.now()}');
-          notifyListeners(); // <--- This is the key notification
-
-          // --- OPTION 2 FIX: Add a small, post-notification delay ---
-          // This allows Flutter's event loop to process the notifyListeners()
-          // before any subsequent rapid unmounting/rebuilding occurs.
+          notifyListeners();
           await Future.delayed(Duration(milliseconds: 50)); // Give it 50ms
           print(
               'AppAuthProvider: Post-notification delay completed. at ${DateTime.now()}');
-          // --- END OPTION 2 FIX ---
 
           print(
               'AppAuthProvider: Login process completed successfully. User authenticated. at ${DateTime.now()}');
@@ -162,6 +157,39 @@ class AppAuthProvider with ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  Future<bool> initiateEmailLogin(String email) async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = null;
+    notifyListeners();
+
+    final success = await _authService.signInWithEmailCode(email);
+    if (!success) {
+      _errorMessage = _authService.errorMessage;
+      _status = AuthStatus.unauthenticated;
+    }
+    // On success, the status remains 'authenticating' as we wait for the code.
+    notifyListeners();
+    return success;
+  }
+
+  /// NEW: Completes the passwordless login by verifying the email code.
+  Future<bool> answerEmailCodeChallenge(String code) async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = null;
+    notifyListeners();
+
+    final success = await _authService.answerEmailCodeChallenge(code);
+    if (success) {
+      _userSession = _authService.session;
+      _status = AuthStatus.authenticated;
+    } else {
+      _errorMessage = _authService.errorMessage;
+      _status = AuthStatus.unauthenticated;
+    }
+    notifyListeners();
+    return success;
   }
 
   Future<bool> signUp({
