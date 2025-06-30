@@ -49,6 +49,39 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  Future<bool> _showCancelConfirmationDialog() async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel Login?'),
+        content: const Text(
+            'Are you sure? This will reset the login process and make any current login codes invalid.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Stay'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Cancel', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
+  Future<void> _handleBackPress() async {
+    final bool confirmed = await _showCancelConfirmationDialog();
+    if (confirmed && mounted) {
+      setState(() {
+        _formKey.currentState?.reset();
+        _uiErrorMessage = '';
+        _formType = AuthFormType.loginInitial;
+      });
+    }
+  }
+
   void _switchFormType() {
     _formKey.currentState?.reset();
     _uiErrorMessage = '';
@@ -151,9 +184,28 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AppAuthProvider>(context);
     final providerErrorMessage = authProvider.errorMessage;
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Container(
+    final bool showBackButton = _formType != AuthFormType.loginInitial &&
+        _formType != AuthFormType.register;
+    return PopScope(
+      canPop: !showBackButton, // Prevent popping if a back button is shown
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        _handleBackPress();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        // NEW: AppBar with a conditional back button.
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: showBackButton
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: _handleBackPress,
+                )
+              : null,
+        ),
+        body: Container(
           alignment: Alignment.topCenter,
           decoration: const BoxDecoration(
             gradient: RadialGradient(
@@ -166,61 +218,72 @@ class _LoginPageState extends State<LoginPage> {
               radius: 0.7,
             ),
           ),
-          child: Column(children: [
-            Padding(
-                padding: const EdgeInsets.only(
-                    top: 200.0, bottom: 50.0, left: 40.0, right: 40.0),
-                child: SizedBox(
-                    child: Image.asset('assets/images/deins_logo.png'))),
-            SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 40.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      _getHeaderText(context),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 40),
-                    ..._buildFormFields(),
-                    const SizedBox(height: 20),
-                    if (providerErrorMessage != null ||
-                        _uiErrorMessage.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Text(
-                          providerErrorMessage ?? _uiErrorMessage,
-                          style:
-                              const TextStyle(color: Colors.red, fontSize: 14),
-                          textAlign: TextAlign.center,
+          child: SingleChildScrollView(
+            // Changed to allow scrolling
+            child: Column(children: [
+              Padding(
+                  padding: const EdgeInsets.only(
+                      top: 100.0,
+                      bottom: 50.0,
+                      left: 40.0,
+                      right: 40.0), // Reduced top padding
+                  child: SizedBox(
+                      child: Image.asset('assets/images/deins_logo.png'))),
+              Padding(
+                // Changed from SingleChildScrollView
+                padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        _getHeaderText(context),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 40),
+                      ..._buildFormFields(),
+                      const SizedBox(height: 20),
+                      if (providerErrorMessage != null ||
+                          _uiErrorMessage.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Text(
+                            providerErrorMessage ?? _uiErrorMessage,
+                            style: const TextStyle(
+                                color: Colors.red, fontSize: 14),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                      ),
-                    ..._buildActionButtons(),
-                    const SizedBox(height: 20),
-                    if (_formType == AuthFormType.loginInitial ||
-                        _formType == AuthFormType.loginWithPassword)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text("Don't have an account?",
-                              style: TextStyle(color: Colors.white)),
-                          TextButton(
-                              onPressed: _isSubmitting ? null : _switchFormType,
-                              child: const Text("Register")),
-                        ],
-                      ),
-                  ],
+                      ..._buildActionButtons(),
+                      const SizedBox(height: 20),
+                      if (_formType == AuthFormType.loginInitial ||
+                          _formType == AuthFormType.loginWithPassword ||
+                          _formType == AuthFormType.loginWithEmailCode)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("Don't have an account?",
+                                style: TextStyle(color: Colors.white)),
+                            TextButton(
+                                onPressed:
+                                    _isSubmitting ? null : _switchFormType,
+                                child: const Text("Register")),
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ])),
+            ]),
+          ),
+        ),
+      ),
     );
   }
 
