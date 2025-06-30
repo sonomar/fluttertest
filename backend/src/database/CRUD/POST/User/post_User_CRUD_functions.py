@@ -48,6 +48,7 @@ def create_user(
         userType=user.userType.value if user.userType is not None else UserTypeEnum.unregistered.value, # Use .value if using Python Enum
         username=user.username, # Optional fields from schema
         deviceId=user.deviceId,
+        authToken=user.authToken,
         # active, createdDt, updatedDt will use server defaults from models
         # userRank, profileImg, authToken, lastLoggedIn are Optional/nullable and default to None
     )

@@ -24,11 +24,15 @@ def lambda_handler(event, context):
         try:
             user_attributes = event.get('request', {}).get('userAttributes', {})
             email = user_attributes.get('email')
+            authToken = user_attributes.get('sub')
             # Cognito userName (event.get('userName')) is often the unique identifier used for sign-in.
             # It could be an email, phone number, or a preferred username based on Cognito settings.
             cognito_username = event.get('userName')
 
-            cognito_password = event.get('password')
+            cognito_password = user_attributes.get('passwordHashed')
+            print("testing 2")
+            print(event)
+            print(cognito_password)
 
             if not email:
                 error_msg = "Email not found in Cognito event's userAttributes. Cannot create user in DB."
@@ -38,7 +42,18 @@ def lambda_handler(event, context):
                 raise ValueError(error_msg)
             
             if not cognito_password:
+                cognito_password = user_attributes.get('custom:passwordHashed')
+                print("pass1")
+                print(cognito_password)
+
+            if not cognito_password:
                 cognito_password = "COGNITO_MANAGED_USER"
+            
+            if not authToken:
+                authToken = "COGNITO_MANAGED_USER_auth_token"
+            
+            if authToken == cognito_username:
+                cognito_username = email
 
             # Prepare the user data for your database
             # The 'passwordHashed' field is mandatory in your UserCreate schema.
@@ -48,7 +63,8 @@ def lambda_handler(event, context):
                 email=email,
                 username=cognito_username, # Map Cognito's userName to your DB username
                 passwordHashed=cognito_password, # Placeholder
-                userType=UserTypeEnum.email # Default user type for Cognito sign-ups
+                userType=UserTypeEnum.email, # Default user type for Cognito sign-ups
+                authToken=authToken
                 # profileImg, deviceId, etc., will be None or their defaults unless extracted from Cognito
             )
             
@@ -71,6 +87,8 @@ def lambda_handler(event, context):
                  raise Exception(f"Validation Error creating user from Cognito: {json.dumps(error_details)}")
             raise e
     else:
+        print(event)
+        #return
         # Existing API Gateway / HTTP call logic
         print("API Gateway or other HTTP trigger received.")
         returnString = 'Invalid Call Parameters' # Default as in original
