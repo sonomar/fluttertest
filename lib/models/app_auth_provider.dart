@@ -115,15 +115,10 @@ class AppAuthProvider with ChangeNotifier {
           _status = AuthStatus.authenticated;
           print(
               'AppAuthProvider: signIn status set to authenticated. Notifying. at ${DateTime.now()}');
-          notifyListeners(); // <--- This is the key notification
-
-          // --- OPTION 2 FIX: Add a small, post-notification delay ---
-          // This allows Flutter's event loop to process the notifyListeners()
-          // before any subsequent rapid unmounting/rebuilding occurs.
+          notifyListeners();
           await Future.delayed(Duration(milliseconds: 50)); // Give it 50ms
           print(
               'AppAuthProvider: Post-notification delay completed. at ${DateTime.now()}');
-          // --- END OPTION 2 FIX ---
 
           print(
               'AppAuthProvider: Login process completed successfully. User authenticated. at ${DateTime.now()}');
@@ -152,8 +147,7 @@ class AppAuthProvider with ChangeNotifier {
         return false;
       }
     } catch (e) {
-      _errorMessage =
-          'AppAuthProvider Unexpected error during login: ${e.toString()} at ${DateTime.now()}';
+      _errorMessage = _authService.errorMessage;
       print('AppAuthProvider: $_errorMessage');
       _status = AuthStatus.unauthenticated;
       _userSession = null;
@@ -164,21 +158,55 @@ class AppAuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> signUp({
+  Future<bool> initiateEmailLogin(String email) async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = null;
+    notifyListeners();
+
+    final success = await _authService.signInWithEmailCode(email);
+    if (!success) {
+      _errorMessage = _authService.errorMessage;
+      _status = AuthStatus.unauthenticated;
+    }
+    // On success, the status remains 'authenticating' as we wait for the code.
+    notifyListeners();
+    return success;
+  }
+
+  /// NEW: Completes the passwordless login by verifying the email code.
+  Future<bool> answerEmailCodeChallenge(String code) async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = null;
+    notifyListeners();
+
+    final success = await _authService.answerEmailCodeChallenge(code);
+    if (success) {
+      _userSession = _authService.session;
+      _status = AuthStatus.authenticated;
+    } else {
+      _errorMessage = _authService.errorMessage;
+      _status = AuthStatus.unauthenticated;
+    }
+    notifyListeners();
+    return success;
+  }
+
+  Future<String> signUp({
     required String email,
     required String password,
     required Map customAttributes,
   }) async {
-    _errorMessage = null; // Clear previous UI error
+    _errorMessage = null;
     notifyListeners();
-    final success = await _authService.signUp(
+    final String result = await _authService.signUp(
         email: email, password: password, customAttributes: customAttributes);
-    if (!success) {
+
+    if (result != 'success') {
       _errorMessage =
           _authService.errorMessage; // Pass service error message to UI
     }
     notifyListeners();
-    return success;
+    return result;
   }
 
   Future<bool> confirmSignUp({
@@ -224,6 +252,35 @@ class AppAuthProvider with ChangeNotifier {
     notifyListeners();
     final success = await _authService.changePassword(
         oldPassword: oldPassword, newPassword: newPassword);
+    if (!success) {
+      _errorMessage = _authService.errorMessage;
+    }
+    notifyListeners();
+    return success;
+  }
+
+  Future<bool> forgotPassword(String email) async {
+    _errorMessage = null;
+    notifyListeners();
+    final success = await _authService.forgotPassword(email);
+    if (!success) {
+      _errorMessage = _authService.errorMessage;
+    }
+    notifyListeners();
+    return success;
+  }
+
+  Future<bool> confirmForgotPassword({
+    required String email,
+    required String confirmationCode,
+    required String newPassword,
+  }) async {
+    _errorMessage = null;
+    notifyListeners();
+    final success = await _authService.confirmForgotPassword(
+        email: email,
+        confirmationCode: confirmationCode,
+        newPassword: newPassword);
     if (!success) {
       _errorMessage = _authService.errorMessage;
     }

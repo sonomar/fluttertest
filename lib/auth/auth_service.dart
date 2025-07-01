@@ -136,7 +136,7 @@ class AuthService {
   // Expose internal error messages
   String? get errorMessage => _internalErrorMessage;
 
-  Future<bool> signUp(
+  Future<String> signUp(
       {required String email,
       required String password,
       required Map customAttributes}) async {
@@ -153,19 +153,24 @@ class AuthService {
     });
     try {
       await _userPool.signUp(email, password, userAttributes: userAttributes);
-      // If no exception is thrown, Cognito has sent a confirmation code.
       print(
           'AuthService: SignUp successful for $email. Awaiting confirmation.');
-      return true;
+      return 'success'; // Return 'success' on success
     } on CognitoClientException catch (e) {
-      // Handle known Cognito errors, e.g., UsernameExistsException
       _internalErrorMessage = e.message ?? 'An unknown sign-up error occurred.';
       print('AuthService: SignUp Error: $_internalErrorMessage');
-      return false;
+
+      // MODIFICATION: Check for the specific exception and return it
+      if (e.name == 'UsernameExistsException') {
+        _internalErrorMessage =
+            'An account with this email already exists. Please log in to continue.';
+        return 'UsernameExistsException';
+      }
+      return 'failed'; // Return 'failed' for other errors
     } catch (e) {
       _internalErrorMessage = 'An unexpected error occurred during sign-up.';
       print('AuthService: SignUp Error: $e');
-      return false;
+      return 'failed'; // Return 'failed' for unexpected errors
     }
   }
 
@@ -282,19 +287,6 @@ class AuthService {
         print('AuthService: ID Token saved to SharedPreferences.');
       }
 
-      // // Handle user registration update if needed
-      // if (token != null && isRegister == true) {
-      //   final encryptedPassword = encryptPassword(password);
-      //   final getUser = await getUserByEmail(email, _appAuthProvider);
-      //   final userId = getUser['userId'];
-      //   final userUpdateBody = {
-      //     "userId": userId,
-      //     "passwordHashed": encryptedPassword,
-      //     "authToken": token
-      //   };
-      //   await updateUserByUserId(userUpdateBody, _appAuthProvider);
-      // }
-
       print(
           'AuthService: User $email signed in successfully. Session valid: ${_session!.isValid()}');
       return true; // Successfully authenticated and cached
@@ -347,6 +339,68 @@ class AuthService {
       print(
           'AuthService: Attempt failed for user $email due to unexpected error. Signing out.');
       await _forceSignOutAndClearLocal(); // Call the consolidated sign-out
+      return false;
+    }
+  }
+
+  Future<bool> signInWithEmailCode(String email) async {
+    _internalErrorMessage = null;
+    _cognitoUser = CognitoUser(email, _userPool);
+
+    try {
+      // This call will trigger your 'Define Auth Challenge' Lambda.
+      await _cognitoUser!.initiateAuth(AuthenticationDetails(username: email));
+      return true;
+    } on CognitoUserCustomChallengeException {
+      // This is the expected successful outcome. It means Cognito is asking for the code.
+      return true;
+    } catch (e) {
+      _internalErrorMessage = "Error initiating email login: ${e.toString()}";
+      return false;
+    }
+  }
+
+  /// NEW: Verifies the code sent to the user's email to complete the login.
+  Future<bool> answerEmailCodeChallenge(String answer) async {
+    _internalErrorMessage = null;
+    if (_cognitoUser == null) {
+      _internalErrorMessage = "Login session expired. Please try again.";
+      return false;
+    }
+    try {
+      _session = await _cognitoUser!.sendCustomChallengeAnswer(answer);
+      if (_session?.isValid() ?? false) {
+        // Persist the session tokens to secure storage.
+        await _cognitoUser!.cacheTokens();
+        final prefs = await SharedPreferences.getInstance();
+        if (_cognitoUser!.username != null) {
+          prefs.setString('email', _cognitoUser!.username!);
+        }
+
+        final token = _session?.getAccessToken().getJwtToken();
+        final idToken = _session?.getIdToken().getJwtToken();
+        if (token != null) {
+          prefs.setString('jwtCode', token);
+        }
+        if (idToken != null) {
+          prefs.setString('jwtIdCode', idToken);
+        }
+
+        final attributes = await _cognitoUser!.getUserAttributes();
+        final userIdAttr = attributes?.firstWhere(
+            (attr) => attr.getName() == 'custom:userId',
+            orElse: () =>
+                CognitoUserAttribute(name: 'custom:userId', value: null));
+        if (userIdAttr?.getValue() != null) {
+          await prefs.setString('userId', userIdAttr!.getValue()!);
+        }
+
+        return true;
+      }
+      return false;
+    } catch (e) {
+      _internalErrorMessage =
+          "Failed to verify code. It may be incorrect or expired.";
       return false;
     }
   }
@@ -418,6 +472,59 @@ class AuthService {
     } catch (e) {
       _internalErrorMessage = 'An unexpected error occurred.';
       print('AuthService: ChangePassword Error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> forgotPassword(String email) async {
+    _internalErrorMessage = null;
+    final cognitoUser = CognitoUser(email, _userPool);
+    try {
+      await cognitoUser.forgotPassword();
+      // Store the user object so we can use it in the confirmation step.
+      _cognitoUser = cognitoUser;
+      print('AuthService: Forgot password process initiated for $email.');
+      return true;
+    } on CognitoClientException catch (e) {
+      _internalErrorMessage = e.message ?? 'An unknown error occurred.';
+      print('AuthService: ForgotPassword Error: $_internalErrorMessage');
+      return false;
+    } catch (e) {
+      _internalErrorMessage = 'An unexpected error occurred.';
+      print('AuthService: ForgotPassword Error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> confirmForgotPassword({
+    required String email,
+    required String confirmationCode,
+    required String newPassword,
+  }) async {
+    _internalErrorMessage = null;
+    // Use the stored user from the previous step, or create a new one.
+    final cognitoUser = _cognitoUser ?? CognitoUser(email, _userPool);
+
+    try {
+      final bool passwordConfirmed =
+          await cognitoUser.confirmPassword(confirmationCode, newPassword);
+      if (!passwordConfirmed) {
+        _internalErrorMessage =
+            "Password could not be confirmed. The code may be incorrect or expired.";
+        return false;
+      }
+      print('AuthService: Password confirmed successfully for $email.');
+      return true;
+    } on CognitoClientException catch (e) {
+      _internalErrorMessage =
+          e.message ?? 'An error occurred during password confirmation.';
+      print(
+          'AuthService: Cognito ConfirmPassword Error: $_internalErrorMessage');
+      return false;
+    } catch (e) {
+      _internalErrorMessage =
+          'An unexpected error occurred during password confirmation.';
+      print('AuthService: Internal ConfirmPassword Error: $e');
       return false;
     }
   }
