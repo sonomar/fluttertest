@@ -18,6 +18,13 @@ class UserTypeEnum(enum.Enum): # <-- ADDED
     username = "username"
     email = "email"
     admin = "admin"
+    onboarding = "onboarding"
+
+class DistributionTypeEnum(enum.Enum):
+    voucher = "voucher"
+    coupon = "coupon"
+    deal = "deal"
+    scan = "scan"
 
 class Category(Base):
     __tablename__ = 'Category'
@@ -120,6 +127,8 @@ class Project(Base):
     location: Mapped[Optional[str]] = mapped_column(String(255))
 
     Collectible: Mapped[List['Collectible']] = relationship('Collectible', back_populates='Project_')
+    Collection: Mapped[List['Collection']] = relationship('Collection', back_populates='Project_')
+    Distribution: Mapped[List['Distribution']] = relationship('Distribution', back_populates='Project_')
 
 
 class Sponsor(Base):
@@ -172,26 +181,32 @@ class User(Base):
     authToken: Mapped[Optional[str]] = mapped_column(Text)
     deviceId: Mapped[Optional[str]] = mapped_column(String(255))
     # Use Python Enum for ENUM type for better type safety
-    userType: Mapped[Optional['UserTypeEnum']] = mapped_column(Enum('unregistered', 'username', 'email', 'admin', name='userType'), server_default=text("'unregistered'")) # <-- CHANGED type, added name
+    userType: Mapped[Optional['UserTypeEnum']] = mapped_column(Enum('unregistered', 'username', 'email', 'admin', 'onboarding', name='userType'), server_default=text("'unregistered'")) # <-- CHANGED type, added name
     lastLoggedIn: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
+    pushToken: Mapped[Optional[str]] = mapped_column(String(255))
 
     CommunityUser: Mapped[List['CommunityUser']] = relationship('CommunityUser', back_populates='User_')
     NotificationUser: Mapped[List['NotificationUser']] = relationship('NotificationUser', back_populates='User_')
     MissionUser: Mapped[List['MissionUser']] = relationship('MissionUser', back_populates='User_')
     UserCollectible: Mapped[List['UserCollectible']] = relationship('UserCollectible', foreign_keys='[UserCollectible.ownerId]', back_populates='User_')
     UserCollectible_: Mapped[List['UserCollectible']] = relationship('UserCollectible', foreign_keys='[UserCollectible.previousOwnerId]', back_populates='User1')
+    DistributionCodeUser: Mapped[List['DistributionCodeUser']] = relationship('DistributionCodeUser', foreign_keys='[DistributionCodeUser.userId]', back_populates='User_')
+    DistributionCodeUser_: Mapped[List['DistributionCodeUser']] = relationship('DistributionCodeUser', foreign_keys='[DistributionCodeUser.previousOwnerId]', back_populates='User1')
 
 
 class Collection(Base):
     __tablename__ = 'Collection'
     __table_args__ = (
         ForeignKeyConstraint(['communityId'], ['Community.communityId'], ondelete='CASCADE', onupdate='CASCADE', name='collection_ibfk_1'),
+        ForeignKeyConstraint(['projectId'], ['Project.projectId'], ondelete='CASCADE', onupdate='CASCADE', name='collection_ibfk_2'),
         Index('collectionId', 'collectionId', unique=True),
-        Index('communityId', 'communityId')
+        Index('communityId', 'communityId'),
+        Index('projectId', 'projectId')
     )
 
     collectionId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     communityId: Mapped[int] = mapped_column(BIGINT)
+    projectId: Mapped[int] = mapped_column(BIGINT)
     name: Mapped[str] = mapped_column(String(255))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
@@ -204,8 +219,10 @@ class Collection(Base):
     embedRef: Mapped[Optional[dict]] = mapped_column(JSON)
 
     Community_: Mapped['Community'] = relationship('Community', back_populates='Collection')
+    Project_: Mapped['Project'] = relationship('Project', back_populates='Collection')
     Collectible: Mapped[List['Collectible']] = relationship('Collectible', back_populates='Collection_')
     Mission: Mapped[List['Mission']] = relationship('Mission', back_populates='Collection_')
+    Distribution: Mapped[List['Distribution']] = relationship('Distribution', back_populates='Collection_')
 
 
 class CommunityChallenge(Base):
@@ -320,6 +337,7 @@ class Collectible(Base):
     Project_: Mapped['Project'] = relationship('Project', back_populates='Collectible')
     CollectibleSponsor: Mapped[List['CollectibleSponsor']] = relationship('CollectibleSponsor', back_populates='Collectible_')
     UserCollectible: Mapped[List['UserCollectible']] = relationship('UserCollectible', back_populates='Collectible_')
+    DistributionCollectible: Mapped[List['DistributionCollectible']] = relationship('DistributionCollectible', back_populates='Collectible_')
 
 
 class Mission(Base):
@@ -441,3 +459,102 @@ class MissionUserData(Base):
     status: Mapped[Optional[str]] = mapped_column(String(255))
 
     MissionUser_: Mapped['MissionUser'] = relationship('MissionUser', back_populates='MissionUserData')
+
+
+class Distribution(Base):
+    __tablename__ = 'Distribution'
+    __table_args__ = (
+        ForeignKeyConstraint(['projectId'], ['Project.projectId'], ondelete='CASCADE', onupdate='CASCADE', name='distribution_ibfk_1'),
+        ForeignKeyConstraint(['collectionId'], ['Collection.collectionId'], ondelete='CASCADE', onupdate='CASCADE', name='distribution_ibfk_2'),
+        Index('distributionId', 'distributionId', unique=True),
+        Index('projectId', 'projectId'),
+        Index('collectionId', 'collectionId')
+    )
+
+    distributionId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    projectId: Mapped[int] = mapped_column(BIGINT)
+    collectionId: Mapped[Optional[int]] = mapped_column(BIGINT)
+    name: Mapped[dict] = mapped_column(JSON)
+    type: Mapped['DistributionTypeEnum'] = mapped_column(Enum('voucher', 'coupon', 'deal', 'scan', name='distributionType'))
+    description: Mapped[Optional[dict]] = mapped_column(JSON)
+    isTimed: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
+    isLimited: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
+    isNewUserReward: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
+    limitedQty: Mapped[Optional[int]] = mapped_column(INTEGER)
+    isRandom: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
+    startDate: Mapped[datetime.datetime] = mapped_column(TIMESTAMP)
+    endDate: Mapped[datetime.datetime] = mapped_column(TIMESTAMP)
+    isUniqueCollectible: Mapped[Optional[bool]] = mapped_column(Boolean)
+    createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+
+    Project_: Mapped['Project'] = relationship('Project', back_populates='Distribution')
+    Collection_: Mapped[Optional['Collection']] = relationship('Collection', back_populates='Distribution')
+    DistributionCode: Mapped[List['DistributionCode']] = relationship('DistributionCode', back_populates='Distribution_')
+    DistributionCollectible: Mapped[List['DistributionCollectible']] = relationship('DistributionCollectible', back_populates='Distribution_')
+
+class DistributionCode(Base):
+    __tablename__ = 'DistributionCode'
+    __table_args__ = (
+        ForeignKeyConstraint(['distributionId'], ['Distribution.distributionId'], ondelete='CASCADE', onupdate='CASCADE', name='distributioncode_ibfk_1'),
+        Index('distributionCodeId', 'distributionCodeId', unique=True),
+        Index('distributionId', 'distributionId'),
+        Index('code', 'code', unique=True)
+    )
+
+    distributionCodeId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    distributionId: Mapped[int] = mapped_column(BIGINT)
+    code: Mapped[str] = mapped_column(String(255), unique=True)
+    qrCode: Mapped[Optional[dict]] = mapped_column(JSON)
+    isMultiUse: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
+    multiUseQty: Mapped[Optional[int]] = mapped_column(INTEGER)
+    createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+
+    Distribution_: Mapped['Distribution'] = relationship('Distribution', back_populates='DistributionCode')
+    DistributionCodeUser: Mapped[List['DistributionCodeUser']] = relationship('DistributionCodeUser', back_populates='DistributionCode_')
+
+class DistributionCodeUser(Base):
+    __tablename__ = 'DistributionCodeUser'
+    __table_args__ = (
+        ForeignKeyConstraint(['distributionCodeId'], ['DistributionCode.distributionCodeId'], ondelete='CASCADE', onupdate='CASCADE', name='distributioncodeuser_ibfk_1'),
+        ForeignKeyConstraint(['userId'], ['User.userId'], ondelete='CASCADE', onupdate='CASCADE', name='distributioncodeuser_ibfk_2'),
+        ForeignKeyConstraint(['previousOwnerId'], ['User.userId'], ondelete='SET NULL', onupdate='CASCADE', name='distributioncodeuser_ibfk_3'),
+        Index('distributionCodeUserId', 'distributionCodeUserId', unique=True),
+        Index('distributionCodeId', 'distributionCodeId'),
+        Index('userId', 'userId')
+    )
+
+    distributionCodeUserId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    userId: Mapped[int] = mapped_column(BIGINT)
+    distributionCodeId: Mapped[int] = mapped_column(BIGINT)
+    previousOwnerId: Mapped[Optional[int]] = mapped_column(BIGINT)
+    redeemed: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
+    redeemedDate: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
+    collectibleRevieved: Mapped[Optional[dict]] = mapped_column(JSON)
+    createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+
+    DistributionCode_: Mapped['DistributionCode'] = relationship('DistributionCode', back_populates='DistributionCodeUser')
+    User_: Mapped['User'] = relationship('User', foreign_keys=[userId], back_populates='DistributionCodeUser')
+    User1: Mapped[Optional['User']] = relationship('User', foreign_keys=[previousOwnerId], back_populates='DistributionCodeUser_')
+
+
+class DistributionCollectible(Base):
+    __tablename__ = 'DistributionCollectible'
+    __table_args__ = (
+        ForeignKeyConstraint(['distributionId'], ['Distribution.distributionId'], ondelete='CASCADE', onupdate='CASCADE', name='distributioncollectible_ibfk_1'),
+        ForeignKeyConstraint(['collectibleId'], ['Collectible.collectibleId'], ondelete='CASCADE', onupdate='CASCADE', name='distributioncollectible_ibfk_2'),
+        Index('distributionCollectibleId', 'distributionCollectibleId', unique=True),
+        Index('distributionId', 'distributionId'),
+        Index('collectibleId', 'collectibleId')
+    )
+
+    distributionCollectibleId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    collectibleId: Mapped[int] = mapped_column(BIGINT)
+    distributionId: Mapped[int] = mapped_column(BIGINT)
+    createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+
+    Distribution_: Mapped['Distribution'] = relationship('Distribution', back_populates='DistributionCollectible')
+    Collectible_: Mapped['Collectible'] = relationship('Collectible', back_populates='DistributionCollectible')

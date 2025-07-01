@@ -17,7 +17,7 @@ except ImportError as e:
 
 # The 'client' and 'db_session' fixtures are automatically injected by pytest from conftest.py
 
-def test_create_user_api_success(client: TestClient, db_session: Session):
+def test_createUser_api_success(client: TestClient, db_session: Session):
     """
     Test successful user creation via the API.
     The database changes will be rolled back by the db_session fixture.
@@ -54,7 +54,7 @@ def test_create_user_api_success(client: TestClient, db_session: Session):
     # Note: The 'fake_hashed_password' logic is in your CRUD, so db_user.passwordHashed will reflect that.
     assert user_in_db.passwordHashed == user_data_payload["passwordHashed"] + "notreallyhashed"
 
-def test_create_user_api_duplicate_email(client: TestClient, db_session: Session):
+def test_createUser_api_duplicate_email(client: TestClient, db_session: Session):
     """Test API user creation with a duplicate email."""
     timestamp = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
     duplicate_email = f"api_duplicate_email_test_{timestamp}@example.com"
@@ -84,7 +84,7 @@ def test_create_user_api_duplicate_email(client: TestClient, db_session: Session
     error_detail = response2.json().get("detail", "")
     assert f"Email address '{duplicate_email}' already exists" in error_detail
 
-def test_create_user_api_missing_required_fields(client: TestClient):
+def test_createUser_api_missing_required_fields(client: TestClient):
     """Test API user creation with missing required fields (e.g., passwordHashed)."""
     timestamp = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
     email_for_incomplete = f"api_incomplete_{timestamp}@example.com"

@@ -20,6 +20,11 @@ import database.CRUD.DELETE.Mission.delete_Mission_CRUD_functions as MissionDELE
 import database.CRUD.DELETE.MissionUser.delete_MissionUser_CRUD_functions as MissionUserDELETEFunctions
 import database.CRUD.DELETE.MissionUserData.delete_MissionUserData_CRUD_functions as MissionUserDataDELETEFunctions
 import database.CRUD.DELETE.CommunityChallenge.delete_CommunityChallenge_CRUD_functions as CommunityChallengeDELETEFunctions
+import database.CRUD.DELETE.Distribution.delete_Distribution_CRUD_functions as DistributionDELETEFunctions
+import database.CRUD.DELETE.DistributionCode.delete_DistributionCode_CRUD_functions as DistributionCodeDELETEFunctions
+import database.CRUD.DELETE.DistributionCodeUser.delete_DistributionCodeUser_CRUD_functions as DistributionCodeUserDELETEFunctions
+import database.CRUD.DELETE.DistributionCollectible.delete_DistributionCollectible_CRUD_functions as DistributionCollectibleDELETEFunctions
+
 # ... import other DELETE function modules
 
 
@@ -210,6 +215,42 @@ API_PATHS_DELETE = {
              # Path param (userId) is in handler signature
         }
          # Add other delete functions once refactored
+    },
+    Distribution_table: {
+        "deleteDistributionByDistributionId": {
+            "path": "/deleteDistributionByDistributionId",
+            "pathLocal": "/deleteDistributionByDistributionId/{distributionId}",
+            "active": True,
+            "handler": DistributionDELETEFunctions.deleteDistributionByDistributionId,
+            "response_model": Dict[str, str]
+        }
+    },
+    DistributionCode_table: {
+        "deleteDistributionCodeByDistributionCodeId": {
+            "path": "/deleteDistributionCodeByDistributionCodeId",
+            "pathLocal": "/deleteDistributionCodeByDistributionCodeId/{distributionCodeId}",
+            "active": True,
+            "handler": DistributionCodeDELETEFunctions.deleteDistributionCodeByDistributionCodeId,
+            "response_model": Dict[str, str]
+        }
+    },
+    DistributionCodeUser_table: {
+        "deleteDistributionCodeUserByDistributionCodeUserId": {
+            "path": "/deleteDistributionCodeUserByDistributionCodeUserId",
+            "pathLocal": "/deleteDistributionCodeUserByDistributionCodeUserId/{distributionCodeUserId}",
+            "active": True,
+            "handler": DistributionCodeUserDELETEFunctions.deleteDistributionCodeUserByDistributionCodeUserId,
+            "response_model": Dict[str, str]
+        }
+    },
+    DistributionCollectible_table: {
+        "deleteDistributionCollectibleByDistributionCollectibleId": {
+            "path": "/deleteDistributionCollectibleByDistributionCollectibleId",
+            "pathLocal": "/deleteDistributionCollectibleByDistributionCollectibleId/{distributionCollectibleId}",
+            "active": True,
+            "handler": DistributionCollectibleDELETEFunctions.deleteDistributionCollectibleByDistributionCollectibleId,
+            "response_model": Dict[str, str]
+        }
     }
     # Add entries for other tables
 }

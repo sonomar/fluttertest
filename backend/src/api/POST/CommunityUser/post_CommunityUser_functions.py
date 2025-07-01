@@ -3,7 +3,7 @@ from tools.prod.prodTools import extractData
 from database.schema.POST.CommunityUser.communityUser_schema import CommunityUserCreate
 import database.CRUD.POST.CommunityUser.post_CommunityUser_CRUD_functions as crudFunctions
 
-def create_community_user(event):
+def createCommunityUser(event):
     """
     Adds a new community user entry to the database.
     Requires 'communityId', 'memberId'.
@@ -25,4 +25,4 @@ def create_community_user(event):
 
     # Call the CRUD function with the Pydantic model and DB session
     # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.create_community_user(community_user=community_user, db=event["db_session"])
+    return crudFunctions.createCommunityUser(community_user=community_user, db=event["db_session"])

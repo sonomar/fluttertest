@@ -8,7 +8,7 @@ from database.schema.POST.Mission.mission_schema import MissionCreate
 from database.schema.GET.Mission.mission_schema import MissionResponse # Updated import
 from api.exceptions import BadRequestException
 
-def create_mission(
+def createMission(
     mission: MissionCreate,
     db: Session = Depends(get_db)
 ) -> MissionResponse: # Updated return type

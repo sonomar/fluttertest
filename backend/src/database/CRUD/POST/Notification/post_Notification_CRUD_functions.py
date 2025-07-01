@@ -9,7 +9,7 @@ from database.schema.POST.Notification.notification_schema import NotificationCr
 from database.schema.GET.Notification.notification_schema import NotificationResponse # Updated import for response schema
 from api.exceptions import ConflictException, BadRequestException
 
-def create_notification(
+def createNotification(
     notification: NotificationCreate,
     db: Session = Depends(get_db)
 ) -> NotificationResponse: # Updated return type

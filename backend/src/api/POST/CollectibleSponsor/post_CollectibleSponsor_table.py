@@ -8,6 +8,6 @@ def call_CollectibleSponsor_function(raw_path, event):
 
     ## CollectibleSponsor
     if raw_path == CollectibleSponsor_Path['createCollectibleSponsor']['path']:
-        returnString = collectibleSponsor.create_collectible_sponsor(event)
+        returnString = collectibleSponsor.createCollectibleSponsor(event)
 
     return returnString

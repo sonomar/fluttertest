@@ -3,7 +3,7 @@ from tools.prod.prodTools import extractData, get_connection
 from database.schema.POST.Collection.collection_schema import CollectionCreate
 import database.CRUD.POST.Collection.post_Collection_CRUD_functions as crudFunctions
 
-def create_collection(event):
+def createCollection(event):
     """
     Adds a new collection to the database.
     Requires 'communityId', 'name'. Other fields are optional.
@@ -32,5 +32,5 @@ def create_collection(event):
 
     # Call the CRUD function with the Pydantic model and DB session
     # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.create_collection(collection=collection, db=event["db_session"])
+    return crudFunctions.createCollection(collection=collection, db=event["db_session"])
 

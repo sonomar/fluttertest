@@ -8,7 +8,7 @@ from database.schema.POST.Collectible.collectible_schema import CollectibleCreat
 from database.schema.GET.Collectible.collectible_schema import CollectibleResponse # Updated import
 from api.exceptions import ConflictException, BadRequestException
 
-def create_collectible(
+def createCollectible(
     collectible: CollectibleCreate,
     db: Session = Depends(get_db)
 ) -> CollectibleResponse: # Updated return type

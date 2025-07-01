@@ -9,7 +9,7 @@ from database.schema.POST.Project.project_schema import ProjectCreate
 from database.schema.GET.Project.project_schema import ProjectResponse # Updated import for response schema
 from api.exceptions import BadRequestException
 
-def create_project(
+def createProject(
     project: ProjectCreate,
     db: Session = Depends(get_db)
 ) -> ProjectResponse: # Updated return type

@@ -3,7 +3,7 @@ from tools.prod.prodTools import extractData
 from database.schema.POST.Project.project_schema import ProjectCreate
 import database.CRUD.POST.Project.post_Project_CRUD_functions as crudFunctions
 
-def create_project(event):
+def createProject(event):
     """
     Adds a new project to the database.
     Requires 'name', 'attributed'. 'location' and 'active' are optional.
@@ -27,4 +27,4 @@ def create_project(event):
 
     # Call the CRUD function with the Pydantic model and DB session
     # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.create_project(project=project, db=event["db_session"])
+    return crudFunctions.createProject(project=project, db=event["db_session"])

@@ -9,7 +9,7 @@ from database.schema.POST.NewsPost.newsPost_schema import NewsPostCreate
 from database.schema.GET.NewsPost.newsPost_schema import NewsPostResponse # Updated import for response schema
 from api.exceptions import BadRequestException
 
-def create_news_post(
+def createNewsPost(
     news_post: NewsPostCreate,
     db: Session = Depends(get_db)
 ) -> NewsPostResponse: # Updated return type

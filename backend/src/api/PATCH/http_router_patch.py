@@ -18,6 +18,10 @@ import api.PATCH.Mission.patch_Mission_table as Mission_table_functions
 import api.PATCH.MissionUserData.patch_MissionUserData_table as MissionUserData_table_functions
 import api.PATCH.MissionUser.patch_MissionUser_table as MissionUser_table_functions
 import api.PATCH.CommunityChallenge.patch_CommunityChallenge_table as CommunityChallenge_table_functions
+import api.PATCH.Distribution.patch_Distribution_table as Distributionfunctions
+import api.PATCH.DistributionCode.patch_DistributionCode_table as DistributionCodefunctions
+import api.PATCH.DistributionCodeUser.patch_DistributionCodeUser_table as DistributionCodeUserfunctions
+import api.PATCH.DistributionCollectible.patch_DistributionCollectible_table as DistributionCollectiblefunctions
 
 
 def http_router_patch(event):
@@ -92,5 +96,17 @@ def http_router_patch(event):
     ## CommunityChallenge
     if tableName == table.CommunityChallenge_table:
         returnString = CommunityChallenge_table_functions.call_CommunityChallenge_function(raw_path, event)
+
+    elif tableName == table.Distribution_table:
+        returnString = Distributionfunctions.call_Distribution_function(raw_path, event)
+
+    elif tableName == table.DistributionCode_table:
+        returnString = DistributionCodefunctions.call_DistributionCode_function(raw_path, event)
+
+    elif tableName == table.DistributionCodeUser_table:
+        returnString = DistributionCodeUserfunctions.call_DistributionCodeUser_function(raw_path, event)
+    
+    elif tableName == table.DistributionCollectible_table:
+        returnString = DistributionCollectiblefunctions.call_DistributionCollectible_function(raw_path, event)
 
     return returnString

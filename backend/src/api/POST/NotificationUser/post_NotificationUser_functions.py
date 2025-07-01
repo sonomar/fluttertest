@@ -3,7 +3,7 @@ from tools.prod.prodTools import extractData
 from database.schema.POST.NotificationUser.notificationUser_schema import NotificationUserCreate
 import database.CRUD.POST.NotificationUser.post_NotificationUser_CRUD_functions as crudFunctions
 
-def create_notification_user(event):
+def createNotificationUser(event):
     """
     Adds a new notification user entry to the database.
     Requires 'notificationId', 'userId'. Other fields are optional.
@@ -29,4 +29,4 @@ def create_notification_user(event):
 
     # Call the CRUD function with the Pydantic model and DB session
     # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.create_notification_user(notification_user=notification_user, db=event["db_session"])
+    return crudFunctions.createNotificationUser(notification_user=notification_user, db=event["db_session"])

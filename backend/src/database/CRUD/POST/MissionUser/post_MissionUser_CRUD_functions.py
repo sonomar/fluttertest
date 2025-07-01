@@ -8,7 +8,7 @@ from database.schema.POST.MissionUser.missionUser_schema import MissionUserCreat
 from database.schema.GET.MissionUser.missionUser_schema import MissionUserResponse # Updated import
 from api.exceptions import ConflictException, BadRequestException
 
-def create_mission_user(
+def createMissionUser(
     mission_user: MissionUserCreate,
     db: Session = Depends(get_db)
 ) -> MissionUserResponse: # Updated return type

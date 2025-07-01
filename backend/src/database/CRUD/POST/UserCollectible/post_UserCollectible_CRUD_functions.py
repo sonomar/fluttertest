@@ -9,7 +9,7 @@ from database.schema.POST.UserCollectible.userCollectible_schema import UserColl
 from database.schema.GET.UserCollectible.userCollectible_schema import UserCollectibleResponse # Updated import for response schema
 from api.exceptions import ConflictException, BadRequestException
 
-def create_user_collectible(
+def createUserCollectible(
     user_collectible: UserCollectibleCreate,
     db: Session = Depends(get_db)
 ) -> UserCollectibleResponse: # Updated return type

@@ -3,7 +3,7 @@ from database.schema.POST.User.user_schema import UserCreate
 import database.CRUD.POST.User.post_User_CRUD_functions as crudFunctions
 from database.models import UserTypeEnum # Adjust import path if necessary
 
-# def create_user(event):
+# def createUser(event):
 #     """
 #     Adds a new user to the database.
 #     Requires 'email', 'passwordHashed', 'userType'. 'username' and 'deviceId' are optional.
@@ -75,7 +75,7 @@ from database.models import UserTypeEnum # Adjust import path if necessary
 
 
 
-def create_user(event):
+def createUser(event):
     """
     Adds a new user to the database.
     Requires 'email', 'passwordHashed', 'userType'. 'username' and 'deviceId' are optional.
@@ -110,4 +110,4 @@ def create_user(event):
         deviceId=device_id
     )
 
-    return crudFunctions.create_user(user=user, db=event["db_session"])
+    return crudFunctions.createUser(user=user, db=event["db_session"])

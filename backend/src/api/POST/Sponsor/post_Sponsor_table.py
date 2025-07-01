@@ -8,6 +8,6 @@ def call_Sponsor_function(raw_path, event):
 
     ## Sponsor
     if raw_path == Sponsor_Path['createSponsor']['path']:
-        returnString = sponsor.create_sponsor(event)
+        returnString = sponsor.createSponsor(event)
 
     return returnString

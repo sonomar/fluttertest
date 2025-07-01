@@ -16,6 +16,10 @@ from database.schema.GET.MissionUser.missionUser_schema import MissionUserRespon
 from database.schema.GET.MissionUserData.missionUserData_schema import MissionUserDataResponse # Import schemas
 from database.schema.GET.NewsPost.newsPost_schema import NewsPostResponse # Import schemas
 from database.schema.GET.NotificationUser.notificationUser_schema import NotificationUserResponse # Import schemas
+from database.schema.GET.Distribution.distribution_schema import DistributionResponse # Import schemas
+from database.schema.GET.DistributionCode.distributionCode_schema import DistributionCodeResponse # Import schemas
+from database.schema.GET.DistributionCodeUser.distributionCodeUser_schema import DistributionCodeUserResponse # Import schemas
+from database.schema.GET.DistributionCollectible.distributionCollectible_schema import DistributionCollectibleResponse # Import schemas
 
 
 # Import the modules containing your refactored PATCH handler functions
@@ -36,6 +40,11 @@ import database.CRUD.PATCH.Mission.patch_Mission_CRUD_functions as MissionPATCHF
 import database.CRUD.PATCH.MissionUser.patch_MissionUser_CRUD_functions as MissionUserPATCHFunctions
 import database.CRUD.PATCH.MissionUserData.patch_MissionUserData_CRUD_functions as MissionUserDataPATCHFunctions
 import database.CRUD.PATCH.CommunityChallenge.patch_CommunityChallenge_CRUD_functions as CommunityChallengePATCHFunctions
+import database.CRUD.PATCH.Distribution.patch_Distribution_CRUD_functions as DistributionPATCHFunctions
+import database.CRUD.PATCH.DistributionCode.patch_DistributionCode_CRUD_functions as DistributionCodePATCHFunctions
+import database.CRUD.PATCH.DistributionCodeUser.patch_DistributionCodeUser_CRUD_functions as DistributionCodeUserPATCHFunctions
+import database.CRUD.PATCH.DistributionCollectible.patch_DistributionCollectible_CRUD_functions as DistributionCollectiblePATCHFunctions
+
 
 # ... import other PATCH function modules
 
@@ -235,6 +244,42 @@ API_PATHS_PATCH = {
              # Path param (userId) is in handler signature
         }
          # Add other delete functions once refactored
+    },
+    Distribution_table: {
+        "updateDistributionByDistributionId": {
+            "path": "/updateDistributionByDistributionId",
+            "pathLocal": "/updateDistributionByDistributionId/{distributionId}",
+            "active": True,
+            "handler": DistributionPATCHFunctions.updateDistributionByDistributionId,
+            "response_model": DistributionResponse
+        }
+    },
+    DistributionCode_table: {
+        "updateDistributionCodeByDistributionCodeId": {
+            "path": "/updateDistributionCodeByDistributionCodeId",
+            "pathLocal": "/updateDistributionCodeByDistributionCodeId/{distributionCodeId}",
+            "active": True,
+            "handler": DistributionCodePATCHFunctions.updateDistributionCodeByDistributionCodeId,
+            "response_model": DistributionCodeResponse
+        }
+    },
+    DistributionCodeUser_table: {
+        "updateDistributionCodeUserByDistributionCodeUserId": {
+            "path": "/updateDistributionCodeUserByDistributionCodeUserId",
+            "pathLocal": "/updateDistributionCodeUserByDistributionCodeUserId/{distributionCodeUserId}",
+            "active": True,
+            "handler": DistributionCodeUserPATCHFunctions.updateDistributionCodeUserByDistributionCodeUserId,
+            "response_model": DistributionCodeUserResponse
+        }
+    },
+    DistributionCollectible_table: {
+        "updateDistributionCollectibleByDistributionCollectibleId": {
+            "path": "/updateDistributionCollectibleByDistributionCollectibleId",
+            "pathLocal": "/updateDistributionCollectibleByDistributionCollectibleId/{distributionCollectibleId}",
+            "active": True,
+            "handler": DistributionCollectiblePATCHFunctions.updateDistributionCollectibleByDistributionCollectibleId,
+            "response_model": DistributionCollectibleResponse
+        }
     }
     # Add entries for other tables
 }

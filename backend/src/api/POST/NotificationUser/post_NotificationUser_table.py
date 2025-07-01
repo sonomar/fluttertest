@@ -8,6 +8,6 @@ def call_NotificationUser_function(raw_path, event):
 
     ## NotificationUser
     if raw_path == NotificationUser_Path['createNotificationUser']['path']:
-        returnString = notificationUser.create_notification_user(event)
+        returnString = notificationUser.createNotificationUser(event)
 
     return returnString

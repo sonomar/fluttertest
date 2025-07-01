@@ -8,7 +8,7 @@ from database.schema.POST.Category.category_schema import CategoryCreate
 from database.schema.GET.Category.category_schema import CategoryResponse # Updated import
 from api.exceptions import ConflictException, BadRequestException
 
-def create_category(
+def createCategory(
     category: CategoryCreate,
     db: Session = Depends(get_db)
 ) -> CategoryResponse: # Updated return type

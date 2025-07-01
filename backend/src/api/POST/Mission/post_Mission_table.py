@@ -8,6 +8,6 @@ def call_Mission_function(raw_path, event):
 
     ## Mission
     if raw_path == Mission_Path['createMission']['path']:
-        returnString = mission.create_mission(event)
+        returnString = mission.createMission(event)
 
     return returnString

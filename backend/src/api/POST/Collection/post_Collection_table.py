@@ -8,6 +8,6 @@ def call_Collection_function(raw_path, event):
 
     ## Collection
     if raw_path == Collection_Path['createCollection']['path']:
-        returnString = collection.create_collection(event)
+        returnString = collection.createCollection(event)
 
     return returnString

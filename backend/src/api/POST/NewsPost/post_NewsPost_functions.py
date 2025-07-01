@@ -3,7 +3,7 @@ from tools.prod.prodTools import extractData
 from database.schema.POST.NewsPost.newsPost_schema import NewsPostCreate
 import database.CRUD.POST.NewsPost.post_NewsPost_CRUD_functions as crudFunctions
 
-def create_news_post(event):
+def createNewsPost(event):
     """
     Adds a new news post to the database.
     Requires 'header', 'body', 'shortBody'. Other fields are optional.
@@ -33,4 +33,4 @@ def create_news_post(event):
 
     # Call the CRUD function with the Pydantic model and DB session
     # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.create_news_post(news_post=news_post, db=event["db_session"])
+    return crudFunctions.createNewsPost(news_post=news_post, db=event["db_session"])

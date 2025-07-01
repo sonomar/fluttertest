@@ -3,7 +3,7 @@ from tools.prod.prodTools import extractData
 from database.schema.POST.CommunityChallenge.communityChallenge_schema import CommunityChallengeCreate
 import database.CRUD.POST.CommunityChallenge.post_CommunityChallenge_CRUD_functions as crudFunctions
 
-def create_community_challenge(event):
+def createCommunityChallenge(event):
     """
     Adds a new community challenge to the database.
     Requires 'communityId', 'title', 'goal'. Other fields are optional.
@@ -35,4 +35,4 @@ def create_community_challenge(event):
 
     # Call the CRUD function with the Pydantic model and DB session
     # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.create_community_challenge(community_challenge=community_challenge, db=event["db_session"])
+    return crudFunctions.createCommunityChallenge(community_challenge=community_challenge, db=event["db_session"])

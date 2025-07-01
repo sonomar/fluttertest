@@ -3,7 +3,7 @@ from tools.prod.prodTools import extractData, get_connection
 from database.schema.POST.MissionUser.missionUser_schema import MissionUserCreate
 import database.CRUD.POST.MissionUser.post_MissionUser_CRUD_functions as crudFunctions
 
-def create_mission_user(event):
+def createMissionUser(event):
     """
     Adds a new mission user entry to the database.
     Requires 'userId', 'missionId'. Other fields are optional.
@@ -30,4 +30,4 @@ def create_mission_user(event):
 
     # Call the CRUD function with the Pydantic model and DB session
     # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.create_mission_user(mission_user=mission_user, db=event["db_session"])
+    return crudFunctions.createMissionUser(mission_user=mission_user, db=event["db_session"])
