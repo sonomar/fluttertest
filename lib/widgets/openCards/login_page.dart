@@ -128,7 +128,7 @@ class _LoginPageState extends State<LoginPage> {
         if (success) shouldNavigateToSplash = true;
         break;
       case AuthFormType.register:
-        success = await authProvider.signUp(
+        final String result = await authProvider.signUp(
           email: email,
           password: password,
           customAttributes: {
@@ -136,14 +136,24 @@ class _LoginPageState extends State<LoginPage> {
             'appUsername': 'test'
           },
         );
-        if (success) {
-          if (mounted) {
-            setState(() {
-              _formType = AuthFormType.confirm;
-              _isSubmitting = false;
-            });
-          }
-          return;
+        if (result == 'success' && mounted) {
+          setState(() {
+            _formType = AuthFormType.confirm; // Proceed to confirmation
+            _isSubmitting = false;
+          });
+          return; // Exit the function
+        }
+
+        if (result == 'UsernameExistsException' && mounted) {
+          // Send the user back to the initial login screen
+          setState(() {
+            _formType = AuthFormType.loginInitial;
+            _isSubmitting = false;
+            // Clear password fields for security
+            _passwordController.clear();
+            _confirmPasswordController.clear();
+          });
+          return; // Exit the function
         }
         break;
       case AuthFormType.confirm:
@@ -256,7 +266,7 @@ class _LoginPageState extends State<LoginPage> {
         _formType != AuthFormType.register;
     return PopScope(
       canPop: !showBackButton,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (bool didPop, dynamic _) {
         if (didPop) return;
         _handleBackPress();
       },
@@ -299,7 +309,8 @@ class _LoginPageState extends State<LoginPage> {
                     child: SizedBox(
                         child: Image.asset('assets/images/deins_logo.png'))),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                  padding: EdgeInsets.fromLTRB(40.0, 0.0, 40.0,
+                      MediaQuery.of(context).viewInsets.bottom),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -387,9 +398,7 @@ class _LoginPageState extends State<LoginPage> {
           const SizedBox(height: 12),
           TextButton(
             onPressed: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                setState(() => _formType = AuthFormType.loginWithPassword);
-              }
+              setState(() => _formType = AuthFormType.loginWithPassword);
             },
             child: const Text('Log in with Password',
                 style: TextStyle(color: Colors.white70)),
@@ -398,7 +407,13 @@ class _LoginPageState extends State<LoginPage> {
       case AuthFormType.loginWithPassword:
         return [
           ElevatedButton(onPressed: _submit, child: const Text("Log In")),
-          // New "Forgot Password" button
+          TextButton(
+            onPressed: () {
+              setState(() => _formType = AuthFormType.loginInitial);
+            },
+            child: const Text('Log in with Email',
+                style: TextStyle(color: Colors.white70)),
+          ),
           TextButton(
             onPressed: () {
               setState(() {
@@ -418,7 +433,17 @@ class _LoginPageState extends State<LoginPage> {
         ];
       case AuthFormType.register:
         return [
-          ElevatedButton(onPressed: _submit, child: const Text("Register"))
+          ElevatedButton(onPressed: _submit, child: const Text("Register")),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Already have an account?",
+                  style: TextStyle(color: Colors.white)),
+              TextButton(
+                  onPressed: _isSubmitting ? null : _switchFormType,
+                  child: const Text("Login")),
+            ],
+          ),
         ];
       // New cases for forgot/reset password
       case AuthFormType.forgotPassword:
@@ -442,8 +467,9 @@ class _LoginPageState extends State<LoginPage> {
             controller: _emailController,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-                labelText: translate("login_email_label", context),
-                border: const OutlineInputBorder()),
+              labelText: translate("login_email_label", context),
+              border: const OutlineInputBorder(),
+            ),
             validator: (v) =>
                 (v?.isEmpty ?? true) ? 'Please enter your email' : null,
           ),
@@ -454,8 +480,9 @@ class _LoginPageState extends State<LoginPage> {
             controller: _emailController,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-                labelText: translate("login_email_label", context),
-                border: const OutlineInputBorder()),
+              labelText: translate("login_email_label", context),
+              border: const OutlineInputBorder(),
+            ),
             validator: (v) =>
                 (v?.isEmpty ?? true) ? 'Please enter your email' : null,
           ),
@@ -476,7 +503,7 @@ class _LoginPageState extends State<LoginPage> {
         return [
           TextFormField(
             controller: _emailController,
-            style: const TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
                 labelText: 'Email', border: OutlineInputBorder()),
             enabled: false,

@@ -136,7 +136,7 @@ class AuthService {
   // Expose internal error messages
   String? get errorMessage => _internalErrorMessage;
 
-  Future<bool> signUp(
+  Future<String> signUp(
       {required String email,
       required String password,
       required Map customAttributes}) async {
@@ -153,19 +153,24 @@ class AuthService {
     });
     try {
       await _userPool.signUp(email, password, userAttributes: userAttributes);
-      // If no exception is thrown, Cognito has sent a confirmation code.
       print(
           'AuthService: SignUp successful for $email. Awaiting confirmation.');
-      return true;
+      return 'success'; // Return 'success' on success
     } on CognitoClientException catch (e) {
-      // Handle known Cognito errors, e.g., UsernameExistsException
       _internalErrorMessage = e.message ?? 'An unknown sign-up error occurred.';
       print('AuthService: SignUp Error: $_internalErrorMessage');
-      return false;
+
+      // MODIFICATION: Check for the specific exception and return it
+      if (e.name == 'UsernameExistsException') {
+        _internalErrorMessage =
+            'An account with this email already exists. Please log in to continue.';
+        return 'UsernameExistsException';
+      }
+      return 'failed'; // Return 'failed' for other errors
     } catch (e) {
       _internalErrorMessage = 'An unexpected error occurred during sign-up.';
       print('AuthService: SignUp Error: $e');
-      return false;
+      return 'failed'; // Return 'failed' for unexpected errors
     }
   }
 

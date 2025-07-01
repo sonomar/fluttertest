@@ -192,21 +192,22 @@ class AppAuthProvider with ChangeNotifier {
     return success;
   }
 
-  Future<bool> signUp({
+  Future<String> signUp({
     required String email,
     required String password,
     required Map customAttributes,
   }) async {
-    _errorMessage = null; // Clear previous UI error
+    _errorMessage = null;
     notifyListeners();
-    final success = await _authService.signUp(
+    final String result = await _authService.signUp(
         email: email, password: password, customAttributes: customAttributes);
-    if (!success) {
+
+    if (result != 'success') {
       _errorMessage =
           _authService.errorMessage; // Pass service error message to UI
     }
     notifyListeners();
-    return success;
+    return result;
   }
 
   Future<bool> confirmSignUp({
