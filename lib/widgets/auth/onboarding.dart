@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../models/user_model.dart';
 import '../../models/app_auth_provider.dart';
@@ -28,7 +29,7 @@ class _OnboardingState extends State<Onboarding> {
     }
 
     final userModel = context.read<UserModel>();
-    final newUsername = _usernameController.text.trim();
+    final newUsername = _usernameController.text.trim().toLowerCase();
 
     final success = await userModel.updateUsername(newUsername);
 
@@ -91,12 +92,19 @@ class _OnboardingState extends State<Onboarding> {
                 labelText: 'Username',
                 border: OutlineInputBorder(),
               ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+              ],
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Please enter a username.';
                 }
-                if (value.length < 3) {
-                  return 'Username must be at least 3 characters.';
+                if (value.length < 5) {
+                  return 'Username must be at least 5 characters.';
+                }
+                // 4. Add a validation rule to double-check the format
+                if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(value)) {
+                  return 'Only letters and numbers are allowed.';
                 }
                 return null;
               },

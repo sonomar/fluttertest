@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import '../models/app_auth_provider.dart';
 import '../widgets/splash_screen.dart';
@@ -7,6 +6,7 @@ import '../models/locale_provider.dart';
 import '../models/user_model.dart';
 import '../helpers/localization_helper.dart';
 import './subscreens/missions/award_screen.dart';
+import './subscreens/profile/language_page.dart';
 import './subscreens/profile/account_settings_screen.dart';
 import '../widgets/profile_pic_changer.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -95,8 +95,9 @@ class ProfileScreen extends StatelessWidget {
             icon: Icons.language_outlined,
             title: translate('profile_language_label', context),
             onTap: () {
-              Provider.of<LocaleProvider>(context, listen: false)
-                  .toggleLocale();
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const LanguagePage()),
+              );
             },
           ),
           const SizedBox(height: 20),
