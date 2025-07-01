@@ -55,9 +55,9 @@ class _LoginPageState extends State<LoginPage> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel Login?'),
+        title: const Text('Cancel Process?'),
         content: const Text(
-            'Are you sure? This will reset the login process and make any current login codes invalid.'),
+            'Are you sure? This will cancel the current process and take you back to the main login screen.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -78,6 +78,7 @@ class _LoginPageState extends State<LoginPage> {
     if (confirmed && mounted) {
       setState(() {
         _formKey.currentState?.reset();
+        _clearControllers();
         _uiErrorMessage = '';
         _formType = AuthFormType.loginInitial;
       });
@@ -93,6 +94,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _switchFormType() {
     _formKey.currentState?.reset();
+    _clearControllers();
     _uiErrorMessage = '';
     Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
     setState(() {
@@ -103,13 +105,22 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _submit() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    // Clear previous errors first
+    setState(() => _uiErrorMessage = '');
+    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
+
+    // Validate the form
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      // If validation fails, set the UI error message and stop
+      setState(() {
+        _uiErrorMessage = 'Please correct the errors shown below.';
+      });
+      return;
+    }
 
     setState(() {
       _isSubmitting = true;
-      _uiErrorMessage = '';
     });
-    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
 
     final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
     final email = _emailController.text.trim();
@@ -120,12 +131,31 @@ class _LoginPageState extends State<LoginPage> {
     switch (_formType) {
       case AuthFormType.loginWithPassword:
         success = await authProvider.signIn(email, password);
-        if (success) shouldNavigateToSplash = true;
+        if (success) {
+          shouldNavigateToSplash = true;
+        } else {
+          setState(() {
+            _uiErrorMessage =
+                authProvider.errorMessage ?? 'Incorrect email or password.';
+            _isSubmitting = false;
+          });
+          return;
+        }
         break;
       case AuthFormType.loginWithEmailCode:
         success = await authProvider
             .answerEmailCodeChallenge(_loginCodeController.text.trim());
-        if (success) shouldNavigateToSplash = true;
+        if (success) {
+          shouldNavigateToSplash = true;
+        } else {
+          // FIX: Apply the same pattern here.
+          setState(() {
+            _uiErrorMessage = authProvider.errorMessage ??
+                'The code provided is incorrect or has expired.';
+            _isSubmitting = false;
+          });
+          return;
+        }
         break;
       case AuthFormType.register:
         final String result = await authProvider.signUp(
@@ -138,31 +168,58 @@ class _LoginPageState extends State<LoginPage> {
         );
         if (result == 'success' && mounted) {
           setState(() {
-            _formType = AuthFormType.confirm; // Proceed to confirmation
+            _formType = AuthFormType.confirm;
             _isSubmitting = false;
           });
-          return; // Exit the function
+          return;
         }
-
         if (result == 'UsernameExistsException' && mounted) {
-          // Send the user back to the initial login screen
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('This email is already registered. Please log in.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
           setState(() {
             _formType = AuthFormType.loginInitial;
             _isSubmitting = false;
-            // Clear password fields for security
             _passwordController.clear();
             _confirmPasswordController.clear();
           });
-          return; // Exit the function
+          return;
         }
-        break;
+        // Handle generic registration failure
+        setState(() {
+          _uiErrorMessage = authProvider.errorMessage ??
+              'An unknown registration error occurred.';
+          _isSubmitting = false;
+        });
+        return;
       case AuthFormType.confirm:
         success = await authProvider.confirmSignUp(
             email: email, confirmationCode: _loginCodeController.text.trim());
         if (success) {
           success =
               await authProvider.signIn(email, password, isRegister: true);
-          if (success) shouldNavigateToSplash = true;
+          if (success) {
+            shouldNavigateToSplash = true;
+          } else {
+            // FIX: Handle failure after confirmation but before sign-in
+            setState(() {
+              _uiErrorMessage = authProvider.errorMessage ??
+                  'Sign in after confirmation failed.';
+              _isSubmitting = false;
+            });
+            return;
+          }
+        } else {
+          // FIX: Handle confirmation code failure
+          setState(() {
+            _uiErrorMessage =
+                authProvider.errorMessage ?? 'Incorrect confirmation code.';
+            _isSubmitting = false;
+          });
+          return;
         }
         break;
       default:
@@ -175,14 +232,19 @@ class _LoginPageState extends State<LoginPage> {
       );
       return;
     }
-
-    if (mounted) {
-      setState(() => _isSubmitting = false);
-    }
   }
 
   Future<void> _handleEmailLoginRequest() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _uiErrorMessage = '');
+    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
+
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      setState(() {
+        _uiErrorMessage = 'Please enter a valid email address.';
+      });
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
@@ -192,20 +254,33 @@ class _LoginPageState extends State<LoginPage> {
     if (success && mounted) {
       setState(() {
         _formType = AuthFormType.loginWithEmailCode;
+        _isSubmitting = false;
       });
-    }
-    if (mounted) {
-      setState(() => _isSubmitting = false);
+    } else {
+      // On failure, the provider will have the error message.
+      // We just need to stop the loading indicator and trigger a rebuild.
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
   Future<void> _handleForgotPassword() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _uiErrorMessage = '');
+    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
+
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      setState(() {
+        _uiErrorMessage = 'Please enter a valid email address.';
+      });
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
-      _uiErrorMessage = '';
     });
-    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
 
     final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
     final success =
@@ -225,12 +300,19 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _handleResetPassword() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _uiErrorMessage = '');
+    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
+
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      setState(() {
+        _uiErrorMessage = 'Please correct the errors shown below.';
+      });
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
-      _uiErrorMessage = '';
     });
-    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
 
     final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
     final success = await authProvider.confirmForgotPassword(
@@ -270,10 +352,8 @@ class _LoginPageState extends State<LoginPage> {
         if (didPop) return;
         _handleBackPress();
       },
-      // MODIFIED: Use a Stack to layer the gradient behind the Scaffold.
       child: Stack(
         children: [
-          // This Container provides the full-screen gradient background.
           Container(
             decoration: const BoxDecoration(
               gradient: RadialGradient(
@@ -287,7 +367,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-          // The Scaffold is now transparent to let the gradient show through.
           Scaffold(
             backgroundColor: Colors.transparent,
             appBar: AppBar(
@@ -300,7 +379,6 @@ class _LoginPageState extends State<LoginPage> {
                     )
                   : null,
             ),
-            // The body no longer needs its own decoration.
             body: SingleChildScrollView(
               child: Column(children: [
                 Padding(
@@ -398,7 +476,14 @@ class _LoginPageState extends State<LoginPage> {
           const SizedBox(height: 12),
           TextButton(
             onPressed: () {
-              setState(() => _formType = AuthFormType.loginWithPassword);
+              if (_formKey.currentState?.validate() ?? false) {
+                setState(() => _formType = AuthFormType.loginWithPassword);
+              } else {
+                // Also show the error message when just switching forms
+                setState(() {
+                  _uiErrorMessage = 'Please enter a valid email to continue.';
+                });
+              }
             },
             child: const Text('Log in with Password',
                 style: TextStyle(color: Colors.white70)),
@@ -407,13 +492,6 @@ class _LoginPageState extends State<LoginPage> {
       case AuthFormType.loginWithPassword:
         return [
           ElevatedButton(onPressed: _submit, child: const Text("Log In")),
-          TextButton(
-            onPressed: () {
-              setState(() => _formType = AuthFormType.loginInitial);
-            },
-            child: const Text('Log in with Email',
-                style: TextStyle(color: Colors.white70)),
-          ),
           TextButton(
             onPressed: () {
               setState(() {
@@ -433,19 +511,8 @@ class _LoginPageState extends State<LoginPage> {
         ];
       case AuthFormType.register:
         return [
-          ElevatedButton(onPressed: _submit, child: const Text("Register")),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Already have an account?",
-                  style: TextStyle(color: Colors.white)),
-              TextButton(
-                  onPressed: _isSubmitting ? null : _switchFormType,
-                  child: const Text("Login")),
-            ],
-          ),
+          ElevatedButton(onPressed: _submit, child: const Text("Register"))
         ];
-      // New cases for forgot/reset password
       case AuthFormType.forgotPassword:
         return [
           ElevatedButton(
@@ -467,9 +534,8 @@ class _LoginPageState extends State<LoginPage> {
             controller: _emailController,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              labelText: translate("login_email_label", context),
-              border: const OutlineInputBorder(),
-            ),
+                labelText: translate("login_email_label", context),
+                border: const OutlineInputBorder()),
             validator: (v) =>
                 (v?.isEmpty ?? true) ? 'Please enter your email' : null,
           ),
@@ -480,9 +546,8 @@ class _LoginPageState extends State<LoginPage> {
             controller: _emailController,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              labelText: translate("login_email_label", context),
-              border: const OutlineInputBorder(),
-            ),
+                labelText: translate("login_email_label", context),
+                border: const OutlineInputBorder()),
             validator: (v) =>
                 (v?.isEmpty ?? true) ? 'Please enter your email' : null,
           ),
@@ -503,7 +568,7 @@ class _LoginPageState extends State<LoginPage> {
         return [
           TextFormField(
             controller: _emailController,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.grey),
             decoration: const InputDecoration(
                 labelText: 'Email', border: OutlineInputBorder()),
             enabled: false,
@@ -561,7 +626,6 @@ class _LoginPageState extends State<LoginPage> {
                 : null,
           ),
         ];
-      // New cases for forgot/reset password
       case AuthFormType.forgotPassword:
         return [
           const Padding(

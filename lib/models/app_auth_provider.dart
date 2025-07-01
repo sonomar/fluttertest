@@ -147,8 +147,7 @@ class AppAuthProvider with ChangeNotifier {
         return false;
       }
     } catch (e) {
-      _errorMessage =
-          'AppAuthProvider Unexpected error during login: ${e.toString()} at ${DateTime.now()}';
+      _errorMessage = _authService.errorMessage;
       print('AppAuthProvider: $_errorMessage');
       _status = AuthStatus.unauthenticated;
       _userSession = null;
