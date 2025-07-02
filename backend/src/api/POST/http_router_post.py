@@ -17,6 +17,11 @@ import api.POST.Mission.post_Mission_table as Mission_table_functions
 import api.POST.MissionUserData.post_MissionUserData_table as MissionUserData_table_functions
 import api.POST.MissionUser.post_MissionUser_table as MissionUser_table_functions
 import api.POST.CommunityChallenge.post_CommunityChallenge_table as CommunityChallenge_table_functions
+import api.POST.Distribution.post_Distribution_table as Distribution_table_functions
+import api.POST.DistributionCode.post_DistributionCode_table as DistributionCode_table_functions
+import api.POST.DistributionCodeUser.post_DistributionCodeUser_table as DistributionCodeUser_table_functions
+import api.POST.DistributionCollectible.post_DistributionCollectible_table as DistributionCollectible_table_functions
+
 
 def http_router_post(event):
     
@@ -28,67 +33,83 @@ def http_router_post(event):
         returnString = Userfunctions.call_User_function(raw_path, event)
     
     ## Category
-    if tableName == table.Category_table:
+    elif tableName == table.Category_table:
         returnString = Category_table_functions.call_Category_function(raw_path, event)
 
     ## Community
-    if tableName == table.Community_table:
+    elif tableName == table.Community_table:
         returnString = Community_table_functions.call_Community_function(raw_path, event)
     
     ## Collection
-    if tableName == table.Collection_table:
+    elif tableName == table.Collection_table:
         returnString = Collection_table_functions.call_Collection_function(raw_path, event)
 
     ## Project
-    if tableName == table.Project_table:
+    elif tableName == table.Project_table:
         returnString = Project_table_functions.call_Project_function(raw_path, event)
 
     ## Collectible
-    if tableName == table.Collectible_table:
+    elif tableName == table.Collectible_table:
         returnString = Collectible_table_functions.call_Collectible_function(raw_path, event)
     
     ## UserCollectible
-    if tableName == table.UserCollectible_table:
+    elif tableName == table.UserCollectible_table:
         returnString = UserCollectible_table_functions.call_UserCollectible_function(raw_path, event)
 
     ## CommunityUser
-    if tableName == table.CommunityUser_table:
+    elif tableName == table.CommunityUser_table:
         returnString = CommunityUser_table_functions.call_CommunityUser_function(raw_path, event)
 
     ## Sponsor
-    if tableName == table.Sponsor_table:
+    elif tableName == table.Sponsor_table:
         returnString = Sponsor_table_functions.call_Sponsor_function(raw_path, event)
 
     ## CollectibleSponsor
-    if tableName == table.CollectibleSponsor_table:
+    elif tableName == table.CollectibleSponsor_table:
         returnString = CollectibleSponsor_table_functions.call_CollectibleSponsor_function(raw_path, event)
 
     ## Notification
-    if tableName == table.Notification_table:
+    elif tableName == table.Notification_table:
         returnString = Notification_table_functions.call_Notification_function(raw_path, event)
 
     ## NotificationUser
-    if tableName == table.NotificationUser_table:
+    elif tableName == table.NotificationUser_table:
         returnString = NotificationUser_table_functions.call_NotificationUser_function(raw_path, event)
 
     ## NewsPost
-    if tableName == table.NewsPost_table:
+    elif tableName == table.NewsPost_table:
         returnString = NewsPost_table_functions.call_NewsPost_function(raw_path, event)
 
     ## Mission
-    if tableName == table.Mission_table:
+    elif tableName == table.Mission_table:
         returnString = Mission_table_functions.call_Mission_function(raw_path, event)
 
     ## MissionUser
-    if tableName == table.MissionUser_table:
+    elif tableName == table.MissionUser_table:
         returnString = MissionUser_table_functions.call_MissionUser_function(raw_path, event)
             
     ## MissionUserData
-    if tableName == table.MissionUserData_table:
+    elif tableName == table.MissionUserData_table:
         returnString = MissionUserData_table_functions.call_MissionUserData_function(raw_path, event)
 
     ## CommunityChallenge
-    if tableName == table.CommunityChallenge_table:
+    elif tableName == table.CommunityChallenge_table:
         returnString = CommunityChallenge_table_functions.call_CommunityChallenge_function(raw_path, event)
     
+    ## Distribution
+    elif tableName == table.Distribution_table:
+        returnString = Distribution_table_functions.call_Distribution_function(raw_path, event)
+        
+    ## DistributionCode
+    elif tableName == table.DistributionCode_table:
+        returnString = DistributionCode_table_functions.call_DistributionCode_function(raw_path, event)
+        
+    ## DistributionCodeUser
+    elif tableName == table.DistributionCodeUser_table:
+        returnString = DistributionCodeUser_table_functions.call_DistributionCodeUser_function(raw_path, event)
+        
+    ## DistributionCollectible
+    elif tableName == table.DistributionCollectible_table:
+        returnString = DistributionCollectible_table_functions.call_DistributionCollectible_function(raw_path, event)
+
     return returnString

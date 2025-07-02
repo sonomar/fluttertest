@@ -24,7 +24,7 @@ except ImportError as e:
 # The 'db_session' fixture (which is transactional and uses the temporary MySQL DB)
 # is automatically injected by pytest from conftest.py
 
-def test_crud_create_user_success(db_session: Session):
+def test_crud_createUser_success(db_session: Session):
     """Test successful user creation at the CRUD level."""
     timestamp = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
     unique_email = f"crud_user_{timestamp}@example.com"
@@ -39,7 +39,7 @@ def test_crud_create_user_success(db_session: Session):
         deviceId="device_crud_001"
     )
 
-    created_user = user_post_crud.create_user(user=user_payload, db=db_session)
+    created_user = user_post_crud.createUser(user=user_payload, db=db_session)
 
     assert created_user is not None
     assert created_user.email == unique_email
@@ -53,7 +53,7 @@ def test_crud_create_user_success(db_session: Session):
     assert user_in_session is not None
     assert user_in_session.email == unique_email
 
-def test_crud_create_user_duplicate_email_raises_conflict(db_session: Session):
+def test_crud_createUser_duplicate_email_raises_conflict(db_session: Session):
     """Test CRUD user creation with a duplicate email raises ConflictException."""
     timestamp = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
     duplicate_email = f"crud_duplicate_email_{timestamp}@example.com"
@@ -67,7 +67,7 @@ def test_crud_create_user_duplicate_email_raises_conflict(db_session: Session):
         username=username1
     )
     # Create the first user (it will be rolled back, but exists for this transaction)
-    user_post_crud.create_user(user=user_payload_1, db=db_session)
+    user_post_crud.createUser(user=user_payload_1, db=db_session)
     # db_session.flush() # Not strictly needed before the exception if the unique constraint is at DB level
 
     user_payload_2 = UserCreate(
@@ -78,11 +78,11 @@ def test_crud_create_user_duplicate_email_raises_conflict(db_session: Session):
     )
 
     with pytest.raises(ConflictException) as excinfo:
-        user_post_crud.create_user(user=user_payload_2, db=db_session)
+        user_post_crud.createUser(user=user_payload_2, db=db_session)
     
     assert f"Email address '{duplicate_email}' already exists" in str(excinfo.value.detail)
 
-def test_crud_create_user_duplicate_username_raises_conflict(db_session: Session):
+def test_crud_createUser_duplicate_username_raises_conflict(db_session: Session):
     """Test CRUD user creation with a duplicate username raises ConflictException."""
     timestamp = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
     email1 = f"crud_dup_uname_email1_{timestamp}@example.com"
@@ -95,7 +95,7 @@ def test_crud_create_user_duplicate_username_raises_conflict(db_session: Session
         userType=UserTypeEnum.username,
         username=duplicate_username
     )
-    user_post_crud.create_user(user=user_payload_1, db=db_session)
+    user_post_crud.createUser(user=user_payload_1, db=db_session)
 
     user_payload_2 = UserCreate(
         email=email2, 
@@ -105,7 +105,7 @@ def test_crud_create_user_duplicate_username_raises_conflict(db_session: Session
     )
 
     with pytest.raises(ConflictException) as excinfo:
-        user_post_crud.create_user(user=user_payload_2, db=db_session)
+        user_post_crud.createUser(user=user_payload_2, db=db_session)
     
     assert f"Username '{duplicate_username}' already exists" in str(excinfo.value.detail)
 
@@ -117,8 +117,8 @@ def test_crud_get_user_by_id(db_session: Session):
     username = f"crud_get_id_{timestamp}"
     
     user_payload = UserCreate(email=email, passwordHashed="pw", userType=UserTypeEnum.email, username=username)
-    created_user_model = user_post_crud.create_user(user=user_payload, db=db_session)
-    # db_session.flush() # Ensure ID is available if not auto-refreshed by create_user
+    created_user_model = user_post_crud.createUser(user=user_payload, db=db_session)
+    # db_session.flush() # Ensure ID is available if not auto-refreshed by createUser
 
     fetched_user = user_get_crud.getUserByUserId(userId=created_user_model.userId, db=db_session)
     assert fetched_user is not None
@@ -138,7 +138,7 @@ def test_crud_get_user_by_email(db_session: Session):
     username = f"crud_get_email_{timestamp}"
 
     user_payload = UserCreate(email=email, passwordHashed="pw", userType=UserTypeEnum.email, username=username)
-    user_post_crud.create_user(user=user_payload, db=db_session)
+    user_post_crud.createUser(user=user_payload, db=db_session)
     # db_session.flush()
 
     fetched_user = user_get_crud.getUserByEmail(email=email, db=db_session)
@@ -153,7 +153,7 @@ def test_crud_get_user_by_username(db_session: Session):
     username = f"crud_get_uname_{timestamp}"
 
     user_payload = UserCreate(email=email, passwordHashed="pw", userType=UserTypeEnum.username, username=username)
-    user_post_crud.create_user(user=user_payload, db=db_session)
+    user_post_crud.createUser(user=user_payload, db=db_session)
     # db_session.flush()
 
     fetched_user = user_get_crud.getUserByUsername(username=username, db=db_session)
@@ -176,7 +176,7 @@ def test_crud_get_user_by_username(db_session: Session):
 '''
 This DB/CRUD test file demonstrates:
 * Using the `db_session` fixture, which is transactional and connected to the temporary MySQL database.
-* Directly calling your CRUD functions (e.g., `user_post_crud.create_user`).
+* Directly calling your CRUD functions (e.g., `user_post_crud.createUser`).
 * Using `pytest.raises` to assert that your custom exceptions (`ConflictException`, `NotFoundException`) are correctly raised.
 * Creating unique data within tests to avoid interference, even though the transaction will be rolled back.
 * The rollback mechanism ensures that the database state is reset after each test function, providing good isolation for your DML operations.

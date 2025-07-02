@@ -21,7 +21,7 @@ from api.exceptions import ConflictException, BadRequestException # Adjust impor
 
 # Make functions async if they involve awaited operations (async driver)
 # Keep sync for now
-def create_user(
+def createUser(
     user: UserCreate, # Expect a Pydantic model as request body
     db: Session = Depends(get_db) # Inject database session
 ) -> UserResponse: # Specify return schema
@@ -98,8 +98,8 @@ def create_user(
 #     # This function would need to:
 #     # 1. Get DB session (manually)
 #     # 2. Extract data from 'event'
-#     # 3. Map raw_path to create_user
+#     # 3. Map raw_path to createUser
 #     # 4. Create a Pydantic UserCreate instance from extracted data (handle validation errors)
-#     # 5. Call create_user(db=session, user=pydantic_instance)
+#     # 5. Call createUser(db=session, user=pydantic_instance)
 #     # 6. Translate result (model instance or HTTPException) back to {'statusCode': ..., 'body': ...}
 #     return {'statusCode': 501, 'body': 'Not Implemented (Old Router Path)'} # Placeholder

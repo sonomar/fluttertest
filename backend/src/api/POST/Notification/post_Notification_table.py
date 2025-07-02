@@ -8,6 +8,6 @@ def call_Notification_function(raw_path, event):
 
     ## Notification
     if raw_path == Notification_Path['createNotification']['path']:
-        returnString = notification.create_notification(event)
+        returnString = notification.createNotification(event)
 
     return returnString

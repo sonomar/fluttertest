@@ -22,6 +22,10 @@ import api.GET.Notification.get_Notification_table as Notificationfunctions
 import api.GET.NotificationUser.get_NotificationUser_table as NotificationUserfunctions
 import api.GET.Sponsor.get_Sponsor_table as Sponsorfunctions
 import api.GET.CollectibleSponsor.get_CollectibleSponsor_table as CollectibleSponsorfunctions
+import api.GET.Distribution.get_Distribution_table as Distributionfunctions
+import api.GET.DistributionCode.get_DistributionCode_table as DistributionCodefunctions
+import api.GET.DistributionCodeUser.get_DistributionCodeUser_table as DistributionCodeUserfunctions
+import api.GET.DistributionCollectible.get_DistributionCollectible_table as DistributionCollectiblefunctions
 
 
 def http_router_get(event):
@@ -99,6 +103,18 @@ def http_router_get(event):
 
     elif tableName == table.CollectibleSponsor_table:
         returnString = CollectibleSponsorfunctions.call_CollectibleSponsor_function(raw_path, event)
+
+    elif tableName == table.Distribution_table:
+        returnString = Distributionfunctions.call_Distribution_function(raw_path, event)
+
+    elif tableName == table.DistributionCode_table:
+        returnString = DistributionCodefunctions.call_DistributionCode_function(raw_path, event)
+
+    elif tableName == table.DistributionCodeUser_table:
+        returnString = DistributionCodeUserfunctions.call_DistributionCodeUser_function(raw_path, event)
+    
+    elif tableName == table.DistributionCollectible_table:
+        returnString = DistributionCollectiblefunctions.call_DistributionCollectible_function(raw_path, event)
 
     # If the table name does not match any known tables, the initial
     # 'Invalid Function Path Call' message will be returned.

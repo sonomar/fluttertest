@@ -8,7 +8,7 @@ from database.schema.POST.Collection.collection_schema import CollectionCreate
 from database.schema.GET.Collection.collection_schema import CollectionResponse # Updated import
 from api.exceptions import BadRequestException
 
-def create_collection(
+def createCollection(
     collection: CollectionCreate,
     db: Session = Depends(get_db)
 ) -> CollectionResponse: # Updated return type

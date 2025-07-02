@@ -21,6 +21,11 @@ from database.schema.GET.Project.project_schema import ProjectResponse
 from database.schema.GET.Sponsor.sponsor_schema import SponsorResponse
 from database.schema.GET.UserCollectible.userCollectible_schema import UserCollectibleResponse
 
+from database.schema.GET.Distribution.distribution_schema import DistributionResponse
+from database.schema.GET.DistributionCode.distributionCode_schema import DistributionCodeResponse
+from database.schema.GET.DistributionCodeUser.distributionCodeUser_schema import DistributionCodeUserResponse
+from database.schema.GET.DistributionCollectible.distributionCollectible_schema import DistributionCollectibleResponse
+
 
 # Import the modules containing your refactored GET handler functions
 import database.CRUD.GET.User.get_User_CRUD_functions as UserGETFunctions
@@ -40,6 +45,11 @@ import database.CRUD.GET.NotificationUser.get_NotificationUser_CRUD_functions as
 import database.CRUD.GET.Project.get_Project_CRUD_functions as ProjectGETFunctions
 import database.CRUD.GET.Sponsor.get_Sponsor_CRUD_functions as SponsorGETFunctions
 import database.CRUD.GET.UserCollectible.get_UserCollectible_CRUD_functions as UserCollectibleGETFunctions
+import database.CRUD.GET.Distribution.get_Distribution_CRUD_functions as DistributionGETFunctions
+import database.CRUD.GET.DistributionCode.get_DistributionCode_CRUD_functions as DistributionCodeGETFunctions
+import database.CRUD.GET.DistributionCodeUser.get_DistributionCodeUser_CRUD_functions as DistributionCodeUserGETFunctions
+import database.CRUD.GET.DistributionCollectible.get_DistributionCollectible_CRUD_functions as DistributionCollectibleGETFunctions
+
 
 
 API_PATHS_GET = {
@@ -398,6 +408,63 @@ API_PATHS_GET = {
             "active": True,
             "handler": CollectibleSponsorGETFunctions.getCollectibleSponsorBySponsorId,
             "response_model": List[CollectibleSponsorResponse]
+        }
+    },
+
+    Distribution_table: {
+        "getDistributionByDistributionId": {
+            "path": "/getDistributionByDistributionId",
+            "active": True,
+            "handler": DistributionGETFunctions.getDistributionByDistributionId,
+            "response_model": DistributionResponse
+        },
+        "getAllDistributions": {
+            "path": "/getAllDistributions",
+            "active": True,
+            "handler": DistributionGETFunctions.getAllDistributions,
+            "response_model": List[DistributionResponse]
+        }
+    },
+    DistributionCode_table: {
+        "getDistributionCodeByDistributionCodeId": {
+            "path": "/getDistributionCodeByDistributionCodeId",
+            "active": True,
+            "handler": DistributionCodeGETFunctions.getDistributionCodeByDistributionCodeId,
+            "response_model": DistributionCodeResponse
+        },
+        "getAllDistributionCodes": {
+            "path": "/getAllDistributionCodes",
+            "active": True,
+            "handler": DistributionCodeGETFunctions.getAllDistributionCodes,
+            "response_model": List[DistributionCodeResponse]
+        }
+    },
+    DistributionCodeUser_table: {
+        "getDistributionCodeUserByDistributionCodeUserId": {
+            "path": "/getDistributionCodeUserByDistributionCodeUserId",
+            "active": True,
+            "handler": DistributionCodeUserGETFunctions.getDistributionCodeUserByDistributionCodeUserId,
+            "response_model": DistributionCodeUserResponse
+        },
+        "getAllDistributionCodeUsers": {
+            "path": "/getAllDistributionCodeUsers",
+            "active": True,
+            "handler": DistributionCodeUserGETFunctions.getAllDistributionCodeUsers,
+            "response_model": List[DistributionCodeUserResponse]
+        }
+    },
+    DistributionCollectible_table: {
+        "getDistributionCollectibleByDistributionCollectibleId": {
+            "path": "/getDistributionCollectibleByDistributionCollectibleId",
+            "active": True,
+            "handler": DistributionCollectibleGETFunctions.getDistributionCollectibleByDistributionCollectibleId,
+            "response_model": DistributionCollectibleResponse
+        },
+        "getAllDistributionCollectibles": {
+            "path": "/getAllDistributionCollectibles",
+            "active": True,
+            "handler": DistributionCollectibleGETFunctions.getAllDistributionCollectibles,
+            "response_model": List[DistributionCollectibleResponse]
         }
     }
 }

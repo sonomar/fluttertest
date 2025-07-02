@@ -8,6 +8,6 @@ def call_UserCollectible_function(raw_path, event):
 
     ## UserCollectible
     if raw_path == UserCollectible_Path['createUserCollectible']['path']:
-        returnString = userCollectible.create_user_collectible(event)
+        returnString = userCollectible.createUserCollectible(event)
 
     return returnString

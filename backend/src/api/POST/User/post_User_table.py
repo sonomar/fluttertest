@@ -8,6 +8,6 @@ def call_User_function(raw_path, event):
 
     ## User
     if raw_path == User_Path['createUser']['path']:
-        returnString = user.create_user(event)
+        returnString = user.createUser(event)
 
     return returnString

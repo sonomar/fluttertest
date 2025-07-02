@@ -8,6 +8,6 @@ def call_CommunityUser_function(raw_path, event):
 
     ## CommunityUser
     if raw_path == CommunityUser_Path['createCommunityUser']['path']:
-        returnString = communityUser.create_community_user(event)
+        returnString = communityUser.createCommunityUser(event)
 
     return returnString

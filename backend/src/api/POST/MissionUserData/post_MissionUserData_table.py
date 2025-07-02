@@ -8,6 +8,6 @@ def call_MissionUserData_function(raw_path, event):
 
     ## MissionUserData
     if raw_path == MissionUserData_Path['createMissionUserData']['path']:
-        returnString = missionUserData.create_mission_user_data(event)
+        returnString = missionUserData.createMissionUserData(event)
 
     return returnString

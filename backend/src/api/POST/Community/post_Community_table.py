@@ -8,6 +8,6 @@ def call_Community_function(raw_path, event):
 
     ## Community
     if raw_path == Community_Path['createCommunity']['path']:
-        returnString = community.create_community(event)
+        returnString = community.createCommunity(event)
 
     return returnString

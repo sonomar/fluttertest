@@ -9,7 +9,7 @@ from database.schema.POST.NotificationUser.notificationUser_schema import Notifi
 from database.schema.GET.NotificationUser.notificationUser_schema import NotificationUserResponse # Updated import for response schema
 from api.exceptions import ConflictException, BadRequestException
 
-def create_notification_user(
+def createNotificationUser(
     notification_user: NotificationUserCreate,
     db: Session = Depends(get_db)
 ) -> NotificationUserResponse: # Updated return type

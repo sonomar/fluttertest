@@ -15,3 +15,7 @@ Mission_table = 'Mission'
 MissionUser_table = 'MissionUser'
 MissionUserData_table = 'MissionUserData'
 CommunityChallenge_table = 'CommunityChallenge'
+Distribution_table = "Distribution"
+DistributionCode_table = "DistributionCode"
+DistributionCodeUser_table = "DistributionCodeUser"
+DistributionCollectible_table = "DistributionCollectible"

@@ -3,7 +3,7 @@ from tools.prod.prodTools import extractData, get_connection
 from database.schema.POST.CollectibleSponsor.collectibleSponsor_schema import CollectibleSponsorCreate
 import database.CRUD.POST.CollectibleSponsor.post_CollectibleSponsor_CRUD_functions as crudFunctions
 
-def create_collectible_sponsor(event):
+def createCollectibleSponsor(event):
     """
     Adds a new collectible sponsor entry to the database.
     Requires 'collectibleId', 'sponsorId'. 'sponsorMessage' and 'active' are optional.
@@ -27,4 +27,4 @@ def create_collectible_sponsor(event):
 
     # Call the CRUD function with the Pydantic model and DB session
     # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.create_collectible_sponsor(collectible_sponsor=collectible_sponsor, db=event["db_session"])
+    return crudFunctions.createCollectibleSponsor(collectible_sponsor=collectible_sponsor, db=event["db_session"])

@@ -3,7 +3,7 @@ from tools.prod.prodTools import extractData
 from database.schema.POST.Sponsor.sponsor_schema import SponsorCreate
 import database.CRUD.POST.Sponsor.post_Sponsor_CRUD_functions as crudFunctions
 
-def create_sponsor(event):
+def createSponsor(event):
     """
     Adds a new sponsor to the database.
     Requires 'name'. Other fields are optional.
@@ -38,4 +38,4 @@ def create_sponsor(event):
 
     # Call the CRUD function with the Pydantic model and DB session
     # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.create_sponsor(sponsor=sponsor, db=event["db_session"])
+    return crudFunctions.createSponsor(sponsor=sponsor, db=event["db_session"])

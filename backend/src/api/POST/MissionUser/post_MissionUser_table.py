@@ -8,6 +8,6 @@ def call_MissionUser_function(raw_path, event):
 
     ## MissionUser
     if raw_path == MissionUser_Path['createMissionUser']['path']:
-        returnString = missionUser.create_mission_user(event)
+        returnString = missionUser.createMissionUser(event)
 
     return returnString

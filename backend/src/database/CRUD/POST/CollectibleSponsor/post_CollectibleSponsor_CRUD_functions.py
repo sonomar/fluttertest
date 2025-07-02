@@ -8,7 +8,7 @@ from database.schema.POST.CollectibleSponsor.collectibleSponsor_schema import Co
 from database.schema.GET.CollectibleSponsor.collectibleSponsor_schema import CollectibleSponsorResponse # Updated import
 from api.exceptions import BadRequestException
 
-def create_collectible_sponsor(
+def createCollectibleSponsor(
     collectible_sponsor: CollectibleSponsorCreate,
     db: Session = Depends(get_db)
 ) -> CollectibleSponsorResponse: # Updated return type

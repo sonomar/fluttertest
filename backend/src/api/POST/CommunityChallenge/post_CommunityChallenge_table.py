@@ -8,6 +8,6 @@ def call_CommunityChallenge_function(raw_path, event):
 
     ## CommunityChallenge
     if raw_path == CommunityChallenge_Path['createCommunityChallenge']['path']:
-        returnString = communityChallenge.create_community_challenge(event)
+        returnString = communityChallenge.createCommunityChallenge(event)
 
     return returnString

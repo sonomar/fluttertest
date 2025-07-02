@@ -58,7 +58,7 @@ def lambda_handler(event, context):
             # Prepare the user data for your database
             # The 'passwordHashed' field is mandatory in your UserCreate schema.
             # Since Cognito manages the actual password, we use a placeholder.
-            # The `create_user` CRUD function appends "notreallyhashed" to this.
+            # The `createUser` CRUD function appends "notreallyhashed" to this.
             user_create_payload = UserCreate(
                 email=email,
                 username=cognito_username, # Map Cognito's userName to your DB username
@@ -69,7 +69,7 @@ def lambda_handler(event, context):
             )
             
             print(f"Attempting to create user in DB: {email}")
-            created_user_db = UserCRUD.create_user(user=user_create_payload, db=db)
+            created_user_db = UserCRUD.createUser(user=user_create_payload, db=db)
             print(f"Successfully created user {created_user_db.email} (ID: {created_user_db.userId}) in DB from Cognito trigger.")
             
             # For the PostConfirmation trigger, Cognito expects the original event to be returned if successful.

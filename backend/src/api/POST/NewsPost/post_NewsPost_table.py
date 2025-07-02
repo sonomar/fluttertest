@@ -8,6 +8,6 @@ def call_NewsPost_function(raw_path, event):
 
     ## NewsPost
     if raw_path == NewsPost_Path['createNewsPost']['path']:
-        returnString = newsPost.create_news_post(event)
+        returnString = newsPost.createNewsPost(event)
 
     return returnString

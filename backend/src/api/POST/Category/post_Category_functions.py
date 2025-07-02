@@ -3,7 +3,7 @@ from tools.prod.prodTools import extractData
 from database.schema.POST.Category.category_schema import CategoryCreate
 import database.CRUD.POST.Category.post_Category_CRUD_functions as crudFunctions
 
-def create_category(event):
+def createCategory(event):
     """
     Adds a new category to the database.
     Requires 'name'.
@@ -22,4 +22,4 @@ def create_category(event):
 
     # Call the CRUD function with the Pydantic model and DB session
     # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.create_category(category=category, db=event["db_session"])
+    return crudFunctions.createCategory(category=category, db=event["db_session"])

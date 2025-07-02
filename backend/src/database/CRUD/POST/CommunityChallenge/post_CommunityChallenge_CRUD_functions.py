@@ -8,7 +8,7 @@ from database.schema.POST.CommunityChallenge.communityChallenge_schema import Co
 from database.schema.GET.CommunityChallenge.communityChallenge_schema import CommunityChallengeResponse # Updated import
 from api.exceptions import ConflictException, BadRequestException
 
-def create_community_challenge(
+def createCommunityChallenge(
     community_challenge: CommunityChallengeCreate,
     db: Session = Depends(get_db)
 ) -> CommunityChallengeResponse: # Updated return type

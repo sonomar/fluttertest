@@ -3,7 +3,7 @@ from tools.prod.prodTools import extractData
 from database.schema.POST.UserCollectible.userCollectible_schema import UserCollectibleCreate
 import database.CRUD.POST.UserCollectible.post_UserCollectible_CRUD_functions as crudFunctions
 
-def create_user_collectible(event):
+def createUserCollectible(event):
     """
     Adds a new user collectible entry to the database.
     Requires 'ownerId', 'collectibleId', 'mint'. Other fields are optional.
@@ -30,4 +30,4 @@ def create_user_collectible(event):
 
     # Call the CRUD function with the Pydantic model and DB session
     # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.create_user_collectible(user_collectible=user_collectible, db=event["db_session"])
+    return crudFunctions.createUserCollectible(user_collectible=user_collectible, db=event["db_session"])

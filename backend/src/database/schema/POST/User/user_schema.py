@@ -10,5 +10,6 @@ class UserCreate(BaseModel):
     profileImg: Optional[str] = None
     deviceId: Optional[str] = None
     passwordHashed: str # Password provided during creation
-    userType: Optional[UserTypeEnum] = None
+    userType: Optional[UserTypeEnum] = Field(default=UserTypeEnum.onboarding)
     authToken: Optional[str] = None
+    pushToken: Optional[str] = None

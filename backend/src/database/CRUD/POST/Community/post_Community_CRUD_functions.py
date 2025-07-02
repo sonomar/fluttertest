@@ -8,7 +8,7 @@ from database.schema.POST.Community.community_schema import CommunityCreate
 from database.schema.GET.Community.community_schema import CommunityResponse # Updated import
 from api.exceptions import BadRequestException
 
-def create_community(
+def createCommunity(
     community: CommunityCreate,
     db: Session = Depends(get_db)
 ) -> CommunityResponse: # Updated return type

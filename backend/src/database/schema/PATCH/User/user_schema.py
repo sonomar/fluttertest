@@ -18,3 +18,4 @@ class UserUpdate(BaseModel):
     lastLoggedIn: Optional[datetime.datetime] = None # Allow updating last login time
     authToken: Optional[str] = None # Allow updating auth token
     userType: Optional[UserTypeEnum] = None
+    pushToken: Optional[str] = None

@@ -8,6 +8,6 @@ def call_Collectible_function(raw_path, event):
 
     ## Collectible
     if raw_path == Collectible_Path['createCollectible']['path']:
-        returnString = collectible.create_collectible(event)
+        returnString = collectible.createCollectible(event)
 
     return returnString

@@ -8,6 +8,6 @@ def call_Category_function(raw_path, event):
 
     ## Category
     if raw_path == Category_Path['createCategory']['path']:
-        returnString = category.create_category(event)
+        returnString = category.createCategory(event)
 
     return returnString

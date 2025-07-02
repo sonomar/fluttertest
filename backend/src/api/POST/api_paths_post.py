@@ -17,6 +17,10 @@ from database.schema.GET.NotificationUser.notificationUser_schema import Notific
 from database.schema.GET.Project.project_schema import ProjectResponse
 from database.schema.GET.Sponsor.sponsor_schema import SponsorResponse
 from database.schema.GET.UserCollectible.userCollectible_schema import UserCollectibleResponse
+from database.schema.GET.Distribution.distribution_schema import DistributionResponse
+from database.schema.GET.DistributionCode.distributionCode_schema import DistributionCodeResponse
+from database.schema.GET.DistributionCodeUser.distributionCodeUser_schema import DistributionCodeUserResponse
+from database.schema.GET.DistributionCollectible.distributionCollectible_schema import DistributionCollectibleResponse
 
 # Import the modules containing your refactored POST handler functions
 import database.CRUD.POST.User.post_User_CRUD_functions as UserPOSTFunctions
@@ -36,6 +40,10 @@ import database.CRUD.POST.NotificationUser.post_NotificationUser_CRUD_functions 
 import database.CRUD.POST.Project.post_Project_CRUD_functions as ProjectPOSTFunctions
 import database.CRUD.POST.Sponsor.post_Sponsor_CRUD_functions as SponsorPOSTFunctions
 import database.CRUD.POST.UserCollectible.post_UserCollectible_CRUD_functions as UserCollectiblePOSTFunctions
+import database.CRUD.POST.Distribution.post_Distribution_CRUD_functions as DistributionPOSTFunctions
+import database.CRUD.POST.DistributionCode.post_DistributionCode_CRUD_functions as DistributionCodePOSTFunctions
+import database.CRUD.POST.DistributionCodeUser.post_DistributionCodeUser_CRUD_functions as DistributionCodeUserPOSTFunctions
+import database.CRUD.POST.DistributionCollectible.post_DistributionCollectible_CRUD_functions as DistributionCollectiblePOSTFunctions
 
 
 API_PATHS_POST = {
@@ -43,7 +51,7 @@ API_PATHS_POST = {
         "createUser": {
             "path": "/createUser",
             "active": True,
-            "handler": UserPOSTFunctions.create_user,
+            "handler": UserPOSTFunctions.createUser,
             "response_model": UserResponse
         }
     },
@@ -51,7 +59,7 @@ API_PATHS_POST = {
         "createCategory": {
             "path": "/createCategory",
             "active": True,
-            "handler": CategoryPOSTFunctions.create_category,
+            "handler": CategoryPOSTFunctions.createCategory,
             "response_model": CategoryResponse
         }
     },
@@ -59,7 +67,7 @@ API_PATHS_POST = {
         "createCollection": {
             "path": "/createCollection",
             "active": True,
-            "handler": CollectionPOSTFunctions.create_collection,
+            "handler": CollectionPOSTFunctions.createCollection,
             "response_model": CollectionResponse
         }
     },
@@ -67,7 +75,7 @@ API_PATHS_POST = {
         "createCollectible": {
             "path": "/createCollectible",
             "active": True,
-            "handler": CollectiblePOSTFunctions.create_collectible,
+            "handler": CollectiblePOSTFunctions.createCollectible,
             "response_model": CollectibleResponse
         }
     },
@@ -75,7 +83,7 @@ API_PATHS_POST = {
         "createCollectibleSponsor": {
             "path": "/createCollectibleSponsor",
             "active": True,
-            "handler": CollectibleSponsorPOSTFunctions.create_collectible_sponsor,
+            "handler": CollectibleSponsorPOSTFunctions.createCollectibleSponsor,
             "response_model": CollectibleSponsorResponse
         }
     },
@@ -83,7 +91,7 @@ API_PATHS_POST = {
         "createCommunity": {
             "path": "/createCommunity",
             "active": True,
-            "handler": CommunityPOSTFunctions.create_community,
+            "handler": CommunityPOSTFunctions.createCommunity,
             "response_model": CommunityResponse
         }
     },
@@ -91,7 +99,7 @@ API_PATHS_POST = {
         "createCommunityChallenge": {
             "path": "/createCommunityChallenge",
             "active": True,
-            "handler": CommunityChallengePOSTFunctions.create_community_challenge,
+            "handler": CommunityChallengePOSTFunctions.createCommunityChallenge,
             "response_model": CommunityChallengeResponse
         }
     },
@@ -99,7 +107,7 @@ API_PATHS_POST = {
         "createCommunityUser": {
             "path": "/createCommunityUser",
             "active": True,
-            "handler": CommunityUserPOSTFunctions.create_community_user,
+            "handler": CommunityUserPOSTFunctions.createCommunityUser,
             "response_model": CommunityUserResponse
         }
     },
@@ -107,7 +115,7 @@ API_PATHS_POST = {
         "createMission": {
             "path": "/createMission",
             "active": True,
-            "handler": MissionPOSTFunctions.create_mission,
+            "handler": MissionPOSTFunctions.createMission,
             "response_model": MissionResponse
         }
     },
@@ -115,7 +123,7 @@ API_PATHS_POST = {
         "createMissionUser": {
             "path": "/createMissionUser",
             "active": True,
-            "handler": MissionUserPOSTFunctions.create_mission_user,
+            "handler": MissionUserPOSTFunctions.createMissionUser,
             "response_model": MissionUserResponse
         }
     },
@@ -123,7 +131,7 @@ API_PATHS_POST = {
         "createMissionUserData": {
             "path": "/createMissionUserData",
             "active": True,
-            "handler": MissionUserDataPOSTFunctions.create_mission_user_data,
+            "handler": MissionUserDataPOSTFunctions.createMissionUserData,
             "response_model": MissionUserDataResponse
         }
     },
@@ -131,7 +139,7 @@ API_PATHS_POST = {
         "createNewsPost": {
             "path": "/createNewsPost",
             "active": True,
-            "handler": NewsPostPOSTFunctions.create_news_post,
+            "handler": NewsPostPOSTFunctions.createNewsPost,
             "response_model": NewsPostResponse
         }
     },
@@ -139,7 +147,7 @@ API_PATHS_POST = {
         "createNotification": {
             "path": "/createNotification",
             "active": True,
-            "handler": NotificationPOSTFunctions.create_notification,
+            "handler": NotificationPOSTFunctions.createNotification,
             "response_model": NotificationResponse
         }
     },
@@ -147,7 +155,7 @@ API_PATHS_POST = {
         "createNotificationUser": {
             "path": "/createNotificationUser",
             "active": True,
-            "handler": NotificationUserPOSTFunctions.create_notification_user,
+            "handler": NotificationUserPOSTFunctions.createNotificationUser,
             "response_model": NotificationUserResponse
         }
     },
@@ -155,7 +163,7 @@ API_PATHS_POST = {
         "createProject": {
             "path": "/createProject",
             "active": True,
-            "handler": ProjectPOSTFunctions.create_project,
+            "handler": ProjectPOSTFunctions.createProject,
             "response_model": ProjectResponse
         }
     },
@@ -163,7 +171,7 @@ API_PATHS_POST = {
         "createSponsor": {
             "path": "/createSponsor",
             "active": True,
-            "handler": SponsorPOSTFunctions.create_sponsor,
+            "handler": SponsorPOSTFunctions.createSponsor,
             "response_model": SponsorResponse
         }
     },
@@ -171,8 +179,40 @@ API_PATHS_POST = {
         "createUserCollectible": {
             "path": "/createUserCollectible",
             "active": True,
-            "handler": UserCollectiblePOSTFunctions.create_user_collectible,
+            "handler": UserCollectiblePOSTFunctions.createUserCollectible,
             "response_model": UserCollectibleResponse
+        }
+    },
+    "Distribution": {
+        "createDistribution": {
+            "path": "/createDistribution",
+            "active": True,
+            "handler": DistributionPOSTFunctions.createDistribution,
+            "response_model": DistributionResponse
+        }
+    },
+    "DistributionCode": {
+        "createDistributionCode": {
+            "path": "/createDistributionCode",
+            "active": True,
+            "handler": DistributionCodePOSTFunctions.createDistributionCode,
+            "response_model": DistributionCodeResponse
+        }
+    },
+    "DistributionCodeUser": {
+        "createDistributionCodeUser": {
+            "path": "/createDistributionCodeUser",
+            "active": True,
+            "handler": DistributionCodeUserPOSTFunctions.createDistributionCodeUser,
+            "response_model": DistributionCodeUserResponse
+        }
+    },
+    "DistributionCollectible": {
+        "createDistributionCollectible": {
+            "path": "/createDistributionCollectible",
+            "active": True,
+            "handler": DistributionCollectiblePOSTFunctions.createDistributionCollectible,
+            "response_model": DistributionCollectibleResponse
         }
     }
 }

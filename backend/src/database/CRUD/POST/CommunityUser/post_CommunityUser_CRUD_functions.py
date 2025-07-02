@@ -8,7 +8,7 @@ from database.schema.POST.CommunityUser.communityUser_schema import CommunityUse
 from database.schema.GET.CommunityUser.communityUser_schema import CommunityUserResponse # Updated import
 from api.exceptions import ConflictException, BadRequestException
 
-def create_community_user(
+def createCommunityUser(
     community_user: CommunityUserCreate,
     db: Session = Depends(get_db)
 ) -> CommunityUserResponse: # Updated return type

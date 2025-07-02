@@ -9,7 +9,7 @@ from database.schema.POST.Sponsor.sponsor_schema import SponsorCreate
 from database.schema.GET.Sponsor.sponsor_schema import SponsorResponse # Updated import for response schema
 from api.exceptions import ConflictException, BadRequestException
 
-def create_sponsor(
+def createSponsor(
     sponsor: SponsorCreate,
     db: Session = Depends(get_db)
 ) -> SponsorResponse: # Updated return type

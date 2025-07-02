@@ -322,7 +322,7 @@ Due to the dynamic and extensive nature of the API (covering tables like User, C
 The `lambda_function.py` includes logic to handle AWS Cognito triggers:
 
 * **Trigger Source**: `PostConfirmation_ConfirmSignUp`
-* **Action**: When a user confirms their sign-up in Cognito, this Lambda function is triggered. It extracts user attributes (email, Cognito username) and creates a corresponding user record in the application's database using `database.CRUD.POST.User.post_User_CRUD_functions.create_user`.
+* **Action**: When a user confirms their sign-up in Cognito, this Lambda function is triggered. It extracts user attributes (email, Cognito username) and creates a corresponding user record in the application's database using `database.CRUD.POST.User.post_User_CRUD_functions.createUser`.
 * The password for the local database user is a placeholder (`COGNITO_MANAGED_USER`), as Cognito manages the actual user authentication.
 
 ## 🤝 Contributing

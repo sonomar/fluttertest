@@ -8,6 +8,6 @@ def call_Project_function(raw_path, event):
 
     ## Project
     if raw_path == Project_Path['createProject']['path']:
-        returnString = project.create_project(event)
+        returnString = project.createProject(event)
 
     return returnString

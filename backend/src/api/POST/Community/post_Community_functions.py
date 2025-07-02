@@ -3,7 +3,7 @@ from tools.prod.prodTools import extractData
 from database.schema.POST.Community.community_schema import CommunityCreate
 import database.CRUD.POST.Community.post_Community_CRUD_functions as crudFunctions
 
-def create_community(event):
+def createCommunity(event):
     """
     Adds a new community to the database.
     Requires 'title'. Other fields are optional.
@@ -30,5 +30,5 @@ def create_community(event):
 
     # Call the CRUD function with the Pydantic model and DB session
     # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.create_community(community=community, db=event["db_session"])
+    return crudFunctions.createCommunity(community=community, db=event["db_session"])
 
