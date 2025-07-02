@@ -476,22 +476,30 @@ class _LoginPageState extends State<LoginPage> {
           const SizedBox(height: 12),
           TextButton(
             onPressed: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                setState(() => _formType = AuthFormType.loginWithPassword);
-              } else {
-                // Also show the error message when just switching forms
-                setState(() {
-                  _uiErrorMessage = 'Please enter a valid email to continue.';
-                });
-              }
+              setState(() => _formType = AuthFormType.loginWithPassword);
             },
             child: const Text('Log in with Password',
-                style: TextStyle(color: Colors.white70)),
+                style: TextStyle(
+                  color: Colors.white70,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Colors.white,
+                )),
           ),
         ];
       case AuthFormType.loginWithPassword:
         return [
           ElevatedButton(onPressed: _submit, child: const Text("Log In")),
+          TextButton(
+            onPressed: () {
+              setState(() => _formType = AuthFormType.loginInitial);
+            },
+            child: const Text('Log in with Email',
+                style: TextStyle(
+                  color: Colors.white70,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Colors.white,
+                )),
+          ),
           TextButton(
             onPressed: () {
               setState(() {
@@ -501,7 +509,11 @@ class _LoginPageState extends State<LoginPage> {
               });
             },
             child: const Text('Forgot Your Password?',
-                style: TextStyle(color: Colors.white70)),
+                style: TextStyle(
+                  color: Colors.white70,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Colors.white,
+                )),
           ),
         ];
       case AuthFormType.loginWithEmailCode:
@@ -511,7 +523,17 @@ class _LoginPageState extends State<LoginPage> {
         ];
       case AuthFormType.register:
         return [
-          ElevatedButton(onPressed: _submit, child: const Text("Register"))
+          ElevatedButton(onPressed: _submit, child: const Text("Register")),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Already have an account?",
+                  style: TextStyle(color: Colors.white)),
+              TextButton(
+                  onPressed: _isSubmitting ? null : _switchFormType,
+                  child: const Text("Register")),
+            ],
+          )
         ];
       case AuthFormType.forgotPassword:
         return [
