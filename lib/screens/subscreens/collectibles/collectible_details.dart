@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter_new/qr_flutter.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import '../../../main.dart';
 import '../../../models/collectible_model.dart';
 import '../../../models/distribution_model.dart'; // Import DistributionModel
 import '../../../models/mission_model.dart';
@@ -81,9 +82,7 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
   /// Initiates a collectible transfer using the DistributionModel.
   Future<void> _initiateTransfer(
       BuildContext context, Map<String, dynamic> mintToTrade) async {
-    // NOTE: This ID should be a constant or fetched from a configuration.
-    // It must correspond to a "Distribution" entry in your database of type 'transfer'.
-    const String transferDistributionId = "3";
+    const String transferDistributionId = "your_transfer_distribution_id_here";
 
     final distributionModel =
         Provider.of<DistributionModel>(context, listen: false);
@@ -108,7 +107,6 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
       return;
     }
 
-    // Call the model to get a single-use transfer code
     final transferData = await distributionModel.initiateTransfer(
         userCollectibleId, transferDistributionId);
 
@@ -116,9 +114,11 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
       final String qrData = transferData['code'];
       if (!mounted) return;
 
-      // Show the QR code in a dialog
-      return showDialog<void>(
+      // --- START: MODIFIED LOGIC ---
+      // Show the dialog and wait for it to be closed by the user.
+      await showDialog<void>(
         context: context,
+        barrierDismissible: false, // User must explicitly close it
         builder: (BuildContext dialogContext) {
           return AlertDialog(
             title: const Text('Scan to Transfer'),
@@ -152,6 +152,31 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
           );
         },
       );
+
+      // After the dialog is closed, force a data refresh and navigate home.
+      if (!mounted) return;
+
+      // Force a refresh of the user's collectibles to reflect the change.
+      await Provider.of<CollectibleModel>(context, listen: false)
+          .loadCollectibles(forceClear: true);
+
+      if (!mounted) return;
+
+      final userData =
+          Provider.of<UserModel>(context, listen: false).currentUser;
+
+      // Navigate to the home page, removing all previous routes so the user can't go "back" to the stale details screen.
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => MyHomePage(
+            title: "Kloppocar Home",
+            userData: userData,
+            qrcode: 'none',
+          ),
+        ),
+        (Route<dynamic> route) => false,
+      );
+      // --- END: MODIFIED LOGIC ---
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

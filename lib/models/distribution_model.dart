@@ -8,8 +8,6 @@ import '../api/distribution_code_user.dart';
 import '../api/distribution_collectible.dart';
 import '../api/user_collectible.dart';
 
-// Note: Assumed API functions are required in your backend/API layer.
-
 class DistributionModel extends ChangeNotifier {
   final AppAuthProvider _appAuthProvider;
   final UserModel userModel;
@@ -52,7 +50,6 @@ class DistributionModel extends ChangeNotifier {
     }
   }
 
-  /// Returns the awarded collectibleId on success, otherwise null.
   Future<String?> redeemScannedCode(String code) async {
     _setState(isLoading: true, loadingMessage: "Verifying code...");
     final String? userId = userModel.currentUser?['userId']?.toString();
@@ -68,6 +65,36 @@ class DistributionModel extends ChangeNotifier {
       final distributionCodeId =
           distributionCode['distributionCodeId'].toString();
       final distributionId = distributionCode['distributionId'].toString();
+
+      // --- START: NEW TIME VALIDATION LOGIC ---
+
+      // Fetch the parent distribution to check its rules
+      final distribution = await getDistributionByDistributionId(
+          distributionId, _appAuthProvider);
+      if (distribution == null) {
+        throw Exception("Could not verify the code's campaign details.");
+      }
+
+      // Check if the distribution is currently active based on its start and end dates
+      final now = DateTime.now();
+      final startDateString = distribution['startDate'] as String?;
+      final endDateString = distribution['endDate'] as String?;
+
+      if (startDateString != null && startDateString.isNotEmpty) {
+        final startDate = DateTime.parse(startDateString);
+        if (now.isBefore(startDate)) {
+          throw Exception("This promotion has not started yet.");
+        }
+      }
+
+      if (endDateString != null && endDateString.isNotEmpty) {
+        final endDate = DateTime.parse(endDateString);
+        if (now.isAfter(endDate)) {
+          throw Exception("This promotion has expired.");
+        }
+      }
+
+      // --- END: NEW TIME VALIDATION LOGIC ---
 
       final hasRedeemed = _userDistributionCodeUsers
           .any((c) => c['distributionCodeId'].toString() == distributionCodeId);
@@ -185,7 +212,51 @@ class DistributionModel extends ChangeNotifier {
 
   Future<bool> redeemMissionReward(
       {required String missionDistributionId}) async {
-    // ... (implementation remains the same)
-    return true;
+    _setState(isLoading: true, loadingMessage: "Claiming mission reward...");
+    final String? userId = userModel.currentUser?['userId']?.toString();
+
+    try {
+      if (userId == null) throw Exception("User not found.");
+
+      // 1. Get the pool of collectibles associated with this mission's distribution
+      final collectiblePool = await getDistributionCollectiblesByDistributionId(
+          missionDistributionId, _appAuthProvider);
+      if (collectiblePool == null || collectiblePool.isEmpty) {
+        throw Exception("No rewards are associated with this mission.");
+      }
+
+      // 2. Randomly select one collectible to award from the pool
+      final randomCollectible =
+          collectiblePool[Random().nextInt(collectiblePool.length)];
+      final collectibleToAwardId =
+          randomCollectible['collectibleId'].toString();
+
+      // 3. Create a unique, single-use code for this user and distribution
+      final newCode = await createDistributionCode({
+        "distributionId": missionDistributionId,
+        "code":
+            "MISSION-$missionDistributionId-$userId-${DateTime.now().millisecondsSinceEpoch}",
+        "isMultiUse": false,
+      }, _appAuthProvider);
+
+      // 4. Immediately redeem it for the user
+      await createDistributionCodeUser({
+        "userId": userId,
+        "distributionCodeId": newCode['distributionCodeId'],
+        "redeemed": true,
+        "redeemedDate": DateTime.now().toIso8601String(),
+      }, _appAuthProvider);
+
+      // 5. Create the new UserCollectible for the user
+      await createUserCollectible(
+          userId, collectibleToAwardId, 0, _appAuthProvider); // Assuming mint 0
+
+      _setState(isLoading: false, loadingMessage: "Reward collected!");
+      return true;
+    } catch (e) {
+      _setState(
+          isLoading: false, error: "Failed to claim reward: ${e.toString()}");
+      return false;
+    }
   }
 }
