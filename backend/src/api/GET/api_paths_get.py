@@ -423,6 +423,12 @@ API_PATHS_GET = {
             "active": True,
             "handler": DistributionGETFunctions.getAllDistributions,
             "response_model": List[DistributionResponse]
+        },
+        "getDistributionsByProjectId": {
+            "path": "/getDistributionsByProjectId",
+            "active": True,
+            "handler": DistributionGETFunctions.getDistributionsByProjectId,
+            "response_model": List[DistributionResponse]
         }
     },
     DistributionCode_table: {
@@ -437,6 +443,18 @@ API_PATHS_GET = {
             "active": True,
             "handler": DistributionCodeGETFunctions.getAllDistributionCodes,
             "response_model": List[DistributionCodeResponse]
+        },
+        "getDistributionCodesByDistributionId": {
+            "path": "/getDistributionCodesByDistributionId",
+            "active": True,
+            "handler": DistributionCodeGETFunctions.getDistributionCodesByDistributionId,
+            "response_model": List[DistributionCodeResponse]
+        },
+        "getDistributionCodeByCode": {
+            "path": "/getDistributionCodeByCode",
+            "active": True,
+            "handler": DistributionCodeGETFunctions.getDistributionCodeByCode,
+            "response_model": DistributionCodeResponse
         }
     },
     DistributionCodeUser_table: {
@@ -451,6 +469,18 @@ API_PATHS_GET = {
             "active": True,
             "handler": DistributionCodeUserGETFunctions.getAllDistributionCodeUsers,
             "response_model": List[DistributionCodeUserResponse]
+        },
+        "getDistributionCodeUsersByUserId": {
+            "path": "/getDistributionCodeUsersByUserId",
+            "active": True,
+            "handler": DistributionCodeUserGETFunctions.getDistributionCodeUsersByUserId,
+            "response_model": List[DistributionCodeUserResponse]
+        },
+        "getDistributionCodeUsersByDistributionCodeId": {
+            "path": "/getDistributionCodeUsersByDistributionCodeId",
+            "active": True,
+            "handler": DistributionCodeUserGETFunctions.getDistributionCodeUsersByDistributionCodeId,
+            "response_model": List[DistributionCodeUserResponse]
         }
     },
     DistributionCollectible_table: {
@@ -464,6 +494,12 @@ API_PATHS_GET = {
             "path": "/getAllDistributionCollectibles",
             "active": True,
             "handler": DistributionCollectibleGETFunctions.getAllDistributionCollectibles,
+            "response_model": List[DistributionCollectibleResponse]
+        },
+        "getDistributionCollectiblesByCollectibleId": {
+            "path": "/getDistributionCollectiblesByCollectibleId",
+            "active": True,
+            "handler": DistributionCollectibleGETFunctions.getDistributionCollectiblesByCollectibleId,
             "response_model": List[DistributionCollectibleResponse]
         }
     }

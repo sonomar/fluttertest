@@ -22,3 +22,9 @@ def getAllDistributions(
     db: Session = Depends(get_db)
 ) -> List[DistributionResponse]:
     return db.query(Distribution).offset(skip).limit(limit).all()
+
+def getDistributionsByProjectId(
+    projectId: int,
+    db: Session = Depends(get_db)
+) -> List[DistributionResponse]:
+    return db.query(Distribution).filter(Distribution.projectId == projectId).all()

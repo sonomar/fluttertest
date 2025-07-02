@@ -10,5 +10,7 @@ def call_Distribution_function(raw_path, event):
         returnString = distributionFunctions.getDistributionByDistributionId(event)
     elif raw_path == Distribution_Path['getAllDistributions']['path']:
         returnString = distributionFunctions.getAllDistributions(event)
+    elif raw_path == Distribution_Path['getDistributionsByProjectId']['path']:
+        returnString = distributionFunctions.getDistributionsByProjectId(event)
 
     return returnString

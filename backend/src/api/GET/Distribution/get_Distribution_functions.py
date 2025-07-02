@@ -18,3 +18,11 @@ def getAllDistributions(event):
         limit = data.get("limit", 100)
         
     return crudFunctions.getAllDistributions(skip=skip, limit=limit, db=event['db_session'])
+
+def getDistributionsByProjectId(event):
+    data = extractData(event)
+    if not data or "projectId" not in data:
+        return {'statusCode': 400, 'body': 'projectId is required'}
+        
+    project_id = data["projectId"]
+    return crudFunctions.getDistributionsByProjectId(projectId=project_id, db=event['db_session'])

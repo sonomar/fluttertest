@@ -10,5 +10,9 @@ def call_DistributionCodeUser_function(raw_path, event):
         returnString = distributionCodeUserFunctions.getDistributionCodeUserByDistributionCodeUserId(event)
     elif raw_path == DistributionCodeUser_Path['getAllDistributionCodeUsers']['path']:
         returnString = distributionCodeUserFunctions.getAllDistributionCodeUsers(event)
+    elif raw_path == DistributionCodeUser_Path['getDistributionCodeUsersByUserId']['path']:
+        returnString = distributionCodeUserFunctions.getDistributionCodeUsersByUserId(event)
+    elif raw_path == DistributionCodeUser_Path['getDistributionCodeUsersByDistributionCodeId']['path']:
+        returnString = distributionCodeUserFunctions.getDistributionCodeUsersByDistributionCodeId(event)
 
     return returnString

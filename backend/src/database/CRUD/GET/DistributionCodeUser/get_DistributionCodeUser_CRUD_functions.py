@@ -22,3 +22,15 @@ def getAllDistributionCodeUsers(
     db: Session = Depends(get_db)
 ) -> List[DistributionCodeUserResponse]:
     return db.query(DistributionCodeUser).offset(skip).limit(limit).all()
+
+def getDistributionCodeUsersByUserId(
+    userId: int,
+    db: Session = Depends(get_db)
+) -> List[DistributionCodeUserResponse]:
+    return db.query(DistributionCodeUser).filter(DistributionCodeUser.userId == userId).all()
+
+def getDistributionCodeUsersByDistributionCodeId(
+    distributionCodeId: int,
+    db: Session = Depends(get_db)
+) -> List[DistributionCodeUserResponse]:
+    return db.query(DistributionCodeUser).filter(DistributionCodeUser.distributionCodeId == distributionCodeId).all()
