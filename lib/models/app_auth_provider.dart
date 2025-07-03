@@ -18,7 +18,6 @@ class AppAuthProvider with ChangeNotifier {
   bool isNewUser = false; // Error message for the UI
 
   AppAuthProvider(this._authService) {
-    // Immediately attempt to check current user session on provider creation
     checkCurrentUser();
   }
 
@@ -35,48 +34,39 @@ class AppAuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // NEW: Method to handle Google Sign-In
-  Future<bool> signInWithGoogle() async {
-    _status = AuthStatus.authenticating;
-    _errorMessage = null;
-    notifyListeners();
-
-    final success = await _authService.signInWithGoogle();
-    if (success) {
-      _userSession = _authService.session;
-      _status = AuthStatus.authenticated;
-    } else {
-      _errorMessage = _authService.errorMessage;
-      _status = AuthStatus.unauthenticated;
-    }
-    notifyListeners();
-    return success;
-  }
-
-  // NEW: Method to handle Apple Sign-In
-  Future<bool> signInWithApple() async {
-    _status = AuthStatus.authenticating;
-    _errorMessage = null;
-    notifyListeners();
-
-    final success = await _authService.signInWithApple();
-    if (success) {
-      _userSession = _authService.session;
-      _status = AuthStatus.authenticated;
-    } else {
-      _errorMessage = _authService.errorMessage;
-      _status = AuthStatus.unauthenticated;
-    }
-    notifyListeners();
-    return success;
-  }
-
   void completeNewUserOnboarding() {
     if (isNewUser) {
       isNewUser = false;
       // Notify listeners in case any part of the UI needs to react to this change.
       notifyListeners();
     }
+  }
+
+  Future<void> launchSignInWithProvider(String provider) async {
+    _errorMessage = null;
+    notifyListeners();
+    await _authService.launchSignInWithProvider(provider);
+    if (_authService.errorMessage != null) {
+      _errorMessage = _authService.errorMessage;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> handleRedirect(Uri uri) async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = null;
+    notifyListeners();
+
+    final success = await _authService.handleRedirect(uri);
+    if (success) {
+      _userSession = _authService.session;
+      _status = AuthStatus.authenticated;
+    } else {
+      _errorMessage = _authService.errorMessage;
+      _status = AuthStatus.unauthenticated;
+    }
+    notifyListeners();
+    return success;
   }
 
   Future<void> checkCurrentUser() async {

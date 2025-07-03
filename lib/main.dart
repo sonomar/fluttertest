@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:uni_links/uni_links.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './models/app_localizations.dart';
 import 'screens/home_screen.dart';
@@ -206,6 +208,7 @@ late List<Widget> _screens;
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
+  StreamSubscription? _linkSubscription;
 
   final PageStorageBucket bucket = PageStorageBucket();
 
@@ -214,6 +217,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    _initUniLinks();
     _screens = [
       HomeScreen(key: const PageStorageKey('home'), qrcode: widget.qrcode),
       const CollectionScreen(key: PageStorageKey('collection')),
@@ -232,6 +236,25 @@ class _MyHomePageState extends State<MyHomePage> {
           },
         );
       }
+    });
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _initUniLinks() async {
+    // Listen for incoming links
+    _linkSubscription = uriLinkStream.listen((Uri? uri) {
+      if (uri != null && mounted) {
+        print('Received redirect: $uri');
+        // Pass the URI to your auth provider to handle
+        context.read<AppAuthProvider>().handleRedirect(uri);
+      }
+    }, onError: (err) {
+      print('Error listening for links: $err');
     });
   }
 

@@ -1,15 +1,13 @@
-import 'dart:async';
 import 'dart:convert';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/app_auth_provider.dart';
 import '../api/user.dart';
 import '../helpers/auth_error_helper.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 // Helper to get environment variables safely
 String getEnvItem(String item) {
@@ -95,39 +93,15 @@ class AuthService {
   final CognitoUserPool _userPool;
   CognitoUser? _cognitoUser;
   CognitoUserSession? _session; // Internal storage for the current session
-  String?
-      _internalErrorMessage; // To hold specific error messages from AuthService
+  String? _internalErrorMessage;
   AppAuthProvider? _appAuthProvider;
-
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-  // Use a Completer to ensure initialization happens only once.
-  final Completer<void> _googleSignInCompleter = Completer<void>();
 
   AuthService(this._appAuthProvider)
       : _userPool = CognitoUserPool(
           userPoolId,
           clientId,
           storage: SecureCognitoStorage(),
-        ) {
-    // STEP 2: Call the async initialization method from the constructor.
-    _initializeGoogleSignIn();
-  }
-
-  Future<void> _initializeGoogleSignIn() async {
-    // If initialization is already complete or in progress, do nothing.
-    if (_googleSignInCompleter.isCompleted) return;
-
-    try {
-      await _googleSignIn.initialize(
-        serverClientId: googleWebClientId,
-      );
-      _googleSignInCompleter.complete();
-    } catch (e) {
-      print("Error initializing Google Sign In: $e");
-      // Mark initialization as failed.
-      _googleSignInCompleter.completeError(e);
-    }
-  }
+        );
 
   AuthService.uninitialized()
       : _appAuthProvider = null,
@@ -135,10 +109,7 @@ class AuthService {
           userPoolId,
           clientId,
           storage: SecureCognitoStorage(),
-        ) {
-    // Also call it from the uninitialized constructor.
-    _initializeGoogleSignIn();
-  }
+        );
 
   String? get currentUserSub {
     if (_session != null && _session!.isValid()) {
@@ -172,61 +143,57 @@ class AuthService {
   // Expose internal error messages
   String? get errorMessage => _internalErrorMessage;
 
-  Future<bool> signInWithGoogle() async {
+  Future<void> launchSignInWithProvider(String provider) async {
     _internalErrorMessage = null;
-    try {
-      await _googleSignInCompleter.future;
+    final String providerName =
+        (provider.toLowerCase() == 'google') ? 'Google' : 'SignInWithApple';
 
-      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+    final url =
+        'https://$cognitoDomain/login?response_type=token&client_id=$clientId&redirect_uri=deinsapp://callback&identity_provider=$providerName';
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final idToken = googleAuth.idToken;
+    final uri = Uri.parse(url);
 
-      if (idToken == null) {
-        _internalErrorMessage = 'Failed to get Google token.';
-        return false;
-      }
-
-      print("Google ID Token: $idToken");
-      _internalErrorMessage =
-          "Google Sign-In not fully implemented on backend.";
-      return false;
-    } catch (e) {
-      // This catch block now correctly handles sign-in failures AND user cancellations.
-      _internalErrorMessage = simplifyAuthError(e.toString());
-      return false;
+    if (await canLaunchUrl(uri)) {
+      // Use launchInBrowser for better handling on simulators and devices
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      _internalErrorMessage = 'Could not launch login page.';
     }
   }
 
-  Future<bool> signInWithApple() async {
+  Future<bool> handleRedirect(Uri uri) async {
     _internalErrorMessage = null;
     try {
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
+      final fragment = uri.fragment;
+      final params = Uri.splitQueryString(fragment);
 
-      final email = credential.email;
-      if (email == null) {
+      final idTokenString = params['id_token'];
+      final accessTokenString = params['access_token'];
+
+      if (idTokenString == null || accessTokenString == null) {
         _internalErrorMessage =
-            "Email not provided. Please try another sign-in method if this is your first time.";
+            simplifyAuthError('Login failed. Tokens not found in redirect.');
         return false;
       }
+      final idToken = CognitoIdToken(idTokenString);
+      final accessToken = CognitoAccessToken(accessTokenString);
 
-      final idToken = credential.identityToken;
-      if (idToken == null) {
-        _internalErrorMessage = 'Failed to get Apple token.';
+      _session = new CognitoUserSession(idToken, accessToken);
+
+      // Manually create a CognitoUser and cache the tokens for session persistence.
+      final claims = idToken.decodePayload();
+      final userEmail = claims['email'];
+      if (userEmail == null) {
+        _internalErrorMessage = 'Email not found in token.';
         return false;
       }
+      _cognitoUser = new CognitoUser(userEmail, _userPool);
+      await _cognitoUser!.cacheTokens();
 
-      print("Apple ID Token: $idToken");
-      _internalErrorMessage = "Apple Sign-In not fully implemented on backend.";
-      return false;
+      print('Successfully handled redirect and created session.');
+      return true;
     } catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.toString());
+      _internalErrorMessage = 'Error handling redirect: ${e.toString()}';
       return false;
     }
   }

@@ -38,6 +38,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>deinsapp</string>
 				<string>com.googleusercontent.apps.979620318257-nootjpjn3e7t1cmgj4gcgnhjua885odn</string>
 			</array>
 		</dict>
