@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './models/app_localizations.dart';
 import 'screens/home_screen.dart';
-import 'widgets/openCards/login_page.dart';
 import './widgets/auth/onboarding.dart';
 import 'screens/collection_screen.dart';
 import 'screens/scan_screen.dart';
@@ -14,12 +13,12 @@ import 'screens/subscreens/missions/missions.dart';
 import './models/collectible_model.dart';
 import './models/notification_provider.dart';
 import './models/user_model.dart';
+import './models/distribution_model.dart';
 import 'models/mission_model.dart';
 import 'models/community_model.dart';
 import 'models/news_post_model.dart';
 import 'models/locale_provider.dart';
 import 'models/asset_provider.dart';
-import 'models/mission_model.dart';
 import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
@@ -27,7 +26,6 @@ import './helpers/localization_helper.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import './app_lifefycle_observer.dart';
-import './screens/auth_loading_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,6 +67,18 @@ void main() async {
             (context, appAuthProvider, userModel, previousCollectibleModel) {
           return previousCollectibleModel ??
               CollectibleModel(appAuthProvider, userModel);
+        },
+      ),
+      ChangeNotifierProxyProvider2<AppAuthProvider, UserModel,
+          DistributionModel>(
+        create: (context) => DistributionModel(
+          context.read<AppAuthProvider>(),
+          context.read<UserModel>(),
+        ),
+        update:
+            (context, appAuthProvider, userModel, previousDistributionModel) {
+          return previousDistributionModel ??
+              DistributionModel(appAuthProvider, userModel);
         },
       ),
       ChangeNotifierProvider<AssetProvider>(
