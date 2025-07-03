@@ -35,6 +35,42 @@ class AppAuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // NEW: Method to handle Google Sign-In
+  Future<bool> signInWithGoogle() async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = null;
+    notifyListeners();
+
+    final success = await _authService.signInWithGoogle();
+    if (success) {
+      _userSession = _authService.session;
+      _status = AuthStatus.authenticated;
+    } else {
+      _errorMessage = _authService.errorMessage;
+      _status = AuthStatus.unauthenticated;
+    }
+    notifyListeners();
+    return success;
+  }
+
+  // NEW: Method to handle Apple Sign-In
+  Future<bool> signInWithApple() async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = null;
+    notifyListeners();
+
+    final success = await _authService.signInWithApple();
+    if (success) {
+      _userSession = _authService.session;
+      _status = AuthStatus.authenticated;
+    } else {
+      _errorMessage = _authService.errorMessage;
+      _status = AuthStatus.unauthenticated;
+    }
+    notifyListeners();
+    return success;
+  }
+
   void completeNewUserOnboarding() {
     if (isNewUser) {
       isNewUser = false;

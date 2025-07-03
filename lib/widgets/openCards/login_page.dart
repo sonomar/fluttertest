@@ -5,6 +5,7 @@ import '../../helpers/localization_helper.dart';
 import '../../models/app_auth_provider.dart';
 import '../../widgets/splash_screen.dart';
 import 'package:crypto/crypto.dart';
+import 'dart:io' show Platform;
 
 String encryptPassword(String password) {
   final bytes = utf8.encode(password);
@@ -49,6 +50,46 @@ class _LoginPageState extends State<LoginPage> {
     _confirmPasswordController.dispose();
     _loginCodeController.dispose();
     super.dispose();
+  }
+
+  // NEW: Handler for Google Sign-In button press
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isSubmitting = true;
+      _uiErrorMessage = '';
+    });
+    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
+
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+    final success = await authProvider.signInWithGoogle();
+
+    if (success && mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const SplashScreen()),
+      );
+    } else if (mounted) {
+      setState(() => _isSubmitting = false);
+    }
+  }
+
+  // NEW: Handler for Apple Sign-In button press
+  Future<void> _handleAppleSignIn() async {
+    setState(() {
+      _isSubmitting = true;
+      _uiErrorMessage = '';
+    });
+    Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
+
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+    final success = await authProvider.signInWithApple();
+
+    if (success && mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const SplashScreen()),
+      );
+    } else if (mounted) {
+      setState(() => _isSubmitting = false);
+    }
   }
 
   Future<bool> _showCancelConfirmationDialog() async {
@@ -418,6 +459,10 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                         ..._buildActionButtons(),
+                        const SizedBox(height: 12),
+                        _buildSocialLoginDivider(),
+                        const SizedBox(height: 12),
+                        _buildSocialLoginButtons(),
                         const SizedBox(height: 20),
                         if (_formType == AuthFormType.loginInitial ||
                             _formType == AuthFormType.loginWithPassword ||
@@ -442,6 +487,48 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ],
       ),
+    );
+  }
+
+  // NEW WIDGET: A divider for the social logins
+  Widget _buildSocialLoginDivider() {
+    return const Row(
+      children: [
+        Expanded(child: Divider(thickness: 1, endIndent: 10)),
+        Text("OR", style: TextStyle(color: Colors.white70)),
+        Expanded(child: Divider(thickness: 1, indent: 10)),
+      ],
+    );
+  }
+
+  // NEW WIDGET: Builds the social login buttons
+  Widget _buildSocialLoginButtons() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ElevatedButton.icon(
+          icon: Image.asset('assets/images/google_logo.png',
+              height: 24.0), // Make sure you have this asset
+          label: const Text('Sign in with Google'),
+          onPressed: _isSubmitting ? null : _handleGoogleSignIn,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Only show the Apple Sign In button on iOS devices
+        if (Platform.isIOS)
+          ElevatedButton.icon(
+            icon: const Icon(Icons.apple, color: Colors.white),
+            label: const Text('Sign in with Apple'),
+            onPressed: _isSubmitting ? null : _handleAppleSignIn,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+            ),
+          ),
+      ],
     );
   }
 
