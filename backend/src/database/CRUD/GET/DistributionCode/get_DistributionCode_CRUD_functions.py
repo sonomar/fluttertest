@@ -22,3 +22,18 @@ def getAllDistributionCodes(
     db: Session = Depends(get_db)
 ) -> List[DistributionCodeResponse]:
     return db.query(DistributionCode).offset(skip).limit(limit).all()
+
+def getDistributionCodesByDistributionId(
+    distributionId: int,
+    db: Session = Depends(get_db)
+) -> List[DistributionCodeResponse]:
+    return db.query(DistributionCode).filter(DistributionCode.distributionId == distributionId).all()
+
+def getDistributionCodeByCode(
+    code: str,
+    db: Session = Depends(get_db)
+) -> DistributionCodeResponse:
+    db_dist_code = db.query(DistributionCode).filter(DistributionCode.code == code).first()
+    if db_dist_code is None:
+        raise NotFoundException(detail=f"DistributionCode with code '{code}' not found")
+    return db_dist_code

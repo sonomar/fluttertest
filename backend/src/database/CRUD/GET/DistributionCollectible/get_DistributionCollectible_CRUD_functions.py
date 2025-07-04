@@ -22,3 +22,15 @@ def getAllDistributionCollectibles(
     db: Session = Depends(get_db)
 ) -> List[DistributionCollectibleResponse]:
     return db.query(DistributionCollectible).offset(skip).limit(limit).all()
+
+def getDistributionCollectiblesByDistributionId(
+    distributionId: int,
+    db: Session = Depends(get_db)
+) -> List[DistributionCollectibleResponse]:
+    return db.query(DistributionCollectible).filter(DistributionCollectible.distributionId == distributionId).all()
+
+def getDistributionCollectiblesByCollectibleId(
+    collectibleId: int,
+    db: Session = Depends(get_db)
+) -> List[DistributionCollectibleResponse]:
+    return db.query(DistributionCollectible).filter(DistributionCollectible.collectibleId == collectibleId).all()

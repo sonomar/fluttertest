@@ -18,3 +18,19 @@ def getAllDistributionCodes(event):
         limit = data.get("limit", 100)
         
     return crudFunctions.getAllDistributionCodes(skip=skip, limit=limit, db=event['db_session'])
+
+def getDistributionCodesByDistributionId(event):
+    data = extractData(event)
+    if not data or "distributionId" not in data:
+        return {'statusCode': 400, 'body': 'distributionId is required'}
+        
+    distribution_id = data["distributionId"]
+    return crudFunctions.getDistributionCodesByDistributionId(distributionId=distribution_id, db=event['db_session'])
+
+def getDistributionCodeByCode(event):
+    data = extractData(event)
+    if not data or "code" not in data:
+        return {'statusCode': 400, 'body': 'code is required'}
+        
+    code = data["code"]
+    return crudFunctions.getDistributionCodeByCode(code=code, db=event['db_session'])

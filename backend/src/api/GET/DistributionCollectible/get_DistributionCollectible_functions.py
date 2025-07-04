@@ -18,3 +18,11 @@ def getAllDistributionCollectibles(event):
         limit = data.get("limit", 100)
         
     return crudFunctions.getAllDistributionCollectibles(skip=skip, limit=limit, db=event['db_session'])
+
+def getDistributionCollectiblesByCollectibleId(event):
+    data = extractData(event)
+    if not data or "collectibleId" not in data:
+        return {'statusCode': 400, 'body': 'collectibleId is required'}
+        
+    collectible_id = data["collectibleId"]
+    return crudFunctions.getDistributionCollectiblesByCollectibleId(collectibleId=collectible_id, db=event['db_session'])
