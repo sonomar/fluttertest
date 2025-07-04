@@ -1,15 +1,18 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
-from database.models import UserTypeEnum # Adjust import path if necessary
+from typing import Optional, Dict
+from database.models import UserTypeEnum
 
-
-# Schema for creating a User (includes password)
 class UserCreate(BaseModel):
     email: EmailStr
     username: Optional[str] = None
+    cognitoUsername: Optional[str] = None
     profileImg: Optional[str] = None
     deviceId: Optional[str] = None
-    passwordHashed: str # Password provided during creation
+    passwordHashed: str
     userType: Optional[UserTypeEnum] = Field(default=UserTypeEnum.onboarding)
     authToken: Optional[str] = None
+    authData: Optional[Dict] = None
     pushToken: Optional[str] = None
+    score: Optional[int] = 0
+    isOnBlockchain: Optional[bool] = False
+    blockchainUserAddress: Optional[str] = None

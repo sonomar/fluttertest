@@ -5,10 +5,8 @@ import datetime
 # --- Notification Schemas ---
 class NotificationResponse(BaseModel):
     notificationId: int
-    createdDt: datetime.datetime
-    updatedDt: datetime.datetime
-    header: str
-    content: str
+    header: Dict[str, str]
+    content: Dict[str, str]
     link: Optional[Dict[str, Any]] = None
     pushNotification: Optional[bool] = False
     private: Optional[bool] = False
@@ -17,6 +15,8 @@ class NotificationResponse(BaseModel):
     qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     embedRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     active: Optional[bool] = True
+    createdDt: datetime.datetime
+    updatedDt: datetime.datetime
 
     class Config:
         from_attributes = True

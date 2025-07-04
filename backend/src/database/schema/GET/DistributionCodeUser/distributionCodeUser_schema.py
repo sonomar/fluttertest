@@ -9,7 +9,7 @@ class DistributionCodeUserResponse(BaseModel):
     previousOwnerId: Optional[int] = None
     redeemed: bool
     redeemedDate: Optional[datetime.datetime] = None
-    collectibleRevieved: Optional[Dict[str, Any]] = None
+    collectibleReceived: Optional[Dict[str, Any]] = None
     createdDt: datetime.datetime
     updatedDt: datetime.datetime
 

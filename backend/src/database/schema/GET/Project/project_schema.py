@@ -4,13 +4,12 @@ import datetime
 
 class ProjectResponse(BaseModel):
     projectId: int
-    createdDt: datetime.datetime
-    updatedDt: datetime.datetime
-
-    name: str
-    attributed: Dict[str, Any] # Assuming attributed is always a dict
+    name: Dict[str, str]
+    attributed: Dict[str, Any]
     location: Optional[str] = None
     active: Optional[bool] = True
+    createdDt: datetime.datetime
+    updatedDt: datetime.datetime
 
     class Config:
         from_attributes = True

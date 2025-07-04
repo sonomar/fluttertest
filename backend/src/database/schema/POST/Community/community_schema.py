@@ -2,10 +2,9 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any, Union, List
 import datetime
 
-# --- Community Schemas ---
 class CommunityCreate(BaseModel):
-    title: str
-    description: Optional[str] = None
+    title: Dict[str, str]
+    description: Optional[Dict[str, str]] = None
     imageRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None

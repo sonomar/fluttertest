@@ -20,7 +20,7 @@ def createDistributionCodeUser(
         previousOwnerId=distribution_code_user.previousOwnerId,
         redeemed=distribution_code_user.redeemed,
         redeemedDate=distribution_code_user.redeemedDate,
-        collectibleRevieved=distribution_code_user.collectibleRevieved
+        collectibleReceived=distribution_code_user.collectibleReceived
     )
 
     try:

@@ -1,3 +1,4 @@
+import logging
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -5,45 +6,39 @@ from sqlalchemy.exc import IntegrityError
 from database.db import get_db
 from database.models import Collectible
 from database.schema.POST.Collectible.collectible_schema import CollectibleCreate
-from database.schema.GET.Collectible.collectible_schema import CollectibleResponse # Updated import
-from api.exceptions import ConflictException, BadRequestException
+from database.schema.GET.Collectible.collectible_schema import CollectibleResponse
+from api.exceptions import BadRequestException
+
+# Use the logging module for better error tracking
+logger = logging.getLogger(__name__)
 
 def createCollectible(
     collectible: CollectibleCreate,
     db: Session = Depends(get_db)
-) -> CollectibleResponse: # Updated return type
+) -> CollectibleResponse:
     """
     Adds a new collectible to the database using SQLAlchemy.
+    This function now handles all fields from the updated schema.
     """
+    # Create the SQLAlchemy model instance directly from the Pydantic schema.
+    # This is a cleaner and more maintainable way to ensure all fields,
+    # including new ones like 'isOnBlockchain' and 'price', are included.
     db_collectible = Collectible(
-        collectionId=collectible.collectionId,
-        categoryId=collectible.categoryId,
-        projectId=collectible.projectId,
-        communityId=collectible.communityId,
-        label=collectible.label,
-        name=collectible.name,
-        description=collectible.description,
-        imageRef=collectible.imageRef,
-        vidRef=collectible.vidRef,
-        qrRef=collectible.qrRef,
-        embedRef=collectible.embedRef,
-        circulation=collectible.circulation,
-        publicationDate=collectible.publicationDate,
-        active=collectible.active
+        **collectible.model_dump()
     )
 
     try:
         db.add(db_collectible)
         db.commit()
         db.refresh(db_collectible)
-        return CollectibleResponse.model_validate(db_collectible) # Updated return statement
+        return CollectibleResponse.model_validate(db_collectible)
     except IntegrityError as e:
         db.rollback()
         error_message = str(e)
-        print(f"Integrity error creating collectible: {error_message}")
-        # Add specific checks if there are unique constraints on collectible fields
-        raise BadRequestException(detail=f"Database integrity error: {e}")
+        logger.error(f"Integrity error creating collectible: {error_message}")
+        # Add specific checks here if there are unique constraints to handle
+        raise BadRequestException(detail=f"Database integrity error: {error_message}")
     except Exception as e:
         db.rollback()
-        print(f"Database error creating collectible: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error: {e}")
+        logger.error(f"An unexpected database error occurred while creating a collectible: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected database error occurred.")

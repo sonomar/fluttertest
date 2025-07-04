@@ -1,7 +1,7 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Dict
 
-# --- CommunityUser Schemas ---
 class CommunityUserUpdate(BaseModel):
     communityId: Optional[int] = None
     memberId: Optional[int] = None
+    completed: Optional[Dict[str, str]] = None

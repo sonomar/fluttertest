@@ -2,12 +2,12 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any, Union, List
 import datetime
 
-# --- Mission Schemas ---
 class MissionUpdate(BaseModel):
     collectionId: Optional[int] = None
-    title: Optional[str] = None
-    description: Optional[str] = None
+    title: Optional[Dict[str, str]] = None
+    description: Optional[Dict[str, str]] = None
     reward: Optional[str] = None
+    rewardId: Optional[int] = None
     goal: Optional[int] = None
     timer: Optional[bool] = None
     endDate: Optional[datetime.datetime] = None

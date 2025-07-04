@@ -1,12 +1,11 @@
 from pydantic import EmailStr, BaseModel
 from typing import Optional, Dict, Any, Union, List
 
-# Schema for updating a Sponsor (all fields optional)
 class SponsorUpdate(BaseModel):
-    name: Optional[str] = None
-    organization: Optional[str] = None
+    name: Optional[Dict[str, str]] = None
+    organization: Optional[Dict[str, str]] = None
     urls: Optional[Dict[str, Any]] = None
-    description: Optional[str] = None
+    description: Optional[Dict[str, str]] = None
     imageRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None

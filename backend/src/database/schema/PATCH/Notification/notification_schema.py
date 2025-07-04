@@ -3,8 +3,8 @@ from typing import Optional, Dict, Any, Union, List
 
 # --- Notification Schemas ---
 class NotificationUpdate(BaseModel):
-    header: Optional[str] = None
-    content: Optional[str] = None
+    header: Optional[Dict[str, str]] = None
+    content: Optional[Dict[str, str]] = None
     link: Optional[Dict[str, Any]] = None
     pushNotification: Optional[bool] = None
     private: Optional[bool] = None

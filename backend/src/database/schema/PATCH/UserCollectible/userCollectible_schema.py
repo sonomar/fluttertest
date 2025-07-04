@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Dict, Any
 import datetime
 
 class UserCollectibleUpdate(BaseModel):
@@ -10,3 +10,6 @@ class UserCollectibleUpdate(BaseModel):
     lastTransferredDt: Optional[datetime.datetime] = None
     active: Optional[bool] = None
     favorite: Optional[bool] = None
+    trade: Optional[bool] = None
+    points: Optional[int] = None
+    qrCode: Optional[Dict[str, Any]] = None

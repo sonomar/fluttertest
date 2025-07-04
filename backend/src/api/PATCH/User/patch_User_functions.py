@@ -145,6 +145,18 @@ def UserDataCheck(user: UserUpdate, data: any):
     if "usernameNew" in data: # TIMESTAMP
         # Consider validating timestamp format
         user.username = data["usernameNew"]
+    if "score" in data:
+        user.score = data["score"]
+    if "cognitoUsername" in data:
+        user.cognitoUsername = data["cognitoUsername"]
+    if "isOnBlockchain" in data:
+        user.isOnBlockchain = data["isOnBlockchain"]
+    if "blockchainUserAddress" in data:
+        user.blockchainUserAddress = data["blockchainUserAddress"]
+    if "pushToken" in data:
+        user.pushToken = data["pushToken"]
+    if "authData" in data:
+        user.authData = data["authData"]
 
     return user
 

@@ -1,28 +1,28 @@
-# database/CRUD/POST/CommunityUser/post_CommunityUser_table.py
 from tools.prod.prodTools import extractData
 from database.schema.POST.CommunityUser.communityUser_schema import CommunityUserCreate
 import database.CRUD.POST.CommunityUser.post_CommunityUser_CRUD_functions as crudFunctions
+from pydantic import ValidationError
 
 def createCommunityUser(event):
     """
-    Adds a new community user entry to the database.
-    Requires 'communityId', 'memberId'.
+    Adds a new community user entry to the database. It validates the request data
+    using the CommunityUserCreate schema and then calls the corresponding CRUD function.
     """
     data = extractData(event)
+    if not data:
+        return {'statusCode': 400, 'body': 'Request body is missing'}
 
-    # Basic validation for required fields
-    if not data or "communityId" not in data or "memberId" not in data:
-        return {
-            "statusCode": 400,
-            "body": "communityId and memberId are required"
-        }
+    try:
+        # Pydantic will automatically validate that 'communityId' and 'memberId' are present.
+        # The manual check is no longer needed.
+        community_user_data = CommunityUserCreate(**data)
+    except ValidationError as e:
+        # If validation fails, return a 400 error with a detailed message.
+        return {'statusCode': 400, 'body': e.errors()}
 
-    # Create Pydantic model instance
-    community_user = CommunityUserCreate(
-        communityId=data["communityId"],
-        memberId=data["memberId"]
+    # Call the CRUD function with the validated Pydantic model.
+    # Note: The CRUD function name is also updated to snake_case for consistency.
+    return crudFunctions.createCommunityUser(
+        community_user=community_user_data, 
+        db=event["db_session"]
     )
-
-    # Call the CRUD function with the Pydantic model and DB session
-    # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.createCommunityUser(community_user=community_user, db=event["db_session"])

@@ -2,8 +2,6 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional, Dict, Any
 import datetime
 
-
-# Schema for returning User data (excludes sensitive info like passwordHash)
 class UserResponse(BaseModel):
     userId: int
     email: EmailStr
@@ -11,11 +9,19 @@ class UserResponse(BaseModel):
     profileImg: Optional[str] = None
     deviceId: Optional[str] = None
     active: bool
-    userRank: Optional[Dict[str, Any]] = None # JSON field
-    userType: Optional[str] = None # Return user type as string
+    userRank: Optional[Dict[str, Any]] = None
+    userType: Optional[str] = None
     createdDt: datetime.datetime
     updatedDt: datetime.datetime
     lastLoggedIn: Optional[datetime.datetime] = None
+    score: Optional[int] = None
+    cognitoUsername: Optional[str] = None
+    isOnBlockchain: Optional[bool] = None
+    blockchainUserAddress: Optional[str] = None
+    pushToken: Optional[str] = None
+    authData: Optional[Dict] = None
 
     class Config:
-        from_attributes = True # Enables ORM mode
+        from_attributes = True
+
+    

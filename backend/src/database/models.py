@@ -2,7 +2,7 @@
 from typing import List, Optional
 
 
-from sqlalchemy import BigInteger, Enum, ForeignKeyConstraint, Index, JSON, String, TIMESTAMP, Text, text, Boolean # Import Boolean
+from sqlalchemy import BigInteger, Enum, ForeignKeyConstraint, Index, JSON, String, TIMESTAMP, Text, text, Boolean, Integer
 from sqlalchemy.dialects.mysql import BIGINT, INTEGER, TINYINT
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
@@ -47,12 +47,11 @@ class Community(Base):
     )
 
     communityId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    title: Mapped[str] = mapped_column(String(255))
+    title: Mapped[dict[str, str]] = mapped_column(JSON)
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    # Use Boolean type for TINYINT(1)
-    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
-    description: Mapped[Optional[str]] = mapped_column(Text)
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'"))
+    description: Mapped[Optional[dict[str, str]]] = mapped_column(JSON)
     imageRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
     qrRef: Mapped[Optional[dict]] = mapped_column(JSON)
@@ -71,14 +70,13 @@ class NewsPost(Base):
     )
 
     newsPostId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    header: Mapped[str] = mapped_column(String(255))
-    body: Mapped[str] = mapped_column(Text)
-    shortBody: Mapped[str] = mapped_column(Text)
+    header: Mapped[dict[str, str]] = mapped_column(JSON)
+    body: Mapped[dict[str, str]] = mapped_column(JSON)
+    shortBody: Mapped[dict[str, str]] = mapped_column(JSON)
     postDate: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    # Use Boolean type
-    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'"))
     type: Mapped[Optional[str]] = mapped_column(String(255))
     imgRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
@@ -93,15 +91,13 @@ class Notification(Base):
     )
 
     notificationId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    header: Mapped[str] = mapped_column(String(255))
-    content: Mapped[str] = mapped_column(Text)
-    # Use Boolean type
-    pushNotification: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
-    private: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
+    header: Mapped[dict[str, str]] = mapped_column(JSON)
+    content: Mapped[dict[str, str]] = mapped_column(JSON)
+    pushNotification: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
+    private: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    # Use Boolean type
-    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'"))
     link: Mapped[Optional[dict]] = mapped_column(JSON)
     imgRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
@@ -118,12 +114,11 @@ class Project(Base):
     )
 
     projectId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    name: Mapped[str] = mapped_column(String(255))
-    attributed: Mapped[dict] = mapped_column(JSON) # Keep as dict/JSON
+    name: Mapped[dict[str, str]] = mapped_column(JSON)
+    attributed: Mapped[dict] = mapped_column(JSON)
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    # Use Boolean type
-    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'"))
     location: Mapped[Optional[str]] = mapped_column(String(255))
 
     Collectible: Mapped[List['Collectible']] = relationship('Collectible', back_populates='Project_')
@@ -138,14 +133,13 @@ class Sponsor(Base):
     )
 
     sponsorId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    name: Mapped[str] = mapped_column(String(255))
+    name: Mapped[dict[str, str]] = mapped_column(JSON)
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    # Use Boolean type
-    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
-    organization: Mapped[Optional[str]] = mapped_column(String(255))
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'"))
+    organization: Mapped[Optional[dict[str, str]]] = mapped_column(JSON)
     urls: Mapped[Optional[dict]] = mapped_column(JSON)
-    description: Mapped[Optional[str]] = mapped_column(Text)
+    description: Mapped[Optional[dict[str, str]]] = mapped_column(JSON)
     imageRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
     qrRef: Mapped[Optional[dict]] = mapped_column(JSON)
@@ -155,7 +149,7 @@ class Sponsor(Base):
     sponsorZip: Mapped[Optional[str]] = mapped_column(String(20))
     primaryContactName: Mapped[Optional[str]] = mapped_column(String(255))
     primaryContactEmail: Mapped[Optional[str]] = mapped_column(String(255))
-    primaryContactPhone: Mapped[Optional[int]] = mapped_column(BigInteger) # BigInt maps to Python int
+    primaryContactPhone: Mapped[Optional[int]] = mapped_column(BigInteger)
     
     CollectibleSponsor: Mapped[List['CollectibleSponsor']] = relationship('CollectibleSponsor', back_populates='Sponsor_')
 
@@ -169,21 +163,24 @@ class User(Base):
     )
 
     userId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    # Use Boolean type
-    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'"))
     email: Mapped[str] = mapped_column(String(255))
     passwordHashed: Mapped[str] = mapped_column(String(255))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    userRank: Mapped[Optional[dict]] = mapped_column(JSON) # Keep as dict/JSON
+    userRank: Mapped[Optional[dict]] = mapped_column(JSON)
     username: Mapped[Optional[str]] = mapped_column(String(255))
     profileImg: Mapped[Optional[str]] = mapped_column(String(255))
     authToken: Mapped[Optional[str]] = mapped_column(Text)
     deviceId: Mapped[Optional[str]] = mapped_column(String(255))
-    # Use Python Enum for ENUM type for better type safety
-    userType: Mapped[Optional['UserTypeEnum']] = mapped_column(Enum('unregistered', 'username', 'email', 'admin', 'onboarding', name='userType'), server_default=text("'unregistered'")) # <-- CHANGED type, added name
+    userType: Mapped[Optional['UserTypeEnum']] = mapped_column(Enum('unregistered', 'username', 'email', 'admin', 'onboarding', name='userType'), server_default=text("'onboarding'"))
     lastLoggedIn: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
+    score: Mapped[Optional[int]] = mapped_column(Integer)
+    cognitoUsername: Mapped[Optional[str]] = mapped_column(String(255))
+    isOnBlockchain: Mapped[Optional[bool]] = mapped_column(Boolean)
+    blockchainUserAddress: Mapped[Optional[str]] = mapped_column(String(255))
     pushToken: Mapped[Optional[str]] = mapped_column(String(255))
+    authData: Mapped[Optional[dict]] = mapped_column(JSON)
 
     CommunityUser: Mapped[List['CommunityUser']] = relationship('CommunityUser', back_populates='User_')
     NotificationUser: Mapped[List['NotificationUser']] = relationship('NotificationUser', back_populates='User_')
@@ -207,12 +204,11 @@ class Collection(Base):
     collectionId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     communityId: Mapped[int] = mapped_column(BIGINT)
     projectId: Mapped[int] = mapped_column(BIGINT)
-    name: Mapped[str] = mapped_column(String(255))
+    name: Mapped[dict[str, str]] = mapped_column(JSON)
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    # Use Boolean type
-    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
-    description: Mapped[Optional[str]] = mapped_column(Text)
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'"))
+    description: Mapped[Optional[dict[str, str]]] = mapped_column(JSON)
     imageRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
     qrRef: Mapped[Optional[dict]] = mapped_column(JSON)
@@ -229,25 +225,27 @@ class CommunityChallenge(Base):
     __tablename__ = 'CommunityChallenge'
     __table_args__ = (
         ForeignKeyConstraint(['communityId'], ['Community.communityId'], ondelete='CASCADE', onupdate='CASCADE', name='communitychallenge_ibfk_1'),
+        ForeignKeyConstraint(['rewardId'], ['Collectible.collectibleId'], ondelete='SET NULL', onupdate='CASCADE', name='communitychallenge_ibfk_2'),
         Index('communityChallengeId', 'communityChallengeId', unique=True),
         Index('communityId', 'communityId')
     )
 
     communityChallengeId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     communityId: Mapped[int] = mapped_column(BIGINT)
-    title: Mapped[str] = mapped_column(String(255))
+    title: Mapped[dict[str, str]] = mapped_column(JSON)
     goal: Mapped[int] = mapped_column(INTEGER)
-    # Use Boolean type
-    timer: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
+    timer: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    description: Mapped[Optional[str]] = mapped_column(Text)
-    reward: Mapped[Optional[str]] = mapped_column(String(255))
+    description: Mapped[Optional[dict[str, str]]] = mapped_column(JSON)
+    reward: Mapped[Optional[dict]] = mapped_column(JSON)
+    rewardId: Mapped[Optional[int]] = mapped_column(BIGINT)
     startDate: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
     endDate: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
     imgRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
     qrRef: Mapped[Optional[dict]] = mapped_column(JSON)
+    webRef: Mapped[Optional[dict]] = mapped_column(JSON)
     embedRef: Mapped[Optional[str]] = mapped_column(String(255))
 
     Community_: Mapped['Community'] = relationship('Community', back_populates='CommunityChallenge')
@@ -266,6 +264,7 @@ class CommunityUser(Base):
     communityUserId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     communityId: Mapped[int] = mapped_column(BIGINT)
     memberId: Mapped[int] = mapped_column(BIGINT)
+    completed: Mapped[Optional[dict]] = mapped_column(JSON)
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
 
@@ -286,11 +285,10 @@ class NotificationUser(Base):
     notificationUserId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     notificationId: Mapped[int] = mapped_column(BIGINT)
     userId: Mapped[int] = mapped_column(BIGINT)
-    # Use Boolean type
-    markRead: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
-    archived: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
-    deleted: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
-    pushNotification: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
+    markRead: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
+    archived: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
+    deleted: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
+    pushNotification: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
 
@@ -317,19 +315,21 @@ class Collectible(Base):
     categoryId: Mapped[int] = mapped_column(BIGINT)
     projectId: Mapped[int] = mapped_column(BIGINT)
     communityId: Mapped[int] = mapped_column(BIGINT)
-    label: Mapped[str] = mapped_column(String(255))
-    name: Mapped[str] = mapped_column(String(255))
+    label: Mapped[dict[str, str]] = mapped_column(JSON)
+    name: Mapped[dict[str, str]] = mapped_column(JSON)
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    # Use Boolean type
-    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
-    description: Mapped[Optional[str]] = mapped_column(Text)
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'"))
+    description: Mapped[Optional[dict[str, str]]] = mapped_column(JSON)
     imageRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
     qrRef: Mapped[Optional[dict]] = mapped_column(JSON)
     embedRef: Mapped[Optional[dict]] = mapped_column(JSON)
     circulation: Mapped[Optional[int]] = mapped_column(INTEGER)
     publicationDate: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
+    isOnBlockchain: Mapped[Optional[bool]] = mapped_column(Boolean)
+    blockchainCollectibleAddress: Mapped[Optional[str]] = mapped_column(String(255))
+    price: Mapped[Optional[dict]] = mapped_column(JSON)
 
     Category_: Mapped['Category'] = relationship('Category', back_populates='Collectible')
     Collection_: Mapped['Collection'] = relationship('Collection', back_populates='Collectible')
@@ -344,20 +344,21 @@ class Mission(Base):
     __tablename__ = 'Mission'
     __table_args__ = (
         ForeignKeyConstraint(['collectionId'], ['Collection.collectionId'], ondelete='CASCADE', onupdate='CASCADE', name='mission_ibfk_1'),
+        ForeignKeyConstraint(['rewardId'], ['Collectible.collectibleId'], ondelete='SET NULL', onupdate='CASCADE', name='mission_ibfk_2'),
         Index('collectionId', 'collectionId'),
         Index('missionId', 'missionId', unique=True)
     )
 
     missionId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     collectionId: Mapped[int] = mapped_column(BIGINT)
-    title: Mapped[str] = mapped_column(String(255))
+    title: Mapped[dict[str, str]] = mapped_column(JSON)
     goal: Mapped[int] = mapped_column(INTEGER)
-    # Use Boolean type
-    timer: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
+    timer: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    description: Mapped[Optional[str]] = mapped_column(Text)
-    reward: Mapped[Optional[str]] = mapped_column(String(255))
+    description: Mapped[Optional[dict[str, str]]] = mapped_column(JSON)
+    reward: Mapped[Optional[dict[str, str]]] = mapped_column(JSON)
+    rewardId: Mapped[Optional[int]] = mapped_column(BIGINT)
     endDate: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
     imgRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
@@ -381,9 +382,8 @@ class CollectibleSponsor(Base):
     collectibleSponsorId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     collectibleId: Mapped[int] = mapped_column(BIGINT)
     sponsorId: Mapped[int] = mapped_column(BIGINT)
-    # Use Boolean type
-    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
-    sponsorMessage: Mapped[Optional[str]] = mapped_column(Text)
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'"))
+    sponsorMessage: Mapped[Optional[dict[str, str]]] = mapped_column(JSON)
 
     Collectible_: Mapped['Collectible'] = relationship('Collectible', back_populates='CollectibleSponsor')
     Sponsor_: Mapped['Sponsor'] = relationship('Sponsor', back_populates='CollectibleSponsor')
@@ -403,9 +403,8 @@ class MissionUser(Base):
     userId: Mapped[int] = mapped_column(BIGINT)
     missionId: Mapped[int] = mapped_column(BIGINT)
     progress: Mapped[int] = mapped_column(INTEGER, server_default=text("'0'"))
-    # Use Boolean type
-    completed: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
-    rewardClaimed: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
+    completed: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
+    rewardClaimed: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
     status: Mapped[Optional[str]] = mapped_column(String(255))
     dateCompleted: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
 
@@ -432,12 +431,13 @@ class UserCollectible(Base):
     mint: Mapped[int] = mapped_column(INTEGER)
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    # Use Boolean type
-    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'")) # <-- CHANGED type
-    # Use Boolean type
-    favorite: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'")) # <-- CHANGED type
+    active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'"))
+    favorite: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
     previousOwnerId: Mapped[Optional[int]] = mapped_column(BIGINT)
     lastTransferredDt: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
+    trade: Mapped[Optional[bool]] = mapped_column(Boolean)
+    points: Mapped[Optional[int]] = mapped_column(Integer)
+    qrCode: Mapped[Optional[dict]] = mapped_column(JSON)
 
     Collectible_: Mapped['Collectible'] = relationship('Collectible', back_populates='UserCollectible')
     User_: Mapped['User'] = relationship('User', foreign_keys=[ownerId], back_populates='UserCollectible')
@@ -499,7 +499,7 @@ class DistributionCode(Base):
         ForeignKeyConstraint(['distributionId'], ['Distribution.distributionId'], ondelete='CASCADE', onupdate='CASCADE', name='distributioncode_ibfk_1'),
         Index('distributionCodeId', 'distributionCodeId', unique=True),
         Index('distributionId', 'distributionId'),
-        Index('code', 'code', unique=True)
+        Index('code', 'code')
     )
 
     distributionCodeId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
@@ -531,7 +531,7 @@ class DistributionCodeUser(Base):
     previousOwnerId: Mapped[Optional[int]] = mapped_column(BIGINT)
     redeemed: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
     redeemedDate: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
-    collectibleRevieved: Mapped[Optional[dict]] = mapped_column(JSON)
+    collectibleReceived: Mapped[Optional[dict]] = mapped_column(JSON)
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
 

@@ -100,7 +100,7 @@ def createUser(event):
     try:
         user_type = UserTypeEnum(user_type_str)
     except ValueError:
-        user_type = UserTypeEnum.unregistered
+        user_type = UserTypeEnum.onboarding
 
     user = UserCreate(
         email=email,
