@@ -5,7 +5,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import '../../../helpers/localization_helper.dart';
 import '../../../main.dart';
 import '../../../models/collectible_model.dart';
-import '../../../models/distribution_model.dart'; // Import DistributionModel
+import '../../../models/distribution_model.dart';
 import '../../../models/mission_model.dart';
 import '../../../models/user_model.dart';
 import '../../../widgets/object_viewer.dart';
@@ -83,7 +83,7 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
   /// Initiates a collectible transfer using the DistributionModel.
   Future<void> _initiateTransfer(
       BuildContext context, Map<String, dynamic> mintToTrade) async {
-    const String transferDistributionId = "your_transfer_distribution_id_here";
+    const String transferDistributionId = "1";
 
     final distributionModel =
         Provider.of<DistributionModel>(context, listen: false);
