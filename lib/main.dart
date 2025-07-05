@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:uni_links/uni_links.dart';
+import 'package:app_links/app_links.dart';
 import 'package:flutter/services.dart' as services;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './models/app_localizations.dart';
@@ -209,6 +209,7 @@ late List<Widget> _screens;
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
+  final _appLinks = AppLinks();
   StreamSubscription? _linkSubscription;
 
   final PageStorageBucket bucket = PageStorageBucket();
@@ -218,7 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _initUniLinks();
+    _initAppLinks();
     _screens = [
       HomeScreen(key: const PageStorageKey('home'), qrcode: widget.qrcode),
       const CollectionScreen(key: PageStorageKey('collection')),
@@ -262,22 +263,22 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<void> _initUniLinks() async {
+  Future<void> _initAppLinks() async {
     // Handle links that launched the app from a terminated state
     try {
-      final initialUri = await getInitialUri();
+      final initialUri = await _appLinks.getInitialLink();
       if (initialUri != null) {
+        print("Initial link received: $initialUri");
         _handleRedirect(initialUri);
       }
-    } on services.PlatformException {
-      print('Failed to get initial URI.');
-    } on FormatException {
-      print('Bad format URI.');
+    } catch (e) {
+      print('Failed to get initial URI: $e');
     }
 
     // Listen for links that come in while the app is running
-    _linkSubscription = uriLinkStream.listen((Uri? uri) {
-      if (uri != null && mounted) {
+    _linkSubscription = _appLinks.uriLinkStream.listen((Uri uri) {
+      if (mounted) {
+        print("Link received while running: $uri");
         _handleRedirect(uri);
       }
     }, onError: (err) {
