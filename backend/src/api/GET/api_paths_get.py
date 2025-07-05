@@ -186,6 +186,12 @@ API_PATHS_GET = {
             "active": True,
             "handler": UserCollectibleGETFunctions.getUserCollectiblesByCollectibleId,
             "response_model": List[UserCollectibleResponse]
+        },
+        "getUserCollectibleByUserCollectibleId": {
+            "path": "/getUserCollectibleByUserCollectibleId",
+            "active": True,
+            "handler": UserCollectibleGETFunctions.getUserCollectibleByUserCollectibleId,
+            "response_model": UserCollectibleResponse
         }
     },
 

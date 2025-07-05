@@ -18,5 +18,8 @@ def call_UserCollectible_function(raw_path, event):
 
     if raw_path == UserCollectible_Path['getUserCollectiblesByCollectibleId']['path']:
         returnString = userCollectible.getUserCollectiblesByCollectibleId(event)
+
+    if raw_path == UserCollectible_Path['getUserCollectibleByUserCollectibleId']['path']:
+        returnString = userCollectible.getUserCollectibleByUserCollectibleId(event)
     
     return returnString
