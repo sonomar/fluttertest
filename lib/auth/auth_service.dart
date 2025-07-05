@@ -175,20 +175,28 @@ class AuthService {
             simplifyAuthError('Login failed. Tokens not found in redirect.');
         return false;
       }
+
       final idToken = CognitoIdToken(idTokenString);
       final accessToken = CognitoAccessToken(accessTokenString);
 
-      _session = new CognitoUserSession(idToken, accessToken);
+      _session = CognitoUserSession(idToken, accessToken);
 
-      // Manually create a CognitoUser and cache the tokens for session persistence.
       final claims = idToken.decodePayload();
       final userEmail = claims['email'];
       if (userEmail == null) {
         _internalErrorMessage = 'Email not found in token.';
         return false;
       }
-      _cognitoUser = new CognitoUser(userEmail, _userPool);
+      _cognitoUser = CognitoUser(userEmail, _userPool);
       await _cognitoUser!.cacheTokens();
+
+      // THIS IS THE FIX:
+      // Manually set the "LastAuthUser" key so that checkCurrentUser()
+      // can find this user on the next app launch or resume.
+      final prefs = await SharedPreferences.getInstance();
+      final lastAuthUserKey =
+          'CognitoIdentityServiceProvider.$clientId.LastAuthUser';
+      await prefs.setString(lastAuthUserKey, userEmail);
 
       print('Successfully handled redirect and created session.');
       return true;

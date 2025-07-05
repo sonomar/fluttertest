@@ -66,16 +66,38 @@ class DistributionModel extends ChangeNotifier {
           distributionCode['distributionCodeId'].toString();
       final distributionId = distributionCode['distributionId'].toString();
 
-      // --- START: NEW TIME VALIDATION LOGIC ---
+      // Fetch existing redemptions for this specific code to check usage limits.
+      final existingRedemptions =
+          await getDistributionCodeUsersByDistributionCodeId(
+              distributionCodeId, _appAuthProvider);
+      final redemptionCount =
+          existingRedemptions is List ? existingRedemptions.length : 0;
 
-      // Fetch the parent distribution to check its rules
+      final bool isMultiUse = distributionCode['isMultiUse'] ?? false;
+
+      if (!isMultiUse) {
+        // Single-use code logic
+        if (redemptionCount >= 1) {
+          throw Exception("This code has already been used.");
+        }
+      } else {
+        // Multi-use code logic
+        final int? multiUseQty = distributionCode['multiUseQty'];
+        // A null or zero quantity means infinite uses.
+        if (multiUseQty != null && multiUseQty > 0) {
+          if (redemptionCount >= multiUseQty) {
+            throw Exception(
+                "This code has reached its maximum number of uses.");
+          }
+        }
+      }
+
       final distribution = await getDistributionByDistributionId(
           distributionId, _appAuthProvider);
       if (distribution == null) {
         throw Exception("Could not verify the code's campaign details.");
       }
 
-      // Check if the distribution is currently active based on its start and end dates
       final now = DateTime.now();
       final startDateString = distribution['startDate'] as String?;
       final endDateString = distribution['endDate'] as String?;
@@ -93,8 +115,6 @@ class DistributionModel extends ChangeNotifier {
           throw Exception("This promotion has expired.");
         }
       }
-
-      // --- END: NEW TIME VALIDATION LOGIC ---
 
       final hasRedeemed = _userDistributionCodeUsers
           .any((c) => c['distributionCodeId'].toString() == distributionCodeId);
@@ -123,10 +143,10 @@ class DistributionModel extends ChangeNotifier {
 
       _setState(
           isLoading: false, loadingMessage: "Success! Collectible added.");
-      return collectibleToAwardId; // Return ID for mission progress
+      return collectibleToAwardId;
     } catch (e) {
       _setState(isLoading: false, error: e.toString());
-      return null; // Return null on failure
+      return null;
     }
   }
 
@@ -162,6 +182,16 @@ class DistributionModel extends ChangeNotifier {
       final distributionCode =
           await getDistributionCodeByCode(code, _appAuthProvider);
       if (distributionCode == null) throw Exception("Invalid transfer code.");
+
+      final distributionCodeId =
+          distributionCode['distributionCodeId'].toString();
+
+      final existingRedemptions =
+          await getDistributionCodeUsersByDistributionCodeId(
+              distributionCodeId, _appAuthProvider);
+      if (existingRedemptions is List && existingRedemptions.isNotEmpty) {
+        throw Exception("This transfer code has already been used.");
+      }
 
       final userCollectibleId =
           distributionCode['userCollectibleId']?.toString();

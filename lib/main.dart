@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:uni_links/uni_links.dart';
+import 'package:flutter/services.dart' as services;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './models/app_localizations.dart';
 import 'screens/home_screen.dart';
@@ -245,13 +246,39 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  void _handleRedirect(Uri uri) {
+    print('Received redirect: $uri');
+    // Use a local variable for the provider to avoid async gaps with context
+    final authProvider = context.read<AppAuthProvider>();
+    authProvider.handleRedirect(uri).then((success) {
+      if (success && mounted) {
+        // If handling the redirect was successful, navigate to the splash screen
+        // to re-evaluate the auth state and proceed to the home page.
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const SplashScreen()),
+          (route) => false,
+        );
+      }
+    });
+  }
+
   Future<void> _initUniLinks() async {
-    // Listen for incoming links
+    // Handle links that launched the app from a terminated state
+    try {
+      final initialUri = await getInitialUri();
+      if (initialUri != null) {
+        _handleRedirect(initialUri);
+      }
+    } on services.PlatformException {
+      print('Failed to get initial URI.');
+    } on FormatException {
+      print('Bad format URI.');
+    }
+
+    // Listen for links that come in while the app is running
     _linkSubscription = uriLinkStream.listen((Uri? uri) {
       if (uri != null && mounted) {
-        print('Received redirect: $uri');
-        // Pass the URI to your auth provider to handle
-        context.read<AppAuthProvider>().handleRedirect(uri);
+        _handleRedirect(uri);
       }
     }, onError: (err) {
       print('Error listening for links: $err');
