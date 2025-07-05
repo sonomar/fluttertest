@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import '../../../models/mission_model.dart';
 import '../../../models/collectible_model.dart';
+import '../../../models/distribution_model.dart'; // Import DistributionModel
 import '../../../models/user_model.dart';
 import '../../../main.dart';
 
@@ -46,14 +47,37 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
   }
 
   Future<void> _processAwardClaim() async {
+    // Wait for animations
     await Future.delayed(const Duration(seconds: 6));
     if (!mounted) return;
 
     final missionModel = context.read<MissionModel>();
-    bool success =
+
+    // 1. First, process the primary mission completion.
+    bool missionSuccess =
         await missionModel.updateMissionCompletion(widget.selectedAwardUser);
 
-    if (success) {
+    if (missionSuccess) {
+      // 2. If the mission is claimed, check for an additional distribution reward.
+      final rewardId = widget.selectedAward['rewardId'];
+
+      // Check if a valid rewardId exists (is not null and is a positive integer)
+      if (rewardId != null && rewardId is int && rewardId > 0) {
+        final distributionModel = context.read<DistributionModel>();
+
+        // 3. Attempt to redeem the distribution-based reward.
+        bool distributionSuccess = await distributionModel.redeemMissionReward(
+            missionDistributionId: rewardId.toString());
+
+        if (!distributionSuccess) {
+          // Optional: Log an error if the bonus reward fails.
+          // The user experience will still proceed as successful because the main mission was claimed.
+          print(
+              "Mission claimed successfully, but failed to grant distribution reward: ${distributionModel.errorMessage}");
+        }
+      }
+
+      // 4. Proceed to the success screen.
       _handleSuccess();
     } else {
       _handleError(missionModel.errorMessage ?? "Failed to claim reward.");
@@ -87,7 +111,6 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
       MaterialPageRoute(
         builder: (context) => MyHomePage(
           title: "Kloppocar Home",
-          // Provide a sensible default value for qrcode
           qrcode: "award_claimed",
           userData: userData,
         ),
@@ -136,7 +159,7 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
   }
 }
 
-// --- UI Widgets for different states ---
+// --- UI Widgets for different states (unchanged) ---
 
 class _ProcessingWidget extends StatelessWidget {
   @override

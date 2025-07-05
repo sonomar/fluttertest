@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:uni_links/uni_links.dart';
+import 'package:flutter/services.dart' as services;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './models/app_localizations.dart';
 import 'screens/home_screen.dart';
-import 'widgets/openCards/login_page.dart';
 import './widgets/auth/onboarding.dart';
 import 'screens/collection_screen.dart';
 import 'screens/scan_screen.dart';
@@ -14,12 +16,12 @@ import 'screens/subscreens/missions/missions.dart';
 import './models/collectible_model.dart';
 import './models/notification_provider.dart';
 import './models/user_model.dart';
+import './models/distribution_model.dart';
 import 'models/mission_model.dart';
 import 'models/community_model.dart';
 import 'models/news_post_model.dart';
 import 'models/locale_provider.dart';
 import 'models/asset_provider.dart';
-import 'models/mission_model.dart';
 import './widgets/splash_screen.dart';
 import 'auth/auth_service.dart';
 import './models/app_auth_provider.dart';
@@ -27,7 +29,6 @@ import './helpers/localization_helper.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import './app_lifefycle_observer.dart';
-import './screens/auth_loading_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,6 +70,18 @@ void main() async {
             (context, appAuthProvider, userModel, previousCollectibleModel) {
           return previousCollectibleModel ??
               CollectibleModel(appAuthProvider, userModel);
+        },
+      ),
+      ChangeNotifierProxyProvider2<AppAuthProvider, UserModel,
+          DistributionModel>(
+        create: (context) => DistributionModel(
+          context.read<AppAuthProvider>(),
+          context.read<UserModel>(),
+        ),
+        update:
+            (context, appAuthProvider, userModel, previousDistributionModel) {
+          return previousDistributionModel ??
+              DistributionModel(appAuthProvider, userModel);
         },
       ),
       ChangeNotifierProvider<AssetProvider>(
@@ -196,6 +209,7 @@ late List<Widget> _screens;
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
+  StreamSubscription? _linkSubscription;
 
   final PageStorageBucket bucket = PageStorageBucket();
 
@@ -204,6 +218,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    _initUniLinks();
     _screens = [
       HomeScreen(key: const PageStorageKey('home'), qrcode: widget.qrcode),
       const CollectionScreen(key: PageStorageKey('collection')),
@@ -222,6 +237,51 @@ class _MyHomePageState extends State<MyHomePage> {
           },
         );
       }
+    });
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _handleRedirect(Uri uri) {
+    print('Received redirect: $uri');
+    // Use a local variable for the provider to avoid async gaps with context
+    final authProvider = context.read<AppAuthProvider>();
+    authProvider.handleRedirect(uri).then((success) {
+      if (success && mounted) {
+        // If handling the redirect was successful, navigate to the splash screen
+        // to re-evaluate the auth state and proceed to the home page.
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const SplashScreen()),
+          (route) => false,
+        );
+      }
+    });
+  }
+
+  Future<void> _initUniLinks() async {
+    // Handle links that launched the app from a terminated state
+    try {
+      final initialUri = await getInitialUri();
+      if (initialUri != null) {
+        _handleRedirect(initialUri);
+      }
+    } on services.PlatformException {
+      print('Failed to get initial URI.');
+    } on FormatException {
+      print('Bad format URI.');
+    }
+
+    // Listen for links that come in while the app is running
+    _linkSubscription = uriLinkStream.listen((Uri? uri) {
+      if (uri != null && mounted) {
+        _handleRedirect(uri);
+      }
+    }, onError: (err) {
+      print('Error listening for links: $err');
     });
   }
 
@@ -255,6 +315,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 collectibleModel.loadCollectibles(forceClear: true);
                 dataMayHaveChanged = true;
               } else if (index == 3) {
+                print("BottomNav: Tapped missions tab. Forcing reload...");
                 missionModel.loadMissions(forceClear: true);
               }
               // Add similar logic for other screens if they depend on shared, mutable models

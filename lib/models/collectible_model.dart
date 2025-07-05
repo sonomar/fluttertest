@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/app_auth_provider.dart';
 import '../api/collectible.dart';
 import '../models/user_model.dart';
 import '../api/user_collectible.dart';
 import '../helpers/sort_data.dart';
+import '../helpers/localization_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectibleModel extends ChangeNotifier {
@@ -25,7 +27,24 @@ class CollectibleModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   CollectibleModel(this._appAuthProvider, this.userModel);
 
-  Future<void> loadCollectibles({bool forceClear = false}) async {
+  String _getSortableString(dynamic value, String languageCode) {
+    if (value is Map) {
+      // Prioritize the current language, fall back to English, then to an empty string.
+      return value[languageCode]?.toString() ?? value['en']?.toString() ?? '';
+    }
+    return value?.toString() ?? '';
+  }
+
+  void _sortCollectibles(String column, String languageCode) {
+    _collectionCollectibles.sort((a, b) {
+      final String stringA = _getSortableString(a[column], languageCode);
+      final String stringB = _getSortableString(b[column], languageCode);
+      return stringA.toLowerCase().compareTo(stringB.toLowerCase());
+    });
+  }
+
+  Future<void> loadCollectibles(
+      {bool forceClear = false, String? languageCode}) async {
     if (_isLoading) return;
     if (_hasLoaded && !forceClear) return;
 
@@ -43,7 +62,6 @@ class CollectibleModel extends ChangeNotifier {
         throw Exception("User ID not available from UserModel.");
       }
 
-      // Perform both API calls concurrently for better performance.
       final results = await Future.wait([
         getCollectiblesByCollectionId('1', _appAuthProvider),
         getUserCollectiblesByOwnerId(userId, _appAuthProvider)
@@ -51,26 +69,35 @@ class CollectibleModel extends ChangeNotifier {
 
       final dynamic fetchedCollectionData = results[0];
       final dynamic fetchedUserData = results[1];
+
       if (fetchedCollectionData is List) {
-        _collectionCollectibles = fetchedCollectionData;
+        // Use the helper to decode all necessary fields from JSON strings to Maps.
+        _collectionCollectibles = decodeJsonFields(
+          fetchedCollectionData,
+          [
+            'name',
+            'description',
+            'imageRef',
+            'embedRef'
+          ], // List all fields that are JSON strings
+        );
       } else {
         _collectionCollectibles = [];
-        print('CollectibleModel: Fetched collection data was not a List.');
       }
+
       if (fetchedUserData is List) {
         _userCollectibles = fetchedUserData;
       } else {
         _userCollectibles = [];
         print('CollectibleModel: Fetched user data was not a List.');
       }
-      _hasLoaded = true; // Mark that a successful load has occurred.
-      sortData(_collectionCollectibles, _sortByName ? "name" : "label");
-      // Re-apply sorting if needed
-      // if (_collectionCollectibles.isNotEmpty && _sortByName) {
-      //   sortCollectiblesByColumn("name");
-      // } else if (_collectionCollectibles.isNotEmpty && !_sortByName) {
-      //   sortCollectiblesByColumn("label"); // or your default sort
-      // }
+
+      _hasLoaded = true;
+
+      // Apply initial sort if a language code is provided
+      if (languageCode != null) {
+        _sortCollectibles(_sortByName ? "name" : "label", languageCode);
+      }
     } catch (e) {
       _errorMessage = 'Error loading collectible data: ${e.toString()}';
       print('CollectibleModel: Error in loadCollectibles: $e');
@@ -82,32 +109,31 @@ class CollectibleModel extends ChangeNotifier {
     }
   }
 
-  void toggleSortPreference() {
+  void toggleSortPreference(String languageCode) {
     _sortByName = !_sortByName;
     String columnToSortBy = _sortByName ? "name" : "label";
-
     try {
-      sortData(_collectionCollectibles, columnToSortBy);
+      _sortCollectibles(columnToSortBy, languageCode);
     } catch (e) {
       print('Error sorting collectible data: $e');
     }
     notifyListeners();
   }
 
-  Future<void> sortCollectiblesByColumn(column) async {
-    if (_sortByName == true) {
-      _sortByName = false;
-    } else {
+  Future<void> sortCollectiblesByColumn(
+      String column, String languageCode) async {
+    if (column == 'name') {
       _sortByName = true;
+    } else if (column == 'label') {
+      _sortByName = false;
     }
-    notifyListeners();
+
     try {
-      sortData(_collectionCollectibles, column);
+      _sortCollectibles(column, languageCode);
     } catch (e) {
       print('Error sorting collectible data: $e');
-    } finally {
-      notifyListeners();
     }
+    notifyListeners();
   }
 
   Future<void> addUserCollectible(userId, collectibleId, mint) async {

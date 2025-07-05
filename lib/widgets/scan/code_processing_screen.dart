@@ -1,30 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:deins_app/helpers/mission_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../models/collectible_model.dart';
-import '../../api/user_collectible.dart';
-import '../../models/app_auth_provider.dart';
+import '../../models/distribution_model.dart'; // Import the new model
 import '../../models/user_model.dart';
-import '../../helpers/localization_helper.dart';
 import '../../main.dart';
-import '../../helpers/get_random.dart';
 
-// Enum and helper classes
 enum ScanState { loading, success, error, received }
-
-class CollectibleWrapper {
-  final String id;
-  final int circulation;
-  CollectibleWrapper(this.id, this.circulation);
-}
-
-class UserCollectibleWrapper {
-  final String collectibleId;
-  final int mint;
-  UserCollectibleWrapper(this.collectibleId, this.mint);
-}
 
 class CodeProcessingScreen extends StatefulWidget {
   final String code;
@@ -49,7 +30,6 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
       duration: const Duration(seconds: 4),
       vsync: this,
     );
-    // Immediately start processing the code when this screen is opened.
     _processCode(widget.code);
   }
 
@@ -59,170 +39,58 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
     super.dispose();
   }
 
-  bool _isCodeValid(String code) {
-    if (code.isEmpty) return false;
-    final List<String> splitCode = code.split('-');
-    return splitCode.isNotEmpty && splitCode[0] == 'deinsqr';
+  /// Determines if a code is for a transfer based on its prefix.
+  bool _isTransferCode(String code) {
+    return code.startsWith('TFR-');
   }
 
-  bool _isTradeCode(String code) {
-    final List<String> parts = code.split('-');
-    return parts.length == 4 &&
-        (parts[0] == 'deinsQr' || parts[0] == 'deinsqr') &&
-        parts[1] == 'trade';
-  }
-
+  /// Main logic router.
   Future<void> _processCode(String code) async {
     if (!mounted) return;
 
-    if (_isTradeCode(code)) {
-      await _processTrade(code);
-    } else if (_isCodeValid(code)) {
-      await _processRegularCode(code);
+    // Use the DistributionModel for all processing logic.
+    final distributionModel =
+        Provider.of<DistributionModel>(context, listen: false);
+
+    if (_isTransferCode(code)) {
+      await _processTransfer(distributionModel, code);
     } else {
-      _handleError('Invalid code format.');
+      await _processCollectibleRedemption(distributionModel, code);
     }
   }
 
-  Future<void> _processRegularCode(String code) async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
+  /// Processes a standard collectible redemption code.
+  Future<void> _processCollectibleRedemption(
+      DistributionModel model, String code) async {
+    final String? awardedCollectibleId =
+        await model.redeemScannedCode(code, context);
 
-    final collectibleModel =
-        Provider.of<CollectibleModel>(context, listen: false);
-    final userModel = Provider.of<UserModel>(context, listen: false);
-
-    final List collectionCollectibles = collectibleModel.collectionCollectibles;
-    final List userCollectiblesRaw = collectibleModel.userCollectibles;
-
-    final List<UserCollectibleWrapper> userCollectiblesWrapped =
-        userCollectiblesRaw.map((ucMap) {
-      return UserCollectibleWrapper(
-        ucMap["collectibleId"].toString(),
-        ucMap["mint"] is int
-            ? ucMap["mint"] as int
-            : int.tryParse(ucMap["mint"].toString()) ?? 0,
-      );
-    }).toList();
-
-    try {
-      final SharedPreferences prefValue = await SharedPreferences.getInstance();
-      await prefValue.setBool(code, true);
-
-      // Get the userId directly and safely from the UserModel provider.
-      final String? userId = userModel.currentUser?['userId']?.toString();
-
-      // Add a null check to handle the case where the user might not be loaded yet.
-      if (userId == null) {
-        _handleError("Could not identify current user.");
-        return;
-      }
-
-      final String collectibleId = code.split('-').last;
-
-      final Map<String, dynamic>? foundCollectibleMap =
-          collectionCollectibles.firstWhere(
-        (c) => c["collectibleId"].toString() == collectibleId,
-        orElse: () => null,
-      );
-
-      if (foundCollectibleMap == null) {
-        _handleError('Collectible not found in collection.');
-        return;
-      }
-
-      final CollectibleWrapper wrappedCollectible = CollectibleWrapper(
-        foundCollectibleMap["collectibleId"].toString(),
-        foundCollectibleMap["circulation"] as int,
-      );
-
-      final int? generatedMint = generateRandomMint(
-        wrappedCollectible,
-        userCollectiblesWrapped,
-      );
-
-      if (generatedMint == null) {
-        _handleError('No available mints for this collectible.');
-        return;
-      }
-
-      final String mint = generatedMint.toString();
-      await collectibleModel.addUserCollectible(userId, collectibleId, mint);
-
-      // The '!' is now safe because we've already checked that userId is not null.
-      await updateMissionProgress(
-        userId: userId,
-        collectibleId: collectibleId,
-        operation: MissionProgressOperation.increment,
-        context: context,
-      );
-
+    if (awardedCollectibleId != null) {
       _handleSuccess(code);
-    } catch (e) {
-      _handleError('Error processing collectible: $e');
-    }
-  }
-
-  Future<void> _processTrade(String tradeCode) async {
-    if (!mounted) return;
-
-    final List<String> parts = tradeCode.split('-');
-    String giverUserId = parts[2];
-    String userCollectibleIdToTrade = parts[3];
-    final userModel = Provider.of<UserModel>(context, listen: false);
-    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
-    final collectibleModel =
-        Provider.of<CollectibleModel>(context, listen: false);
-    final String? receiverUserId = userModel.currentUser?['userId']?.toString();
-
-    if (receiverUserId == null) {
-      _handleError("Could not identify current user to receive trade.");
-      return;
-    }
-
-    if (receiverUserId == giverUserId) {
-      _handleError("Cannot trade a collectible to yourself.");
-      return;
-    }
-
-    final tradedInstanceData = await getUserCollectibleByUserCollectibleId(
-        userCollectibleIdToTrade, authProvider);
-
-    if (tradedInstanceData == null ||
-        tradedInstanceData['collectibleId'] == null) {
-      _handleError("Could not verify the collectible being traded.");
-      return;
-    }
-
-    final String collectibleId = tradedInstanceData['collectibleId'].toString();
-    bool tradeSuccess = await collectibleModel.updateUserCollectibleStatus(
-        userCollectibleIdToTrade, true, receiverUserId, giverUserId);
-
-    if (tradeSuccess) {
-      await updateMissionProgress(
-          userId: receiverUserId,
-          collectibleId: collectibleId,
-          operation: MissionProgressOperation.increment,
-          context: context);
-      await updateMissionProgress(
-          userId: giverUserId,
-          collectibleId: collectibleId,
-          operation: MissionProgressOperation.decrement,
-          context: context);
-
-      _handleSuccess(tradeCode);
     } else {
-      _handleError(collectibleModel.errorMessage ?? "Trade failed.");
+      _handleError(model, model.errorMessage ?? "Invalid Code");
     }
   }
 
-  void _handleError(String message) async {
+  /// Processes a collectible transfer code.
+  Future<void> _processTransfer(DistributionModel model, String code) async {
+    // This logic can be updated later to also call the mission helper if needed
+    final Map<String, String>? tradeResult = await model.completeTransfer(code);
+
+    if (tradeResult != null) {
+      _handleSuccess(code);
+    } else {
+      _handleError(model, model.errorMessage ?? "Trade Failed");
+    }
+  }
+
+  void _handleError(DistributionModel model, String message) async {
     debugPrint(message);
     if (!mounted) return;
     setState(() => _currentScanState = ScanState.error);
     await Future.delayed(const Duration(seconds: 3));
     if (!mounted) return;
-    Navigator.of(context).pop(); // Go back to the previous screen (ScanScreen)
+    Navigator.of(context).pop();
   }
 
   void _handleSuccess(String code) async {
@@ -248,8 +116,6 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
 
   @override
   Widget build(BuildContext context) {
-    // --- START OF FIX ---
-    // The switch statement now has a default case to ensure it always returns a widget.
     switch (_currentScanState) {
       case ScanState.loading:
         return const _CodeLoadingWidget();
@@ -259,24 +125,20 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
       case ScanState.error:
         return const _CodeErrorWidget();
       case ScanState.received:
-        return const _CodeLoadingWidget();
-      default:
-        // This default case handles any unexpected state and prevents the error.
-        return const _CodeErrorWidget();
+        return const _CodeLoadingWidget(); // Shows loading while redirecting
     }
-    // --- END OF FIX ---
   }
 }
 
-// --- UI Widgets for different states ---
+// --- UI Widgets for different states (unchanged) ---
 
 class _CodeLoadingWidget extends StatelessWidget {
   const _CodeLoadingWidget();
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      child: Center(
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

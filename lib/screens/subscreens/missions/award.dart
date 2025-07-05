@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../helpers/localization_helper.dart';
 import '../../../widgets/object_viewer.dart';
 
 class Award extends StatefulWidget {
@@ -20,7 +21,9 @@ class _AwardState extends State<Award> {
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.pop(context),
             ),
-            title: Text(widget.selectedAward["title"])),
+            title: Text(
+              getTranslatedString(context, widget.selectedAward["title"]),
+            )),
         body: Container(
             decoration: BoxDecoration(
               gradient: RadialGradient(

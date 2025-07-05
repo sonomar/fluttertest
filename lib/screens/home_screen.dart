@@ -112,7 +112,7 @@ class HomeScreenState extends State<HomeScreen>
           Padding(
               padding: const EdgeInsets.only(top: 10),
               child: Text(
-                header,
+                getTranslatedString(context, header),
                 style: GoogleFonts.roboto(
                     textStyle: const TextStyle(
                   fontSize: 14,

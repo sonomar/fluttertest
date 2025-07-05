@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../widgets/object_viewer.dart';
 import '../../../widgets/missions/award_info.dart';
+import '../../../helpers/localization_helper.dart';
 import '../../../widgets/interactive_drag_scroll_sheet.dart';
 
 class AwardDetails extends StatefulWidget {
@@ -51,7 +52,9 @@ class _AwardDetailsState extends State<AwardDetails> {
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.pop(context),
             ),
-            title: Text(widget.selectedAward["title"]),
+            title: Text(
+              getTranslatedString(context, widget.selectedAward["title"]),
+            ),
             actions: [
               if (isCompleted)
                 Padding(

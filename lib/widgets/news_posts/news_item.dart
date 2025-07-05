@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../helpers/localization_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A reusable widget to display a full news post with all its components.
@@ -28,7 +29,7 @@ class NewsItem extends StatelessWidget {
     final body = newsPost['body'] ?? '';
     final headerImageUrl = newsPost['imgRef']?['header'];
     final linkButtonUrl = newsPost['embedRef']?['linkButtonRef'];
-    final linkButtonText = newsPost['embedRef']?['linkButtonText'];
+    final linkButtonText = newsPost['embedRef']?['linkButtonTextDe'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,7 +54,7 @@ class NewsItem extends StatelessWidget {
 
         // Header Text
         Text(
-          header,
+          getTranslatedString(context, header),
           style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -79,7 +80,7 @@ class NewsItem extends StatelessWidget {
 
         // Render the body content as HTML, which is safe from injections.
         Html(
-          data: body,
+          data: getTranslatedString(context, body),
           style: {
             "body": Style(
               fontSize: FontSize(16.0),

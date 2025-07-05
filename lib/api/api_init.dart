@@ -119,7 +119,18 @@ Future<dynamic> apiGetRequest(
       await authProvider.signOut();
       return null;
     }
-    return json.decode(response.body);
+    try {
+      return json.decode(response.body);
+    } catch (e) {
+      print('--- API PARSE ERROR ---');
+      print(
+          'Failed to decode JSON from response. The server returned a non-JSON response.');
+      print('Path: $path');
+      print('Status Code: ${response.statusCode}');
+      print('Raw Response Body: ${response.body}');
+      print('-----------------------');
+      return null; // Return null to prevent the app from crashing.
+    }
   }
   return null; // Or throw a specific exception
 }

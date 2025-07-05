@@ -69,14 +69,15 @@ class NotificationsPageState extends State<NotificationsPage> {
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: ListTile(
                     title: Text(
-                      notif.header,
+                      getTranslatedString(context, notif.header),
                       style: TextStyle(
                         fontWeight: userNotif.markRead
                             ? FontWeight.normal
                             : FontWeight.bold,
                       ),
                     ),
-                    subtitle: Text(_shortPreview(notif.content)),
+                    subtitle: Text(_shortPreview(
+                        getTranslatedString(context, notif.content))),
                     trailing: userNotif.markRead
                         ? null
                         : Icon(Icons.circle,

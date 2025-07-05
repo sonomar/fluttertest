@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../helpers/localization_helper.dart';
 import 'package:deins_app/models/notification_provider.dart';
 import 'package:deins_app/screens/subscreens/notifications/notification_models.dart';
 
@@ -61,8 +62,9 @@ class _NotificationDetailPageState extends State<NotificationDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            notif.header.isNotEmpty ? notif.header : 'Notification Details'),
+        title: Text(notif.header.isNotEmpty
+            ? getTranslatedString(context, notif.header)
+            : 'Notification Details'),
         leading: IconButton(
           // Add back button
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -75,7 +77,7 @@ class _NotificationDetailPageState extends State<NotificationDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              notif.header,
+              getTranslatedString(context, notif.header),
               style: const TextStyle(
                 fontSize: 22, // Increased size
                 fontWeight: FontWeight.bold,
@@ -85,7 +87,7 @@ class _NotificationDetailPageState extends State<NotificationDetailPage> {
             Expanded(
               child: SingleChildScrollView(
                 child: Text(
-                  notif.content,
+                  getTranslatedString(context, notif.content),
                   style: const TextStyle(
                       fontSize: 16, height: 1.5), // Added line height
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../widgets/object_viewer.dart';
+import '../../../helpers/localization_helper.dart';
 
 class Collectible extends StatefulWidget {
   const Collectible({super.key, required this.selectedCollectible});
@@ -20,7 +21,8 @@ class _CollectibleState extends State<Collectible> {
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.pop(context),
             ),
-            title: Text(widget.selectedCollectible["name"])),
+            title: Text(getTranslatedString(
+                context, widget.selectedCollectible["name"]))),
         body: Container(
             decoration: BoxDecoration(
               gradient: RadialGradient(

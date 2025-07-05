@@ -41,7 +41,7 @@ class MissionModel extends ChangeNotifier {
     // Prevent re-fetching if already loading or if data has loaded and not forced.
     if (_isLoading) return;
     if (_hasLoaded && !forceClear) return;
-
+    print("MissionModel: loadMissions called with forceClear = $forceClear");
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -76,10 +76,6 @@ class MissionModel extends ChangeNotifier {
         }
       }
 
-      if (_missions.isNotEmpty) {
-        sortData(_missions, "title");
-      }
-      // Set the flag to true after a successful load.
       _hasLoaded = true;
     } catch (e) {
       _errorMessage = 'Error loading mission data: ${e.toString()}';
@@ -191,18 +187,25 @@ class MissionModel extends ChangeNotifier {
     }
   }
 
-  void sortMissions(MissionSortBy sortBy) {
-    _missionSortBy = sortBy;
-    switch (sortBy) {
-      case MissionSortBy.title:
-        _missions.sort((a, b) => a['title'].compareTo(b['title']));
-        break;
-      case MissionSortBy.publicationDate:
-      default:
-        _missions.sort((a, b) => DateTime.parse(b['publicationDate'])
-            .compareTo(DateTime.parse(a['publicationDate'])));
-        break;
+  Future<void> resetTestMissionProgress() async {
+    print("--- DEBUG: Attempting to reset mission progress ---");
+    try {
+      final body = {
+        "missionUserId": 1, // Targeting missionUser with ID 1
+        "progress": 13,
+        "completed": false,
+        "rewardClaimed": false, // Assuming this field exists in your API
+      };
+      print(
+          "--- DEBUG: Sending PATCH request to reset mission with body: $body ---");
+      await updateMissionUserByMissionUserId(body, _appAuthProvider);
+      print("--- DEBUG: Mission reset request sent successfully ---");
+      // Optionally, force a reload of mission data to reflect the change immediately
+      await loadMissions(forceClear: true);
+    } catch (e) {
+      print("--- DEBUG: Failed to reset mission progress: $e ---");
+      _errorMessage = "Failed to reset mission progress: $e";
+      notifyListeners();
     }
-    notifyListeners();
   }
 }

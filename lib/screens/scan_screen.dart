@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
-import '../models/collectible_model.dart';
+import '../models/distribution_model.dart'; // Import DistributionModel
 import '../helpers/localization_helper.dart';
-import '../widgets/scan/code_processing_screen.dart'; // Import the new screen
+import '../widgets/scan/code_processing_screen.dart';
+import '../models/mission_model.dart'; // FOR TESTING. REMOVE WITH TEST BUTTONS
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key, this.userData});
@@ -22,9 +23,9 @@ class _ScanScreenState extends State<ScanScreen> {
   @override
   void initState() {
     super.initState();
-    // It's still a good idea to ensure collectibles are loaded for context,
-    // though the main processing will happen in the new screen.
-    Provider.of<CollectibleModel>(context, listen: false).loadCollectibles();
+    // Pre-load the user's redeemed codes to make the processing screen faster.
+    Provider.of<DistributionModel>(context, listen: false)
+        .loadUserRedeemedCodes(forceReload: true);
   }
 
   @override
@@ -34,12 +35,8 @@ class _ScanScreenState extends State<ScanScreen> {
     super.dispose();
   }
 
-  // --- START OF NEW SIMPLIFIED LOGIC ---
-  /// This function now just navigates to the processing screen.
   void _triggerCodeProcessing(String code) {
     if (code.isEmpty) return;
-
-    // Stop the camera before navigating away.
     _scanController.stop();
 
     Navigator.of(context)
@@ -50,14 +47,11 @@ class _ScanScreenState extends State<ScanScreen> {
       ),
     )
         .then((_) {
-      // When we return from the processing screen (e.g., on an error),
-      // restart the camera for the next scan.
       if (mounted) {
         _scanController.start();
       }
     });
   }
-  // --- END OF NEW SIMPLIFIED LOGIC ---
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +60,6 @@ class _ScanScreenState extends State<ScanScreen> {
         ? 220.0
         : 330.0;
 
-    // The build method is now much simpler. It only shows the scanner UI.
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -134,7 +127,55 @@ class _ScanScreenState extends State<ScanScreen> {
                     color: Colors.white,
                   ),
                 ),
-              )
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  // Call the new debug function from the model
+                  context.read<DistributionModel>().resetTestCode();
+                  // Show a snackbar to confirm the action was triggered
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text("Attempting to reset test code...")),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 40),
+                  backgroundColor:
+                      Colors.grey[700], // A different color for debug buttons
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Reset test code',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  // Call the new debug function from the MissionModel
+                  context.read<MissionModel>().resetTestMissionProgress();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content:
+                            Text("Attempting to reset mission progress...")),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 40),
+                  backgroundColor:
+                      Colors.blueGrey[700], // A different color for this button
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Reset Mission Progress',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
             ],
           ),
         ),
@@ -143,12 +184,45 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 }
 
-// Custom painter for the QR scan area border.
 class BorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    // ... (implementation remains the same)
+    final width = 4.0;
+    final radius = 20.0;
+    final tRadius = 2 * radius;
+    final rect = Rect.fromLTWH(
+      width,
+      width,
+      size.width - 2 * width,
+      size.height - 2 * width,
+    );
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius));
+    final clippingRect0 = Rect.fromLTWH(0, 0, tRadius, tRadius);
+    final clippingRect1 = Rect.fromLTWH(0, 0, tRadius, tRadius);
+    final clippingRect2 =
+        Rect.fromLTWH(size.width - tRadius, 0, tRadius, tRadius);
+    final clippingRect3 =
+        Rect.fromLTWH(0, size.height - tRadius, tRadius, tRadius);
+    final clippingRect4 = Rect.fromLTWH(
+        size.width - tRadius, size.height - tRadius, tRadius, tRadius);
+
+    final path = Path()
+      ..addRRect(rrect)
+      ..addRect(clippingRect0)
+      ..addRect(clippingRect1)
+      ..addRect(clippingRect2)
+      ..addRect(clippingRect3)
+      ..addRect(clippingRect4);
+    canvas.clipPath(path);
+    canvas.drawRRect(
+      rrect,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = width,
+    );
   }
+
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
