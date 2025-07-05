@@ -26,3 +26,11 @@ def getDistributionCollectiblesByCollectibleId(event):
         
     collectible_id = data["collectibleId"]
     return crudFunctions.getDistributionCollectiblesByCollectibleId(collectibleId=collectible_id, db=event['db_session'])
+
+def getDistributionCollectiblesByDistributionId(event):
+    data = extractData(event)
+    if not data or "distributionId" not in data:
+        return {'statusCode': 400, 'body': 'distributionId is required'}
+        
+    collectible_id = data["distributionId"]
+    return crudFunctions.getDistributionCollectiblesByDistributionId(collectibleId=collectible_id, db=event['db_session'])
