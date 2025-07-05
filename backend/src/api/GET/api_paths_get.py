@@ -501,6 +501,12 @@ API_PATHS_GET = {
             "active": True,
             "handler": DistributionCollectibleGETFunctions.getDistributionCollectiblesByCollectibleId,
             "response_model": List[DistributionCollectibleResponse]
+        },
+        "getDistributionCollectiblesByDistributionId": {
+            "path": "/getDistributionCollectiblesByDistributionId",
+            "active": True,
+            "handler": DistributionCollectibleGETFunctions.getDistributionCollectiblesByDistributionId,
+            "response_model": List[DistributionCollectibleResponse]
         }
     }
 }

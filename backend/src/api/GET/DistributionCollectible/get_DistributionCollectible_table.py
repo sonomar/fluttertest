@@ -12,5 +12,7 @@ def call_DistributionCollectible_function(raw_path, event):
         returnString = distributionCollectibleFunctions.getAllDistributionCollectibles(event)
     elif raw_path == DistributionCollectible_Path['getDistributionCollectiblesByCollectibleId']['path']:
         returnString = distributionCollectibleFunctions.getDistributionCollectiblesByCollectibleId(event)
+    elif raw_path == DistributionCollectible_Path['getDistributionCollectiblesByDistributionId']['path']:
+        returnString = distributionCollectibleFunctions.getDistributionCollectiblesByDistributionId(event)
 
     return returnString
