@@ -101,7 +101,8 @@ class CardInfo extends StatelessWidget {
               padding: EdgeInsets.only(left: 10),
               child: SizedBox(
                   width: 400,
-                  child: Text(selectedCollectible["name"],
+                  child: Text(
+                      getTranslatedString(context, selectedCollectible["name"]),
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 30,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter_new/qr_flutter.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import '../../../helpers/localization_helper.dart';
 import '../../../main.dart';
 import '../../../models/collectible_model.dart';
 import '../../../models/distribution_model.dart'; // Import DistributionModel
@@ -208,7 +209,8 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(widget.selectedCollectible["name"]),
+        title: Text(
+            getTranslatedString(context, widget.selectedCollectible["name"])),
         actions: [
           Padding(
             padding: const EdgeInsets.all(15),

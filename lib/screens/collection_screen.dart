@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'subscreens/collectibles/collectible_details.dart';
 import '../models/collectible_model.dart';
+import '../models/locale_provider.dart';
 import '../helpers/localization_helper.dart';
 import '../widgets/shadow_circle.dart';
 
@@ -154,8 +155,13 @@ class _CollectionScreenState extends State<CollectionScreen>
   @override
   void initState() {
     super.initState();
-    Provider.of<CollectibleModel>(context, listen: false)
-        .loadCollectibles(forceClear: true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final langCode = Provider.of<LocaleProvider>(context, listen: false)
+          .locale!
+          .languageCode;
+      Provider.of<CollectibleModel>(context, listen: false)
+          .loadCollectibles(forceClear: true, languageCode: langCode);
+    });
   }
 
   @override
@@ -244,9 +250,14 @@ class _CollectionScreenState extends State<CollectionScreen>
                           inactiveThumbColor: Color.fromARGB(255, 214, 34, 202),
                           inactiveTrackColor: Colors.white,
                           onChanged: (bool value) {
+                            final langCode = Provider.of<LocaleProvider>(
+                                    context,
+                                    listen: false)
+                                .locale!
+                                .languageCode;
                             context
                                 .read<CollectibleModel>()
-                                .toggleSortPreference();
+                                .toggleSortPreference(langCode);
                           },
                         ),
                         Padding(

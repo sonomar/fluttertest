@@ -32,24 +32,6 @@ class _ScanViewReceiveState extends State<ScanViewReceive>
     super.dispose();
   }
 
-  Future<String> readItemJson() async {
-    final String response =
-        await rootBundle.loadString('assets/json/example.json');
-    final data = await json.decode(response);
-    for (int i = 0; i < data['collectibles'].length; i++) {
-      if (data['collectibles'][i]['label'] == widget.qrcode) {
-        setState(() {
-          _item = data['collectibles'][i]['imageRef']['url'];
-        });
-        return data['collectibles'][i]['imageRef']['url'];
-      }
-    }
-    setState(() {
-      _item = 'assets/images/car1.png';
-    });
-    return 'assets/images/car1.png';
-  }
-
   @override
   void initState() {
     final qrcode = widget.qrcode;
@@ -57,18 +39,6 @@ class _ScanViewReceiveState extends State<ScanViewReceive>
     setState(() {
       _clicked = false;
     });
-    readItemJson().then((value) => {
-          Future.delayed(const Duration(seconds: 4)).then((value) => {
-                if (_clicked == false)
-                  {
-                    navigator.pushReplacement(MaterialPageRoute(
-                        builder: (context) => MyHomePage(
-                            title: "Kloppocar Home",
-                            qrcode: qrcode,
-                            userData: widget.userData))),
-                  }
-              })
-        });
     super.initState();
   }
 
