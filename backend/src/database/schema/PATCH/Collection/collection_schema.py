@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, Union, List
 
-# --- Collection Schemas ---
 class CollectionUpdate(BaseModel):
     communityId: Optional[int] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
+    projectId: Optional[int] = None
+    name: Optional[Dict[str, str]] = None
+    description: Optional[Dict[str, str]] = None
     imageRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None

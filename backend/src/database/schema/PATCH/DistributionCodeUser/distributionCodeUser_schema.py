@@ -8,4 +8,4 @@ class DistributionCodeUserUpdate(BaseModel):
     previousOwnerId: Optional[int] = None
     redeemed: Optional[bool] = None
     redeemedDate: Optional[datetime.datetime] = None
-    collectibleRevieved: Optional[Dict[str, Any]] = None
+    collectibleReceived: Optional[Dict[str, Any]] = None

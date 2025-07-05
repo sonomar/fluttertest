@@ -5,36 +5,26 @@ from sqlalchemy.exc import IntegrityError
 from database.db import get_db
 from database.models import CommunityChallenge
 from database.schema.POST.CommunityChallenge.communityChallenge_schema import CommunityChallengeCreate
-from database.schema.GET.CommunityChallenge.communityChallenge_schema import CommunityChallengeResponse # Updated import
-from api.exceptions import ConflictException, BadRequestException
+from database.schema.GET.CommunityChallenge.communityChallenge_schema import CommunityChallengeResponse
+from api.exceptions import BadRequestException
 
 def createCommunityChallenge(
     community_challenge: CommunityChallengeCreate,
     db: Session = Depends(get_db)
-) -> CommunityChallengeResponse: # Updated return type
+) -> CommunityChallengeResponse:
     """
-    Adds a new community challenge to the database using SQLAlchemy.
+    Adds a new community challenge to the database using SQLAlchemy, including all new fields.
     """
+    # Create the database model instance directly from the Pydantic schema data
     db_community_challenge = CommunityChallenge(
-        communityId=community_challenge.communityId,
-        title=community_challenge.title,
-        goal=community_challenge.goal,
-        timer=community_challenge.timer,
-        description=community_challenge.description,
-        reward=community_challenge.reward,
-        startDate=community_challenge.startDate,
-        endDate=community_challenge.endDate,
-        imgRef=community_challenge.imgRef,
-        vidRef=community_challenge.vidRef,
-        qrRef=community_challenge.qrRef,
-        embedRef=community_challenge.embedRef
+        **community_challenge.model_dump()
     )
 
     try:
         db.add(db_community_challenge)
         db.commit()
         db.refresh(db_community_challenge)
-        return CommunityChallengeResponse.model_validate(db_community_challenge) # Updated return statement
+        return CommunityChallengeResponse.model_validate(db_community_challenge)
     except IntegrityError as e:
         db.rollback()
         error_message = str(e)

@@ -2,14 +2,14 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any, Union, List
 import datetime
 
-# --- CommunityChallenge Schemas ---
 class CommunityChallengeCreate(BaseModel):
     communityId: int
-    title: str
+    title: Dict[str, str]
     goal: int
+    rewardId: Optional[int] = None
+    webRef: Optional[Dict[str, Any]] = None
     timer: Optional[bool] = False
-    description: Optional[str] = None
-    reward: Optional[str] = None
+    description: Optional[Dict[str, str]] = None
     startDate: Optional[datetime.datetime] = None
     endDate: Optional[datetime.datetime] = None
     imgRef: Optional[Union[Dict[str, Any], str, List[str]]] = None

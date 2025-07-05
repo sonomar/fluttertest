@@ -1,3 +1,4 @@
+import logging
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -5,41 +6,44 @@ from sqlalchemy.exc import IntegrityError
 from database.db import get_db
 from database.models import UserCollectible
 from database.schema.POST.UserCollectible.userCollectible_schema import UserCollectibleCreate
-# Assuming a GET/UserCollectible/userCollectible_schema.py exists or similar naming
-from database.schema.GET.UserCollectible.userCollectible_schema import UserCollectibleResponse # Updated import for response schema
+from database.schema.GET.UserCollectible.userCollectible_schema import UserCollectibleResponse
 from api.exceptions import ConflictException, BadRequestException
+
+# Use the logging module for better error tracking in production
+logger = logging.getLogger(__name__)
 
 def createUserCollectible(
     user_collectible: UserCollectibleCreate,
     db: Session = Depends(get_db)
-) -> UserCollectibleResponse: # Updated return type
+) -> UserCollectibleResponse:
     """
     Adds a new user collectible entry to the database using SQLAlchemy.
+    This function now handles all fields from the updated schema automatically.
     """
+    # Create the SQLAlchemy model instance directly from the Pydantic schema.
+    # This is a cleaner and more robust way to ensure all fields, including
+    # the new 'trade', 'points', and 'qrCode' columns, are included.
     db_user_collectible = UserCollectible(
-        ownerId=user_collectible.ownerId,
-        collectibleId=user_collectible.collectibleId,
-        mint=user_collectible.mint,
-        previousOwnerId=user_collectible.previousOwnerId,
-        lastTransferredDt=user_collectible.lastTransferredDt,
-        active=user_collectible.active,
-        favorite=user_collectible.favorite
+        **user_collectible.model_dump()
     )
 
     try:
         db.add(db_user_collectible)
         db.commit()
         db.refresh(db_user_collectible)
-        return UserCollectibleResponse.model_validate(db_user_collectible) # Updated return statement
+        return UserCollectibleResponse.model_validate(db_user_collectible)
     except IntegrityError as e:
         db.rollback()
         error_message = str(e)
-        print(f"Integrity error creating user collectible: {error_message}")
-        if 'Duplicate entry' in error_message and 'unique_owner_collectible_mint' in error_message:
-            raise ConflictException(detail=f"UserCollectible entry with ownerId '{user_collectible.ownerId}', collectibleId '{user_collectible.collectibleId}', and mint '{user_collectible.mint}' already exists.")
+        logger.error(f"Integrity error creating user collectible: {error_message}")
+        
+        # Checking for the unique constraint name is more reliable
+        if 'unique_owner_collectible_mint' in error_message:
+            raise ConflictException(detail=f"This user already owns this collectible with the same mint number.")
         else:
             raise BadRequestException(detail=f"Database integrity error: {error_message}")
+            
     except Exception as e:
         db.rollback()
-        print(f"Database error creating user collectible: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error: {e}")
+        logger.error(f"An unexpected database error occurred while creating a user collectible: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected database error occurred.")

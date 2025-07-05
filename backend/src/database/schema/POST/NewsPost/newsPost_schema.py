@@ -4,10 +4,10 @@ import datetime
 
 # --- NewsPost Schemas ---
 class NewsPostCreate(BaseModel):
-    header: str
-    body: str
-    shortBody: str
-    postDate: Optional[datetime.datetime] = Field(default_factory=datetime.datetime.utcnow) # Use utcnow as default
+    header: Dict[str, str]
+    body: Dict[str, str]
+    shortBody: Dict[str, str]
+    postDate: Optional[datetime.datetime] = Field(default_factory=datetime.datetime.utcnow)
     type: Optional[str] = None
     imgRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None

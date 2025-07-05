@@ -1,48 +1,29 @@
 from tools.prod.prodTools import extractData
 import database.CRUD.PATCH.Collectible.patch_Collectible_CRUD_functions as crudFunctions
 from database.schema.PATCH.Collectible.collectible_schema import CollectibleUpdate
-import datetime
-
-def CollectibleDataCheck(collectible: CollectibleUpdate, data: any):
-    if "collectionId" in data:
-        collectible.collectionId = data["collectionId"]
-    if "categoryId" in data:
-        collectible.categoryId = data["categoryId"]
-    if "projectId" in data:
-        collectible.projectId = data["projectId"]
-    if "communityId" in data:
-        collectible.communityId = data["communityId"]
-    if "label" in data:
-        collectible.label = data["label"]
-    if "name" in data:
-        collectible.name = data["name"]
-    if "description" in data:
-        collectible.description = data["description"]
-    if "imageRef" in data:
-        collectible.imageRef = data["imageRef"]
-    if "vidRef" in data:
-        collectible.vidRef = data["vidRef"]
-    if "qrRef" in data:
-        collectible.qrRef = data["qrRef"]
-    if "embedRef" in data:
-        collectible.embedRef = data["embedRef"]
-    if "circulation" in data:
-        collectible.circulation = data["circulation"]
-    if "publicationDate" in data:
-        if isinstance(data["publicationDate"], str):
-            collectible.publicationDate = datetime.datetime.fromisoformat(data["publicationDate"])
-        else:
-            collectible.publicationDate = data["publicationDate"]
-    if "active" in data:
-        collectible.active = data["active"]
-    return collectible
+from pydantic import ValidationError
 
 def updateCollectibleByCollectibleId(event):
+    """
+    Updates an existing Collectible. It extracts data from the event, validates it
+    using the CollectibleUpdate schema, and calls the CRUD function to update the database.
+    """
     data = extractData(event)
     if not data or "collectibleId" not in data:
-        return {'statusCode': 400, 'body': 'collectibleId is required'}
+        return {'statusCode': 400, 'body': 'collectibleId is required in the request body'}
 
-    collectible_id = data["collectibleId"]
-    collectible = CollectibleUpdate()
-    collectible = CollectibleDataCheck(collectible, data)
-    return crudFunctions.updateCollectibleByCollectibleId(collectibleId=collectible_id, user_update_data=collectible, db=event['db_session'])
+    collectible_id = data.pop("collectibleId")
+
+    try:
+        # Pydantic will automatically validate and parse the incoming data.
+        # The manual CollectibleDataCheck function is no longer needed.
+        collectible_update_data = CollectibleUpdate(**data)
+    except ValidationError as e:
+        # If the data is invalid, return a 400 error with specific details.
+        return {'statusCode': 400, 'body': e.errors()}
+
+    return crudFunctions.updateCollectibleByCollectibleId(
+        collectibleId=collectible_id,
+        collectible_update_data=collectible_update_data, 
+        db=event['db_session']
+    )

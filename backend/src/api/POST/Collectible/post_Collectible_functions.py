@@ -1,43 +1,29 @@
-# database/CRUD/POST/Collectible/post_Collectible_table.py
 from tools.prod.prodTools import extractData
 from database.schema.POST.Collectible.collectible_schema import CollectibleCreate
 import database.CRUD.POST.Collectible.post_Collectible_CRUD_functions as crudFunctions
+from pydantic import ValidationError
 
 def createCollectible(event):
     """
-    Adds a new collectible to the database.
-    Requires 'collectionId', 'categoryId', 'projectId', 'communityId', 'label', 'name'.
-    Other fields are optional.
+    Adds a new collectible to the database. It validates the request data
+    using the CollectibleCreate schema and then calls the corresponding CRUD function.
     """
     data = extractData(event)
+    if not data:
+        return {'statusCode': 400, 'body': 'Request body is missing'}
 
-    # Basic validation for required fields
-    if not data or "collectionId" not in data or "categoryId" not in data or \
-       "projectId" not in data or "communityId" not in data or "label" not in data or \
-       "name" not in data:
-        return {
-            "statusCode": 400,
-            "body": "collectionId, categoryId, projectId, communityId, label, and name are required"
-        }
+    try:
+        # Pydantic will automatically validate that all required fields are present.
+        # The manual if/else block is no longer necessary.
+        collectible_data = CollectibleCreate(**data)
+    except ValidationError as e:
+        # If the incoming data is invalid, Pydantic raises an error.
+        # We catch it and return a detailed 400 Bad Request response.
+        return {'statusCode': 400, 'body': e.errors()}
 
-    # Create Pydantic model instance
-    collectible = CollectibleCreate(
-        collectionId=data["collectionId"],
-        categoryId=data["categoryId"],
-        projectId=data["projectId"],
-        communityId=data["communityId"],
-        label=data["label"],
-        name=data["name"],
-        description=data.get("description"),
-        imageRef=data.get("imageRef"),
-        vidRef=data.get("vidRef"),
-        qrRef=data.get("qrRef"),
-        embedRef=data.get("embedRef"),
-        circulation=data.get("circulation"),
-        publicationDate=data.get("publicationDate"),
-        active=data.get("active") # Schema default is True if not provided
+    # Call the CRUD function with the validated Pydantic model.
+    # The CRUD function name is also updated to snake_case for consistency.
+    return crudFunctions.createCollectible(
+        collectible=collectible_data,
+        db=event["db_session"]
     )
-
-    # Call the CRUD function with the Pydantic model and DB session
-    # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.createCollectible(collectible=collectible, db=event["db_session"])

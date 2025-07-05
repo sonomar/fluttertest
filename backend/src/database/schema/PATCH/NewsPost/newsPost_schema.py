@@ -4,9 +4,9 @@ import datetime
 
 # --- NewsPost Schemas ---
 class NewsPostUpdate(BaseModel):
-    header: Optional[str] = None
-    body: Optional[str] = None
-    shortBody: Optional[str] = None
+    header: Optional[Dict[str, str]] = None
+    body: Optional[Dict[str, str]] = None
+    shortBody: Optional[Dict[str, str]] = None
     postDate: Optional[datetime.datetime] = None
     type: Optional[str] = None
     imgRef: Optional[Union[Dict[str, Any], str, List[str]]] = None

@@ -5,5 +5,5 @@ from typing import Optional, Dict, Any
 class CollectibleSponsorUpdate(BaseModel):
     collectibleId: Optional[int] = None
     sponsorId: Optional[int] = None
-    sponsorMessage: Optional[str] = None
+    sponsorMessage: Optional[Dict[str, str]] = None
     active: Optional[bool] = None

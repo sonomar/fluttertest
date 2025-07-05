@@ -6,7 +6,7 @@ class CollectibleSponsorResponse(BaseModel):
     collectibleSponsorId: int
     collectibleId: int
     sponsorId: int
-    sponsorMessage: Optional[str] = None
+    sponsorMessage: Optional[Dict[str, str]] = None
     active: Optional[bool] = True
 
     class Config:

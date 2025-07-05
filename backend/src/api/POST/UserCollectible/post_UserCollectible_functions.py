@@ -1,33 +1,28 @@
-# database/CRUD/POST/UserCollectible/post_UserCollectible_table.py
 from tools.prod.prodTools import extractData
 from database.schema.POST.UserCollectible.userCollectible_schema import UserCollectibleCreate
 import database.CRUD.POST.UserCollectible.post_UserCollectible_CRUD_functions as crudFunctions
+from pydantic import ValidationError
 
 def createUserCollectible(event):
     """
-    Adds a new user collectible entry to the database.
-    Requires 'ownerId', 'collectibleId', 'mint'. Other fields are optional.
+    Adds a new user collectible entry to the database. It validates the request data
+    using the UserCollectibleCreate schema and then calls the corresponding CRUD function.
     """
     data = extractData(event)
+    if not data:
+        return {'statusCode': 400, 'body': 'Request body is missing'}
 
-    # Basic validation for required fields
-    if not data or "ownerId" not in data or "collectibleId" not in data or "mint" not in data:
-        return {
-            "statusCode": 400,
-            "body": "ownerId, collectibleId, and mint are required"
-        }
+    try:
+        # Pydantic will automatically validate required fields ('ownerId', 'collectibleId', 'mint')
+        # and handle all other optional fields from the updated schema.
+        user_collectible_data = UserCollectibleCreate(**data)
+    except ValidationError as e:
+        # If validation fails, return a detailed 400 Bad Request error.
+        return {'statusCode': 400, 'body': e.errors()}
 
-    # Create Pydantic model instance
-    user_collectible = UserCollectibleCreate(
-        ownerId=data["ownerId"],
-        collectibleId=data["collectibleId"],
-        mint=data["mint"],
-        previousOwnerId=data.get("previousOwnerId"),
-        lastTransferredDt=data.get("lastTransferredDt"),
-        active=data.get("active"), # Schema default is True if not provided
-        favorite=data.get("favorite") # Schema default is False if not provided
+    # Call the CRUD function with the validated Pydantic model.
+    # The CRUD function name is also updated to snake_case for consistency.
+    return crudFunctions.createUserCollectible(
+        user_collectible=user_collectible_data,
+        db=event["db_session"]
     )
-
-    # Call the CRUD function with the Pydantic model and DB session
-    # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.createUserCollectible(user_collectible=user_collectible, db=event["db_session"])

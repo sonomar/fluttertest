@@ -1,37 +1,28 @@
-# database/CRUD/POST/Mission/post_Mission_table.py
-from tools.prod.prodTools import extractData, get_connection
+from tools.prod.prodTools import extractData
 from database.schema.POST.Mission.mission_schema import MissionCreate
 import database.CRUD.POST.Mission.post_Mission_CRUD_functions as crudFunctions
+from pydantic import ValidationError
 
 def createMission(event):
     """
-    Adds a new mission to the database.
-    Requires 'collectionId', 'title', 'goal'. Other fields are optional.
+    Adds a new mission to the database. It validates the request data
+    using the MissionCreate schema and then calls the corresponding CRUD function.
     """
     data = extractData(event)
+    if not data:
+        return {'statusCode': 400, 'body': 'Request body is missing'}
 
-    # Basic validation for required fields
-    if not data or "collectionId" not in data or "title" not in data or "goal" not in data:
-        return {
-            "statusCode": 400,
-            "body": "collectionId, title, and goal are required"
-        }
+    try:
+        # Pydantic will automatically validate that 'collectionId', 'title', and 'goal' are present,
+        # and handle all other optional fields from the updated schema.
+        mission_data = MissionCreate(**data)
+    except ValidationError as e:
+        # If validation fails, return a detailed 400 Bad Request error.
+        return {'statusCode': 400, 'body': e.errors()}
 
-    # Create Pydantic model instance
-    mission = MissionCreate(
-        collectionId=data["collectionId"],
-        title=data["title"],
-        goal=data["goal"],
-        description=data.get("description"),
-        reward=data.get("reward"),
-        timer=data.get("timer"), # Schema default is False if not provided
-        endDate=data.get("endDate"),
-        imgRef=data.get("imgRef"),
-        vidRef=data.get("vidRef"),
-        qrRef=data.get("qrRef"),
-        embedRef=data.get("embedRef")
+    # Call the CRUD function with the validated Pydantic model.
+    # The CRUD function name is also updated to snake_case for consistency.
+    return crudFunctions.createMission(
+        mission=mission_data, 
+        db=event["db_session"]
     )
-
-    # Call the CRUD function with the Pydantic model and DB session
-    # Assumes event["db_session"] contains the SQLAlchemy session
-    return crudFunctions.createMission(mission=mission, db=event["db_session"])

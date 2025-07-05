@@ -163,6 +163,11 @@ kloopocarGeneralFunctions_deployment_package/
     alembic revision -m "create initial tables" --autogenerate
     ```
 
+    This command when you want to generate custom migration
+    ```bash
+    alembic revision -m "Manually migrate all text and varchar data to JSON format"
+    ```
+
     * **Apply Migrations**:
 
     To apply all pending migrations to your database:

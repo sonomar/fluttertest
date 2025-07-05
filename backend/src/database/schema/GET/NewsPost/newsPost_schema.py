@@ -5,18 +5,18 @@ import datetime
 # --- NewsPost Schemas ---
 class NewsPostResponse(BaseModel):
     newsPostId: int
-    createdDt: datetime.datetime
-    updatedDt: datetime.datetime
-    header: str
-    body: str
-    shortBody: str
-    postDate: Optional[datetime.datetime] = Field(default_factory=datetime.datetime.utcnow) # Use utcnow as default
+    header: Dict[str, str]
+    body: Dict[str, str]
+    shortBody: Dict[str, str]
+    postDate: Optional[datetime.datetime] = None
     type: Optional[str] = None
     imgRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     embedRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     active: Optional[bool] = True
+    createdDt: datetime.datetime
+    updatedDt: datetime.datetime
 
     class Config:
         from_attributes = True
