@@ -97,4 +97,4 @@ def getUserCollectibleByUserCollectibleId(event):
     if "limit" in data:
         limit = data["limit"]
 
-    return crudFunctions.getUserCollectiblesByUserCollectibleId(userCollectibleId=userCollectibleId, skip=skip, limit=limit, db=event['db_session'])
+    return crudFunctions.getUserCollectibleByUserCollectibleId(userCollectibleId=userCollectibleId, skip=skip, limit=limit, db=event['db_session'])
