@@ -77,3 +77,24 @@ def getUserCollectiblesByCollectibleId(event):
         limit = data["limit"]
 
     return crudFunctions.getUserCollectiblesByCollectibleId(collectibleId=collectible_id, skip=skip, limit=limit, db=event['db_session'])
+
+def getUserCollectibleByUserCollectibleId(event):
+    """
+    Retrieves user collectibles by collectible ID.
+    Requires 'userCollectibleId' in the request data. Optional 'skip' and 'limit' for pagination.
+    """
+    data = extractData(event)
+    skip = 0
+    limit = 100
+
+    if not data or "userCollectibleId" not in data:
+        return {'statusCode': 400, 'body': 'userCollectibleId is required'}
+
+    userCollectibleId = data["userCollectibleId"]
+
+    if "skip" in data:
+        skip = data["skip"]
+    if "limit" in data:
+        limit = data["limit"]
+
+    return crudFunctions.getUserCollectiblesByUserCollectibleId(userCollectibleId=userCollectibleId, skip=skip, limit=limit, db=event['db_session'])

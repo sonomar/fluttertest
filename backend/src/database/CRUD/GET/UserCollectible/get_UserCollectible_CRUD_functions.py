@@ -52,3 +52,12 @@ def getUserCollectiblesByCollectibleId(
 ) -> List[UserCollectibleResponse]:
     user_collectibles = db.query(UserCollectible).filter(UserCollectible.collectibleId == collectibleId).offset(skip).limit(limit).all()
     return user_collectibles
+
+def getUserCollectibleByUserCollectibleId(
+    userCollectibleId: int = Query(..., description="ID of the userCollectible to retrieve user collectibles for"),
+    skip: int = Query(0, description="Skip this many items"),
+    limit: int = Query(100, description="Limit results to this many items"),
+    db: Session = Depends(get_db)
+) -> UserCollectibleResponse:
+    user_collectible = db.query(UserCollectible).filter(UserCollectible.userCollectibleId == userCollectibleId).offset(skip).limit(limit).all()
+    return user_collectible
