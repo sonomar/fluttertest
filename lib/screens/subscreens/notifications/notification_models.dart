@@ -1,8 +1,9 @@
 class NotificationModel {
   final int notificationId;
   final bool active;
-  final String header; // Corresponds to 'title' in old model
-  final String content; // Corresponds to 'message' in old model
+  // Changed from String to handle JSON translations
+  final Map<String, dynamic> header;
+  final Map<String, dynamic> content;
 
   NotificationModel({
     required this.notificationId,
@@ -12,23 +13,32 @@ class NotificationModel {
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    // Helper function to handle conversion from String or Map to a Map
+    Map<String, dynamic> parseTranslatableField(
+        dynamic fieldData, String fallbackValue) {
+      if (fieldData is Map<String, dynamic>) {
+        return fieldData;
+      }
+      if (fieldData is String) {
+        // If we receive an old string format, wrap it in a map as a fallback.
+        return {'en': fieldData};
+      }
+      // Default fallback if data is null or unexpected type
+      return {'en': fallbackValue};
+    }
+
     return NotificationModel(
       notificationId: json['notificationId'],
-
-      // --- FIX 1: Map the new property 'active' to the 'active' key from JSON ---
       active: json['active'] ?? false,
 
-      // --- FIX 2: Map 'header' and 'content' to their corresponding keys from JSON ---
-      // Assuming your API now sends 'header' and 'content'.
-      // If it still sends 'title' and 'message', map them accordingly like this:
-      header: json['header'] ?? json['title'] ?? 'No Title',
-      content: json['content'] ?? json['message'] ?? 'No message content.',
+      // Use the helper to parse header and content safely
+      header: parseTranslatableField(json['header'], 'No Title'),
+      content: parseTranslatableField(json['content'], 'No message content.'),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      // FIX 3: Use a consistent key name, likely camelCase for JSON conventions
       'notificationId': notificationId,
       'active': active,
       'header': header,
@@ -67,7 +77,6 @@ class UserNotification {
 
   Map<String, dynamic> toJson() {
     return {
-      // FIX 4: Use the consistent key 'notificationUserId'
       'notificationUserId': notificationUserid,
       'deleted': deleted,
       'archived': archived,

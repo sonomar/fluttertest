@@ -53,7 +53,7 @@ Widget communityChallengeWidget(
           : 0;
   final String ChallengeTitle =
       (communityChallenge != null && communityChallenge['title'] != null)
-          ? communityChallenge['title']
+          ? getTranslatedString(context, communityChallenge['title'])
           : '';
   return Padding(
     padding: const EdgeInsets.only(top: 20.0),

@@ -96,7 +96,8 @@ class AwardInfo extends StatelessWidget {
             Padding(
                 padding: const EdgeInsets.only(left: 20),
                 child: SizedBox(
-                    child: Text(selectedAward["title"],
+                    child: Text(
+                        getTranslatedString(context, selectedAward["title"]),
                         style: const TextStyle(
                           color: Colors.black,
                           fontSize: 30,
@@ -111,7 +112,8 @@ class AwardInfo extends StatelessWidget {
           padding: const EdgeInsets.only(left: 40.0, right: 40.0, bottom: 10.0),
           child: SizedBox(
               width: 400,
-              child: Text(selectedAward["description"],
+              child: Text(
+                  getTranslatedString(context, selectedAward["description"]),
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.black,
@@ -134,7 +136,10 @@ class AwardInfo extends StatelessWidget {
                       child: Column(children: [
                         lineItem("Missionnummer",
                             selectedAward["missionId"].toString()),
-                        lineItem("Reward", selectedAward["reward"].toString()),
+                        lineItem(
+                            "Reward",
+                            getTranslatedString(
+                                context, selectedAward["Reward"])),
                         lineItem(
                             "Mission Start",
                             formatDate(

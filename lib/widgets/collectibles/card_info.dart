@@ -118,7 +118,9 @@ class CardInfo extends StatelessWidget {
           padding: const EdgeInsets.only(left: 40.0, right: 40.0, bottom: 10.0),
           child: SizedBox(
               width: 400,
-              child: Text(selectedCollectible["description"],
+              child: Text(
+                  getTranslatedString(
+                      context, selectedCollectible["description"]),
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.black,

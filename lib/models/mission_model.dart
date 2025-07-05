@@ -190,19 +190,4 @@ class MissionModel extends ChangeNotifier {
       return false;
     }
   }
-
-  void sortMissions(MissionSortBy sortBy) {
-    _missionSortBy = sortBy;
-    switch (sortBy) {
-      case MissionSortBy.title:
-        _missions.sort((a, b) => a['title'].compareTo(b['title']));
-        break;
-      case MissionSortBy.publicationDate:
-      default:
-        _missions.sort((a, b) => DateTime.parse(b['publicationDate'])
-            .compareTo(DateTime.parse(a['publicationDate'])));
-        break;
-    }
-    notifyListeners();
-  }
 }
