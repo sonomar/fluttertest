@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_localizations.dart';
@@ -6,6 +7,30 @@ import '../../models/locale_provider.dart';
 /// Translates a static key from the app's local JSON files (e.g., en.json, de.json).
 String translate(key, context) {
   return AppLocalizations.of(context)!.translate(key);
+}
+
+List<dynamic> decodeJsonFields(
+    List<dynamic> dataList, List<String> keysToDecode) {
+  if (dataList.isEmpty) return [];
+
+  return dataList.map((item) {
+    final newItem = Map<String, dynamic>.from(item);
+    for (String key in keysToDecode) {
+      if (newItem.containsKey(key) && newItem[key] is String) {
+        try {
+          // Check if the string is not empty before trying to decode
+          if (newItem[key].isNotEmpty) {
+            newItem[key] = jsonDecode(newItem[key]);
+          }
+        } catch (e) {
+          print(
+              'Failed to decode key "$key" with value: ${newItem[key]}. Error: $e');
+          // If decoding fails, we might want to set it to a default value or leave as is
+        }
+      }
+    }
+    return newItem;
+  }).toList();
 }
 
 String getTranslatedString(BuildContext context, dynamic jsonText,

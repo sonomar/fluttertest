@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/app_auth_provider.dart';
 import '../api/collectible.dart';
 import '../models/user_model.dart';
 import '../api/user_collectible.dart';
 import '../helpers/sort_data.dart';
+import '../helpers/localization_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectibleModel extends ChangeNotifier {
@@ -60,7 +62,6 @@ class CollectibleModel extends ChangeNotifier {
         throw Exception("User ID not available from UserModel.");
       }
 
-      // Perform both API calls concurrently for better performance.
       final results = await Future.wait([
         getCollectiblesByCollectionId('1', _appAuthProvider),
         getUserCollectiblesByOwnerId(userId, _appAuthProvider)
@@ -68,19 +69,32 @@ class CollectibleModel extends ChangeNotifier {
 
       final dynamic fetchedCollectionData = results[0];
       final dynamic fetchedUserData = results[1];
+
       if (fetchedCollectionData is List) {
-        _collectionCollectibles = fetchedCollectionData;
+        // Use the helper to decode all necessary fields from JSON strings to Maps.
+        _collectionCollectibles = decodeJsonFields(
+          fetchedCollectionData,
+          [
+            'name',
+            'description',
+            'imageRef',
+            'embedRef'
+          ], // List all fields that are JSON strings
+        );
       } else {
         _collectionCollectibles = [];
-        print('CollectibleModel: Fetched collection data was not a List.');
       }
+
       if (fetchedUserData is List) {
         _userCollectibles = fetchedUserData;
       } else {
         _userCollectibles = [];
         print('CollectibleModel: Fetched user data was not a List.');
       }
-      _hasLoaded = true; // Mark that a successful load has occurred.
+
+      _hasLoaded = true;
+
+      // Apply initial sort if a language code is provided
       if (languageCode != null) {
         _sortCollectibles(_sortByName ? "name" : "label", languageCode);
       }

@@ -48,7 +48,7 @@ Widget progressBar(pageContext, mission, missionUser) {
 }
 
 Widget missionWidget(BuildContext pageContext, Map? mission, Map? missionUser) {
-  final String getTitle = mission?['title'] ?? 'No Title';
+  final Map<String, dynamic> getTitle = mission?['title'] ?? 'No Title';
   final String? getLogoUrl = mission?['imgRef']?['url'];
   final int missionGoal = mission?['goal'] ?? 999999;
   final int missionProgress = missionUser?['progress'] ?? 0;
@@ -126,7 +126,7 @@ Widget missionWidget(BuildContext pageContext, Map? mission, Map? missionUser) {
                   children: [
                     Expanded(
                       child: Text(
-                        getTitle,
+                        getTranslatedString(pageContext, getTitle),
                         style: const TextStyle(
                           fontSize: 20,
                           fontFamily: 'ChakraPetch',
@@ -178,9 +178,10 @@ Widget missionWidget(BuildContext pageContext, Map? mission, Map? missionUser) {
 Widget homeMissionWidget(pageContext, mission, missionUser) {
   final getMission = mission;
   final getMissionUser = missionUser;
-  final String getTitle = (getMission != null && getMission['title'] != null)
-      ? getMission['title']
-      : 'No Title'; // Default value
+  final Map<String, dynamic> getTitle =
+      (getMission != null && getMission['title'] != null)
+          ? getMission['title']
+          : 'No Title'; // Default value
   final String getLogo =
       (getMission != null && getMission['imgRef']['url'] != null)
           ? getMission['imgRef']['url']
@@ -268,9 +269,10 @@ Widget viewMissionWidget(pageContext, mission, missionUser,
     {isMission = false}) {
   final getMission = mission;
   final getMissionUser = missionUser;
-  final String getTitle = (getMission != null && getMission['title'] != null)
-      ? getMission['title']
-      : 'No Title'; // Default value
+  final Map<String, dynamic> getTitle =
+      (getMission != null && getMission['title'] != null)
+          ? getMission['title']
+          : 'No Title'; // Default value
   final String missionGoal = (getMission != null && getMission['goal'] != null)
       ? getMission['goal'].toString()
       : '0'; // Default value
@@ -288,7 +290,7 @@ Widget viewMissionWidget(pageContext, mission, missionUser,
                   Padding(
                       padding: const EdgeInsets.only(left: 15.0),
                       child: Text(
-                        getTitle,
+                        getTranslatedString(pageContext, getTitle),
                         style: TextStyle(
                           fontSize: 20,
                           fontFamily: 'ChakraPetch',

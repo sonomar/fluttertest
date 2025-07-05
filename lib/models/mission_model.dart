@@ -76,10 +76,6 @@ class MissionModel extends ChangeNotifier {
         }
       }
 
-      if (_missions.isNotEmpty) {
-        sortData(_missions, "title");
-      }
-      // Set the flag to true after a successful load.
       _hasLoaded = true;
     } catch (e) {
       _errorMessage = 'Error loading mission data: ${e.toString()}';
