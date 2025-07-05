@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:deins_app/helpers/mission_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import '../../models/distribution_model.dart'; // Import the new model
@@ -63,24 +62,10 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
   /// Processes a standard collectible redemption code.
   Future<void> _processCollectibleRedemption(
       DistributionModel model, String code) async {
-    final String? userId = Provider.of<UserModel>(context, listen: false)
-        .currentUser?['userId']
-        ?.toString();
-    if (userId == null) {
-      _handleError(model, "Could not identify current user.");
-      return;
-    }
-
-    final String? awardedCollectibleId = await model.redeemScannedCode(code);
+    final String? awardedCollectibleId =
+        await model.redeemScannedCode(code, context);
 
     if (awardedCollectibleId != null) {
-      // Mission progress can be updated here
-      await updateMissionProgress(
-        userId: userId,
-        collectibleId: awardedCollectibleId,
-        operation: MissionProgressOperation.increment,
-        context: context,
-      );
       _handleSuccess(code);
     } else {
       _handleError(model, model.errorMessage ?? "Invalid Code");
@@ -89,29 +74,10 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
 
   /// Processes a collectible transfer code.
   Future<void> _processTransfer(DistributionModel model, String code) async {
-    final String? receiverUserId =
-        Provider.of<UserModel>(context, listen: false)
-            .currentUser?['userId']
-            ?.toString();
-
+    // This logic can be updated later to also call the mission helper if needed
     final Map<String, String>? tradeResult = await model.completeTransfer(code);
 
-    if (tradeResult != null && receiverUserId != null) {
-      final String collectibleId = tradeResult['collectibleId']!;
-      final String giverId = tradeResult['giverId']!;
-
-      // Update mission progress for both users
-      await updateMissionProgress(
-          userId: receiverUserId,
-          collectibleId: collectibleId,
-          operation: MissionProgressOperation.increment,
-          context: context);
-      await updateMissionProgress(
-          userId: giverId,
-          collectibleId: collectibleId,
-          operation: MissionProgressOperation.decrement,
-          context: context);
-
+    if (tradeResult != null) {
       _handleSuccess(code);
     } else {
       _handleError(model, model.errorMessage ?? "Trade Failed");
@@ -170,9 +136,9 @@ class _CodeLoadingWidget extends StatelessWidget {
   const _CodeLoadingWidget();
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      child: Center(
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

@@ -38,6 +38,19 @@ Future<dynamic> getDistributionCodeUsersByDistributionCodeId(
   }
 }
 
+Future<dynamic> updateDistributionCodeUserByDistributionCodeUserId(
+    body, provider) async {
+  final res = apiPatchRequest(
+      'DistributionCodeUser/updateDistributionCodeUserByDistributionCodeUserId',
+      body,
+      provider);
+  if (res != null) {
+    return res;
+  } else {
+    throw ' database POST error';
+  }
+}
+
 Future<dynamic> createDistributionCodeUser(body, provider) async {
   final res = apiPostRequest(
       'DistributionCodeUser/createDistributionCodeUser', body, provider);

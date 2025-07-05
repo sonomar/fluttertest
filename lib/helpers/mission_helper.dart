@@ -6,10 +6,6 @@ import 'package:deins_app/models/collectible_model.dart';
 // An enum to make the operation clear
 enum MissionProgressOperation { increment, decrement }
 
-/// A helper function to update a user's mission progress based on collectible actions.
-///
-/// This function finds missions related to a collectible's collection, updates
-/// the user's progress, and handles completion status.
 Future<void> updateMissionProgress({
   required String userId,
   required String collectibleId,
@@ -21,11 +17,15 @@ Future<void> updateMissionProgress({
   final collectibleModel = context.read<CollectibleModel>();
 
   // Find the collectible's template to get its collectionId
-  final collectibleTemplate =
-      collectibleModel.collectionCollectibles.firstWhere(
-    (c) => c['collectibleId'].toString() == collectibleId,
-    orElse: () => null,
-  );
+  dynamic collectibleTemplate;
+  try {
+    collectibleTemplate = collectibleModel.collectionCollectibles.firstWhere(
+      (c) => c['collectibleId'].toString() == collectibleId,
+    );
+  } on StateError {
+    // This error is thrown if no matching collectible is found.
+    collectibleTemplate = null;
+  }
   if (collectibleTemplate == null ||
       collectibleTemplate['collectionId'] == null) {
     print(
@@ -33,6 +33,14 @@ Future<void> updateMissionProgress({
     return;
   }
   final dynamic collectionId = collectibleTemplate['collectionId'];
+  print("Found collectible: ${collectibleTemplate['name']}");
+  print(
+      "Its collection ID is: $collectionId (Type: ${collectionId.runtimeType})");
+  print("Available missions in model: ${missionModel.missions.length}");
+  for (var m in missionModel.missions) {
+    print(
+        "  - Mission '${m['title']}' has collectionId: ${m['collectionId']} (Type: ${m['collectionId'].runtimeType})");
+  }
   final relevantMissions = missionModel.missions
       .where((m) => m['collectionId'].toString() == collectionId.toString())
       .toList();
@@ -41,13 +49,19 @@ Future<void> updateMissionProgress({
     return;
   }
 
+  print(
+      "Found ${relevantMissions.length} relevant mission(s). Proceeding to update progress.");
   for (var mission in relevantMissions) {
-    final missionUser = missionModel.missionUsers.firstWhere(
-      (mu) =>
-          mu['userId'].toString() == userId &&
-          mu['missionId'] == mission['missionId'],
-      orElse: () => null,
-    );
+    dynamic missionUser;
+    try {
+      missionUser = missionModel.missionUsers.firstWhere(
+        (mu) =>
+            mu['userId'].toString() == userId &&
+            mu['missionId'] == mission['missionId'],
+      );
+    } on StateError {
+      missionUser = null;
+    }
 
     if (missionUser == null) continue;
     if (missionUser['completed'] == true) {
@@ -65,6 +79,10 @@ Future<void> updateMissionProgress({
     // Ensure progress doesn't go below zero
     if (newProgress < 0) newProgress = 0;
 
+    final int missionGoal = mission['goal'] as int;
+    if (newProgress > missionGoal) {
+      newProgress = missionGoal;
+    }
     // Prepare body and call API to update MissionUser progress
     await missionModel.updateMissionProgress(missionUser, newProgress);
   }

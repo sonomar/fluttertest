@@ -41,7 +41,7 @@ class MissionModel extends ChangeNotifier {
     // Prevent re-fetching if already loading or if data has loaded and not forced.
     if (_isLoading) return;
     if (_hasLoaded && !forceClear) return;
-
+    print("MissionModel: loadMissions called with forceClear = $forceClear");
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -184,6 +184,28 @@ class MissionModel extends ChangeNotifier {
       _missionUsers[index]['dateCompleted'] = null;
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<void> resetTestMissionProgress() async {
+    print("--- DEBUG: Attempting to reset mission progress ---");
+    try {
+      final body = {
+        "missionUserId": 1, // Targeting missionUser with ID 1
+        "progress": 13,
+        "completed": false,
+        "rewardClaimed": false, // Assuming this field exists in your API
+      };
+      print(
+          "--- DEBUG: Sending PATCH request to reset mission with body: $body ---");
+      await updateMissionUserByMissionUserId(body, _appAuthProvider);
+      print("--- DEBUG: Mission reset request sent successfully ---");
+      // Optionally, force a reload of mission data to reflect the change immediately
+      await loadMissions(forceClear: true);
+    } catch (e) {
+      print("--- DEBUG: Failed to reset mission progress: $e ---");
+      _errorMessage = "Failed to reset mission progress: $e";
+      notifyListeners();
     }
   }
 }

@@ -315,6 +315,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 collectibleModel.loadCollectibles(forceClear: true);
                 dataMayHaveChanged = true;
               } else if (index == 3) {
+                print("BottomNav: Tapped missions tab. Forcing reload...");
                 missionModel.loadMissions(forceClear: true);
               }
               // Add similar logic for other screens if they depend on shared, mutable models
