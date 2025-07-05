@@ -7,6 +7,7 @@ enum AuthStatus {
   authenticating, // Checking session or performing login/logout
   authenticated, // User has a valid, active session
   unauthenticated, // User is not logged in or session expired
+  confirming
 }
 
 class AppAuthProvider with ChangeNotifier {
@@ -16,6 +17,7 @@ class AppAuthProvider with ChangeNotifier {
   CognitoUserSession? _userSession; // Holds the active session if authenticated
   String? _errorMessage;
   bool isNewUser = false; // Error message for the UI
+  String? _emailForConfirmation;
 
   AppAuthProvider(this._authService) {
     checkCurrentUser();
@@ -28,6 +30,7 @@ class AppAuthProvider with ChangeNotifier {
   String? get idToken => _userSession?.getIdToken().getJwtToken();
   String? get accessToken => _userSession?.getAccessToken().getJwtToken();
   String? get refreshToken => _userSession?.getRefreshToken()?.getToken();
+  String? get emailForConfirmation => _emailForConfirmation;
 
   void setErrorMessage(String? message) {
     _errorMessage = message;
@@ -162,8 +165,6 @@ class AppAuthProvider with ChangeNotifier {
           return false;
         }
       } else {
-        print(
-            'AppAuthProvider: AuthService.signIn failed. at ${DateTime.now()}');
         _errorMessage = _authService.errorMessage;
         _status = AuthStatus.unauthenticated;
         _userSession = null;
@@ -172,6 +173,15 @@ class AppAuthProvider with ChangeNotifier {
         notifyListeners();
         return false;
       }
+    } on UserNotConfirmedException catch (e) {
+      print(
+          "AppAuthProvider: Caught UserNotConfirmedException. Navigating to confirmation.");
+      _emailForConfirmation =
+          username; // Store the email for the confirmation screen
+      _status = AuthStatus.confirming; // Set state to show confirmation screen
+      _errorMessage = e.message;
+      notifyListeners();
+      return false; // Login did not complete, but we are handling the flow.
     } catch (e) {
       _errorMessage = _authService.errorMessage;
       print('AppAuthProvider: $_errorMessage');
@@ -222,14 +232,19 @@ class AppAuthProvider with ChangeNotifier {
     required String password,
     required Map customAttributes,
   }) async {
+    _status = AuthStatus.authenticating;
     _errorMessage = null;
     notifyListeners();
     final String result = await _authService.signUp(
         email: email, password: password, customAttributes: customAttributes);
 
-    if (result != 'success') {
-      _errorMessage =
-          _authService.errorMessage; // Pass service error message to UI
+    if (result == 'success') {
+      _emailForConfirmation = email; // Store email
+      _status = AuthStatus.confirming; // Move to confirmation state
+      isNewUser = true;
+    } else {
+      _errorMessage = _authService.errorMessage;
+      _status = AuthStatus.unauthenticated; // Or an error state
     }
     notifyListeners();
     return result;
@@ -243,9 +258,14 @@ class AppAuthProvider with ChangeNotifier {
     notifyListeners();
     final success = await _authService.confirmSignUp(
         email: email, confirmationCode: confirmationCode);
-    if (!success) {
-      _errorMessage =
-          _authService.errorMessage; // Pass service error message to UI
+    if (success) {
+      // After successful confirmation, move to unauthenticated to prompt login.
+      _status = AuthStatus.unauthenticated;
+      _emailForConfirmation = null; // Clear the stored email
+    } else {
+      _errorMessage = _authService.errorMessage;
+      _status =
+          AuthStatus.confirming; // Stay on the confirmation screen on error
     }
     notifyListeners();
     return success;
