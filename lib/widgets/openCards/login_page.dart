@@ -583,27 +583,33 @@ class _LoginPageState extends State<LoginPage> {
         ];
       case AuthFormType.register:
         return [
-          ElevatedButton(onPressed: _submit, child: const Text("Register")),
+          ElevatedButton(
+              onPressed: _submit,
+              child: Text(translate("register_button_label", context))),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("Already have an account?",
+              Text(translate("register_login_switch_text", context),
                   style: TextStyle(color: Colors.white)),
               TextButton(
                   onPressed: _isSubmitting ? null : _switchFormType,
-                  child: const Text("Register")),
+                  child: Text(translate("register_button_label", context))),
             ],
           )
         ];
       case AuthFormType.forgotPassword:
         return [
           ElevatedButton(
-              onPressed: _handleForgotPassword, child: const Text("Submit"))
+              onPressed: _handleForgotPassword,
+              child: Text(translate("onboarding_form_submitbutton", context)))
         ];
       case AuthFormType.resetPassword:
         return [
           ElevatedButton(
-              onPressed: _handleResetPassword, child: const Text("Confirm"))
+              onPressed: _handleResetPassword,
+              child: Text(
+                translate("confirm_code_button", context),
+              ))
         ];
     }
   }
