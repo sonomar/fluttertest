@@ -443,15 +443,15 @@ class AuthService {
     }
   }
 
-  /// NEW: Verifies the code sent to the user's email to complete the login.
   Future<bool> answerEmailCodeChallenge(String email, String answer) async {
     _internalErrorMessage = null;
-    final cognitoUser = CognitoUser(email, _userPool);
+    if (_cognitoUser == null || _cognitoUser!.username != email) {
+      _cognitoUser = CognitoUser(email, _userPool);
+    }
+
     try {
       _session = await _cognitoUser!.sendCustomChallengeAnswer(answer);
       if (_session?.isValid() ?? false) {
-        // Persist the session tokens to secure storage.
-        _cognitoUser = cognitoUser;
         await _cognitoUser!.cacheTokens();
         final prefs = await SharedPreferences.getInstance();
         if (_cognitoUser!.username != null) {
@@ -477,10 +477,16 @@ class AuthService {
         }
 
         return true;
+      } else {
+        _internalErrorMessage =
+            "The session was not valid after verifying the code. Please try again.";
+        print(
+            'AuthService: answerEmailCodeChallenge succeeded but the session is not valid.');
+        return false;
       }
-      return false;
     } catch (e) {
-      _internalErrorMessage = simplifyAuthError('failed to verify code');
+      _internalErrorMessage =
+          simplifyAuthError('The code provided is incorrect or has expired.');
       return false;
     }
   }
