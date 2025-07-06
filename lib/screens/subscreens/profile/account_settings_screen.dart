@@ -48,8 +48,7 @@ class AccountSettingsScreen extends StatelessWidget {
                     : () {
                         Navigator.of(dialogContext).pop();
                       },
-                child: Text(translate(
-                    "account_settings_delete_dialog_cancel", context)),
+                child: Text(translate("cancel_button", context)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(

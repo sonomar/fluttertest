@@ -140,16 +140,19 @@ class CardInfo extends StatelessWidget {
                       padding: const EdgeInsets.only(
                           top: 20.0, left: 20.0, right: 20.0),
                       child: Column(children: [
-                        lineItem("Kartennummer",
+                        lineItem(
+                            translate("card_info_lineitem_cardnumber", context),
                             selectedCollectible["collectibleId"].toString()),
                         lineItem(
-                            "Mint",
+                            translate("card_info_lineitem_mint", context),
                             selectedUserCollectible['mint']?.toString() ??
                                 'N/A'),
-                        lineItem("Auflage",
+                        lineItem(
+                            translate(
+                                "card_info_lineitem_circulation", context),
                             selectedCollectible["circulation"].toString()),
                         lineItem(
-                            "Erscheinungsdatum",
+                            translate("card_info_lineitem_pubdate", context),
                             formatDate(
                                 context,
                                 selectedCollectible["publicationDate"]

@@ -51,7 +51,8 @@ Widget progressBar(pageContext, mission, missionUser) {
 }
 
 Widget missionWidget(BuildContext pageContext, Map? mission, Map? missionUser) {
-  final Map<String, dynamic> getTitle = mission?['title'] ?? 'No Title';
+  final dynamic getTitle = mission?['title'] ??
+      translate("mission_view_widget_notitle", pageContext);
   final String? getLogoUrl = mission?['imgRef']?['url'];
   final int missionGoal = mission?['goal'] ?? 999999;
   final int missionProgress = missionUser?['progress'] ?? 0;
@@ -108,10 +109,11 @@ Widget missionWidget(BuildContext pageContext, Map? mission, Map? missionUser) {
                 child: Text(
                   // Update the header text to reflect the mission's state.
                   isCompleted
-                      ? 'Completed'
+                      ? translate("mission_view_widget_completed", pageContext)
                       : goalReached
-                          ? 'Claim Your Reward'
-                          : 'Mission',
+                          ? translate("mission_view_widget_claim", pageContext)
+                          : translate(
+                              "mission_view_widget_mission", pageContext),
                   style: const TextStyle(
                     fontSize: 24,
                     color: Colors.white,
@@ -181,10 +183,9 @@ Widget missionWidget(BuildContext pageContext, Map? mission, Map? missionUser) {
 Widget homeMissionWidget(pageContext, mission, missionUser) {
   final getMission = mission;
   final getMissionUser = missionUser;
-  final Map<String, dynamic> getTitle =
-      (getMission != null && getMission['title'] != null)
-          ? getMission['title']
-          : 'No Title'; // Default value
+  final dynamic getTitle = (getMission != null && getMission['title'] != null)
+      ? getMission['title']
+      : translate("mission_view_widget_notitle", pageContext); // Default value
   final int missionGoal = getMission?['goal'] ?? 0;
   final int missionProgress = getMissionUser?['progress'] ?? 0;
   final bool goalReached = missionGoal > 0 && missionProgress >= missionGoal;
@@ -204,7 +205,9 @@ Widget homeMissionWidget(pageContext, mission, missionUser) {
                         color: Colors.black,
                         borderRadius:
                             const BorderRadius.all(Radius.circular(5))),
-                    child: Text("MISSION",
+                    child: Text(
+                        translate("mission_view_widget_mission", pageContext)
+                            .toUpperCase(),
                         style: TextStyle(
                             fontSize: 10,
                             letterSpacing: 2.56,
@@ -233,7 +236,8 @@ Widget homeMissionWidget(pageContext, mission, missionUser) {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          translate("Claim Reward", pageContext).toUpperCase(),
+                          translate("award_info_build_claimbutton", pageContext)
+                              .toUpperCase(),
                           style: const TextStyle(
                               fontSize: 10,
                               color: Colors.white,
@@ -300,10 +304,9 @@ Widget viewMissionWidget(pageContext, mission, missionUser,
     {isMission = false}) {
   final getMission = mission;
   final getMissionUser = missionUser;
-  final Map<String, dynamic> getTitle =
-      (getMission != null && getMission['title'] != null)
-          ? getMission['title']
-          : 'No Title'; // Default value
+  final dynamic getTitle = (getMission != null && getMission['title'] != null)
+      ? getMission['title']
+      : translate("mission_view_widget_notitle", pageContext); // Default value
   final int missionGoal = getMission?['goal'] ?? 0;
   final int missionProgress = getMissionUser?['progress'] ?? 0;
   final bool goalReached = missionGoal > 0 && missionProgress >= missionGoal;
@@ -336,7 +339,8 @@ Widget viewMissionWidget(pageContext, mission, missionUser,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                translate("Claim Reward", pageContext)
+                                translate("award_info_build_claimbutton",
+                                        pageContext)
                                     .toUpperCase(),
                                 style: const TextStyle(
                                     fontSize: 10,

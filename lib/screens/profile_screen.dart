@@ -23,7 +23,8 @@ class ProfileScreen extends StatelessWidget {
     final userModel = context.watch<UserModel>();
     final currentUser = userModel.currentUser;
     final userPic = currentUser?['profileImg'];
-    final username = currentUser?['username'] ?? 'User';
+    final username = currentUser?['username'] ??
+        translate("profile_screen_build_default_user", context);
 
     return Scaffold(
       backgroundColor:
@@ -81,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           ProfileMenuItem(
             icon: Icons.image_outlined,
-            title: "Change Profile Picture",
+            title: translate("profile_screen_build_change_pic", context),
             onTap: () => showProfilePicModal(context),
           ),
           ProfileMenuItem(

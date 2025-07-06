@@ -38,7 +38,7 @@ class NotificationsPageState extends State<NotificationsPage> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                'Error: ${provider.errorMessage}',
+                '${translate("notifications_page_build_error_prefix", context)}${provider.errorMessage}',
                 style: const TextStyle(color: Colors.red, fontSize: 16),
                 textAlign: TextAlign.center,
               ),

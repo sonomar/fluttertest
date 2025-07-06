@@ -3,6 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../helpers/localization_helper.dart';
 import '../models/app_auth_provider.dart';
 import '../models/asset_provider.dart';
 import '../models/user_model.dart';
@@ -54,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => MyHomePage(
-                title: "Kloppocar Home",
+                title: translate("code_proc_success_hometitle", context),
                 qrcode: 'login_success',
                 userData: userProvider.currentUser!,
               ),

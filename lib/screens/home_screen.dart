@@ -187,9 +187,10 @@ class HomeScreenState extends State<HomeScreen>
           body: Center(child: CircularProgressIndicator()));
     }
     if (currentUser == null) {
-      return const Scaffold(
+      return Scaffold(
           backgroundColor: Colors.white,
-          body: Center(child: Text("User data not available.")));
+          body: Center(
+              child: Text(translate("home_screen_build_no_user", context))));
     }
     final userPic = currentUser["profileImg"];
     final communityModel = context.watch<CommunityModel>();

@@ -117,9 +117,11 @@ class NewsItem extends StatelessWidget {
                 ),
                 onPressed: () => _launchUrl(linkButtonUrl),
                 child: Text(
-                  (linkButtonText != null && linkButtonText.isNotEmpty)
-                      ? linkButtonText
-                      : 'More Information',
+                  (linkButtonText != null &&
+                          linkButtonText
+                              .isNotEmpty) // This is likely a translatable field from the CMS
+                      ? getTranslatedString(context, linkButtonText)
+                      : translate("news_item_build_moreinfobutton", context),
                 ),
               ),
             ),

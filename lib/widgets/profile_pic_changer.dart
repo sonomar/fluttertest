@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../helpers/localization_helper.dart';
 import '../../models/user_model.dart';
 import 'shadow_circle.dart';
 
@@ -18,17 +19,18 @@ Future<void> showProfilePicModal(BuildContext context) async {
       return StatefulBuilder(
         builder: (context, setModalState) {
           return AlertDialog(
-            title: const Text('Choose a Profile Picture'),
+            title: Text(translate("profile_pic_changer_show_title", context)),
             backgroundColor: Colors.white,
             content: SizedBox(
               width: double.maxFinite,
               child: isUpdating
-                  ? const Column(
+                  ? Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CircularProgressIndicator(),
                         SizedBox(height: 16),
-                        Text("Updating...")
+                        Text(translate(
+                            "profile_pic_changer_show_updating", context))
                       ],
                     )
                   : GridView.builder(
@@ -65,9 +67,9 @@ Future<void> showProfilePicModal(BuildContext context) async {
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text('Cancel'),
                 onPressed:
                     isUpdating ? null : () => Navigator.of(dialogContext).pop(),
+                child: Text(translate("cancel_button", context)),
               ),
               ElevatedButton(
                 onPressed: (selectedImageUrl == null || isUpdating)
@@ -96,7 +98,8 @@ Future<void> showProfilePicModal(BuildContext context) async {
                           Navigator.of(dialogContext).pop();
                         }
                       },
-                child: const Text('Change'),
+                child: Text(translate(
+                    "profile_pic_changer_show_changebutton", context)),
               ),
             ],
           );

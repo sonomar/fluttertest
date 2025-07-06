@@ -95,15 +95,17 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
 
     if (userCollectibleId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("This collectible instance cannot be traded.")),
+        SnackBar(
+            content: Text(
+                translate("collectible_details_trade_err_notrade", context))),
       );
       return;
     }
     if (ownerId != currentUserId) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("You are not the owner of this collectible.")),
+        SnackBar(
+            content: Text(
+                translate("collectible_details_trade_err_notowner", context))),
       );
       return;
     }
@@ -122,7 +124,8 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
         barrierDismissible: false, // User must explicitly close it
         builder: (BuildContext dialogContext) {
           return AlertDialog(
-            title: const Text('Scan to Transfer'),
+            title: Text(
+                translate("collectible_details_trade_dialog_title", context)),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -144,7 +147,8 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text('Close'),
+                child: Text(translate(
+                    "collectible_details_trade_dialog_close", context)),
                 onPressed: () {
                   Navigator.of(dialogContext).pop();
                 },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
+import '../../../helpers/localization_helper.dart';
 import '../../../models/mission_model.dart';
 import '../../../models/collectible_model.dart';
 import '../../../models/distribution_model.dart'; // Import DistributionModel
@@ -28,7 +29,8 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
     with TickerProviderStateMixin {
   AwardProcessingState _currentState = AwardProcessingState.processing;
   late final AnimationController _successController;
-  String _errorMessage = "An unknown error occurred.";
+  String _errorMessage =
+      "An unknown error occurred."; // This will be set with context later
 
   @override
   void initState() {
@@ -80,7 +82,8 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
       // 4. Proceed to the success screen.
       _handleSuccess();
     } else {
-      _handleError(missionModel.errorMessage ?? "Failed to claim reward.");
+      _handleError(missionModel.errorMessage ??
+          translate("award_processing_process_failfallback", context));
     }
   }
 
@@ -110,7 +113,7 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
         builder: (context) => MyHomePage(
-          title: "Kloppocar Home",
+          title: translate("code_proc_success_hometitle", context),
           qrcode: "award_claimed",
           userData: userData,
         ),
@@ -154,7 +157,9 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
       case AwardProcessingState.error:
         return _ErrorWidget(message: _errorMessage);
       default:
-        return _ErrorWidget(message: "An unexpected error occurred.");
+        return _ErrorWidget(
+            message:
+                translate("auth_error_helper_simplify_unexpected", context));
     }
   }
 }
@@ -169,8 +174,8 @@ class _ProcessingWidget extends StatelessWidget {
       children: [
         Image.asset('assets/images/deins_logo.png', height: 200, width: 200),
         const SizedBox(height: 20),
-        const Text('Claiming Your Reward...',
-            style: TextStyle(color: Colors.white, fontSize: 16)),
+        Text(translate("award_processing_widget_claiming", context),
+            style: const TextStyle(color: Colors.white, fontSize: 16)),
         const SizedBox(height: 20),
         SizedBox(
             height: 40,
@@ -211,8 +216,8 @@ class _FinalizingWidget extends StatelessWidget {
       children: [
         Image.asset('assets/images/deins_logo.png', height: 200, width: 200),
         const SizedBox(height: 20),
-        const Text('Updating Your Collection...',
-            style: TextStyle(color: Colors.white, fontSize: 16)),
+        Text(translate("award_processing_widget_updating", context),
+            style: const TextStyle(color: Colors.white, fontSize: 16)),
         const SizedBox(height: 20),
         SizedBox(
             height: 40,
@@ -235,7 +240,7 @@ class _ErrorWidget extends StatelessWidget {
         Image.asset('assets/images/negative.png', height: 200, width: 200),
         const SizedBox(height: 20),
         Text(
-          'Claim Failed!',
+          translate("award_processing_widget_claimfailed", context),
           style: const TextStyle(
               color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),

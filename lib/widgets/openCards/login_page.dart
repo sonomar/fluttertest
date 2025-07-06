@@ -461,10 +461,10 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildSocialLoginDivider() {
     return Row(
       children: [
-        Expanded(child: Divider(thickness: 1, endIndent: 10)),
-        Text(translate("login_page_build_ordivider", context),
+        const Expanded(child: Divider(thickness: 1, endIndent: 10)),
+        Text(translate("signup_page_form_ordivider", context),
             style: TextStyle(color: Colors.white70)),
-        Expanded(child: Divider(thickness: 1, indent: 10)),
+        const Expanded(child: Divider(thickness: 1, indent: 10)),
       ],
     );
   }

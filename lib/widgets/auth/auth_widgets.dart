@@ -96,7 +96,8 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
 
       if (success && mounted) {
         setState(() {
-          _successMessage = 'Password changed successfully!';
+          _successMessage =
+              translate("auth_widgets_changepass_success", context);
         });
         _formKey.currentState?.reset();
       }
@@ -131,8 +132,10 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
               decoration: _buildInputDecoration(
                   translate("account_change_password_old", context)),
               obscureText: true,
-              validator: (val) =>
-                  val!.isEmpty ? 'Please enter your current password' : null,
+              validator: (val) => val!.isEmpty
+                  ? translate(
+                      "auth_widgets_changepass_oldpassvalidator", context)
+                  : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -141,7 +144,8 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
                   translate("account_change_password_new", context)),
               obscureText: true,
               validator: (val) => (val?.length ?? 0) < 8
-                  ? 'Password must be at least 8 characters'
+                  ? translate(
+                      "auth_widgets_changepass_newpassvalidator", context)
                   : null,
             ),
             const SizedBox(height: 16),
@@ -151,7 +155,7 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
                   translate("account_change_password_confirm", context)),
               obscureText: true,
               validator: (val) => val != _newPasswordController.text
-                  ? 'Passwords do not match'
+                  ? translate("signup_page_form_passmismatch", context)
                   : null,
             ),
             const SizedBox(height: 20),
@@ -271,7 +275,8 @@ class _ChangeEmailFormState extends State<ChangeEmailForm> {
                     translate("account_change_email_new", context)),
                 keyboardType: TextInputType.emailAddress,
                 validator: (val) => !(val?.contains('@') ?? false)
-                    ? 'Enter a valid email'
+                    ? translate(
+                        "auth_widgets_changeemail_emailvalidator", context)
                     : null,
               ),
               const SizedBox(height: 20),
@@ -299,8 +304,10 @@ class _ChangeEmailFormState extends State<ChangeEmailForm> {
                 decoration: _buildInputDecoration(
                     translate("account_change_email_code", context)),
                 keyboardType: TextInputType.number,
-                validator: (val) =>
-                    val!.isEmpty ? 'Please enter the code' : null,
+                validator: (val) => val!.isEmpty
+                    ? translate(
+                        "auth_widgets_changeemail_codevalidator", context)
+                    : null,
               ),
               const SizedBox(height: 20),
               if (_isSubmitting)

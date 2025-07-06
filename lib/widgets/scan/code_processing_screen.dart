@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
+import '../../helpers/localization_helper.dart';
 import '../../models/distribution_model.dart'; // Import the new model
 import '../../models/user_model.dart';
 import '../../main.dart';
@@ -68,7 +69,10 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
     if (awardedCollectibleId != null) {
       _handleSuccess(code);
     } else {
-      _handleError(model, model.errorMessage ?? "Invalid Code");
+      _handleError(
+          model,
+          model.errorMessage ??
+              translate("code_proc_redeem_invalidfallback", context));
     }
   }
 
@@ -81,7 +85,10 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
     if (tradeResult != null) {
       _handleSuccess(code);
     } else {
-      _handleError(model, model.errorMessage ?? "Trade Failed");
+      _handleError(
+          model,
+          model.errorMessage ??
+              translate("code_proc_transfer_failfallback", context));
     }
   }
 
@@ -106,7 +113,7 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
         builder: (context) => MyHomePage(
-          title: "Kloppocar Home",
+          title: translate("code_proc_success_hometitle", context),
           qrcode: code,
           userData: widget.userData,
         ),
@@ -146,8 +153,8 @@ class _CodeLoadingWidget extends StatelessWidget {
             Image.asset('assets/images/deins_logo.png',
                 height: 200, width: 200),
             const SizedBox(height: 20),
-            const Text('Processing Code...',
-                style: TextStyle(color: Colors.white, fontSize: 16)),
+            Text(translate("code_proc_widget_processing", context),
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
             const SizedBox(height: 20),
             SizedBox(
                 height: 40,
@@ -192,8 +199,8 @@ class _CodeErrorWidget extends StatelessWidget {
           children: [
             Image.asset('assets/images/negative.png', height: 200, width: 200),
             const SizedBox(height: 20),
-            const Text('Incorrect Code!',
-                style: TextStyle(color: Colors.white, fontSize: 16)),
+            Text(translate("code_proc_widget_incorrect", context),
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
           ],
         ),
       ),

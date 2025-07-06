@@ -309,7 +309,9 @@ class _CollectionScreenState extends State<CollectionScreen>
                         const CircularProgressIndicator(),
                         const SizedBox(height: 16),
                         Text(
-                          collectibleModel.loadingMessage ?? 'Initializing...',
+                          collectibleModel.loadingMessage ??
+                              translate("collection_screen_build_loading_init",
+                                  context),
                           textAlign: TextAlign.center,
                           style:
                               const TextStyle(fontSize: 16, color: Colors.grey),
@@ -324,7 +326,7 @@ class _CollectionScreenState extends State<CollectionScreen>
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        'Failed to load collectibles:\n${collectibleModel.errorMessage}',
+                        '${translate("collection_screen_build_error_prefix", context)}:\n${collectibleModel.errorMessage}',
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: Colors.red, fontSize: 16),
                       ),

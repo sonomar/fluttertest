@@ -64,7 +64,7 @@ class _NotificationDetailPageState extends State<NotificationDetailPage> {
       appBar: AppBar(
         title: Text(notif.header.isNotEmpty
             ? getTranslatedString(context, notif.header)
-            : 'Notification Details'),
+            : translate("notification_detail_build_default_title", context)),
         leading: IconButton(
           // Add back button
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -101,8 +101,10 @@ class _NotificationDetailPageState extends State<NotificationDetailPage> {
                 TextButton.icon(
                   // Use TextButton for less emphasis
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  label:
-                      const Text('Delete', style: TextStyle(color: Colors.red)),
+                  label: Text(
+                      translate(
+                          "account_settings_delete_dialog_delete", context),
+                      style: TextStyle(color: Colors.red)),
                   onPressed: _deleteNotification,
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
