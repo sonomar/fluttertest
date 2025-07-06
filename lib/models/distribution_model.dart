@@ -111,6 +111,39 @@ class DistributionModel extends ChangeNotifier {
         throw Exception("No collectibles are associated with this code.");
       }
 
+      final randomItemFromPool =
+          collectiblePool[Random().nextInt(collectiblePool.length)];
+
+      Map<String, dynamic> collectibleForMinting;
+      String collectibleToAwardId;
+
+      if (isRandom) {
+        // If random from a collection, the item is already a full collectible object.
+        collectibleForMinting = randomItemFromPool;
+        collectibleToAwardId =
+            collectibleForMinting['collectibleId'].toString();
+      } else {
+        // If from a distribution, the item is a distributionCollectible.
+        // We need to fetch the full collectible object to get its details (like circulation).
+        collectibleToAwardId = randomItemFromPool['collectibleId'].toString();
+
+        dynamic fetchedCollectible = await getCollectibleByCollectibleId(
+            collectibleToAwardId, _appAuthProvider);
+        if (fetchedCollectible == null) {
+          throw Exception(
+              "Could not retrieve details for the awarded collectible.");
+        }
+        // Handle API potentially returning a list
+        if (fetchedCollectible is List) {
+          if (fetchedCollectible.isEmpty)
+            throw Exception(
+                "Could not retrieve details for the awarded collectible.");
+          collectibleForMinting = fetchedCollectible.first;
+        } else {
+          collectibleForMinting = fetchedCollectible;
+        }
+      }
+
       final existingRedemptions =
           await getDistributionCodeUsersByDistributionCodeId(
               distributionCodeId, _appAuthProvider);
@@ -159,15 +192,10 @@ class DistributionModel extends ChangeNotifier {
               userRedemptionRecord['redeemed'] == 1)) {
         throw Exception("You have already redeemed this code.");
       }
-
-      final randomCollectible =
-          collectiblePool[Random().nextInt(collectiblePool.length)];
-      final collectibleToAwardId =
-          randomCollectible['collectibleId'].toString();
       final allUserCollectibles =
           await getUserCollectiblesByOwnerId(userId, _appAuthProvider);
       final int? newMint =
-          generateRandomMint(randomCollectible, allUserCollectibles);
+          generateRandomMint(collectibleForMinting, allUserCollectibles);
       if (newMint == null) {
         throw Exception("No available mints for this collectible.");
       }
@@ -366,14 +394,38 @@ class DistributionModel extends ChangeNotifier {
         throw Exception("No rewards are associated with this mission.");
       }
 
-      final randomCollectible =
+      Map<String, dynamic> collectibleForMinting;
+      String collectibleToAwardId;
+
+      final randomItemFromPool =
           collectiblePool[Random().nextInt(collectiblePool.length)];
-      final collectibleToAwardId =
-          randomCollectible['collectibleId'].toString();
+
+      if (isRandom) {
+        collectibleForMinting = randomItemFromPool;
+        collectibleToAwardId =
+            collectibleForMinting['collectibleId'].toString();
+      } else {
+        collectibleToAwardId = randomItemFromPool['collectibleId'].toString();
+        dynamic fetchedCollectible = await getCollectibleByCollectibleId(
+            collectibleToAwardId, _appAuthProvider);
+        if (fetchedCollectible == null) {
+          throw Exception(
+              "Could not retrieve details for the awarded collectible.");
+        }
+        if (fetchedCollectible is List) {
+          if (fetchedCollectible.isEmpty)
+            throw Exception(
+                "Could not retrieve details for the awarded collectible.");
+          collectibleForMinting = fetchedCollectible.first;
+        } else {
+          collectibleForMinting = fetchedCollectible;
+        }
+      }
+
       final allUserCollectibles =
           await getUserCollectiblesByOwnerId(userId, _appAuthProvider);
       final int? newMint =
-          generateRandomMint(randomCollectible, allUserCollectibles);
+          generateRandomMint(collectibleForMinting, allUserCollectibles);
       if (newMint == null) {
         throw Exception("No available mints for this collectible.");
       }
