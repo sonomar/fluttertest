@@ -310,9 +310,12 @@ class DistributionModel extends ChangeNotifier {
         "collectibleReceived": collectibleReceivedJson
       }, _appAuthProvider);
 
-      await updateUserCollectibleByUserCollectibleId(
-          {"userCollectibleId": userCollectibleId, "ownerId": newOwnerId},
-          _appAuthProvider);
+      await updateUserCollectibleByUserCollectibleId({
+        "userCollectibleId": userCollectibleId,
+        "ownerId": newOwnerId,
+        "previousOwnerId": giverId,
+        "lastTransferredDt": DateTime.now().toIso8601String(),
+      }, _appAuthProvider);
 
       _setState(isLoading: false, loadingMessage: "Transfer complete!");
       return {'collectibleId': collectibleId, 'giverId': giverId};
