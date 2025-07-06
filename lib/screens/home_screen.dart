@@ -387,8 +387,7 @@ class HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                 ),
-                getLatestActiveMission(
-                    context, missions, missionUsers, mostRecentUserCollectible),
+                getLatestActiveMission(context, missions, missionUsers),
               ])),
           communityChallengeWidget(_formatTime(_remainingTime), context,
               communityChallenge, 200, context),

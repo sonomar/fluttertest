@@ -111,8 +111,7 @@ class CardInfo extends StatelessWidget {
                       ))))),
       Padding(
           padding: const EdgeInsets.only(left: 10.0, right: 20.0, bottom: 10.0),
-          child: getLatestActiveMission(
-              context, missions, missionUsers, recentColl,
+          child: getLatestActiveMission(context, missions, missionUsers,
               isViewer: true)),
       Padding(
           padding: const EdgeInsets.only(left: 40.0, right: 40.0, bottom: 10.0),
