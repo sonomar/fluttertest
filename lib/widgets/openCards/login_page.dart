@@ -91,6 +91,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _handleBackPress() async {
     final bool confirmed = await _showCancelConfirmationDialog();
     if (confirmed && mounted) {
+      Provider.of<AppAuthProvider>(context, listen: false).clearErrorMessage();
       setState(() {
         _formKey.currentState?.reset();
         _clearControllers();
@@ -433,10 +434,10 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                         ..._buildActionButtons(),
-                        const SizedBox(height: 12),
-                        _buildSocialLoginDivider(),
-                        const SizedBox(height: 12),
-                        _buildSocialLoginButtons(),
+                        // const SizedBox(height: 12),
+                        // _buildSocialLoginDivider(),
+                        // const SizedBox(height: 12),
+                        // _buildSocialLoginButtons(),
                         const SizedBox(height: 20),
                         if (_formType == AuthFormType.loginInitial ||
                             _formType == AuthFormType.loginWithPassword ||

@@ -444,16 +444,14 @@ class AuthService {
   }
 
   /// NEW: Verifies the code sent to the user's email to complete the login.
-  Future<bool> answerEmailCodeChallenge(String answer) async {
+  Future<bool> answerEmailCodeChallenge(String email, String answer) async {
     _internalErrorMessage = null;
-    if (_cognitoUser == null) {
-      _internalErrorMessage = "Login session expired. Please try again.";
-      return false;
-    }
+    final cognitoUser = CognitoUser(email, _userPool);
     try {
       _session = await _cognitoUser!.sendCustomChallengeAnswer(answer);
       if (_session?.isValid() ?? false) {
         // Persist the session tokens to secure storage.
+        _cognitoUser = cognitoUser;
         await _cognitoUser!.cacheTokens();
         final prefs = await SharedPreferences.getInstance();
         if (_cognitoUser!.username != null) {

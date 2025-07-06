@@ -37,6 +37,13 @@ class AppAuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void clearErrorMessage() {
+    if (_errorMessage != null) {
+      _errorMessage = null;
+      notifyListeners();
+    }
+  }
+
   void completeNewUserOnboarding() {
     if (isNewUser) {
       isNewUser = false;
@@ -197,6 +204,7 @@ class AppAuthProvider with ChangeNotifier {
   Future<bool> initiateEmailLogin(String email) async {
     _status = AuthStatus.authenticating;
     _errorMessage = null;
+    _emailForConfirmation = email;
     notifyListeners();
 
     final success = await _authService.signInWithEmailCode(email);
@@ -215,10 +223,19 @@ class AppAuthProvider with ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    final success = await _authService.answerEmailCodeChallenge(code);
+    if (_emailForConfirmation == null) {
+      _errorMessage = "Session expired. Please start the login process again.";
+      _status = AuthStatus.unauthenticated;
+      notifyListeners();
+      return false;
+    }
+
+    final success = await _authService.answerEmailCodeChallenge(
+        _emailForConfirmation!, code);
     if (success) {
       _userSession = _authService.session;
       _status = AuthStatus.authenticated;
+      _emailForConfirmation = null;
     } else {
       _errorMessage = _authService.errorMessage;
       _status = AuthStatus.unauthenticated;
@@ -262,6 +279,7 @@ class AppAuthProvider with ChangeNotifier {
       // After successful confirmation, move to unauthenticated to prompt login.
       _status = AuthStatus.unauthenticated;
       _emailForConfirmation = null; // Clear the stored email
+      isNewUser = false;
     } else {
       _errorMessage = _authService.errorMessage;
       _status =
