@@ -60,7 +60,7 @@ class CollectibleModel extends ChangeNotifier {
 
     _isLoading = true;
     _errorMessage = null;
-    _loadingMessage = "Loading...";
+    _loadingMessage = "collectible_model_load_loading";
     if (forceClear) {
       notifyListeners();
     }
@@ -69,7 +69,7 @@ class CollectibleModel extends ChangeNotifier {
       final String? userId = userModel.currentUser?['userId']?.toString();
 
       if (userId == null) {
-        throw Exception("User ID not available from UserModel.");
+        throw Exception("collectible_model_load_nouserid");
       }
 
       final results = await Future.wait([

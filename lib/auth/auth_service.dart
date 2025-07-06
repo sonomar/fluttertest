@@ -20,8 +20,7 @@ String getEnvItem(String item) {
   if (endpoint != null) {
     return endpoint;
   } else {
-    throw Exception(
-        'Environment variable "$item" not found. Please check your .env file.');
+    throw Exception('auth_service_getenv_notfound');
   }
 }
 
@@ -162,7 +161,7 @@ class AuthService {
       // Use launchInBrowser for better handling on simulators and devices
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      _internalErrorMessage = 'Could not launch login page.';
+      _internalErrorMessage = 'app_auth_provider_launch_faillaunch';
     }
   }
 
@@ -176,8 +175,7 @@ class AuthService {
       final accessTokenString = params['access_token'];
 
       if (idTokenString == null || accessTokenString == null) {
-        _internalErrorMessage =
-            simplifyAuthError('Login failed. Tokens not found in redirect.');
+        _internalErrorMessage = 'app_auth_provider_redirect_notokens';
         return false;
       }
 
@@ -189,7 +187,7 @@ class AuthService {
       final claims = idToken.decodePayload();
       final userEmail = claims['email'];
       if (userEmail == null) {
-        _internalErrorMessage = 'Email not found in token.';
+        _internalErrorMessage = 'app_auth_provider_redirect_noemail';
         return false;
       }
       _cognitoUser = CognitoUser(userEmail, _userPool);
@@ -244,7 +242,7 @@ class AuthService {
       }
       return 'failed'; // Return 'failed' for other errors
     } catch (e) {
-      _internalErrorMessage = 'An unexpected error occurred during sign-up.';
+      _internalErrorMessage = 'app_auth_provider_signup_unexpected';
       print('AuthService: SignUp Error: $e');
       return 'failed'; // Return 'failed' for unexpected errors
     }
@@ -478,15 +476,13 @@ class AuthService {
 
         return true;
       } else {
-        _internalErrorMessage =
-            "The session was not valid after verifying the code. Please try again.";
+        _internalErrorMessage = 'app_auth_provider_answer_sessionexpired';
         print(
             'AuthService: answerEmailCodeChallenge succeeded but the session is not valid.');
         return false;
       }
     } catch (e) {
-      _internalErrorMessage =
-          simplifyAuthError('The code provided is incorrect or has expired.');
+      _internalErrorMessage = 'login_page_submit_codefallback';
       return false;
     }
   }
@@ -542,7 +538,7 @@ class AuthService {
     _internalErrorMessage = null;
     // First, ensure we have a valid session and user object.
     if (_cognitoUser == null || _session == null || !_session!.isValid()) {
-      _internalErrorMessage = "You must be logged in to change your password.";
+      _internalErrorMessage = 'app_auth_provider_changepass_notloggedin';
       return false;
     }
 
@@ -595,8 +591,7 @@ class AuthService {
       final bool passwordConfirmed =
           await cognitoUser.confirmPassword(confirmationCode, newPassword);
       if (!passwordConfirmed) {
-        _internalErrorMessage =
-            "Password could not be confirmed. The code may be incorrect or expired.";
+        _internalErrorMessage = 'app_auth_provider_confirmpass_fail';
         return false;
       }
       print('AuthService: Password confirmed successfully for $email.');
@@ -621,7 +616,7 @@ class AuthService {
   }) async {
     _internalErrorMessage = null;
     if (_cognitoUser == null || _session == null || !_session!.isValid()) {
-      _internalErrorMessage = "You must be logged in to change your email.";
+      _internalErrorMessage = 'app_auth_provider_updateemail_notloggedin';
       return false;
     }
 
@@ -651,7 +646,7 @@ class AuthService {
   }) async {
     _internalErrorMessage = null;
     if (_cognitoUser == null) {
-      _internalErrorMessage = "User not found. Please log in again.";
+      _internalErrorMessage = 'app_auth_provider_verifyemail_nouser';
       return false;
     }
 
@@ -676,7 +671,7 @@ class AuthService {
     _internalErrorMessage = null;
     // Ensure we have a valid, authenticated user to delete.
     if (_cognitoUser == null || _session == null || !_session!.isValid()) {
-      _internalErrorMessage = "You must be logged in to delete your account.";
+      _internalErrorMessage = 'app_auth_provider_delete_notloggedin';
       return false;
     }
 

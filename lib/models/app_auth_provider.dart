@@ -161,7 +161,7 @@ class AppAuthProvider with ChangeNotifier {
           return true;
         } else {
           _errorMessage = _authService.errorMessage ??
-              'Login succeeded, but session could not be confirmed as valid. at ${DateTime.now()}';
+              'app_auth_provider_signin_invalidsession';
           print('AppAuthProvider: $_errorMessage');
           isNewUser = false;
           _status = AuthStatus.unauthenticated;
@@ -224,7 +224,7 @@ class AppAuthProvider with ChangeNotifier {
     notifyListeners();
 
     if (_emailForConfirmation == null) {
-      _errorMessage = "Session expired. Please start the login process again.";
+      _errorMessage = "app_auth_provider_answer_sessionexpired";
       _status = AuthStatus.unauthenticated;
       notifyListeners();
       return false;
