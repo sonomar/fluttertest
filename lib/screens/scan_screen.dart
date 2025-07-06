@@ -129,53 +129,53 @@ class _ScanScreenState extends State<ScanScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     // Call the new debug function from the model
-              //     context.read<DistributionModel>().resetTestCode();
-              //     // Show a snackbar to confirm the action was triggered
-              //     ScaffoldMessenger.of(context).showSnackBar(
-              //       const SnackBar(
-              //           content: Text("Attempting to reset test code...")),
-              //     );
-              //   },
-              //   style: ElevatedButton.styleFrom(
-              //     minimumSize: const Size(double.infinity, 40),
-              //     backgroundColor:
-              //         Colors.grey[700], // A different color for debug buttons
-              //     shape: RoundedRectangleBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //     ),
-              //   ),
-              //   child: const Text(
-              //     'Reset test code',
-              //     style: TextStyle(color: Colors.white),
-              //   ),
-              // ),
-              // const SizedBox(height: 10),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     // Call the new debug function from the MissionModel
-              //     context.read<MissionModel>().resetTestMissionProgress();
-              //     ScaffoldMessenger.of(context).showSnackBar(
-              //       const SnackBar(
-              //           content:
-              //               Text("Attempting to reset mission progress...")),
-              //     );
-              //   },
-              //   style: ElevatedButton.styleFrom(
-              //     minimumSize: const Size(double.infinity, 40),
-              //     backgroundColor:
-              //         Colors.blueGrey[700], // A different color for this button
-              //     shape: RoundedRectangleBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //     ),
-              //   ),
-              //   child: const Text(
-              //     'Reset Mission Progress',
-              //     style: TextStyle(color: Colors.white),
-              //   ),
-              // ),
+              ElevatedButton(
+                onPressed: () {
+                  // Call the new debug function from the model
+                  context.read<DistributionModel>().resetTestCode();
+                  // Show a snackbar to confirm the action was triggered
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text("Attempting to reset test code...")),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 40),
+                  backgroundColor:
+                      Colors.grey[700], // A different color for debug buttons
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Reset test code',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  // Call the new debug function from the MissionModel
+                  context.read<MissionModel>().resetTestMissionProgress();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content:
+                            Text("Attempting to reset mission progress...")),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 40),
+                  backgroundColor:
+                      Colors.blueGrey[700], // A different color for this button
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Reset Mission Progress',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
             ],
           ),
         ),

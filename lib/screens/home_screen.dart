@@ -7,6 +7,7 @@ import 'dart:async';
 import 'subscreens/notifications/notifications_page.dart';
 import '../models/user_model.dart';
 import '../models/mission_model.dart';
+import '../models/locale_provider.dart';
 import '../models/collectible_model.dart';
 import '../models/notification_provider.dart';
 import '../models/community_model.dart';
@@ -46,9 +47,19 @@ class HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<NewsPostModel>(context, listen: false).loadNewsPosts();
-      Provider.of<CommunityModel>(context, listen: false)
-          .loadCommunityChallenge();
+      if (mounted) {
+        final langCode = Provider.of<LocaleProvider>(context, listen: false)
+            .locale!
+            .languageCode;
+        // Load all necessary data for the home screen
+        Provider.of<NewsPostModel>(context, listen: false).loadNewsPosts();
+        Provider.of<CommunityModel>(context, listen: false)
+            .loadCommunityChallenge();
+        Provider.of<CollectibleModel>(context, listen: false)
+            .loadCollectibles(forceClear: true, languageCode: langCode);
+        Provider.of<MissionModel>(context, listen: false)
+            .loadMissions(forceClear: true);
+      }
     });
     _startTimer();
   }
