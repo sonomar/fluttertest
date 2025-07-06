@@ -67,7 +67,7 @@ class _AwardProcessingScreenState extends State<AwardProcessingScreen>
 
         // 3. Attempt to redeem the distribution-based reward.
         bool distributionSuccess = await distributionModel.redeemMissionReward(
-            missionDistributionId: rewardId.toString());
+            context: context, missionDistributionId: rewardId.toString());
 
         if (!distributionSuccess) {
           // Optional: Log an error if the bonus reward fails.

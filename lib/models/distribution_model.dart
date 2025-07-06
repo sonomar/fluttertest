@@ -265,7 +265,8 @@ class DistributionModel extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, String>?> completeTransfer(String code) async {
+  Future<Map<String, String>?> completeTransfer(
+      String code, BuildContext context) async {
     _setState(isLoading: true, loadingMessage: "Completing transfer...");
     final String? newOwnerId = userModel.currentUser?['userId']?.toString();
 
@@ -345,6 +346,19 @@ class DistributionModel extends ChangeNotifier {
         "lastTransferredDt": DateTime.now().toIso8601String(),
       }, _appAuthProvider);
 
+      await updateMissionProgress(
+        userId: newOwnerId, // The user receiving the collectible
+        collectibleId: collectibleId,
+        operation: MissionProgressOperation.increment,
+        context: context,
+      );
+      await updateMissionProgress(
+        userId: giverId, // The user giving the collectible
+        collectibleId: collectibleId,
+        operation: MissionProgressOperation.decrement,
+        context: context,
+      );
+
       _setState(isLoading: false, loadingMessage: "Transfer complete!");
       return {'collectibleId': collectibleId, 'giverId': giverId};
     } catch (e) {
@@ -354,7 +368,8 @@ class DistributionModel extends ChangeNotifier {
   }
 
   Future<bool> redeemMissionReward(
-      {required String missionDistributionId}) async {
+      {required String missionDistributionId,
+      required BuildContext context}) async {
     _setState(isLoading: true, loadingMessage: "Claiming mission reward...");
     final String? userId = userModel.currentUser?['userId']?.toString();
 
@@ -448,6 +463,13 @@ class DistributionModel extends ChangeNotifier {
 
       await createUserCollectible(
           userId, collectibleToAwardId, newMint, _appAuthProvider);
+
+      await updateMissionProgress(
+        userId: userId,
+        collectibleId: collectibleToAwardId,
+        operation: MissionProgressOperation.increment,
+        context: context,
+      );
 
       _setState(isLoading: false, loadingMessage: "Reward collected!");
       return true;

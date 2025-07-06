@@ -75,7 +75,8 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
   /// Processes a collectible transfer code.
   Future<void> _processTransfer(DistributionModel model, String code) async {
     // This logic can be updated later to also call the mission helper if needed
-    final Map<String, String>? tradeResult = await model.completeTransfer(code);
+    final Map<String, String>? tradeResult =
+        await model.completeTransfer(code, context);
 
     if (tradeResult != null) {
       _handleSuccess(code);
