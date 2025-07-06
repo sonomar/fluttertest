@@ -70,17 +70,17 @@ class _LoginPageState extends State<LoginPage> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel Process?'),
-        content: const Text(
-            'Are you sure? This will cancel the current process and take you back to the main login screen.'),
+        title: Text(translate("login_page_dialog_canceltitle", context)),
+        content: Text(translate("login_page_dialog_cancelbody", context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Stay'),
+            child: Text(translate("login_page_dialog_staybutton", context)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Go Back', style: TextStyle(color: Colors.red)),
+            child: Text(translate("login_page_dialog_gobackbutton", context),
+                style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -121,15 +121,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _submit() async {
-    // Clear previous errors first
     setState(() => _uiErrorMessage = '');
     Provider.of<AppAuthProvider>(context, listen: false).setErrorMessage(null);
 
-    // Validate the form
     if (!(_formKey.currentState?.validate() ?? false)) {
-      // If validation fails, set the UI error message and stop
       setState(() {
-        _uiErrorMessage = 'Please correct the errors shown below.';
+        _uiErrorMessage = translate("login_page_submit_formerror", context);
       });
       return;
     }
@@ -151,8 +148,8 @@ class _LoginPageState extends State<LoginPage> {
           shouldNavigateToSplash = true;
         } else {
           setState(() {
-            _uiErrorMessage =
-                authProvider.errorMessage ?? 'Incorrect email or password.';
+            _uiErrorMessage = authProvider.errorMessage ??
+                translate("login_page_submit_loginfallback", context);
             _isSubmitting = false;
           });
           return;
@@ -164,10 +161,9 @@ class _LoginPageState extends State<LoginPage> {
         if (success) {
           shouldNavigateToSplash = true;
         } else {
-          // FIX: Apply the same pattern here.
           setState(() {
             _uiErrorMessage = authProvider.errorMessage ??
-                'The code provided is incorrect or has expired.';
+                translate("login_page_submit_codefallback", context);
             _isSubmitting = false;
           });
           return;
@@ -191,8 +187,9 @@ class _LoginPageState extends State<LoginPage> {
         }
         if (result == 'UsernameExistsException' && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('This email is already registered. Please log in.'),
+            SnackBar(
+              content:
+                  Text(translate("login_page_submit_emailexists", context)),
               backgroundColor: Colors.orange,
             ),
           );
@@ -204,10 +201,9 @@ class _LoginPageState extends State<LoginPage> {
           });
           return;
         }
-        // Handle generic registration failure
         setState(() {
           _uiErrorMessage = authProvider.errorMessage ??
-              'An unknown registration error occurred.';
+              translate("login_page_submit_regfallback", context);
           _isSubmitting = false;
         });
         return;
@@ -220,19 +216,17 @@ class _LoginPageState extends State<LoginPage> {
           if (success) {
             shouldNavigateToSplash = true;
           } else {
-            // FIX: Handle failure after confirmation but before sign-in
             setState(() {
               _uiErrorMessage = authProvider.errorMessage ??
-                  'Sign in after confirmation failed.';
+                  translate("login_page_submit_signinfail", context);
               _isSubmitting = false;
             });
             return;
           }
         } else {
-          // FIX: Handle confirmation code failure
           setState(() {
-            _uiErrorMessage =
-                authProvider.errorMessage ?? 'Incorrect confirmation code.';
+            _uiErrorMessage = authProvider.errorMessage ??
+                translate("login_page_submit_confirmfail", context);
             _isSubmitting = false;
           });
           return;
@@ -256,7 +250,8 @@ class _LoginPageState extends State<LoginPage> {
 
     if (!(_formKey.currentState?.validate() ?? false)) {
       setState(() {
-        _uiErrorMessage = 'Please enter a valid email address.';
+        _uiErrorMessage =
+            translate("login_page_emailreq_invalidemail", context);
       });
       return;
     }
@@ -273,8 +268,6 @@ class _LoginPageState extends State<LoginPage> {
         _isSubmitting = false;
       });
     } else {
-      // On failure, the provider will have the error message.
-      // We just need to stop the loading indicator and trigger a rebuild.
       if (mounted) {
         setState(() {
           _isSubmitting = false;
@@ -289,7 +282,8 @@ class _LoginPageState extends State<LoginPage> {
 
     if (!(_formKey.currentState?.validate() ?? false)) {
       setState(() {
-        _uiErrorMessage = 'Please enter a valid email address.';
+        _uiErrorMessage =
+            translate("login_page_emailreq_invalidemail", context);
       });
       return;
     }
@@ -321,7 +315,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (!(_formKey.currentState?.validate() ?? false)) {
       setState(() {
-        _uiErrorMessage = 'Please correct the errors shown below.';
+        _uiErrorMessage = translate("login_page_submit_formerror", context);
       });
       return;
     }
@@ -339,8 +333,8 @@ class _LoginPageState extends State<LoginPage> {
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Your password has been successfully reset.'),
+        SnackBar(
+          content: Text(translate("login_page_reset_success", context)),
           backgroundColor: Colors.green,
         ),
       );
@@ -434,10 +428,6 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                         ..._buildActionButtons(),
-                        // const SizedBox(height: 12),
-                        // _buildSocialLoginDivider(),
-                        // const SizedBox(height: 12),
-                        // _buildSocialLoginButtons(),
                         const SizedBox(height: 20),
                         if (_formType == AuthFormType.loginInitial ||
                             _formType == AuthFormType.loginWithPassword ||
@@ -445,12 +435,15 @@ class _LoginPageState extends State<LoginPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text("Don't have an account?",
+                              Text(
+                                  translate("login_page_build_noaccounttext",
+                                      context),
                                   style: TextStyle(color: Colors.white)),
                               TextButton(
                                   onPressed:
                                       _isSubmitting ? null : _switchFormType,
-                                  child: const Text("Register")),
+                                  child: Text(translate(
+                                      "register_button_label", context))),
                             ],
                           ),
                       ],
@@ -465,25 +458,24 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // NEW WIDGET: A divider for the social logins
   Widget _buildSocialLoginDivider() {
-    return const Row(
+    return Row(
       children: [
         Expanded(child: Divider(thickness: 1, endIndent: 10)),
-        Text("OR", style: TextStyle(color: Colors.white70)),
+        Text(translate("login_page_build_ordivider", context),
+            style: TextStyle(color: Colors.white70)),
         Expanded(child: Divider(thickness: 1, indent: 10)),
       ],
     );
   }
 
-  // NEW WIDGET: Builds the social login buttons
   Widget _buildSocialLoginButtons() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ElevatedButton.icon(
           icon: Image.asset('assets/images/google_logo.png', height: 24.0),
-          label: const Text('Sign in with Google'),
+          label: Text(translate("login_page_build_googlebutton", context)),
           onPressed: _isSubmitting ? null : _handleGoogleSignIn,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
@@ -494,7 +486,7 @@ class _LoginPageState extends State<LoginPage> {
         if (Platform.isIOS)
           ElevatedButton.icon(
             icon: const Icon(Icons.apple, color: Colors.white),
-            label: const Text('Sign in with Apple'),
+            label: Text(translate("login_page_build_applebutton", context)),
             onPressed: _isSubmitting ? null : _handleAppleSignIn,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
@@ -516,9 +508,9 @@ class _LoginPageState extends State<LoginPage> {
       case AuthFormType.confirm:
         return translate('confirm_code_header', context);
       case AuthFormType.forgotPassword:
-        return 'Forgot Your Password?';
+        return translate("login_page_header_forgotpassword", context);
       case AuthFormType.resetPassword:
-        return 'Reset Your Password';
+        return translate("login_page_header_resetpassword", context);
     }
   }
 
@@ -531,14 +523,14 @@ class _LoginPageState extends State<LoginPage> {
         return [
           ElevatedButton(
             onPressed: _handleEmailLoginRequest,
-            child: const Text('Log in with Email'),
+            child: Text(translate("login_page_actions_loginemail", context)),
           ),
           const SizedBox(height: 12),
           TextButton(
             onPressed: () {
               setState(() => _formType = AuthFormType.loginWithPassword);
             },
-            child: const Text('Log in with Password',
+            child: Text(translate("login_page_actions_loginpass", context),
                 style: TextStyle(
                   color: Colors.white70,
                   decoration: TextDecoration.underline,
@@ -548,12 +540,15 @@ class _LoginPageState extends State<LoginPage> {
         ];
       case AuthFormType.loginWithPassword:
         return [
-          ElevatedButton(onPressed: _submit, child: const Text("Log In")),
+          ElevatedButton(
+              onPressed: _submit,
+              child:
+                  Text(translate("login_page_actions_loginbutton", context))),
           TextButton(
             onPressed: () {
               setState(() => _formType = AuthFormType.loginInitial);
             },
-            child: const Text('Log in with Email',
+            child: Text(translate("login_page_actions_loginemail", context),
                 style: TextStyle(
                   color: Colors.white70,
                   decoration: TextDecoration.underline,
@@ -568,7 +563,7 @@ class _LoginPageState extends State<LoginPage> {
                 _formType = AuthFormType.forgotPassword;
               });
             },
-            child: const Text('Forgot Your Password?',
+            child: Text(translate("login_page_header_forgotpassword", context),
                 style: TextStyle(
                   color: Colors.white70,
                   decoration: TextDecoration.underline,
@@ -579,7 +574,9 @@ class _LoginPageState extends State<LoginPage> {
       case AuthFormType.loginWithEmailCode:
       case AuthFormType.confirm:
         return [
-          ElevatedButton(onPressed: _submit, child: const Text("Confirm Code"))
+          ElevatedButton(
+              onPressed: _submit,
+              child: Text(translate("login_page_actions_confirmcode", context)))
         ];
       case AuthFormType.register:
         return [
@@ -624,8 +621,9 @@ class _LoginPageState extends State<LoginPage> {
             decoration: InputDecoration(
                 labelText: translate("login_email_label", context),
                 border: const OutlineInputBorder()),
-            validator: (v) =>
-                (v?.isEmpty ?? true) ? 'Please enter your email' : null,
+            validator: (v) => (v?.isEmpty ?? true)
+                ? translate("login_page_fields_emailvalidator", context)
+                : null,
           ),
         ];
       case AuthFormType.loginWithPassword:
@@ -636,8 +634,9 @@ class _LoginPageState extends State<LoginPage> {
             decoration: InputDecoration(
                 labelText: translate("login_email_label", context),
                 border: const OutlineInputBorder()),
-            validator: (v) =>
-                (v?.isEmpty ?? true) ? 'Please enter your email' : null,
+            validator: (v) => (v?.isEmpty ?? true)
+                ? translate("login_page_fields_emailvalidator", context)
+                : null,
           ),
           const SizedBox(height: 20),
           TextFormField(
@@ -647,8 +646,9 @@ class _LoginPageState extends State<LoginPage> {
                 labelText: translate("login_password_label", context),
                 border: const OutlineInputBorder()),
             obscureText: true,
-            validator: (v) =>
-                (v?.isEmpty ?? true) ? 'Please enter your password' : null,
+            validator: (v) => (v?.isEmpty ?? true)
+                ? translate("login_page_fields_passvalidator", context)
+                : null,
           ),
         ];
       case AuthFormType.loginWithEmailCode:
@@ -657,8 +657,9 @@ class _LoginPageState extends State<LoginPage> {
           TextFormField(
             controller: _emailController,
             style: const TextStyle(color: Colors.grey),
-            decoration: const InputDecoration(
-                labelText: 'Email', border: OutlineInputBorder()),
+            decoration: InputDecoration(
+                labelText: translate("login_page_fields_emaillabel", context),
+                border: OutlineInputBorder()),
             enabled: false,
           ),
           const SizedBox(height: 20),
@@ -667,11 +668,11 @@ class _LoginPageState extends State<LoginPage> {
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
                 labelText: _formType == AuthFormType.loginWithEmailCode
-                    ? 'Login Code'
-                    : 'Confirmation Code',
+                    ? translate("login_page_fields_logincodelabel", context)
+                    : translate("login_page_fields_confirmcodelabel", context),
                 border: const OutlineInputBorder()),
             validator: (v) => (v?.isEmpty ?? true)
-                ? 'Please enter the code from your email'
+                ? translate("login_page_fields_codevalidator", context)
                 : null,
           ),
         ];
@@ -716,10 +717,10 @@ class _LoginPageState extends State<LoginPage> {
         ];
       case AuthFormType.forgotPassword:
         return [
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(bottom: 8.0),
             child: Text(
-              'Enter your email below to receive a code to reset your password.',
+              translate("login_page_fields_forgotpassbody", context),
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
@@ -727,19 +728,21 @@ class _LoginPageState extends State<LoginPage> {
           TextFormField(
             controller: _emailController,
             style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
-                labelText: 'Email', border: OutlineInputBorder()),
+            decoration: InputDecoration(
+                labelText: translate("login_page_fields_emaillabel", context),
+                border: OutlineInputBorder()),
             keyboardType: TextInputType.emailAddress,
-            validator: (v) =>
-                (v?.isEmpty ?? true) ? 'Please enter your email' : null,
+            validator: (v) => (v?.isEmpty ?? true)
+                ? translate("login_page_fields_emailvalidator", context)
+                : null,
           ),
         ];
       case AuthFormType.resetPassword:
         return [
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(bottom: 8.0),
             child: Text(
-              'Please enter the code from your email below and enter your new password twice to add your new password.',
+              translate("login_page_fields_resetpassbody", context),
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
@@ -747,33 +750,37 @@ class _LoginPageState extends State<LoginPage> {
           TextFormField(
             controller: _loginCodeController,
             style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
-                labelText: 'Code', border: OutlineInputBorder()),
+            decoration: InputDecoration(
+                labelText: translate("login_page_fields_codelabel", context),
+                border: OutlineInputBorder()),
             validator: (v) => (v?.isEmpty ?? true)
-                ? 'Please enter the code from your email'
+                ? translate("login_page_fields_codevalidator", context)
                 : null,
           ),
           const SizedBox(height: 20),
           TextFormField(
             controller: _passwordController,
             style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
-                labelText: 'New Password', border: OutlineInputBorder()),
+            decoration: InputDecoration(
+                labelText: translate("login_page_fields_newpasslabel", context),
+                border: OutlineInputBorder()),
             obscureText: true,
             validator: (v) => (v?.length ?? 0) < 8
-                ? 'Password must be at least 8 characters'
+                ? translate("login_page_fields_passlengthvalidator", context)
                 : null,
           ),
           const SizedBox(height: 20),
           TextFormField(
             controller: _confirmPasswordController,
             style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
-                labelText: 'Confirm New Password',
-                border: OutlineInputBorder()),
+            decoration: InputDecoration(
+                labelText:
+                    translate("login_page_fields_confirmpasslabel", context),
+                border: const OutlineInputBorder()),
             obscureText: true,
-            validator: (v) =>
-                v != _passwordController.text ? 'Passwords do not match' : null,
+            validator: (v) => v != _passwordController.text
+                ? translate("login_page_fields_passmismatch", context)
+                : null,
           ),
         ];
     }
