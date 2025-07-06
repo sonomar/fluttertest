@@ -37,6 +37,16 @@ class DistributionModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearData() {
+    _userDistributionCodeUsers = [];
+    _hasLoadedUserCodes = false;
+    _isLoading = false;
+    _errorMessage = null;
+    _loadingMessage = null;
+    notifyListeners();
+    print("DistributionModel: Data cleared.");
+  }
+
   Future<void> loadUserRedeemedCodes({bool forceReload = false}) async {
     if (_hasLoadedUserCodes && !forceReload) return;
     final String? userId = userModel.currentUser?['userId']?.toString();

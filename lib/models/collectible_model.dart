@@ -27,6 +27,16 @@ class CollectibleModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   CollectibleModel(this._appAuthProvider, this.userModel);
 
+  void clearData() {
+    _collectionCollectibles = [];
+    _userCollectibles = [];
+    _hasLoaded = false;
+    _errorMessage = null;
+    _loadingMessage = null;
+    notifyListeners();
+    print("CollectibleModel: Data cleared.");
+  }
+
   String _getSortableString(dynamic value, String languageCode) {
     if (value is Map) {
       // Prioritize the current language, fall back to English, then to an empty string.

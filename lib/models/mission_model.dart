@@ -31,6 +31,15 @@ class MissionModel extends ChangeNotifier {
   MissionSortBy _missionSortBy = MissionSortBy.publicationDate;
   MissionSortBy get missionSortBy => _missionSortBy;
 
+  void clearData() {
+    _missions = [];
+    _missionUsers = [];
+    _hasLoaded = false;
+    _errorMessage = null;
+    notifyListeners();
+    print("MissionModel: Data cleared.");
+  }
+
   void update(AppAuthProvider authProvider, UserModel userModel) {
     _appAuthProvider = authProvider;
     _userModel = userModel;

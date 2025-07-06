@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/app_auth_provider.dart';
 import '../widgets/splash_screen.dart';
-import '../models/locale_provider.dart';
 import '../models/user_model.dart';
+import '../models/collectible_model.dart';
+import '../models/mission_model.dart';
+import '../models/distribution_model.dart';
 import '../helpers/localization_helper.dart';
 import './subscreens/missions/award_screen.dart';
 import './subscreens/profile/language_page.dart';
@@ -102,20 +104,28 @@ class ProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           ProfileMenuItem(
-            icon: Icons.logout,
-            title: translate("profile_signout_label", context),
-            color: Colors.red,
-            onTap: () async {
-              await Provider.of<AppAuthProvider>(context, listen: false)
-                  .signOut();
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const SplashScreen()),
-                  (Route<dynamic> route) => false,
-                );
-              }
-            },
-          ),
+              icon: Icons.logout,
+              title: translate("profile_signout_label", context),
+              color: Colors.red,
+              onTap: () async {
+                context.read<CollectibleModel>().clearData();
+                context.read<MissionModel>().clearData();
+                context
+                    .read<DistributionModel>()
+                    .clearData(); // Assuming you add a clearData method here too
+                context
+                    .read<UserModel>()
+                    .clearUser(); // Assuming you add a clearData method here too
+                await context.read<AppAuthProvider>().signOut();
+
+                if (context.mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (context) => const SplashScreen()),
+                    (Route<dynamic> route) => false,
+                  );
+                }
+              }),
         ],
       ),
     );
