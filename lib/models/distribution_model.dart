@@ -10,7 +10,7 @@ import '../api/distribution_code.dart';
 import '../api/distribution_code_user.dart';
 import '../api/distribution_collectible.dart';
 import '../api/user_collectible.dart';
-import '../api/collectible.dart'; // Import the collectible API
+import '../api/collectible.dart';
 
 class DistributionModel extends ChangeNotifier {
   final AppAuthProvider _appAuthProvider;
@@ -63,9 +63,17 @@ class DistributionModel extends ChangeNotifier {
 
       await loadUserRedeemedCodes(forceReload: true);
 
-      final distributionCode =
+      dynamic rawDistributionCode =
           await getDistributionCodeByCode(code, _appAuthProvider);
-      if (distributionCode == null) throw Exception("Invalid code.");
+      if (rawDistributionCode is List) {
+        if (rawDistributionCode.isEmpty) throw Exception("Invalid code.");
+        rawDistributionCode = rawDistributionCode.first;
+      }
+      if (rawDistributionCode == null ||
+          rawDistributionCode is! Map<String, dynamic>) {
+        throw Exception("Invalid code.");
+      }
+      final Map<String, dynamic> distributionCode = rawDistributionCode;
 
       final distributionCodeId =
           distributionCode['distributionCodeId'].toString();
@@ -142,21 +150,15 @@ class DistributionModel extends ChangeNotifier {
           throw Exception("This promotion has expired.");
         }
       }
-
-      // --- START: THE FIX ---
-      // 1. Find the specific redemption record for THIS user.
       final userRedemptionRecord = _userDistributionCodeUsers.firstWhere(
         (uc) => uc['distributionCodeId'].toString() == distributionCodeId,
         orElse: () => null, // Return null if not found
       );
-
-      // 2. Check if that specific record exists AND is marked as redeemed.
       if (userRedemptionRecord != null &&
           (userRedemptionRecord['redeemed'] == true ||
               userRedemptionRecord['redeemed'] == 1)) {
         throw Exception("You have already redeemed this code.");
       }
-      // --- END: THE FIX ---
 
       final randomCollectible =
           collectiblePool[Random().nextInt(collectiblePool.length)];
@@ -214,14 +216,16 @@ class DistributionModel extends ChangeNotifier {
 
   Future<Map<String, dynamic>?> initiateTransfer(
       String userCollectibleId, String transferDistributionId) async {
+    final qrCodeJson = {'userCollectibleId': userCollectibleId};
     _setState(isLoading: true, loadingMessage: "Generating transfer code...");
     try {
       final Map<String, dynamic> body = {
         "distributionId": transferDistributionId,
         "code": "TFR-${DateTime.now().millisecondsSinceEpoch}",
         "isMultiUse": false,
-        "userCollectibleId": userCollectibleId
+        "qrCode": qrCodeJson
       };
+      print('test2: $body');
       final newCode = await createDistributionCode(body, _appAuthProvider);
       _setState(isLoading: false);
       return newCode;
@@ -240,9 +244,18 @@ class DistributionModel extends ChangeNotifier {
     try {
       if (newOwnerId == null) throw Exception("Current user not found.");
 
-      final distributionCode =
+      dynamic rawDistributionCode =
           await getDistributionCodeByCode(code, _appAuthProvider);
-      if (distributionCode == null) throw Exception("Invalid transfer code.");
+      if (rawDistributionCode is List) {
+        if (rawDistributionCode.isEmpty)
+          throw Exception("Invalid transfer code.");
+        rawDistributionCode = rawDistributionCode.first;
+      }
+      if (rawDistributionCode == null ||
+          rawDistributionCode is! Map<String, dynamic>) {
+        throw Exception("Invalid transfer code.");
+      }
+      final Map<String, dynamic> distributionCode = rawDistributionCode;
 
       final distributionCodeId =
           distributionCode['distributionCodeId'].toString();
@@ -254,15 +267,31 @@ class DistributionModel extends ChangeNotifier {
         throw Exception("This transfer code has already been used.");
       }
 
-      final userCollectibleId =
-          distributionCode['userCollectibleId']?.toString();
+      final qrCodeData = distributionCode['qrCode'] as Map<String, dynamic>?;
+      if (qrCodeData == null) {
+        throw Exception(
+            "Transfer code is not linked to a collectible instance.");
+      }
+      final userCollectibleId = qrCodeData['userCollectibleId']?.toString();
       if (userCollectibleId == null)
         throw Exception("Transfer code is not linked to a collectible.");
 
-      final tradedInstanceData = await getUserCollectibleByUserCollectibleId(
-          userCollectibleId, _appAuthProvider);
-      if (tradedInstanceData == null)
+      final tradedInstanceDataResponse =
+          await getUserCollectibleByUserCollectibleId(
+              userCollectibleId, _appAuthProvider);
+
+      Map<String, dynamic>? tradedInstanceData;
+
+      if (tradedInstanceDataResponse is List) {
+        if (tradedInstanceDataResponse.isNotEmpty) {
+          tradedInstanceData = tradedInstanceDataResponse.first;
+        }
+      } else if (tradedInstanceDataResponse is Map<String, dynamic>) {
+        tradedInstanceData = tradedInstanceDataResponse;
+      }
+      if (tradedInstanceData == null) {
         throw Exception("Could not find collectible to be traded.");
+      }
 
       final String giverId = tradedInstanceData['ownerId'].toString();
       final String collectibleId =
@@ -271,8 +300,7 @@ class DistributionModel extends ChangeNotifier {
       if (newOwnerId == giverId) {
         throw Exception("Cannot trade a collectible to yourself.");
       }
-      final collectibleReceivedJson =
-          jsonEncode({'collectibleId': collectibleId});
+      final collectibleReceivedJson = {'collectibleId': collectibleId};
 
       await createDistributionCodeUser({
         "userId": newOwnerId,

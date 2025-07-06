@@ -9,6 +9,11 @@ import '../models/app_auth_provider.dart';
 import '../api/user.dart';
 import '../helpers/auth_error_helper.dart';
 
+class UserNotConfirmedException implements Exception {
+  final String message;
+  UserNotConfirmedException(this.message);
+}
+
 // Helper to get environment variables safely
 String getEnvItem(String item) {
   var endpoint = dotenv.env[item];
@@ -232,15 +237,27 @@ class AuthService {
 
       // MODIFICATION: Check for the specific exception and return it
       if (e.name == 'UsernameExistsException') {
-        _internalErrorMessage =
-            'An account with this email already exists. Please log in to continue.';
-        return 'UsernameExistsException';
+        print(
+            "AuthService: User already exists but may be unconfirmed. Resending confirmation code.");
+        await resendConfirmationCode(email);
+        return 'success'; // Return 'success' to proceed to the confirmation view
       }
       return 'failed'; // Return 'failed' for other errors
     } catch (e) {
       _internalErrorMessage = 'An unexpected error occurred during sign-up.';
       print('AuthService: SignUp Error: $e');
       return 'failed'; // Return 'failed' for unexpected errors
+    }
+  }
+
+  Future<void> resendConfirmationCode(String email) async {
+    try {
+      final cognitoUser = CognitoUser(email, _userPool);
+      await cognitoUser.resendConfirmationCode();
+      print("AuthService: Resent confirmation code to $email.");
+    } catch (e) {
+      print("AuthService: Error resending confirmation code: $e");
+      // Don't throw an error here, as the primary flow should continue.
     }
   }
 
@@ -390,8 +407,8 @@ class AuthService {
     } on CognitoUserConfirmationNecessaryException catch (e) {
       _internalErrorMessage = 'Confirmation Necessary: ${e.message}';
       print('AuthService Sign-in Error: $_internalErrorMessage');
-      _session = null; // Clear session on specific failure
-      return false; // No retry for user action required
+      await resendConfirmationCode(email);
+      throw UserNotConfirmedException('Please confirm your account.');
     } on CognitoClientException catch (e) {
       _internalErrorMessage = simplifyAuthError(e.message);
       _session = null; // Clear session on this type of failure
