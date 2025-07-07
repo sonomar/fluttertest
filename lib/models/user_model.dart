@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/app_auth_provider.dart';
+import '../models/mission_model.dart';
 import '../api/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../api/user_collectible.dart';
 
 class UserModel extends ChangeNotifier {
   final AppAuthProvider _appAuthProvider;
@@ -87,6 +90,80 @@ class UserModel extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> completeOnboarding(
+      String newUsername, BuildContext context) async {
+    if (currentUser == null) {
+      _errorMessage = "Cannot complete onboarding: current user is null.";
+      notifyListeners();
+      return false;
+    }
+
+    // Only proceed if the user is actually in the 'onboarding' state.
+    if (_currentUser['userType'] != 'onboarding') {
+      print(
+          "User is not in onboarding state. Proceeding with normal username update.");
+      return await updateUsername(newUsername);
+    }
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      // 1. Immediately update the user's type to 'email' to prevent this flow from running again.
+      // This also sets their chosen username.
+      final initialUpdateBody = {
+        "userId": _currentUser['userId'],
+        "username": newUsername,
+        "type": "email"
+      };
+      final updateResult =
+          await updateUserByUserId(initialUpdateBody, _appAuthProvider);
+
+      if (updateResult == null) {
+        throw Exception("Failed to update user type and username.");
+      }
+
+      // Optimistically update the local user object.
+      _currentUser['username'] = newUsername;
+      _currentUser['userType'] = 'email';
+
+      // 2. Now that the user is "locked" out of onboarding, check for collectibles.
+      final userCollectibles = await getUserCollectiblesByOwnerId(
+          _currentUser['userId'].toString(), _appAuthProvider);
+
+      // 3. If they have collectibles, update mission progress.
+      if (userCollectibles is List && userCollectibles.isNotEmpty) {
+        print(
+            "Onboarding: User has pre-existing collectibles. Updating mission progress.");
+        await _updateInitialMissionProgress(context);
+      }
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = "An error occurred during onboarding: ${e.toString()}";
+      _isLoading = false;
+      notifyListeners();
+      return false; // Return false but don't block the user from proceeding.
+    }
+  }
+
+  /// Helper function to handle the one-time mission progress update for new users.
+  Future<void> _updateInitialMissionProgress(BuildContext context) async {
+    final missionModel = context.read<MissionModel>();
+    // Ensure the mission model has the latest data for this user.
+    await missionModel.loadMissions(forceClear: true);
+
+    for (var missionUser in missionModel.missionUsers) {
+      if (missionUser['progress'] == 0) {
+        print("Updating progress for mission ID: ${missionUser['missionId']}");
+        await missionModel.updateMissionProgress(missionUser, 1);
+      }
     }
   }
 

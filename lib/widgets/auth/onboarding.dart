@@ -32,7 +32,7 @@ class _OnboardingState extends State<Onboarding> {
     final userModel = context.read<UserModel>();
     final newUsername = _usernameController.text.trim().toLowerCase();
 
-    final success = await userModel.updateUsername(newUsername);
+    final success = await userModel.completeOnboarding(newUsername, context);
 
     if (mounted && success) {
       setState(() {

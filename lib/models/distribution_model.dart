@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../helpers/mission_helper.dart';
@@ -211,6 +210,8 @@ class DistributionModel extends ChangeNotifier {
       if (newMint == null) {
         throw Exception("No available mints for this collectible.");
       }
+      final bool isUniqueGain = !allUserCollectibles
+          .any((uc) => uc['collectibleId'].toString() == collectibleToAwardId);
       final collectibleReceivedJson = {'collectibleId': collectibleToAwardId};
 
       if (userRedemptionRecord != null) {
@@ -238,12 +239,14 @@ class DistributionModel extends ChangeNotifier {
       await createUserCollectible(
           userId, collectibleToAwardId, newMint, _appAuthProvider);
 
-      await updateMissionProgress(
-        userId: userId,
-        collectibleId: collectibleToAwardId,
-        operation: MissionProgressOperation.increment,
-        context: context,
-      );
+      if (isUniqueGain) {
+        await updateMissionProgress(
+          userId: userId,
+          collectibleId: collectibleToAwardId,
+          operation: MissionProgressOperation.increment,
+          context: context,
+        );
+      }
 
       _setState(isLoading: false, loadingMessage: "dist_model_redeem_success");
       return collectibleToAwardId;
@@ -343,14 +346,31 @@ class DistributionModel extends ChangeNotifier {
       if (newOwnerId == giverId) {
         throw Exception("dist_model_completetransfer_selftrade");
       }
-      final collectibleReceivedJson = {'collectibleId': collectibleId};
+
+      final giverCollectibles =
+          await getUserCollectiblesByOwnerId(giverId, _appAuthProvider);
+      final receiverCollectibles =
+          await getUserCollectiblesByOwnerId(newOwnerId, _appAuthProvider);
+
+      // 2. Determine if the transfer results in a unique loss for the giver.
+      final giverInstanceCount = giverCollectibles
+          .where((uc) => uc['collectibleId'].toString() == collectibleId)
+          .length;
+      final bool isUniqueLossForGiver = giverInstanceCount == 1;
+
+      // 3. Determine if the transfer results in a unique gain for the receiver.
+      final bool isUniqueGainForReceiver = !receiverCollectibles
+          .any((uc) => uc['collectibleId'].toString() == collectibleId);
+      // --- END: UNIQUENESS CHECK FOR TRANSFER ---
+
+      final collectibleReceivedForUserJson = {'collectibleId': collectibleId};
 
       await createDistributionCodeUser({
         "userId": newOwnerId,
         "distributionCodeId": distributionCodeId,
         "redeemed": true,
         "redeemedDate": DateTime.now().toIso8601String(),
-        "collectibleReceived": collectibleReceivedJson
+        "collectibleReceived": collectibleReceivedForUserJson
       }, _appAuthProvider);
 
       await updateUserCollectibleByUserCollectibleId({
@@ -360,18 +380,22 @@ class DistributionModel extends ChangeNotifier {
         "lastTransferredDt": DateTime.now().toIso8601String(),
       }, _appAuthProvider);
 
-      await updateMissionProgress(
-        userId: newOwnerId, // The user receiving the collectible
-        collectibleId: collectibleId,
-        operation: MissionProgressOperation.increment,
-        context: context,
-      );
-      await updateMissionProgress(
-        userId: giverId, // The user giving the collectible
-        collectibleId: collectibleId,
-        operation: MissionProgressOperation.decrement,
-        context: context,
-      );
+      if (isUniqueGainForReceiver) {
+        await updateMissionProgress(
+          userId: newOwnerId,
+          collectibleId: collectibleId,
+          operation: MissionProgressOperation.increment,
+          context: context,
+        );
+      }
+      if (isUniqueLossForGiver) {
+        await updateMissionProgress(
+          userId: giverId,
+          collectibleId: collectibleId,
+          operation: MissionProgressOperation.decrement,
+          context: context,
+        );
+      }
 
       _setState(
           isLoading: false,
