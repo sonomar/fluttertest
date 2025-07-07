@@ -149,6 +149,7 @@
   "login_page_reset_success": "Your password has been successfully reset.",
   "login_page_build_googlebutton": "Sign in with Google",
   "login_page_build_applebutton": "Sign in with Apple",
+  "login_page_build_noaccounttext": "No valid ID token found after checkUser.",
   "login_page_header_forgotpassword": "Forgot Your Password?",
   "login_page_header_resetpassword": "Reset Your Password",
   "login_page_actions_loginemail": "Log in with Email",
