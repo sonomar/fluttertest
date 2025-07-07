@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/object_viewer.dart';
+// import '../../../widgets/object_viewer.dart';
 import '../../../widgets/missions/award_info.dart';
 import '../../../helpers/localization_helper.dart';
 import '../../../widgets/interactive_drag_scroll_sheet.dart';
