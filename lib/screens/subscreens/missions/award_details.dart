@@ -17,7 +17,7 @@ class AwardDetails extends StatefulWidget {
 }
 
 class _AwardDetailsState extends State<AwardDetails> {
-  bool _isEnlarged = false;
+  // bool _isEnlarged = false;
   double _sheetPosition = 0.75;
 
   Widget lineItem(key, value) {
@@ -56,28 +56,28 @@ class _AwardDetailsState extends State<AwardDetails> {
               getTranslatedString(context, widget.selectedAward["title"]),
             ),
             actions: [
-              if (isCompleted)
-                Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _isEnlarged = !_isEnlarged;
-                        if (!_isEnlarged) {
-                          _sheetPosition = 0.75;
-                        }
-                      });
-                    },
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: _isEnlarged
-                          ? const Icon(Icons.fullscreen_exit,
-                              key: ValueKey('shrink'), color: Colors.black)
-                          : Image.asset("assets/images/enlarge.png",
-                              key: const ValueKey('enlarge')),
-                    ),
-                  ),
-                )
+              // if (isCompleted)
+              //   Padding(
+              //     padding: const EdgeInsets.all(15),
+              //     child: GestureDetector(
+              //       onTap: () {
+              //         setState(() {
+              //           _isEnlarged = !_isEnlarged;
+              //           if (!_isEnlarged) {
+              //             _sheetPosition = 0.75;
+              //           }
+              //         });
+              //       },
+              //       child: AnimatedSwitcher(
+              //         duration: const Duration(milliseconds: 300),
+              //         child: _isEnlarged
+              //             ? const Icon(Icons.fullscreen_exit,
+              //                 key: ValueKey('shrink'), color: Colors.black)
+              //             : Image.asset("assets/images/enlarge.png",
+              //                 key: const ValueKey('enlarge')),
+              //       ),
+              //     ),
+              //   )
             ]),
         body: LayoutBuilder(builder: (context, constraints) {
           final double objectViewerHeight =
@@ -102,48 +102,51 @@ class _AwardDetailsState extends State<AwardDetails> {
               top: 0,
               left: 20,
               right: 20,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 100),
-                curve: Curves.linear,
-                height: _isEnlarged
-                    ? constraints.maxHeight * 0.85
-                    : objectViewerHeight,
-                child: isCompleted
-                    ? ObjectViewer(
-                        asset: widget.selectedAward['embedRef']['url'],
-                        placeholder: widget.selectedAward['imgRef']['load'])
-                    : Center(
-                        child: ColorFiltered(
-                          colorFilter: const ColorFilter.matrix(<double>[
-                            // Greyscale matrix
-                            0.2126, 0.7152, 0.0722, 0, 0,
-                            0.2126, 0.7152, 0.0722, 0, 0,
-                            0.2126, 0.7152, 0.0722, 0, 0,
-                            0, 0, 0, 1, 0,
-                          ]),
-                          child: Image.network(
-                            missionImage,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
+              child: SizedBox(
+                height: objectViewerHeight,
+                // AnimatedContainer(
+                //   duration: const Duration(milliseconds: 100),
+                //   curve: Curves.linear,
+                //   height: _isEnlarged
+                //       ? constraints.maxHeight * 0.85
+                //       : objectViewerHeight,
+                //   child: isCompleted
+                //       ? ObjectViewer(
+                //           asset: widget.selectedAward['embedRef']['url'],
+                //           placeholder: widget.selectedAward['imgRef']['load'])
+                //       :
+                child: Center(
+                  child: ColorFiltered(
+                    colorFilter: const ColorFilter.matrix(<double>[
+                      // Greyscale matrix
+                      0.2126, 0.7152, 0.0722, 0, 0,
+                      0.2126, 0.7152, 0.0722, 0, 0,
+                      0.2126, 0.7152, 0.0722, 0, 0,
+                      0, 0, 0, 1, 0,
+                    ]),
+                    child: Image.network(
+                      missionImage,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
               ),
             ),
-            if (!_isEnlarged)
-              InteractiveDragScrollSheet(
-                  initialChildSize: 0.75,
-                  onSheetMoved: (position) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (mounted && _sheetPosition != position) {
-                        setState(() {
-                          _sheetPosition = position;
-                        });
-                      }
-                    });
-                  },
-                  contents: AwardInfo(
-                      selectedAward: widget.selectedAward,
-                      selectedAwardUser: widget.selectedAwardUser)),
+            // if (!_isEnlarged)
+            InteractiveDragScrollSheet(
+                initialChildSize: 0.75,
+                onSheetMoved: (position) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted && _sheetPosition != position) {
+                      setState(() {
+                        _sheetPosition = position;
+                      });
+                    }
+                  });
+                },
+                contents: AwardInfo(
+                    selectedAward: widget.selectedAward,
+                    selectedAwardUser: widget.selectedAwardUser)),
           ]);
         }));
   }
