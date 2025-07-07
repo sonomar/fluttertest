@@ -115,21 +115,26 @@ class _AwardDetailsState extends State<AwardDetails> {
                 //           asset: widget.selectedAward['embedRef']['url'],
                 //           placeholder: widget.selectedAward['imgRef']['load'])
                 //       :
-                child: Center(
-                  child: ColorFiltered(
-                    colorFilter: const ColorFilter.matrix(<double>[
-                      // Greyscale matrix
-                      0.2126, 0.7152, 0.0722, 0, 0,
-                      0.2126, 0.7152, 0.0722, 0, 0,
-                      0.2126, 0.7152, 0.0722, 0, 0,
-                      0, 0, 0, 1, 0,
-                    ]),
-                    child: Image.network(
-                      missionImage,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
+                child: isCompleted
+                    ? Image.network(
+                        missionImage,
+                        fit: BoxFit.contain,
+                      )
+                    : Center(
+                        child: ColorFiltered(
+                          colorFilter: const ColorFilter.matrix(<double>[
+                            // Greyscale matrix
+                            0.2126, 0.7152, 0.0722, 0, 0,
+                            0.2126, 0.7152, 0.0722, 0, 0,
+                            0.2126, 0.7152, 0.0722, 0, 0,
+                            0, 0, 0, 1, 0,
+                          ]),
+                          child: Image.network(
+                            missionImage,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
               ),
             ),
             // if (!_isEnlarged)
