@@ -228,16 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
       const ProfileScreen(key: PageStorageKey('profile')),
     ];
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authProvider = context.read<AppAuthProvider>();
-      if (authProvider.isNewUser) {
-        showDialog(
-          context: context,
-          barrierDismissible: false, // User cannot dismiss by tapping outside
-          builder: (BuildContext context) {
-            return const Onboarding();
-          },
-        );
-      }
+      _checkOnboardingStatus();
     });
   }
 
@@ -245,6 +236,49 @@ class _MyHomePageState extends State<MyHomePage> {
   void dispose() {
     _linkSubscription?.cancel();
     super.dispose();
+  }
+
+  Future<void> _checkOnboardingStatus() async {
+    final userModel = context.read<UserModel>();
+
+    // The UserModel now loads automatically. We just need to wait if it's in progress.
+    if (userModel.isLoading) {
+      // Create a temporary listener to wait for the loading to complete.
+      void listener() {
+        if (!userModel.isLoading && mounted) {
+          _performOnboardingCheck();
+          userModel.removeListener(listener); // Clean up the listener
+        }
+      }
+
+      userModel.addListener(listener);
+    } else {
+      // If not loading, perform the check immediately.
+      _performOnboardingCheck();
+    }
+  }
+
+  void _performOnboardingCheck() {
+    final authProvider = context.read<AppAuthProvider>();
+    final userModel = context.read<UserModel>();
+
+    // If the user's type is 'onboarding', set the flag to trigger the dialog.
+    if (userModel.currentUser?['type'] == 'onboarding') {
+      authProvider.setNewUserFlag(true);
+    }
+
+    // This check now happens after we've potentially set the flag.
+    if (authProvider.isNewUser) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return const Onboarding();
+          },
+        );
+      }
+    }
   }
 
   void _handleRedirect(Uri uri) {

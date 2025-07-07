@@ -9,16 +9,85 @@ class UserModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
+  UserModel(this._appAuthProvider) {
+    // Listen to authentication state changes to automatically load or clear user data.
+    _appAuthProvider.addListener(_onAuthStateChanged);
+    _onAuthStateChanged(); // Perform an initial check when the model is created.
+  }
+
+  @override
+  void dispose() {
+    _appAuthProvider.removeListener(_onAuthStateChanged);
+    super.dispose();
+  }
+
   dynamic get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  UserModel(this._appAuthProvider);
+
+  void _onAuthStateChanged() {
+    if (_appAuthProvider.status == AuthStatus.authenticated) {
+      loadCurrentUser();
+    } else {
+      clearUser();
+    }
+  }
 
   void clearUser() {
     _currentUser = null;
     _isLoading = false;
     _errorMessage = null;
     notifyListeners();
+  }
+
+  Future<void> loadCurrentUser() async {
+    if (_isLoading ||
+        (_currentUser != null &&
+            _appAuthProvider.status == AuthStatus.authenticated)) return;
+
+    if (_appAuthProvider.status != AuthStatus.authenticated) {
+      print("UserModel: Cannot load user, not authenticated.");
+      return;
+    }
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final userSub = _appAuthProvider.authService.currentUserSub;
+      if (userSub == null) {
+        throw Exception("Could not get user SUB from auth service.");
+      }
+      final email =
+          _appAuthProvider.userSession?.getIdToken().decodePayload()['email'];
+      if (email == null) {
+        throw Exception("Could not get user email from auth session.");
+      }
+
+      // 2. Use the existing getUserByEmail function with the email.
+      final userData = await getUserByEmail(email, _appAuthProvider);
+      // --- END: THE FIX ---
+
+      if (userData != null) {
+        // Handle API potentially returning a list
+        if (userData is List && userData.isNotEmpty) {
+          _currentUser = userData.first;
+        } else if (userData is Map<String, dynamic>) {
+          _currentUser = userData;
+        } else {
+          throw Exception("User data received in unexpected format.");
+        }
+      } else {
+        throw Exception("Failed to fetch user data from API.");
+      }
+    } catch (e) {
+      _errorMessage = "Failed to load user profile: ${e.toString()}";
+      print(_errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<bool> updateUsername(String newUsername) async {
@@ -34,7 +103,11 @@ class UserModel extends ChangeNotifier {
 
     try {
       final userId = _currentUser['userId'];
-      final userUpdateBody = {"userId": userId, "username": newUsername};
+      final userUpdateBody = {
+        "userId": userId,
+        "username": newUsername,
+        "type": "email"
+      };
 
       // Call the API function from api/user.dart
       final result = await updateUserByUserId(userUpdateBody, _appAuthProvider);
@@ -46,6 +119,7 @@ class UserModel extends ChangeNotifier {
         // Instead of calling loadUser() and causing a race condition,
         // we update the local user object directly.
         _currentUser['username'] = newUsername;
+        _currentUser['type'] = 'email';
         _isLoading = false;
         notifyListeners(); // Notify the UI of the updated username.
         return true;

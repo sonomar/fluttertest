@@ -44,6 +44,12 @@ class AppAuthProvider with ChangeNotifier {
     }
   }
 
+  void setNewUserFlag(bool value) {
+    if (isNewUser != value) {
+      isNewUser = value;
+    }
+  }
+
   void completeNewUserOnboarding() {
     if (isNewUser) {
       isNewUser = false;
