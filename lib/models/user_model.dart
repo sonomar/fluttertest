@@ -106,7 +106,7 @@ class UserModel extends ChangeNotifier {
       final userUpdateBody = {
         "userId": userId,
         "username": newUsername,
-        "type": "email"
+        "userType": "email"
       };
 
       // Call the API function from api/user.dart
@@ -119,7 +119,7 @@ class UserModel extends ChangeNotifier {
         // Instead of calling loadUser() and causing a race condition,
         // we update the local user object directly.
         _currentUser['username'] = newUsername;
-        _currentUser['type'] = 'email';
+        _currentUser['userType'] = 'email';
         _isLoading = false;
         notifyListeners(); // Notify the UI of the updated username.
         return true;

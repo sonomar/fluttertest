@@ -262,8 +262,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final authProvider = context.read<AppAuthProvider>();
     final userModel = context.read<UserModel>();
 
-    // If the user's type is 'onboarding', set the flag to trigger the dialog.
-    if (userModel.currentUser?['type'] == 'onboarding') {
+    if (userModel.currentUser?['userType'] == 'onboarding') {
       authProvider.setNewUserFlag(true);
     }
 
