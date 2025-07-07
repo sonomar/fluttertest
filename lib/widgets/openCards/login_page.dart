@@ -163,7 +163,7 @@ class _LoginPageState extends State<LoginPage> {
         } else {
           setState(() {
             _uiErrorMessage = authProvider.errorMessage ??
-                translate("login_page_submit_codefallback", context);
+                "The code provided is incorrect or has expired.";
             _isSubmitting = false;
           });
           return;
@@ -436,8 +436,8 @@ class _LoginPageState extends State<LoginPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                  translate("login_page_build_noaccounttext",
-                                      context),
+                                  translate(
+                                      "login_register_switch_text", context),
                                   style: TextStyle(color: Colors.white)),
                               TextButton(
                                   onPressed:

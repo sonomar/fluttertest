@@ -1,9 +1,7 @@
-/// A helper function to convert verbose AWS Cognito error messages
-/// into simple, user-friendly strings.
 String simplifyAuthError(String? rawError) {
   // Default message for unknown or null errors
   if (rawError == null) {
-    return 'auth_error_helper_simplify_unknown';
+    return 'An unknown error occurred.';
   }
 
   // Convert the error to lowercase for case-insensitive matching
@@ -12,51 +10,51 @@ String simplifyAuthError(String? rawError) {
   // --- Common Sign-In and Sign-Up Errors ---
   if (error.contains('user not found') ||
       error.contains('user does not exist')) {
-    return 'auth_error_helper_simplify_usernotfound';
+    return 'User with this email not found.';
   }
   if (error.contains('incorrect username or password')) {
-    return 'auth_error_helper_simplify_wrongpass';
+    return 'Incorrect email or password.';
   }
   if (error.contains('user already exists') ||
       error.contains('usernameexistsexception')) {
-    return 'auth_error_helper_simplify_emailexists';
+    return 'This email is already registered.';
   }
   if (error.contains('user is not confirmed')) {
-    return 'auth_error_helper_simplify_notconfirmed';
+    return 'Account has not been confirmed.';
   }
 
   // --- Password Errors ---
   if (error.contains('password did not conform')) {
-    return 'auth_error_helper_simplify_invalidpass';
+    return 'Password format is invalid.';
   }
   // This can happen during passwordless sign-in if the session is invalid
   if (error.contains('not authorized')) {
-    return 'auth_error_helper_simplify_codeexpired';
+    return 'Incorrect code or session expired.';
   }
 
   // --- Verification Code Errors (for Sign-up, Passwordless, and Forgot Password) ---
   if (error.contains('code mismatch') ||
       error.contains('invalid verification code')) {
-    return 'auth_error_helper_simplify_wrongcode';
+    return 'Incorrect verification code.';
   }
   if (error.contains('expired code')) {
-    return 'auth_error_helper_simplify_codeexpired2';
+    return 'Verification code has expired.';
   }
   // A more generic code error for passwordless sign-in
   if (error.contains('failed to verify code')) {
-    return 'auth_error_helper_simplify_codeexpired3';
+    return 'Incorrect code or it has expired.';
   }
 
   // --- General & Throttling Errors ---
   if (error.contains('limit exceeded') ||
       error.contains('attempt limit exceeded')) {
-    return 'auth_error_helper_simplify_limitexceeded';
+    return 'Too many attempts. Try again later.';
   }
   if (error.contains('invalid parameter')) {
-    return 'auth_error_helper_simplify_invalidparam';
+    return 'Invalid email or password format.';
   }
 
   // Fallback for any other errors not specifically handled
   print('Unhandled Auth Error: $rawError');
-  return 'auth_error_helper_simplify_unexpected';
+  return 'An unexpected error occurred.';
 }
