@@ -119,7 +119,7 @@ class HomeScreenState extends State<HomeScreen>
               decoration: BoxDecoration(
                   color: Colors.black,
                   borderRadius: const BorderRadius.all(Radius.circular(20))),
-              child: Text(type,
+              child: Text(getTranslatedString(context, type),
                   style: const TextStyle(
                       fontSize: 8,
                       letterSpacing: 2.56,
