@@ -1,5 +1,3 @@
-DROP TRIGGER IF EXISTS after_user_collectible_insert_update_mission_progress;
-
 CREATE TRIGGER after_user_collectible_insert_update_mission_progress
 AFTER INSERT ON `UserCollectible`
 FOR EACH ROW
@@ -22,7 +20,7 @@ BEGIN
             LEAVE read_loop;
         END IF;
 
-        -- Check if user is in mission, if not add them
+        -- Check if the user is in the mission, if not, add them
         IF NOT EXISTS (SELECT 1 FROM MissionUser WHERE userId = NEW.ownerId AND missionId = mission_id_var) THEN
             INSERT INTO MissionUser (userId, missionId, progress, completed, rewardClaimed)
             VALUES (NEW.ownerId, mission_id_var, 0, FALSE, FALSE);

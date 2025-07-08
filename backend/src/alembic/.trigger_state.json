@@ -1,0 +1,10 @@
+{
+    "after_user_insert_create_first_notification": {
+        "revision_id": "88508c60480a",
+        "hash": "4dba218887c65e8a22600e9916051f13556c9d5ff87324c017a92e66f22a9aad"
+    },
+    "after_user_collectible_insert_update_mission_progress": {
+        "revision_id": "54e4091fd5c0",
+        "hash": "96da1610862ff5e2918054e0137bc401236eecc339a13ff51a9f93788b08903b"
+    }
+}
