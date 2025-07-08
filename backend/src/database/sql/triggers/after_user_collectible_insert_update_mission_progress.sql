@@ -1,5 +1,3 @@
-DROP TRIGGER IF EXISTS after_user_collectible_insert_update_mission_progress;
-
 CREATE TRIGGER after_user_collectible_insert_update_mission_progress
 AFTER INSERT ON `UserCollectible`
 FOR EACH ROW
@@ -22,20 +20,20 @@ BEGIN
             LEAVE read_loop;
         END IF;
 
-        -- Check if user is in mission, if not add them
+        -- Check if the user is in the mission, if not, add them
         IF NOT EXISTS (SELECT 1 FROM MissionUser WHERE userId = NEW.ownerId AND missionId = mission_id_var) THEN
             INSERT INTO MissionUser (userId, missionId, progress, completed, rewardClaimed)
             VALUES (NEW.ownerId, mission_id_var, 0, FALSE, FALSE);
         END IF;
 
         -- Update progress
-        SELECT COUNT(DISTINCT collectibleId) INTO user_progress
-        FROM UserCollectible
-        WHERE ownerId = NEW.ownerId AND collectibleId IN (
-            SELECT JSON_UNQUOTE(JSON_EXTRACT(j.value, '$'))
-            FROM Mission
-            CROSS JOIN JSON_TABLE(parameterJson->'$.collectibleIds', '$[*]' COLUMNS (value INT PATH '$')) as j
-            WHERE Mission.missionId = mission_id_var
+        SELECT COUNT(DISTINCT uc.collectibleId) INTO user_progress
+        FROM UserCollectible uc
+        WHERE uc.ownerId = NEW.ownerId AND uc.collectibleId IN (
+            SELECT j.value -- Corrected: j.value is already an INT, no need for JSON_EXTRACT or JSON_UNQUOTE
+            FROM Mission m_inner
+            CROSS JOIN JSON_TABLE(m_inner.parameterJson->'$.collectibleIds', '$[*]' COLUMNS (value INT PATH '$')) as j
+            WHERE m_inner.missionId = mission_id_var
         );
 
         UPDATE MissionUser
