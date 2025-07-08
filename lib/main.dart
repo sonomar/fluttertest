@@ -305,35 +305,10 @@ class _MyHomePageState extends State<MyHomePage> {
             backgroundColor: Colors.white,
             elevation: 0,
             onTap: (index) {
-              bool dataMayHaveChanged =
-                  false; // Flag to see if a relevant screen is being targeted
-
-              if (index == 0) {
-                collectibleModel.loadCollectibles(forceClear: true);
-                missionModel.loadMissions(forceClear: true);
-                dataMayHaveChanged = true;
-              } else if (index == 1) {
-                collectibleModel.loadCollectibles(forceClear: true);
-                dataMayHaveChanged = true;
-              } else if (index == 3) {
-                print("BottomNav: Tapped missions tab. Forcing reload...");
-                missionModel.loadMissions(forceClear: true);
-              }
-              // Add similar logic for other screens if they depend on shared, mutable models
-              // and are not reliably refreshed by their own initState after global state changes.
-
-              // Only update the index if it actually changes,
-              // or always update if you want the tap on current tab to re-render (though reload is separate)
-              if (_currentIndex != index || dataMayHaveChanged) {
+              if (_currentIndex != index) {
                 setState(() {
                   _currentIndex = index;
                 });
-              } else if (_currentIndex == index) {
-                // If tapping the current tab again, and it's one we want to refresh:
-                if (index == 0 || index == 1) {
-                  print(
-                      "BottomNav: Re-tapped current relevant screen. Data reload already triggered.");
-                }
               }
             },
             type: BottomNavigationBarType.fixed,

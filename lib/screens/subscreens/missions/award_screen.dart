@@ -68,11 +68,11 @@ class _AwardScreenState extends State<AwardScreen> {
           });
 
           if (completedAwards.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                'You have not earned any awards yet.\nComplete missions to see them here!',
+                translate("award_screen_build_no_awards", context),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16),
               ),
             );
           }

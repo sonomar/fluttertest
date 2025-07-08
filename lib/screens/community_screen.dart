@@ -40,22 +40,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
             ),
             width: double.infinity,
             height: double.infinity,
-            child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(children: [
-                  Text("NEW FEATURE COMING SOON!",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white)),
-                  Text(
-                      "Join the DEINS Community and participate in awesome Communitys!",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white)),
-                ]))));
+            child: SizedBox.shrink()));
   }
 }

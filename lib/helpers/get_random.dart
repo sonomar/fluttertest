@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter/material.dart';
+
 /// Generates a unique, random mint number for a given collectible.
 ///
 /// This function is designed to work with Map<String, dynamic> objects from your API.
@@ -11,6 +13,7 @@ import 'dart:math';
 int? generateRandomMint(
     Map<String, dynamic>? collectible, List<dynamic>? userCollectibles) {
   // 1. Validate the input data.
+  print("pooly2: $collectible and then $userCollectibles");
   if (collectible == null ||
       collectible['collectibleId'] == null ||
       collectible['circulation'] == null) {

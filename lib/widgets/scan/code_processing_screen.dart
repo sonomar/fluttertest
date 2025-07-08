@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
-import '../../models/distribution_model.dart'; // Import the new model
-import '../../models/user_model.dart';
+import '../../helpers/localization_helper.dart';
+import '../../models/distribution_model.dart';
 import '../../main.dart';
 
 enum ScanState { loading, success, error, received }
@@ -22,6 +22,7 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
   ScanState _currentScanState = ScanState.loading;
   late final AnimationController _successLottieController;
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
+  String _errorMessage = '';
 
   @override
   void initState() {
@@ -68,26 +69,36 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
     if (awardedCollectibleId != null) {
       _handleSuccess(code);
     } else {
-      _handleError(model, model.errorMessage ?? "Invalid Code");
+      _handleError(
+          model,
+          model.errorMessage ??
+              translate("code_proc_redeem_invalidfallback", context));
     }
   }
 
   /// Processes a collectible transfer code.
   Future<void> _processTransfer(DistributionModel model, String code) async {
     // This logic can be updated later to also call the mission helper if needed
-    final Map<String, String>? tradeResult = await model.completeTransfer(code);
+    final Map<String, String>? tradeResult =
+        await model.completeTransfer(code, context);
 
     if (tradeResult != null) {
       _handleSuccess(code);
     } else {
-      _handleError(model, model.errorMessage ?? "Trade Failed");
+      _handleError(
+          model,
+          model.errorMessage ??
+              translate("code_proc_transfer_failfallback", context));
     }
   }
 
   void _handleError(DistributionModel model, String message) async {
     debugPrint(message);
     if (!mounted) return;
-    setState(() => _currentScanState = ScanState.error);
+    setState(() {
+      _errorMessage = message; // Store the message
+      _currentScanState = ScanState.error;
+    });
     await Future.delayed(const Duration(seconds: 3));
     if (!mounted) return;
     Navigator.of(context).pop();
@@ -105,7 +116,7 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
         builder: (context) => MyHomePage(
-          title: "Kloppocar Home",
+          title: translate("code_proc_success_hometitle", context),
           qrcode: code,
           userData: widget.userData,
         ),
@@ -123,7 +134,7 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
         return _CodeSuccessWidget(
             controller: _successLottieController, opacityTween: _opacityTween);
       case ScanState.error:
-        return const _CodeErrorWidget();
+        return _CodeErrorWidget(message: _errorMessage);
       case ScanState.received:
         return const _CodeLoadingWidget(); // Shows loading while redirecting
     }
@@ -145,8 +156,8 @@ class _CodeLoadingWidget extends StatelessWidget {
             Image.asset('assets/images/deins_logo.png',
                 height: 200, width: 200),
             const SizedBox(height: 20),
-            const Text('Processing Code...',
-                style: TextStyle(color: Colors.white, fontSize: 16)),
+            Text(translate("code_proc_widget_processing", context),
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
             const SizedBox(height: 20),
             SizedBox(
                 height: 40,
@@ -166,9 +177,10 @@ class _CodeSuccessWidget extends StatelessWidget {
   final Tween<double> opacityTween;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      child: Center(
+    return Scaffold(
+      // Added Scaffold for proper rendering
+      backgroundColor: Colors.black,
+      body: Center(
         child: AnimatedOpacity(
           opacity: opacityTween.evaluate(controller),
           duration: const Duration(seconds: 2),
@@ -180,19 +192,22 @@ class _CodeSuccessWidget extends StatelessWidget {
 }
 
 class _CodeErrorWidget extends StatelessWidget {
-  const _CodeErrorWidget();
+  final String message;
+  const _CodeErrorWidget({required this.message});
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      child: Center(
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset('assets/images/negative.png', height: 200, width: 200),
             const SizedBox(height: 20),
-            const Text('Incorrect Code!',
-                style: TextStyle(color: Colors.white, fontSize: 16)),
+            Text(message, // Display the specific error message from the model
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
           ],
         ),
       ),

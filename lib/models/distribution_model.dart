@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../helpers/mission_helper.dart';
@@ -35,6 +34,16 @@ class DistributionModel extends ChangeNotifier {
     _errorMessage = error;
     _loadingMessage = loadingMessage;
     notifyListeners();
+  }
+
+  void clearData() {
+    _userDistributionCodeUsers = [];
+    _hasLoadedUserCodes = false;
+    _isLoading = false;
+    _errorMessage = null;
+    _loadingMessage = null;
+    notifyListeners();
+    print("DistributionModel: Data cleared.");
   }
 
   Future<void> loadUserRedeemedCodes({bool forceReload = false}) async {
@@ -111,6 +120,39 @@ class DistributionModel extends ChangeNotifier {
         throw Exception("No collectibles are associated with this code.");
       }
 
+      final randomItemFromPool =
+          collectiblePool[Random().nextInt(collectiblePool.length)];
+
+      Map<String, dynamic> collectibleForMinting;
+      String collectibleToAwardId;
+
+      if (isRandom) {
+        // If random from a collection, the item is already a full collectible object.
+        collectibleForMinting = randomItemFromPool;
+        collectibleToAwardId =
+            collectibleForMinting['collectibleId'].toString();
+      } else {
+        // If from a distribution, the item is a distributionCollectible.
+        // We need to fetch the full collectible object to get its details (like circulation).
+        collectibleToAwardId = randomItemFromPool['collectibleId'].toString();
+
+        dynamic fetchedCollectible = await getCollectibleByCollectibleId(
+            collectibleToAwardId, _appAuthProvider);
+        if (fetchedCollectible == null) {
+          throw Exception(
+              "Could not retrieve details for the awarded collectible.");
+        }
+        // Handle API potentially returning a list
+        if (fetchedCollectible is List) {
+          if (fetchedCollectible.isEmpty)
+            throw Exception(
+                "Could not retrieve details for the awarded collectible.");
+          collectibleForMinting = fetchedCollectible.first;
+        } else {
+          collectibleForMinting = fetchedCollectible;
+        }
+      }
+
       final existingRedemptions =
           await getDistributionCodeUsersByDistributionCodeId(
               distributionCodeId, _appAuthProvider);
@@ -159,15 +201,10 @@ class DistributionModel extends ChangeNotifier {
               userRedemptionRecord['redeemed'] == 1)) {
         throw Exception("You have already redeemed this code.");
       }
-
-      final randomCollectible =
-          collectiblePool[Random().nextInt(collectiblePool.length)];
-      final collectibleToAwardId =
-          randomCollectible['collectibleId'].toString();
       final allUserCollectibles =
           await getUserCollectiblesByOwnerId(userId, _appAuthProvider);
       final int? newMint =
-          generateRandomMint(randomCollectible, allUserCollectibles);
+          generateRandomMint(collectibleForMinting, allUserCollectibles);
       if (newMint == null) {
         throw Exception("No available mints for this collectible.");
       }
@@ -237,7 +274,8 @@ class DistributionModel extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, String>?> completeTransfer(String code) async {
+  Future<Map<String, String>?> completeTransfer(
+      String code, BuildContext context) async {
     _setState(isLoading: true, loadingMessage: "Completing transfer...");
     final String? newOwnerId = userModel.currentUser?['userId']?.toString();
 
@@ -310,9 +348,25 @@ class DistributionModel extends ChangeNotifier {
         "collectibleReceived": collectibleReceivedJson
       }, _appAuthProvider);
 
-      await updateUserCollectibleByUserCollectibleId(
-          {"userCollectibleId": userCollectibleId, "ownerId": newOwnerId},
-          _appAuthProvider);
+      await updateUserCollectibleByUserCollectibleId({
+        "userCollectibleId": userCollectibleId,
+        "ownerId": newOwnerId,
+        "previousOwnerId": giverId,
+        "lastTransferredDt": DateTime.now().toIso8601String(),
+      }, _appAuthProvider);
+
+      await updateMissionProgress(
+        userId: newOwnerId, // The user receiving the collectible
+        collectibleId: collectibleId,
+        operation: MissionProgressOperation.increment,
+        context: context,
+      );
+      await updateMissionProgress(
+        userId: giverId, // The user giving the collectible
+        collectibleId: collectibleId,
+        operation: MissionProgressOperation.decrement,
+        context: context,
+      );
 
       _setState(isLoading: false, loadingMessage: "Transfer complete!");
       return {'collectibleId': collectibleId, 'giverId': giverId};
@@ -323,7 +377,8 @@ class DistributionModel extends ChangeNotifier {
   }
 
   Future<bool> redeemMissionReward(
-      {required String missionDistributionId}) async {
+      {required String missionDistributionId,
+      required BuildContext context}) async {
     _setState(isLoading: true, loadingMessage: "Claiming mission reward...");
     final String? userId = userModel.currentUser?['userId']?.toString();
 
@@ -363,14 +418,38 @@ class DistributionModel extends ChangeNotifier {
         throw Exception("No rewards are associated with this mission.");
       }
 
-      final randomCollectible =
+      Map<String, dynamic> collectibleForMinting;
+      String collectibleToAwardId;
+
+      final randomItemFromPool =
           collectiblePool[Random().nextInt(collectiblePool.length)];
-      final collectibleToAwardId =
-          randomCollectible['collectibleId'].toString();
+
+      if (isRandom) {
+        collectibleForMinting = randomItemFromPool;
+        collectibleToAwardId =
+            collectibleForMinting['collectibleId'].toString();
+      } else {
+        collectibleToAwardId = randomItemFromPool['collectibleId'].toString();
+        dynamic fetchedCollectible = await getCollectibleByCollectibleId(
+            collectibleToAwardId, _appAuthProvider);
+        if (fetchedCollectible == null) {
+          throw Exception(
+              "Could not retrieve details for the awarded collectible.");
+        }
+        if (fetchedCollectible is List) {
+          if (fetchedCollectible.isEmpty)
+            throw Exception(
+                "Could not retrieve details for the awarded collectible.");
+          collectibleForMinting = fetchedCollectible.first;
+        } else {
+          collectibleForMinting = fetchedCollectible;
+        }
+      }
+
       final allUserCollectibles =
           await getUserCollectiblesByOwnerId(userId, _appAuthProvider);
       final int? newMint =
-          generateRandomMint(randomCollectible, allUserCollectibles);
+          generateRandomMint(collectibleForMinting, allUserCollectibles);
       if (newMint == null) {
         throw Exception("No available mints for this collectible.");
       }
@@ -393,6 +472,13 @@ class DistributionModel extends ChangeNotifier {
 
       await createUserCollectible(
           userId, collectibleToAwardId, newMint, _appAuthProvider);
+
+      await updateMissionProgress(
+        userId: userId,
+        collectibleId: collectibleToAwardId,
+        operation: MissionProgressOperation.increment,
+        context: context,
+      );
 
       _setState(isLoading: false, loadingMessage: "Reward collected!");
       return true;

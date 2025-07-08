@@ -19,7 +19,7 @@ class _MissionsState extends State<Missions> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        context.read<MissionModel>().loadMissions();
+        context.read<MissionModel>().loadMissions(forceClear: true);
       }
     });
   }

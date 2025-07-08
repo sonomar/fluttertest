@@ -86,9 +86,8 @@ class _CameraPermissionSwitchState extends State<CameraPermissionSwitch> {
         });
       }
       _showDisableCameraDialog(
-        translate('disable_camera_title', context) ?? 'Disable Camera Access',
-        translate('disable_camera_message', context) ??
-            'To disable camera access, you must go to your device\'s app settings.',
+        translate('disable_camera_title', context),
+        translate('disable_camera_message', context),
       );
     }
   }

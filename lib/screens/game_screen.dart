@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/item_button.dart';
 import './subscreens/missions/missions.dart';
+import '../../helpers/localization_helper.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key, this.userData});
@@ -52,7 +53,7 @@ class _GameScreenState extends State<GameScreen> {
             automaticallyImplyLeading: false,
             scrolledUnderElevation: 0.0,
             backgroundColor: Colors.white,
-            title: const Text("Game Center"),
+            title: Text(translate("game_screen_build_title", context)),
             centerTitle: false,
             titleTextStyle: TextStyle(
               fontSize: 28,
@@ -77,7 +78,7 @@ class _GameScreenState extends State<GameScreen> {
                           ),
                         ),
                         child: Text(
-                          "${userRank ?? 'NEWB'}",
+                          "${userRank ?? translate("game_screen_build_default_rank", context)}",
                           style: TextStyle(
                               fontSize: 14,
                               letterSpacing: 2.56,
@@ -108,7 +109,7 @@ class _GameScreenState extends State<GameScreen> {
                                           Missions(userData: widget.userData)),
                                 );
                               },
-                              title: "Missions",
+                              title: translate("missions_header", context),
                               active: true),
                         ],
                       )))

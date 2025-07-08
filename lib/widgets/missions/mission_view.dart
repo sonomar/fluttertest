@@ -18,6 +18,9 @@ Widget progressBar(pageContext, mission, missionUser) {
   if (missionGoal > 0) {
     // Avoid division by zero
     progressPercent = missionProgress / missionGoal;
+    if (progressPercent > 1.0) {
+      progressPercent = 1.0;
+    }
   }
   return Container(
       width: MediaQuery.of(pageContext).size.width - 50,
@@ -48,7 +51,8 @@ Widget progressBar(pageContext, mission, missionUser) {
 }
 
 Widget missionWidget(BuildContext pageContext, Map? mission, Map? missionUser) {
-  final Map<String, dynamic> getTitle = mission?['title'] ?? 'No Title';
+  final dynamic getTitle = mission?['title'] ??
+      translate("mission_view_widget_notitle", pageContext);
   final String? getLogoUrl = mission?['imgRef']?['url'];
   final int missionGoal = mission?['goal'] ?? 999999;
   final int missionProgress = missionUser?['progress'] ?? 0;
@@ -105,10 +109,11 @@ Widget missionWidget(BuildContext pageContext, Map? mission, Map? missionUser) {
                 child: Text(
                   // Update the header text to reflect the mission's state.
                   isCompleted
-                      ? 'Completed'
+                      ? translate("mission_view_widget_completed", pageContext)
                       : goalReached
-                          ? 'Claim Your Reward'
-                          : 'Mission',
+                          ? translate("mission_view_widget_claim", pageContext)
+                          : translate(
+                              "mission_view_widget_mission", pageContext),
                   style: const TextStyle(
                     fontSize: 24,
                     color: Colors.white,
@@ -178,40 +183,70 @@ Widget missionWidget(BuildContext pageContext, Map? mission, Map? missionUser) {
 Widget homeMissionWidget(pageContext, mission, missionUser) {
   final getMission = mission;
   final getMissionUser = missionUser;
-  final Map<String, dynamic> getTitle =
-      (getMission != null && getMission['title'] != null)
-          ? getMission['title']
-          : 'No Title'; // Default value
-  final String getLogo =
-      (getMission != null && getMission['imgRef']['url'] != null)
-          ? getMission['imgRef']['url']
-          : 'assets/images/deins_logo.png'; // Default value
-  final String missionGoal = (getMission != null && getMission['goal'] != null)
-      ? getMission['goal'].toString()
-      : '0'; // Default value
-  final String missionProgress =
-      (getMissionUser != null && getMissionUser['progress'] != null)
-          ? getMissionUser['progress'].toString()
-          : '0'; // Default value
+  final dynamic getTitle = (getMission != null && getMission['title'] != null)
+      ? getMission['title']
+      : translate("mission_view_widget_notitle", pageContext); // Default value
+  final int missionGoal = getMission?['goal'] ?? 0;
+  final int missionProgress = getMissionUser?['progress'] ?? 0;
+  final bool goalReached = missionGoal > 0 && missionProgress >= missionGoal;
+  final bool isCompleted = getMissionUser?['completed'] ?? false;
   return Padding(
       padding: const EdgeInsets.only(top: 20.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Padding(
             padding: const EdgeInsets.only(left: 15.0),
-            child: Container(
-              padding:
-                  const EdgeInsets.only(left: 40, right: 40, top: 7, bottom: 7),
-              decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: const BorderRadius.all(Radius.circular(5))),
-              child: Text("MISSION",
-                  style: TextStyle(
-                      fontSize: 10,
-                      letterSpacing: 2.56,
-                      color: Colors.white,
-                      fontFamily: 'ChakraPetch',
-                      fontWeight: FontWeight.w700)),
-            )),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.only(
+                        left: 40, right: 40, top: 7, bottom: 7),
+                    decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(5))),
+                    child: Text(
+                        translate("mission_view_widget_mission", pageContext)
+                            .toUpperCase(),
+                        style: TextStyle(
+                            fontSize: 10,
+                            letterSpacing: 2.56,
+                            color: Colors.white,
+                            fontFamily: 'ChakraPetch',
+                            fontWeight: FontWeight.w700)),
+                  ),
+                  if (goalReached && !isCompleted)
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          pageContext,
+                          MaterialPageRoute(
+                            builder: (context) => AwardDetails(
+                              selectedAward: getMission,
+                              selectedAwardUser: getMissionUser,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xffd622ca),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          translate("award_info_build_claimbutton", pageContext)
+                              .toUpperCase(),
+                          style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5),
+                        ),
+                      ),
+                    )
+                ])),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -269,45 +304,78 @@ Widget viewMissionWidget(pageContext, mission, missionUser,
     {isMission = false}) {
   final getMission = mission;
   final getMissionUser = missionUser;
-  final Map<String, dynamic> getTitle =
-      (getMission != null && getMission['title'] != null)
-          ? getMission['title']
-          : 'No Title'; // Default value
-  final String missionGoal = (getMission != null && getMission['goal'] != null)
-      ? getMission['goal'].toString()
-      : '0'; // Default value
-  final String missionProgress =
-      (getMissionUser != null && getMissionUser['progress'] != null)
-          ? getMissionUser['progress'].toString()
-          : '0'; // Default value
+  final dynamic getTitle = (getMission != null && getMission['title'] != null)
+      ? getMission['title']
+      : translate("mission_view_widget_notitle", pageContext); // Default value
+  final int missionGoal = getMission?['goal'] ?? 0;
+  final int missionProgress = getMissionUser?['progress'] ?? 0;
+  final bool goalReached = missionGoal > 0 && missionProgress >= missionGoal;
+  final bool isCompleted = getMissionUser?['completed'] ?? false;
   return Padding(
       padding: const EdgeInsets.only(top: 20.0),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      child: Column(children: [
         isMission == false
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
-                      child: Text(
-                        getTranslatedString(pageContext, getTitle),
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontFamily: 'ChakraPetch',
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                      )),
-                  Padding(
-                      padding: const EdgeInsets.only(
-                          left: 40.0, bottom: 10, right: 10),
-                      child: getMission['imgRef']['url'] != null
-                          ? Image.network(getMission['imgRef']['url'],
-                              width: 50, fit: BoxFit.fill)
-                          : Image.asset('assets/images/car1.png',
-                              width: 120, height: 50, fit: BoxFit.fill)),
-                ],
-              )
+            ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Padding(
+                    padding: EdgeInsets.only(left: 15),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          pageContext,
+                          MaterialPageRoute(
+                            builder: (context) => AwardDetails(
+                              selectedAward: getMission,
+                              selectedAwardUser: getMissionUser,
+                            ),
+                          ),
+                        );
+                      },
+                      child: goalReached && !isCompleted
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xffd622ca),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                translate("award_info_build_claimbutton",
+                                        pageContext)
+                                    .toUpperCase(),
+                                style: const TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.5),
+                              ),
+                            )
+                          : SizedBox.shrink(),
+                    )),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                        padding: const EdgeInsets.only(left: 15.0),
+                        child: Text(
+                          getTranslatedString(pageContext, getTitle),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontFamily: 'ChakraPetch',
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        )),
+                    Padding(
+                        padding: const EdgeInsets.only(
+                            left: 40.0, bottom: 10, right: 10),
+                        child: getMission['imgRef']['url'] != null
+                            ? Image.network(getMission['imgRef']['url'],
+                                width: 50, fit: BoxFit.fill)
+                            : Image.asset('assets/images/car1.png',
+                                width: 120, height: 50, fit: BoxFit.fill)),
+                  ],
+                )
+              ])
             : SizedBox.shrink(),
         Container(
             alignment: Alignment.center,

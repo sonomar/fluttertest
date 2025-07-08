@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../helpers/localization_helper.dart';
 import '../../models/user_model.dart';
 import '../../models/app_auth_provider.dart';
 
@@ -54,7 +55,9 @@ class _OnboardingState extends State<Onboarding> {
       },
       child: AlertDialog(
         title: Text(
-          _isSuccess ? "Welcome to the DEINS App!" : "Create a Username",
+          _isSuccess
+              ? translate("onboarding_build_welcometitle", context)
+              : translate("onboarding_build_createtitle", context),
         ),
         content: Consumer<UserModel>(
           builder: (context, userModel, _) {
@@ -67,7 +70,8 @@ class _OnboardingState extends State<Onboarding> {
             ? [
                 TextButton(
                   onPressed: _finishOnboarding,
-                  child: const Text('Start Exploring'),
+                  child:
+                      Text(translate("onboarding_build_startbutton", context)),
                 ),
               ]
             : [],
@@ -83,13 +87,12 @@ class _OnboardingState extends State<Onboarding> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-                'Welcome to the DEINS app! Please create a username for yourself.'),
+            Text(translate("onboarding_form_body", context)),
             const SizedBox(height: 20),
             TextFormField(
               controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Username',
+              decoration: InputDecoration(
+                labelText: translate("onboarding_form_usernamelabel", context),
                 border: OutlineInputBorder(),
               ),
               inputFormatters: [
@@ -97,14 +100,14 @@ class _OnboardingState extends State<Onboarding> {
               ],
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a username.';
+                  return translate("onboarding_form_uservalidator1", context);
                 }
                 if (value.length < 5) {
-                  return 'Username must be at least 5 characters.';
+                  return translate("onboarding_form_uservalidator2", context);
                 }
                 // 4. Add a validation rule to double-check the format
                 if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(value)) {
-                  return 'Only letters and numbers are allowed.';
+                  return translate("onboarding_form_uservalidator3", context);
                 }
                 return null;
               },
@@ -114,7 +117,7 @@ class _OnboardingState extends State<Onboarding> {
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
                   userModel.errorMessage!.contains('duplicate')
-                      ? 'Username already in use. Please try another.'
+                      ? translate("onboarding_form_duplicateuser", context)
                       : userModel.errorMessage!,
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
@@ -127,7 +130,8 @@ class _OnboardingState extends State<Onboarding> {
                 alignment: Alignment.centerRight,
                 child: FilledButton(
                   onPressed: _submitUsername,
-                  child: const Text('Submit'),
+                  child:
+                      Text(translate("onboarding_form_submitbutton", context)),
                 ),
               ),
           ],
@@ -138,6 +142,6 @@ class _OnboardingState extends State<Onboarding> {
 
   Widget _buildSuccessView(UserModel userModel) {
     final username = userModel.currentUser?['username'] ?? 'Explorer';
-    return Text('Your new username is: $username');
+    return Text('${translate("onboarding_success_body", context)} $username');
   }
 }

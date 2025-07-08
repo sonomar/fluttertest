@@ -4,7 +4,6 @@ import '../../../helpers/localization_helper.dart';
 import 'package:provider/provider.dart';
 import '../../../models/app_auth_provider.dart';
 import '../../../models/user_model.dart';
-import '../../../widgets/profile/profile_menu_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AccountSettingsScreen extends StatelessWidget {
@@ -20,31 +19,37 @@ class AccountSettingsScreen extends StatelessWidget {
           return AlertDialog(
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: const Text('Delete Account?'),
+            title: Text(
+                translate("account_settings_delete_dialog_title", context)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  const Text('This action is permanent and cannot be undone.'),
-                  const Text('Are you sure you want to delete your account?'),
+                  Text(translate(
+                      "account_settings_delete_dialog_perm", context)),
+                  const SizedBox(height: 10),
+                  Text(translate(
+                      "account_settings_delete_dialog_confirm", context)),
                   if (isDeleting) ...[
                     const SizedBox(height: 20),
                     const Center(child: CircularProgressIndicator()),
                     const SizedBox(height: 10),
-                    const Center(child: Text("Deleting account...")),
+                    Center(
+                        child: Text(translate(
+                            "account_settings_delete_dialog_progress",
+                            context))),
                   ]
                 ],
               ),
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text('Cancel'),
                 onPressed: isDeleting
                     ? null
                     : () {
                         Navigator.of(dialogContext).pop();
                       },
+                child: Text(translate("cancel_button", context)),
               ),
-              // Styled Delete Button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
@@ -66,9 +71,10 @@ class AccountSettingsScreen extends StatelessWidget {
                             userModel.currentUser?['userId']?.toString();
 
                         if (userId == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                              content: Text(
-                                  "Error: Could not find user ID to delete account.")));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(translate(
+                                  "account_settings_delete_dialog_error",
+                                  context))));
                           if (dialogContext.mounted)
                             Navigator.of(dialogContext).pop();
                           return;
@@ -81,7 +87,8 @@ class AccountSettingsScreen extends StatelessWidget {
                               .popUntil((route) => route.isFirst);
                         }
                       },
-                child: const Text('Delete'),
+                child: Text(translate(
+                    "account_settings_delete_dialog_delete", context)),
               ),
             ],
           );
@@ -114,7 +121,7 @@ class AccountSettingsScreen extends StatelessWidget {
               Center(
                   child: InkWell(
                 child: Text(
-                  'Terms & Conditions',
+                  translate("account_settings_build_terms", context),
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                   ),
@@ -126,7 +133,7 @@ class AccountSettingsScreen extends StatelessWidget {
               Center(
                   child: InkWell(
                 child: Text(
-                  'Privacy Policy',
+                  translate("account_settings_build_privacy", context),
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                   ),
@@ -135,8 +142,6 @@ class AccountSettingsScreen extends StatelessWidget {
                     launchUrl(Uri.parse('https://deins.io/data-privacy')),
               )),
               const SizedBox(height: 24),
-
-              // Restyled Delete Button Section
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -150,7 +155,8 @@ class AccountSettingsScreen extends StatelessWidget {
                     ElevatedButton.icon(
                       onPressed: () => _showDeleteConfirmationDialog(context),
                       icon: const Icon(Icons.delete_forever),
-                      label: const Text('Delete My Account Permanently'),
+                      label: Text(translate(
+                          "account_settings_build_delete_btn", context)),
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           foregroundColor: Colors.white,
@@ -160,15 +166,15 @@ class AccountSettingsScreen extends StatelessWidget {
                     ),
                     Padding(
                         padding: EdgeInsets.only(top: 10.0),
-                        child: const Text(
-                            "This action cannot be undone. All your data and collectibles will be permanently removed.",
+                        child: Text(
+                            translate("account_settings_build_delete_warning",
+                                context),
                             textAlign: TextAlign.center,
                             style: TextStyle(color: Colors.redAccent))),
                     const SizedBox(height: 16),
                   ],
                 ),
               ),
-
               Consumer<AppAuthProvider>(
                 builder: (context, authProvider, _) {
                   if (authProvider.errorMessage != null) {

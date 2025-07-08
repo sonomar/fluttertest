@@ -17,8 +17,10 @@ class LanguagePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Language> supportedLanguages = [
-      Language('English', const Locale('en')),
-      Language('German', const Locale('de')),
+      Language(
+          translate("lang_page_build_english", context), const Locale('en')),
+      Language(
+          translate("lang_page_build_german", context), const Locale('de')),
     ];
 
     final localeProvider = Provider.of<LocaleProvider>(context);

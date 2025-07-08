@@ -31,6 +31,15 @@ class MissionModel extends ChangeNotifier {
   MissionSortBy _missionSortBy = MissionSortBy.publicationDate;
   MissionSortBy get missionSortBy => _missionSortBy;
 
+  void clearData() {
+    _missions = [];
+    _missionUsers = [];
+    _hasLoaded = false;
+    _errorMessage = null;
+    notifyListeners();
+    print("MissionModel: Data cleared.");
+  }
+
   void update(AppAuthProvider authProvider, UserModel userModel) {
     _appAuthProvider = authProvider;
     _userModel = userModel;
@@ -49,7 +58,7 @@ class MissionModel extends ChangeNotifier {
     try {
       final userId = _userModel.currentUser?['userId']?.toString();
       if (userId == null) {
-        _errorMessage = 'User ID not found.';
+        _errorMessage = 'mission_model_load_nouser';
         _missions = [];
         _missionUsers = [];
       } else {
@@ -72,7 +81,7 @@ class MissionModel extends ChangeNotifier {
         } else {
           _missionUsers = [];
           _missions = [];
-          _errorMessage = 'Failed to load user missions: Unexpected format.';
+          _errorMessage = 'mission_model_load_badformat';
         }
       }
 
@@ -90,7 +99,7 @@ class MissionModel extends ChangeNotifier {
   Future<bool> updateMissionProgress(
       dynamic missionUser, int newProgress) async {
     if (missionUser == null || missionUser['missionUserId'] == null) {
-      _errorMessage = "Invalid mission user data provided for progress update.";
+      _errorMessage = "mission_model_updateprog_invaliddata";
       notifyListeners();
       return false;
     }
@@ -106,7 +115,7 @@ class MissionModel extends ChangeNotifier {
       _missionUsers[index]['progress'] = newProgress;
       notifyListeners();
     } else {
-      _errorMessage = "Could not find mission user in cache to update.";
+      _errorMessage = "mission_model_updateprog_nocache";
       notifyListeners();
       return false;
     }
@@ -122,7 +131,7 @@ class MissionModel extends ChangeNotifier {
       if (result != null) {
         return true;
       } else {
-        _errorMessage = "Failed to save mission progress.";
+        _errorMessage = "mission_model_updateprog_savefail";
         if (originalProgress != null) {
           _missionUsers[index]['progress'] = originalProgress;
         }
@@ -130,7 +139,7 @@ class MissionModel extends ChangeNotifier {
         return false;
       }
     } catch (e) {
-      _errorMessage = "An error occurred updating mission progress: $e";
+      _errorMessage = "${"mission_model_updateprog_error"}$e";
       if (originalProgress != null) {
         _missionUsers[index]['progress'] = originalProgress;
       }
@@ -141,7 +150,7 @@ class MissionModel extends ChangeNotifier {
 
   Future<bool> updateMissionCompletion(dynamic missionUser) async {
     if (missionUser == null || missionUser['missionUserId'] == null) {
-      _errorMessage = "Invalid mission data provided for completion.";
+      _errorMessage = "mission_model_updatecomp_invaliddata";
       notifyListeners();
       return false;
     }
@@ -155,7 +164,7 @@ class MissionModel extends ChangeNotifier {
       _missionUsers[index]['dateCompleted'] = DateTime.now().toIso8601String();
       notifyListeners();
     } else {
-      _errorMessage = "Could not find mission to complete in cache.";
+      _errorMessage = "mission_model_updatecomp_nocache";
       notifyListeners();
       return false;
     }
@@ -172,14 +181,14 @@ class MissionModel extends ChangeNotifier {
       if (result != null) {
         return true;
       } else {
-        _errorMessage = "Failed to save completion status to the server.";
+        _errorMessage = "mission_model_updatecomp_savefail";
         _missionUsers[index]['completed'] = false;
         _missionUsers[index]['dateCompleted'] = null;
         notifyListeners();
         return false;
       }
     } catch (e) {
-      _errorMessage = "An error occurred while claiming reward: $e";
+      _errorMessage = "${"mission_model_updatecomp_error"}$e";
       _missionUsers[index]['completed'] = false;
       _missionUsers[index]['dateCompleted'] = null;
       notifyListeners();
@@ -191,7 +200,7 @@ class MissionModel extends ChangeNotifier {
     print("--- DEBUG: Attempting to reset mission progress ---");
     try {
       final body = {
-        "missionUserId": 1, // Targeting missionUser with ID 1
+        "missionUserId": 4, // Targeting missionUser with ID 1
         "progress": 13,
         "completed": false,
         "rewardClaimed": false, // Assuming this field exists in your API

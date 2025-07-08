@@ -80,9 +80,9 @@ class AwardInfo extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 15),
             ),
             onPressed: () => _claimReward(context),
-            child: const Text(
-              'Claim Reward',
-              style: TextStyle(
+            child: Text(
+              translate("award_info_build_claimbutton", context),
+              style: const TextStyle(
                 fontSize: 20,
                 color: Colors.white,
                 fontFamily: 'ChakraPetch',
@@ -134,14 +134,17 @@ class AwardInfo extends StatelessWidget {
                       padding: const EdgeInsets.only(
                           top: 20.0, left: 20.0, right: 20.0),
                       child: Column(children: [
-                        lineItem("Missionnummer",
+                        lineItem(
+                            translate(
+                                "award_info_lineitem_missionnum", context),
                             selectedAward["missionId"].toString()),
                         lineItem(
-                            "Reward",
+                            translate("award_info_lineitem_reward", context),
                             getTranslatedString(
                                 context, selectedAward["Reward"])),
                         lineItem(
-                            "Mission Start",
+                            translate(
+                                "award_info_lineitem_missionstart", context),
                             formatDate(
                                 context, selectedAward["createdDt"].toString(),
                                 format: "d MMMM, yyyy - h:mm"))

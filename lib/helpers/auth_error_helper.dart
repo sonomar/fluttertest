@@ -1,5 +1,3 @@
-/// A helper function to convert verbose AWS Cognito error messages
-/// into simple, user-friendly strings.
 String simplifyAuthError(String? rawError) {
   // Default message for unknown or null errors
   if (rawError == null) {

@@ -43,10 +43,7 @@ Map<String, dynamic>? getLatestCollectible(
   if (mostRecentCollectibleId == null) {
     return null;
   }
-
-  // --- FIX IS HERE ---
-  // Change the type from List<dynamic> to dynamic (or Map<String, dynamic>?)
-  dynamic correspondingCollectible; // Changed from List<dynamic>
+  dynamic correspondingCollectible;
   try {
     if (collectibles.isNotEmpty && collectibles.every((c) => c is Map)) {
       correspondingCollectible = collectibles.firstWhere(
@@ -61,126 +58,89 @@ Map<String, dynamic>? getLatestCollectible(
       return null;
     }
   } catch (e) {
-    // This catch is for cases where 'collectibles' itself is somehow malformed
-    // (e.g., if it's not actually an Iterable or if elements are non-Maps when expected)
     return null;
   }
 
   if (correspondingCollectible == null) {
     return null;
   }
-
-  // 3. Return the URL for the embed in the related collectible
   return correspondingCollectible;
 }
 
 Widget getLatestActiveMission(
-    context, missions, missionUsers, latestCollectible,
+    context, List<dynamic> missions, List<dynamic> missionUsers,
     {bool isViewer = false}) {
-  if (latestCollectible == 'not found' ||
-      latestCollectible == null ||
-      latestCollectible['collectionId'] == null) {
-    return const SizedBox.shrink(); // Return nothing if no basis for filtering
+  if (missions.isEmpty || missionUsers.isEmpty) {
+    return const SizedBox.shrink();
   }
-  final dynamic latestCollectibleCollectionId =
-      latestCollectible['collectionId'];
-  if (missions.isEmpty) {
-    return const SizedBox.shrink(); // Return nothing if no missions to check
-  }
+  // The missions.dart screen already sorts the list to bring claimable missions to the top.
+  // We can iterate through the pre-sorted list to find the first valid mission to display.
   for (var mission in missions) {
-    // 1. Basic null checks for mission and its ID, goal, and collectionId
-    if (mission == null ||
-        mission['missionId'] == null ||
-        mission['goal'] == null ||
-        mission['collectionId'] == null) {
+    if (mission == null || mission['missionId'] == null) {
       continue;
     }
-    final String missionId = mission['missionId'].toString();
-    final num missionGoal = mission['goal'] as num;
-    final dynamic missionCollectionId = mission['collectionId'];
-    // NEW CHECK: Compare collectionId
-    if (missionCollectionId != latestCollectibleCollectionId) {
-      continue; // Skip if collectionId does not match
-    }
-    if (mission['active'] != null && mission['active'] == false) {
+    // Find the corresponding user progress for this mission.
+    final correspondingMissionUser = missionUsers.firstWhere(
+      (mu) => mu != null && mu['missionId'] == mission['missionId'],
+      orElse: () => null,
+    );
+    if (correspondingMissionUser == null) {
       continue;
     }
-    dynamic correspondingMissionUser;
-    try {
-      correspondingMissionUser = missionUsers.firstWhere(
-        (mu) => mu != null && mu['missionId']?.toString() == missionId,
-        orElse: () => null,
-      );
-    } catch (e) {
-      continue;
-    }
-    if (correspondingMissionUser == null ||
-        correspondingMissionUser['progress'] == null) {
-      continue;
-    }
-
-    final num userProgress = correspondingMissionUser['progress'] as num;
-    if (userProgress != missionGoal) {
-      // If all conditions are met, return the missionWidget
+    // Check if the mission is active and NOT yet completed.
+    final bool isActive = mission['active'] ?? true;
+    final bool isCompleted = correspondingMissionUser['completed'] ?? false;
+    if (isActive && !isCompleted) {
+      // We found our highest-priority active mission. Display it and stop searching.
       return isViewer
           ? viewMissionWidget(context, mission, correspondingMissionUser)
           : homeMissionWidget(context, mission, correspondingMissionUser);
     }
   }
 
-  // If the loop finishes, no such mission was found, return an empty widget
+  // If the loop completes, no active, non-completed missions were found.
   return const SizedBox.shrink();
 }
 
 Widget listMissions(context, getMissions, getMissionUsers) {
   if (getMissions.isEmpty) {
-    return const SizedBox.shrink(); // No missions available
+    return const SizedBox.shrink();
   }
 
-  // Create a list to hold the mission widgets that meet the criteria
   final List<Widget> validMissionWidgets = [];
 
-  // Iterate through userMissions to find corresponding missions and apply conditions
-  for (var missionUser in getMissionUsers) {
-    // Find the corresponding mission from the getMissions list
-    final correspondingMission = getMissions.firstWhere(
-      (mission) =>
-          mission['missionId'].toString() ==
-          missionUser['missionId'].toString(),
-      orElse: () => null, // Return null if no matching mission is found
+  // Iterate through all missions to find their corresponding user progress.
+  for (var mission in getMissions) {
+    final correspondingMissionUser = getMissionUsers.firstWhere(
+      (missionUser) =>
+          missionUser['missionId'].toString() ==
+          mission['missionId'].toString(),
+      orElse: () => null,
     );
-
-    // Check if a corresponding mission was found and if the goal is not met
-    if (correspondingMission != null &&
-        correspondingMission['goal'] != null &&
-        missionUser['progress'] != null &&
-        (correspondingMission['goal'] as num) !=
-            (missionUser['progress'] as num)) {
-      // If conditions are met, create the mission widget and add it to our list
+    if (correspondingMissionUser != null &&
+        (correspondingMissionUser['completed'] == false ||
+            correspondingMissionUser['completed'] == null)) {
       validMissionWidgets.add(
         Container(
           padding: const EdgeInsets.only(
             left: 5,
             right: 5,
           ),
-          child: missionWidget(context, correspondingMission, missionUser),
+          child: missionWidget(context, mission, correspondingMissionUser),
         ),
       );
-
-      // IMPORTANT: If we already have 2 valid mission widgets, stop adding more.
-      if (validMissionWidgets.length >= 2) {
-        break; // Exit the loop early
-      }
+    }
+    // Stop after finding two missions to display.
+    if (validMissionWidgets.length >= 2) {
+      break;
     }
   }
 
-  // Return a Column containing only the first two valid mission widgets
   if (validMissionWidgets.isEmpty) {
-    return const SizedBox.shrink(); // No missions met the criteria or only 0-1
+    return const SizedBox.shrink();
   } else {
-    // Take a sublist of the first two items if there are more than two, otherwise take all.
     return Column(
-      children: validMissionWidgets.take(2).toList(),
+      children: validMissionWidgets,
     );
   }
 }

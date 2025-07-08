@@ -23,7 +23,7 @@ class UserModel extends ChangeNotifier {
 
   Future<bool> updateUsername(String newUsername) async {
     if (currentUser == null) {
-      _errorMessage = "Cannot update username: current user is null.";
+      _errorMessage = "No user found";
       notifyListeners();
       return false;
     }
@@ -34,11 +34,15 @@ class UserModel extends ChangeNotifier {
 
     try {
       final userId = _currentUser['userId'];
-      final userUpdateBody = {"userId": userId, "username": newUsername};
+      final userUpdateBody = {
+        "userId": userId.toString(),
+        "username": newUsername
+      };
+      print('mah update body: $userUpdateBody');
 
       // Call the API function from api/user.dart
       final result = await updateUserByUserId(userUpdateBody, _appAuthProvider);
-
+      print('mah result: $result');
       // Your API should ideally return a clear success/error state.
       // We'll assume a non-null response indicates success for now.
       if (result != null) {
@@ -51,8 +55,7 @@ class UserModel extends ChangeNotifier {
         return true;
       } else {
         // Handle cases where the API call fails or returns an error.
-        _errorMessage =
-            "Failed to update username. The username might already be taken.";
+        _errorMessage = "user_model_updateuser_fail";
         _isLoading = false;
         notifyListeners();
         return false;
@@ -60,7 +63,7 @@ class UserModel extends ChangeNotifier {
     } catch (e) {
       // If the API throws an exception (e.g., for duplicate username), catch it.
       if (e.toString().toLowerCase().contains('duplicate')) {
-        _errorMessage = 'Username already in use. Please try another.';
+        _errorMessage = 'onboarding_form_duplicateuser';
       } else {
         _errorMessage = "An error occurred: ${e.toString()}";
       }
@@ -72,7 +75,7 @@ class UserModel extends ChangeNotifier {
 
   Future<bool> updateUserProfileImg(String newProfileImgUrl) async {
     if (currentUser == null) {
-      _errorMessage = "Cannot update profile image: current user is null.";
+      _errorMessage = "user_model_updateimg_null";
       notifyListeners();
       return false;
     }
@@ -95,7 +98,7 @@ class UserModel extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _errorMessage = "Failed to update profile image.";
+        _errorMessage = "user_model_updateimg_fail";
         _isLoading = false;
         notifyListeners();
         return false;

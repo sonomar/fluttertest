@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import '../models/distribution_model.dart'; // Import DistributionModel
 import '../helpers/localization_helper.dart';
 import '../widgets/scan/code_processing_screen.dart';
-import '../models/mission_model.dart'; // FOR TESTING. REMOVE WITH TEST BUTTONS
+// import '../models/mission_model.dart'; // FOR TESTING. REMOVE WITH TEST BUTTONS
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
+    );
+  }
+}
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key, this.userData});
@@ -103,6 +115,10 @@ class _ScanScreenState extends State<ScanScreen> {
             children: [
               TextField(
                 controller: _codeTextController,
+                textCapitalization: TextCapitalization.characters,
+                inputFormatters: [
+                  UpperCaseTextFormatter(),
+                ],
                 decoration: InputDecoration(
                   labelText: translate("scan_manual_text", context),
                   border: OutlineInputBorder(
@@ -112,8 +128,8 @@ class _ScanScreenState extends State<ScanScreen> {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () =>
-                    _triggerCodeProcessing(_codeTextController.text),
+                onPressed: () => _triggerCodeProcessing(
+                    _codeTextController.text.toUpperCase()),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                   backgroundColor: Color.fromARGB(202, 214, 34, 202),
@@ -128,54 +144,54 @@ class _ScanScreenState extends State<ScanScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  // Call the new debug function from the model
-                  context.read<DistributionModel>().resetTestCode();
-                  // Show a snackbar to confirm the action was triggered
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text("Attempting to reset test code...")),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 40),
-                  backgroundColor:
-                      Colors.grey[700], // A different color for debug buttons
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Reset test code',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  // Call the new debug function from the MissionModel
-                  context.read<MissionModel>().resetTestMissionProgress();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content:
-                            Text("Attempting to reset mission progress...")),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 40),
-                  backgroundColor:
-                      Colors.blueGrey[700], // A different color for this button
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Reset Mission Progress',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
+              // const SizedBox(height: 10),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     // Call the new debug function from the model
+              //     context.read<DistributionModel>().resetTestCode();
+              //     // Show a snackbar to confirm the action was triggered
+              //     ScaffoldMessenger.of(context).showSnackBar(
+              //       const SnackBar(
+              //           content: Text("Attempting to reset test code...")),
+              //     );
+              //   },
+              //   style: ElevatedButton.styleFrom(
+              //     minimumSize: const Size(double.infinity, 40),
+              //     backgroundColor:
+              //         Colors.grey[700], // A different color for debug buttons
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //   ),
+              //   child: const Text(
+              //     'Reset test code',
+              //     style: TextStyle(color: Colors.white),
+              //   ),
+              // ),
+              // const SizedBox(height: 10),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     // Call the new debug function from the MissionModel
+              //     context.read<MissionModel>().resetTestMissionProgress();
+              //     ScaffoldMessenger.of(context).showSnackBar(
+              //       const SnackBar(
+              //           content:
+              //               Text("Attempting to reset mission progress...")),
+              //     );
+              //   },
+              //   style: ElevatedButton.styleFrom(
+              //     minimumSize: const Size(double.infinity, 40),
+              //     backgroundColor:
+              //         Colors.blueGrey[700], // A different color for this button
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //   ),
+              //   child: const Text(
+              //     'Reset Mission Progress',
+              //     style: TextStyle(color: Colors.white),
+              //   ),
+              // ),
             ],
           ),
         ),

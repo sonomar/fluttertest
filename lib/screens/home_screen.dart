@@ -7,6 +7,7 @@ import 'dart:async';
 import 'subscreens/notifications/notifications_page.dart';
 import '../models/user_model.dart';
 import '../models/mission_model.dart';
+import '../models/locale_provider.dart';
 import '../models/collectible_model.dart';
 import '../models/notification_provider.dart';
 import '../models/community_model.dart';
@@ -46,9 +47,19 @@ class HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<NewsPostModel>(context, listen: false).loadNewsPosts();
-      Provider.of<CommunityModel>(context, listen: false)
-          .loadCommunityChallenge();
+      if (mounted) {
+        final langCode = Provider.of<LocaleProvider>(context, listen: false)
+            .locale!
+            .languageCode;
+        // Load all necessary data for the home screen
+        Provider.of<NewsPostModel>(context, listen: false).loadNewsPosts();
+        Provider.of<CommunityModel>(context, listen: false)
+            .loadCommunityChallenge();
+        Provider.of<CollectibleModel>(context, listen: false)
+            .loadCollectibles(forceClear: true, languageCode: langCode);
+        Provider.of<MissionModel>(context, listen: false)
+            .loadMissions(forceClear: true);
+      }
     });
     _startTimer();
   }
@@ -74,6 +85,27 @@ class HomeScreenState extends State<HomeScreen>
   void dispose() {
     _timer.cancel();
     super.dispose();
+  }
+
+  Map<String, dynamic>? _getMostRecentUserCollectible(
+      List<dynamic> userCollectibles) {
+    if (userCollectibles.isEmpty) {
+      return null;
+    }
+
+    // Sort the collectibles by their 'updatedDt' in descending order.
+    userCollectibles.sort((a, b) {
+      try {
+        final DateTime dateA = DateTime.parse(a['updatedDt']);
+        final DateTime dateB = DateTime.parse(b['updatedDt']);
+        return dateB.compareTo(dateA); // Newest first
+      } catch (e) {
+        return 0; // If parsing fails, don't change order
+      }
+    });
+
+    // Return the first item, which is now the most recent.
+    return userCollectibles.first;
   }
 
   Widget newsItem(type, postedDate, header) {
@@ -166,9 +198,10 @@ class HomeScreenState extends State<HomeScreen>
           body: Center(child: CircularProgressIndicator()));
     }
     if (currentUser == null) {
-      return const Scaffold(
+      return Scaffold(
           backgroundColor: Colors.white,
-          body: Center(child: Text("User data not available.")));
+          body: Center(
+              child: Text(translate("home_screen_build_no_user", context))));
     }
     final userPic = currentUser["profileImg"];
     final communityModel = context.watch<CommunityModel>();
@@ -180,15 +213,30 @@ class HomeScreenState extends State<HomeScreen>
     final newsPosts = newsPostModel.newsPosts;
     final collectibleModel = context.watch<CollectibleModel>();
     final allCollectibles = collectibleModel.collectionCollectibles;
-    final recentColl =
-        allCollectibles.isNotEmpty ? allCollectibles.first : null;
     final userCollectibles = collectibleModel.userCollectibles;
-
+    final mostRecentUserCollectible =
+        _getMostRecentUserCollectible(userCollectibles);
     final notificationProvider = context.watch<NotificationProvider>();
     final int unreadNotifications =
         notificationProvider.unreadNotificationCount;
 
-    final recentUrls = _getAssetUrlFromCollectible(recentColl);
+    Map<String, dynamic>? displayCollectibleTemplate;
+    if (mostRecentUserCollectible != null) {
+      try {
+        displayCollectibleTemplate = allCollectibles.firstWhere(
+          (c) =>
+              c['collectibleId'] == mostRecentUserCollectible['collectibleId'],
+        );
+      } on StateError {
+        displayCollectibleTemplate = null;
+      }
+    }
+
+    if (displayCollectibleTemplate == null && allCollectibles.isNotEmpty) {
+      displayCollectibleTemplate = allCollectibles.first;
+    }
+
+    final recentUrls = _getAssetUrlFromCollectible(displayCollectibleTemplate);
     final String? username = currentUser['username'];
     final bool showUsername = username != null;
 
@@ -316,46 +364,42 @@ class HomeScreenState extends State<HomeScreen>
                               isFront: true),
                         ),
                         GestureDetector(
-                          onTap: () {
-                            if (recentColl != null) {
-                              final instances = userCollectibles
-                                  .where((uc) =>
-                                      uc['collectibleId'] ==
-                                      recentColl['collectibleId'])
-                                  .map((e) => e as Map<String, dynamic>)
-                                  .toList();
-                              if (instances.isNotEmpty) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CollectibleDetails(
-                                      selectedCollectible: recentColl,
-                                      userCollectibleInstances: instances,
+                          onTap: (mostRecentUserCollectible != null &&
+                                  displayCollectibleTemplate != null)
+                              ? () {
+                                  final instances = userCollectibles
+                                      .where((uc) =>
+                                          uc['collectibleId'] ==
+                                          displayCollectibleTemplate![
+                                              'collectibleId'])
+                                      .map((e) => e as Map<String, dynamic>)
+                                      .toList();
+
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CollectibleDetails(
+                                        selectedCollectible:
+                                            displayCollectibleTemplate!,
+                                        userCollectibleInstances:
+                                            instances.isNotEmpty
+                                                ? instances
+                                                : [mostRecentUserCollectible],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          "You don't own any collectibles yet. Scan a collectible to get started!")),
-                                );
-                              }
-                            }
-                          },
-                          // This container ensures the GestureDetector has a tappable area.
+                                  );
+                                }
+                              : null,
                           child: Container(
                             height: 400,
-                            color: Colors
-                                .transparent, // Makes the container tappable but invisible
+                            color: Colors.transparent,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                getLatestActiveMission(
-                    context, missions, missionUsers, recentColl),
+                getLatestActiveMission(context, missions, missionUsers),
               ])),
           communityChallengeWidget(_formatTime(_remainingTime), context,
               communityChallenge, 200, context),
