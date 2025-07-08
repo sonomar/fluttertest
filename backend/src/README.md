@@ -295,11 +295,86 @@ To downgrade by one step:
 ```bash
 alembic downgrade -1
 ```
-* **Checking Current Revision**:
+Checking Current Revision:
 
-  ```bash
-  alembic current
-  ```
+```bash
+alembic current
+```
+<br>
+<br>
+
+### ⚙️ Managing Complex or Trigger-Based Migrations (`manage_trigger_migrations.py`)
+
+In addition to Alembic, this project includes a custom migration utility script:  
+`tools/dev/manage_trigger_migrations.py`.
+
+This script is useful for applying SQL migrations that go beyond standard table creation or alteration, such as:
+
+- Adding, modifying, or dropping database **triggers**
+- Creating or altering **stored procedures**
+- Executing **custom raw SQL** not easily expressed via SQLAlchemy
+
+This is especially helpful when evolving business logic directly in the database layer.
+
+#### ✅ Usage
+
+From the root directory of the project, run:
+
+```bash
+python tools/dev/manage_trigger_migrations.py
+```
+
+This script will:
+
+1. **Connect to the MySQL database** using credentials from the environment or `.env` file.
+2. **Scan and execute SQL scripts** found in a configured folder (e.g., `database/doc/triggers/` or similar).
+3. Log which files were run and handle basic error reporting.
+
+> 📝 By default, SQL scripts should be placed in a subdirectory like `database/doc/triggers/` and should be named clearly by purpose (e.g., `on_user_insert_trigger.sql`, `project_update_logic.sql`).
+
+#### 📁 Expected SQL Folder Structure
+
+```bash
+database/
+└── doc/
+    └── triggers/
+        ├── user_on_create_trigger.sql
+        ├── update_collectible_status.sql
+        └── ...
+```
+
+#### 🛠️ Customization
+
+If you need to change:
+
+- **Folder location** for SQL scripts
+- **File execution order**
+- **Database connection logic**
+
+Edit the script:  
+`tools/dev/manage_trigger_migrations.py`
+
+Make sure to include error handling and logging if adapting this for production use.
+
+#### 🔐 Database Credentials
+
+The script uses the same `.env` configuration as the main app. Ensure the following variables are available:
+
+```env
+DB_HOST=...
+DB_PORT=...
+DB_USER=...
+DB_PASSWORD=...
+DB_NAME=...
+ENV=local
+```
+
+These are loaded by `load_dotenv()` from the root `.env` file.
+
+---
+
+> ℹ️ Use `manage_trigger_migrations.py` **in addition to Alembic**, not as a replacement. It’s meant for SQL-level logic that doesn’t map cleanly to SQLAlchemy models.
+
 
 ## 🔗 API Endpoints
 
