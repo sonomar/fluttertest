@@ -36,8 +36,7 @@ class UserModel extends ChangeNotifier {
       final userId = _currentUser['userId'];
       final userUpdateBody = {
         "userId": userId.toString(),
-        "username": newUsername,
-        "deviceId": "registered"
+        "username": newUsername
       };
       print('mah update body: $userUpdateBody');
 
