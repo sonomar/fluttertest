@@ -21,6 +21,7 @@ from database.schema.GET.Distribution.distribution_schema import DistributionRes
 from database.schema.GET.DistributionCode.distributionCode_schema import DistributionCodeResponse
 from database.schema.GET.DistributionCodeUser.distributionCodeUser_schema import DistributionCodeUserResponse
 from database.schema.GET.DistributionCollectible.distributionCollectible_schema import DistributionCollectibleResponse
+from database.schema.GET.MissionType.missionType_schema import MissionTypeResponse
 
 # Import the modules containing your refactored POST handler functions
 import database.CRUD.POST.User.post_User_CRUD_functions as UserPOSTFunctions
@@ -44,6 +45,7 @@ import database.CRUD.POST.Distribution.post_Distribution_CRUD_functions as Distr
 import database.CRUD.POST.DistributionCode.post_DistributionCode_CRUD_functions as DistributionCodePOSTFunctions
 import database.CRUD.POST.DistributionCodeUser.post_DistributionCodeUser_CRUD_functions as DistributionCodeUserPOSTFunctions
 import database.CRUD.POST.DistributionCollectible.post_DistributionCollectible_CRUD_functions as DistributionCollectiblePOSTFunctions
+import database.CRUD.POST.MissionType.post_MissionType_CRUD_functions as MissionTypePOSTFunctions
 
 
 API_PATHS_POST = {
@@ -117,6 +119,14 @@ API_PATHS_POST = {
             "active": True,
             "handler": MissionPOSTFunctions.createMission,
             "response_model": MissionResponse
+        }
+    },
+    MissionType_table: {
+        "createMissionType": {
+            "path": "/createMissionType",
+            "active": True,
+            "handler": MissionTypePOSTFunctions.createMissionType,
+            "response_model": MissionTypeResponse
         }
     },
     MissionUser_table: {

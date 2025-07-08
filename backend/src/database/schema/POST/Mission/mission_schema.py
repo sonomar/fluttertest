@@ -4,6 +4,7 @@ import datetime
 
 class MissionCreate(BaseModel):
     collectionId: int
+    missionTypeId: int
     title: Dict[str, str]
     reward: Optional[str] = None
     goal: int
@@ -15,3 +16,4 @@ class MissionCreate(BaseModel):
     vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     embedRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    parameterJson: Optional[Dict[str, Any]] = None

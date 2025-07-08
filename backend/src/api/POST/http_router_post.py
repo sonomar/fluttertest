@@ -21,6 +21,7 @@ import api.POST.Distribution.post_Distribution_table as Distribution_table_funct
 import api.POST.DistributionCode.post_DistributionCode_table as DistributionCode_table_functions
 import api.POST.DistributionCodeUser.post_DistributionCodeUser_table as DistributionCodeUser_table_functions
 import api.POST.DistributionCollectible.post_DistributionCollectible_table as DistributionCollectible_table_functions
+import api.POST.MissionType.post_MissionType_table as MissionType_table_functions
 
 
 def http_router_post(event):
@@ -83,6 +84,10 @@ def http_router_post(event):
     ## Mission
     elif tableName == table.Mission_table:
         returnString = Mission_table_functions.call_Mission_function(raw_path, event)
+    
+    ## MissionType
+    elif tableName == table.MissionType_table:
+        returnString = MissionType_table_functions.call_MissionType_function(raw_path, event)
 
     ## MissionUser
     elif tableName == table.MissionUser_table:

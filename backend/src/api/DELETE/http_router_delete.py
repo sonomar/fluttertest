@@ -21,6 +21,7 @@ import api.DELETE.Distribution.delete_Distribution_table as Distributionfunction
 import api.DELETE.DistributionCode.delete_DistributionCode_table as DistributionCodefunctions
 import api.DELETE.DistributionCodeUser.delete_DistributionCodeUser_table as DistributionCodeUserfunctions
 import api.DELETE.DistributionCollectible.delete_DistributionCollectible_table as DistributionCollectiblefunctions
+import api.DELETE.MissionType.delete_MissionType_table as MissionType_table_functions
 
 
 def http_router_delete(event):
@@ -83,6 +84,10 @@ def http_router_delete(event):
     ## Mission
     elif tableName == table.Mission_table:
         returnString = Mission_table_functions.call_Mission_function(raw_path, event)
+
+    ## MissionType
+    elif tableName == table.MissionType_table:
+        returnString = MissionType_table_functions.call_MissionType_function(raw_path, event)
 
     ## MissionUser
     elif tableName == table.MissionUser_table:

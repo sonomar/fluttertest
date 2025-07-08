@@ -24,6 +24,7 @@ import database.CRUD.DELETE.Distribution.delete_Distribution_CRUD_functions as D
 import database.CRUD.DELETE.DistributionCode.delete_DistributionCode_CRUD_functions as DistributionCodeDELETEFunctions
 import database.CRUD.DELETE.DistributionCodeUser.delete_DistributionCodeUser_CRUD_functions as DistributionCodeUserDELETEFunctions
 import database.CRUD.DELETE.DistributionCollectible.delete_DistributionCollectible_CRUD_functions as DistributionCollectibleDELETEFunctions
+import database.CRUD.DELETE.MissionType.delete_MissionType_CRUD_functions as MissionTypeDELETEFunctions
 
 # ... import other DELETE function modules
 
@@ -182,6 +183,15 @@ API_PATHS_DELETE = {
              # Path param (userId) is in handler signature
         }
          # Add other delete functions once refactored
+    },
+    MissionType_table: {
+        "deleteMissionTypeByMissionTypeId": {
+            "path": "/deleteMissionTypeByMissionTypeId",
+            "pathLocal": "/deleteMissionTypeByMissionTypeId/{missionTypeId}",
+            "active": True,
+            "handler": MissionTypeDELETEFunctions.deleteMissionTypeByMissionTypeId,
+            "response_model": Dict[str, str]
+        }
     },
     MissionUser_table: {
         "deleteMissionUserByMissionUserId": {

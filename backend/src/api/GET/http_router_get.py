@@ -26,6 +26,7 @@ import api.GET.Distribution.get_Distribution_table as Distributionfunctions
 import api.GET.DistributionCode.get_DistributionCode_table as DistributionCodefunctions
 import api.GET.DistributionCodeUser.get_DistributionCodeUser_table as DistributionCodeUserfunctions
 import api.GET.DistributionCollectible.get_DistributionCollectible_table as DistributionCollectiblefunctions
+import api.GET.MissionType.get_MissionType_table as MissionTypefunctions
 
 
 def http_router_get(event):
@@ -82,6 +83,9 @@ def http_router_get(event):
 
     elif tableName == table.Mission_table:
         returnString = Missionfunctions.call_Mission_function(raw_path, event)
+
+    elif tableName == table.MissionType_table:
+        returnString = MissionTypefunctions.call_MissionType_function(raw_path, event)
 
     elif tableName == table.MissionUser_table:
         returnString = MissionUserfunctions.call_MissionUser_function(raw_path, event)

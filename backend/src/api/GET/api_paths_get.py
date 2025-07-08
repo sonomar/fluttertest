@@ -25,6 +25,7 @@ from database.schema.GET.Distribution.distribution_schema import DistributionRes
 from database.schema.GET.DistributionCode.distributionCode_schema import DistributionCodeResponse
 from database.schema.GET.DistributionCodeUser.distributionCodeUser_schema import DistributionCodeUserResponse
 from database.schema.GET.DistributionCollectible.distributionCollectible_schema import DistributionCollectibleResponse
+from database.schema.GET.MissionType.missionType_schema import MissionTypeResponse
 
 
 # Import the modules containing your refactored GET handler functions
@@ -49,6 +50,7 @@ import database.CRUD.GET.Distribution.get_Distribution_CRUD_functions as Distrib
 import database.CRUD.GET.DistributionCode.get_DistributionCode_CRUD_functions as DistributionCodeGETFunctions
 import database.CRUD.GET.DistributionCodeUser.get_DistributionCodeUser_CRUD_functions as DistributionCodeUserGETFunctions
 import database.CRUD.GET.DistributionCollectible.get_DistributionCollectible_CRUD_functions as DistributionCollectibleGETFunctions
+import database.CRUD.GET.MissionType.get_MissionType_CRUD_functions as MissionTypeGETFunctions
 
 
 
@@ -321,6 +323,21 @@ API_PATHS_GET = {
             "active": True,
             "handler": MissionGETFunctions.getMissionByTitle,
             "response_model": List[MissionResponse]
+        }
+    },
+
+    MissionType_table: {
+        "getMissionTypeByMissionTypeId": {
+            "path": "/getMissionTypeByMissionTypeId",
+            "active": True,
+            "handler": MissionTypeGETFunctions.getMissionTypeByMissionTypeId,
+            "response_model": MissionTypeResponse
+        },
+        "getAllMissionTypes": {
+            "path": "/getAllMissionTypes",
+            "active": True,
+            "handler": MissionTypeGETFunctions.getAllMissionTypes,
+            "response_model": List[MissionTypeResponse]
         }
     },
 

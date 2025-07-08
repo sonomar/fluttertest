@@ -8,7 +8,7 @@ class NewsPostUpdate(BaseModel):
     body: Optional[Dict[str, str]] = None
     shortBody: Optional[Dict[str, str]] = None
     postDate: Optional[datetime.datetime] = None
-    type: Optional[str] = None
+    type: Optional[Dict[str, str]] = None
     imgRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None

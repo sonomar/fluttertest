@@ -20,6 +20,7 @@ from database.schema.GET.Distribution.distribution_schema import DistributionRes
 from database.schema.GET.DistributionCode.distributionCode_schema import DistributionCodeResponse # Import schemas
 from database.schema.GET.DistributionCodeUser.distributionCodeUser_schema import DistributionCodeUserResponse # Import schemas
 from database.schema.GET.DistributionCollectible.distributionCollectible_schema import DistributionCollectibleResponse # Import schemas
+from database.schema.GET.MissionType.missionType_schema import MissionTypeResponse
 
 
 # Import the modules containing your refactored PATCH handler functions
@@ -44,6 +45,7 @@ import database.CRUD.PATCH.Distribution.patch_Distribution_CRUD_functions as Dis
 import database.CRUD.PATCH.DistributionCode.patch_DistributionCode_CRUD_functions as DistributionCodePATCHFunctions
 import database.CRUD.PATCH.DistributionCodeUser.patch_DistributionCodeUser_CRUD_functions as DistributionCodeUserPATCHFunctions
 import database.CRUD.PATCH.DistributionCollectible.patch_DistributionCollectible_CRUD_functions as DistributionCollectiblePATCHFunctions
+import database.CRUD.PATCH.MissionType.patch_MissionType_CRUD_functions as MissionTypePATCHFunctions
 
 
 # ... import other PATCH function modules
@@ -211,6 +213,15 @@ API_PATHS_PATCH = {
              # Path param (userId) is in handler signature
         }
          # Add other delete functions once refactored
+    },
+    MissionType_table: {
+        "updateMissionTypeByMissionTypeId": {
+            "path": "/updateMissionTypeByMissionTypeId",
+            "pathLocal": "/updateMissionTypeByMissionTypeId/{missionTypeId}",
+            "active": True,
+            "handler": MissionTypePATCHFunctions.updateMissionTypeByMissionTypeId,
+            "response_model": MissionTypeResponse
+        }
     },
     MissionUser_table: {
         "updateMissionUserByMissionUserId": {

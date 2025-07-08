@@ -4,6 +4,7 @@ import datetime
 
 class MissionUpdate(BaseModel):
     collectionId: Optional[int] = None
+    missionTypeId: Optional[int] = None
     title: Optional[Dict[str, str]] = None
     description: Optional[Dict[str, str]] = None
     reward: Optional[str] = None
@@ -15,3 +16,4 @@ class MissionUpdate(BaseModel):
     vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     embedRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    parameterJson: Optional[Dict[str, Any]] = None

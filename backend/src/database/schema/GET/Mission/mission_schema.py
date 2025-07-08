@@ -6,6 +6,7 @@ import datetime
 class MissionResponse(BaseModel):
     missionId: int
     collectionId: int
+    missionTypeId: int
     title: Dict[str, str]
     goal: int
     rewardId: Optional[int] = None
@@ -17,6 +18,7 @@ class MissionResponse(BaseModel):
     vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     embedRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    parameterJson: Optional[Dict[str, Any]] = None
     createdDt: datetime.datetime
     updatedDt: datetime.datetime
 

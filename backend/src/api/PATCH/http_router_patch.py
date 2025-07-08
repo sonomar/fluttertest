@@ -22,6 +22,7 @@ import api.PATCH.Distribution.patch_Distribution_table as Distributionfunctions
 import api.PATCH.DistributionCode.patch_DistributionCode_table as DistributionCodefunctions
 import api.PATCH.DistributionCodeUser.patch_DistributionCodeUser_table as DistributionCodeUserfunctions
 import api.PATCH.DistributionCollectible.patch_DistributionCollectible_table as DistributionCollectiblefunctions
+import api.PATCH.MissionType.patch_MissionType_table as MissionType_table_functions
 
 
 def http_router_patch(event):
@@ -84,6 +85,10 @@ def http_router_patch(event):
     ## Mission
     if tableName == table.Mission_table:
         returnString = Mission_table_functions.call_Mission_function(raw_path, event)
+    
+    ## MissionType
+    elif tableName == table.MissionType_table:
+        returnString = MissionType_table_functions.call_MissionType_function(raw_path, event)
 
     ## MissionUser
     if tableName == table.MissionUser_table:

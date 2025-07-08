@@ -1,4 +1,4 @@
-# models.py
+# src/database/models.py
 from typing import List, Optional
 
 
@@ -25,6 +25,8 @@ class DistributionTypeEnum(enum.Enum):
     coupon = "coupon"
     deal = "deal"
     scan = "scan"
+    internal = "internal"
+    admin = "admin"
 
 class Category(Base):
     __tablename__ = 'Category'
@@ -77,7 +79,7 @@ class NewsPost(Base):
     createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
     active: Mapped[bool] = mapped_column(Boolean, server_default=text("'1'"))
-    type: Mapped[Optional[str]] = mapped_column(String(255))
+    type: Mapped[Optional[dict[str, str]]] = mapped_column(JSON)
     imgRef: Mapped[Optional[dict]] = mapped_column(JSON)
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
     qrRef: Mapped[Optional[dict]] = mapped_column(JSON)
@@ -345,12 +347,14 @@ class Mission(Base):
     __table_args__ = (
         ForeignKeyConstraint(['collectionId'], ['Collection.collectionId'], ondelete='CASCADE', onupdate='CASCADE', name='mission_ibfk_1'),
         ForeignKeyConstraint(['rewardId'], ['Collectible.collectibleId'], ondelete='SET NULL', onupdate='CASCADE', name='mission_ibfk_2'),
+        ForeignKeyConstraint(['missionTypeId'], ['MissionType.missionTypeId'], ondelete='CASCADE', onupdate='CASCADE', name='mission_ibfk_3'),
         Index('collectionId', 'collectionId'),
         Index('missionId', 'missionId', unique=True)
     )
 
     missionId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     collectionId: Mapped[int] = mapped_column(BIGINT)
+    missionTypeId: Mapped[int] = mapped_column(BIGINT)
     title: Mapped[dict[str, str]] = mapped_column(JSON)
     goal: Mapped[int] = mapped_column(INTEGER)
     timer: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
@@ -364,9 +368,24 @@ class Mission(Base):
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
     qrRef: Mapped[Optional[dict]] = mapped_column(JSON)
     embedRef: Mapped[Optional[dict]] = mapped_column(JSON)
+    parameterJson: Mapped[Optional[dict]] = mapped_column(JSON)
 
     Collection_: Mapped['Collection'] = relationship('Collection', back_populates='Mission')
     MissionUser: Mapped[List['MissionUser']] = relationship('MissionUser', back_populates='Mission_')
+    MissionType_: Mapped['MissionType'] = relationship('MissionType', back_populates='Mission')
+
+
+class MissionType(Base):
+    __tablename__ = 'MissionType'
+    __table_args__ = (
+        Index('missionTypeId', 'missionTypeId', unique=True),
+    )
+
+    missionTypeId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    name: Mapped[str] = mapped_column(String(255))
+    description: Mapped[Optional[str]] = mapped_column(String(255))
+
+    Mission: Mapped[List['Mission']] = relationship('Mission', back_populates='MissionType_')
 
 
 class CollectibleSponsor(Base):
@@ -475,7 +494,7 @@ class Distribution(Base):
     projectId: Mapped[int] = mapped_column(BIGINT)
     collectionId: Mapped[Optional[int]] = mapped_column(BIGINT)
     name: Mapped[dict] = mapped_column(JSON)
-    type: Mapped['DistributionTypeEnum'] = mapped_column(Enum('voucher', 'coupon', 'deal', 'scan', name='distributionType'))
+    type: Mapped['DistributionTypeEnum'] = mapped_column(Enum('voucher', 'coupon', 'deal', 'scan', 'internal', 'admin', name='distributionType'), server_default=text("'internal'"))
     description: Mapped[Optional[dict]] = mapped_column(JSON)
     isTimed: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
     isLimited: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))

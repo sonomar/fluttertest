@@ -8,7 +8,7 @@ class NewsPostCreate(BaseModel):
     body: Dict[str, str]
     shortBody: Dict[str, str]
     postDate: Optional[datetime.datetime] = Field(default_factory=datetime.datetime.utcnow)
-    type: Optional[str] = None
+    type: Optional[Dict[str, str]] = None
     imgRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
