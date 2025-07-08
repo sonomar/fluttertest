@@ -41,7 +41,7 @@ class NewsItem extends StatelessWidget {
               color: Colors.black,
               borderRadius: const BorderRadius.all(Radius.circular(20))),
           child: Text(
-            type.toUpperCase(),
+            getTranslatedString(context, type).toUpperCase(),
             style: const TextStyle(
                 fontSize: 10,
                 letterSpacing: 2,
