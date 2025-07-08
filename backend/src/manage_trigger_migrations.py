@@ -16,60 +16,56 @@ SQL_DIR = BASE_DIR / "database/sql/triggers"
 VERSIONS_DIR = BASE_DIR / "alembic/versions"
 STATE_FILE = BASE_DIR / "alembic/.trigger_state.json"
 
-# --- Migration Template ---
-# This template is used to generate the content of the Alembic migration file.
-# It includes placeholders for revision ID, down revision, creation date,
-# and the trigger file name and basename.
-MIGRATION_TEMPLATE = """\"\"\"Apply {trigger_name} trigger
-
-Revision ID: {revision_id}
-Revises: {down_revision}
-Create Date: {create_date}
-
-\"\"\"
-from alembic import op
-import sqlalchemy as sa
-import os
-
-# revision identifiers, used by Alembic.
-revision = '{revision_id}'
-down_revision = '{down_revision}'
-branch_labels = None
-depends_on = None
-
-# Construct the path to the SQL trigger file relative to the migration script.
-# os.path.dirname(__file__) gets the directory of the current migration script.
-# '../../database/sql/triggers/' navigates up two directories and then into the triggers folder.
-trigger_file_path = os.path.join(os.path.dirname(__file__), '../../database/sql/triggers/{trigger_name}')
-
-def upgrade():
+# --- Templates for injecting into Alembic's default migration file ---
+# These templates define only the *body* of the upgrade and downgrade functions.
+# They will be injected into the existing Alembic-generated file.
+UPGRADE_BODY_TEMPLATE = """
+    # If this trigger was altered, drop the existing one before creating the new version.
+    {drop_existing_trigger_sql}
     # The upgrade function reads the content of the SQL trigger file
     # and executes it, applying the trigger to the database.
     with open(trigger_file_path, 'r') as file:
         op.execute(file.read())
+"""
 
-def downgrade():
-    # The downgrade function drops the trigger if it exists,
-    # reverting the change made by the upgrade.
+DOWNGRADE_BODY_TEMPLATE = """
     op.execute("DROP TRIGGER IF EXISTS {trigger_basename};")
 """
 
 # --- Helper Functions ---
 
-def get_current_alembic_head() -> str:
+def get_current_alembic_head() -> Union[str, None]:
     """
     Gets the revision ID of the current Alembic head.
-    This is used to chain new migrations correctly.
+    Returns None if no heads are found (e.g., a fresh Alembic environment),
+    otherwise returns the head revision ID as a string.
+    Handles CalledProcessError if 'alembic heads' command fails.
     """
-    result = subprocess.run(
-        ["alembic", "heads"],
-        capture_output=True, text=True, check=True
-    )
-    lines = result.stdout.strip().splitlines()
-    if not lines:
-        raise RuntimeError("No Alembic heads found. Ensure Alembic is initialized and migrations exist.")
-    # The first line of `alembic heads` output contains the head revision ID.
-    return lines[0].split(" ")[0]
+    try:
+        result = subprocess.run(
+            ["alembic", "heads"],
+            capture_output=True, text=True, check=True,
+            cwd=BASE_DIR # Ensure alembic command runs from the base directory
+        )
+        lines = result.stdout.strip().splitlines()
+        if not lines:
+            # This case should ideally be caught by CalledProcessError if alembic exits with 1,
+            # but as a fallback, if stdout is empty but no error was raised.
+            return None
+        return lines[0].split(" ")[0]
+    except subprocess.CalledProcessError as e:
+        # If 'alembic heads' returns non-zero, it often means no heads exist.
+        # Check stderr for specific messages or assume no heads if stdout is empty.
+        # Alembic heads typically returns exit status 1 if no heads are found.
+        if "No heads found" in e.stderr or not e.stdout.strip():
+            print("INFO: No Alembic heads found. This is likely a fresh environment.")
+            return None
+        else:
+            # Re-raise if it's a different kind of error (e.g., alembic not installed/in PATH)
+            raise RuntimeError(f"Alembic 'heads' command failed unexpectedly: {e.stderr}") from e
+    except Exception as e:
+        # Catch any other unexpected errors
+        raise RuntimeError(f"An unexpected error occurred while getting Alembic head: {e}") from e
 
 
 def load_state() -> dict:
@@ -98,7 +94,8 @@ def generate_revision(trigger_filename: str, message: str):
     """
     result = subprocess.run(
         ["alembic", "revision", "-m", message],
-        capture_output=True, text=True, check=True
+        capture_output=True, text=True, check=True,
+        cwd=BASE_DIR # Ensure alembic command runs from the base directory
     )
     
     # --- DEBUGGING OUTPUT ---
@@ -107,18 +104,25 @@ def generate_revision(trigger_filename: str, message: str):
     print("--- End raw stdout ---\n")
     # --- END DEBUGGING OUTPUT ---
 
-    generated_lines = [line for line in result.stdout.splitlines() if 'Generating' in line]
-    if not generated_lines:
+    # Search for the pattern "Generating <path> ... done" where <path> can span multiple lines
+    # and might contain spaces.
+    # We'll capture the path part.
+    path_pattern = re.compile(r"Generating\s+(.*?)(?:\s*\.\.\.\s*done)?$", re.DOTALL)
+    match = path_pattern.search(result.stdout)
+
+    if not match:
         raise RuntimeError(f"Could not find generated revision path in Alembic output:\n{result.stdout}")
     
-    # Extract the raw path string from Alembic's output.
-    # This line is crucial for correctly identifying the file.
-    new_revision_path_str_raw = generated_lines[0].split("Generating", 1)[-1].strip()
-
-    # --- FIX: Robustly remove " ... done." from the end of the path string using regex ---
-    # Use a regular expression to remove " ... done." or similar trailing patterns
-    # This handles potential variations in whitespace before " ... done."
-    new_revision_path_str = re.sub(r'\s*\.\.\.\s*done$', '', new_revision_path_str_raw).strip()
+    # The captured group (1) will contain the raw path string, potentially with newlines and extra spaces.
+    new_revision_path_str_raw = match.group(1)
+    
+    # --- FIX: Robust string cleaning for the path ---
+    # 1. Remove all newline characters.
+    cleaned_path = new_revision_path_str_raw.replace('\n', '')
+    # 2. Condense any sequence of whitespace characters (including those that replaced newlines) into a single space.
+    cleaned_path = re.sub(r'\s+', ' ', cleaned_path)
+    # 3. Strip leading/trailing whitespace.
+    new_revision_path_str = cleaned_path.strip()
     # --- END FIX ---
 
     # --- DEBUGGING OUTPUT ---
@@ -131,6 +135,7 @@ def generate_revision(trigger_filename: str, message: str):
 
     # Extract the revision ID from the stem of the filename.
     revision_id = new_revision_path.stem.split('_')[0]
+    print(f"DEBUG: Extracted revision ID: '{revision_id}'") # Added debug for revision_id
     return new_revision_path, revision_id
 
 
@@ -166,11 +171,7 @@ def run() -> None:
     processed_triggers = load_state()
     
     # Get the current head revision of Alembic to link new migrations.
-    try:
-        current_head = get_current_alembic_head()
-    except RuntimeError as e:
-        print(f"Error getting Alembic head: {e}. Ensure Alembic is initialized (alembic init) and has at least one revision.")
-        return
+    current_head = get_current_alembic_head()
 
     # Find all SQL files in the triggers directory.
     sql_files = [f for f in SQL_DIR.iterdir() if f.is_file() and f.suffix == '.sql']
@@ -178,6 +179,11 @@ def run() -> None:
 
     for sql_file in sql_files:
         trigger_basename = sql_file.stem # e.g., 'my_trigger_name' from 'my_trigger_name.sql'
+        
+        # Initialize drop_existing_trigger_sql for the template
+        # This will be an empty string if the trigger is new or unchanged,
+        # otherwise it will contain the DROP statement.
+        drop_existing_trigger_sql = "" 
 
         # Check if the trigger has been processed before and if its content has changed.
         if trigger_basename in processed_triggers:
@@ -187,7 +193,11 @@ def run() -> None:
             if current_hash == stored_hash:
                 # If the file hasn't changed, skip to the next one.
                 continue
-
+            else:
+                # Trigger has been altered, include a DROP statement in the new migration's upgrade.
+                # This ensures the old trigger is dropped before the new one is created.
+                drop_existing_trigger_sql = f"op.execute(\"DROP TRIGGER IF EXISTS {trigger_basename};\")"
+        
         # If a new or modified trigger file is found, generate a migration.
         print(f"New or modified trigger file found: {sql_file.name}. Generating migration...")
         new_migrations_created = True
@@ -197,19 +207,97 @@ def run() -> None:
             message = f"Apply trigger {sql_file.name}"
             new_revision_path, revision_id = generate_revision(sql_file.name, message)
 
-            # Format the migration template with dynamic values.
-            migration_content = MIGRATION_TEMPLATE.format(
-                trigger_name=sql_file.name,
-                trigger_basename=trigger_basename,
-                revision_id=revision_id,
-                down_revision=current_head,
-                create_date=time.strftime('%Y-%m-%d %H:%M:%S')
+            # --- Read the content of the newly generated (empty) Alembic migration file ---
+            with open(new_revision_path, 'r') as f:
+                migration_file_content = f.read()
+
+            # --- Prepare the upgrade and downgrade body content ---
+            upgrade_body = UPGRADE_BODY_TEMPLATE.format(
+                drop_existing_trigger_sql=drop_existing_trigger_sql
+            )
+            downgrade_body = DOWNGRADE_BODY_TEMPLATE.format(
+                trigger_basename=trigger_basename
+            )
+            
+            # --- Inject the content into the upgrade and downgrade functions using regex ---
+            # Pattern to match 'def upgrade() -> None: ... pass'
+            upgrade_pattern = r'(def upgrade\(\) -> None:\s*"""Upgrade schema\."""\s*)pass'
+            migration_file_content = re.sub(
+                upgrade_pattern,
+                r'\1' + upgrade_body.strip(), # \1 refers to the captured group (the function definition and docstring)
+                migration_file_content,
+                count=1,
+                flags=re.DOTALL # Allow '.' to match newlines for multi-line docstrings
             )
 
-            # Overwrite the newly generated (empty) Alembic migration file
-            # with our custom content that applies the SQL trigger.
+            # Pattern to match 'def downgrade() -> None: ... pass'
+            downgrade_pattern = r'(def downgrade\(\) -> None:\s*"""Downgrade schema\."""\s*)pass'
+            migration_file_content = re.sub(
+                downgrade_pattern,
+                r'\1' + downgrade_body.strip(),
+                migration_file_content,
+                count=1,
+                flags=re.DOTALL
+            )
+
+            # --- Dynamically update other parts of the migration file ---
+            # Update revision ID
+            migration_file_content = re.sub(
+                r"revision: str = '.*'",
+                f"revision: str = '{revision_id}'",
+                migration_file_content,
+                count=1
+            )
+            # Update down_revision
+            # Format down_revision for the template: 'None' if current_head is None, else "'<revision_id>'"
+            # This line needs to be *inside* the loop to use the updated current_head
+            template_down_revision_val = 'None' if current_head is None else f"'{current_head}'"
+            migration_file_content = re.sub(
+                r"down_revision: Union\[str, None\] = .*", # Match anything after '='
+                f"down_revision: Union[str, None] = {template_down_revision_val}",
+                migration_file_content,
+                count=1
+            )
+            
+            # Update Create Date in the docstring and potentially in the file
+            # Update the initial docstring message
+            docstring_new_content = (
+                f"Apply {sql_file.name} trigger\n\n"
+                f"Revision ID: {revision_id}\n"
+                f"Revises: {current_head if current_head is not None else 'None'}\n" # Use actual current_head for docstring
+                f"Create Date: {time.strftime('%Y-%m-%d %H:%M:%S')}"
+            )
+            
+            # Replace the content within the triple quotes (the main docstring)
+            migration_file_content = re.sub(
+                r'"""\s*.*?Revision ID:.*?Create Date:.*?"""', # Matches the entire docstring block
+                f'"""{docstring_new_content}\n\n"""', # Recreate with new content, adding newlines for formatting
+                migration_file_content,
+                count=1,
+                flags=re.DOTALL
+            )
+
+            # Ensure 'import os' is present for os.path.join
+            if "import os" not in migration_file_content:
+                migration_file_content = migration_file_content.replace(
+                    "import sqlalchemy as sa",
+                    "import sqlalchemy as sa\nimport os"
+                )
+
+            # Insert trigger_file_path definition after depends_on = None
+            trigger_path_definition = f"trigger_file_path = os.path.join(os.path.dirname(__file__), '../../database/sql/triggers/{sql_file.name}')"
+            
+            # Find the line 'depends_on: Union[str, Sequence[str], None] = None' and insert after it
+            migration_file_content = re.sub(
+                r"(depends_on: Union\[str, Sequence\[str\], None\] = None\s*)",
+                r"\1\n\n" + trigger_path_definition + "\n",
+                migration_file_content,
+                count=1
+            )
+
+            # --- Write the modified content back to the file ---
             with open(new_revision_path, 'w') as f:
-                f.write(migration_content)
+                f.write(migration_file_content)
 
             print(f"  - Populated migration file: {new_revision_path.name}")
 
@@ -225,6 +313,7 @@ def run() -> None:
             print(f"  !!! Error generating migration for {sql_file.name}: {e}")
 
     # Save the updated state after all migrations have been processed.
+    print(f"DEBUG: State to be saved to {STATE_FILE.name}: {json.dumps(processed_triggers, indent=4)}") # Added debug for state
     save_state(processed_triggers)
 
     if not new_migrations_created:
