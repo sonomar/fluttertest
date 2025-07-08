@@ -23,7 +23,7 @@ class UserModel extends ChangeNotifier {
 
   Future<bool> updateUsername(String newUsername) async {
     if (currentUser == null) {
-      _errorMessage = "user_model_updateuser_null";
+      _errorMessage = "No user found";
       notifyListeners();
       return false;
     }
@@ -34,11 +34,16 @@ class UserModel extends ChangeNotifier {
 
     try {
       final userId = _currentUser['userId'];
-      final userUpdateBody = {"userId": userId, "username": newUsername};
+      final userUpdateBody = {
+        "userId": userId.toString(),
+        "username": newUsername,
+        "deviceId": "registered"
+      };
+      print('mah update body: $userUpdateBody');
 
       // Call the API function from api/user.dart
       final result = await updateUserByUserId(userUpdateBody, _appAuthProvider);
-
+      print('mah result: $result');
       // Your API should ideally return a clear success/error state.
       // We'll assume a non-null response indicates success for now.
       if (result != null) {

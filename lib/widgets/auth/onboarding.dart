@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../helpers/localization_helper.dart';
 import '../../models/user_model.dart';
+import '../../models/mission_model.dart';
 import '../../models/app_auth_provider.dart';
 
 class Onboarding extends StatefulWidget {
@@ -41,7 +42,20 @@ class _OnboardingState extends State<Onboarding> {
     }
   }
 
-  void _finishOnboarding() {
+  void _finishOnboarding() async {
+    final missionModel = context.read<MissionModel>();
+    final userModel = context.read<UserModel>();
+    final userId = userModel.currentUser?['userId'];
+    final missionUsers = missionModel.missionUsers;
+
+    if (userModel.currentUser?['deviceId'] == 'new' ||
+        userModel.currentUser?['deviceId'] == null) {
+      for (final missionUser in missionUsers) {
+        if (missionUser['userId'].toString() == userId.toString()) {
+          await missionModel.updateMissionProgress(missionUser, 1);
+        }
+      }
+    }
     context.read<AppAuthProvider>().completeNewUserOnboarding();
     Navigator.of(context).pop();
   }

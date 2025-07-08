@@ -229,7 +229,10 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = context.read<AppAuthProvider>();
-      if (authProvider.isNewUser) {
+      final userModel = context.read<UserModel>();
+      if (authProvider.isNewUser ||
+          userModel.currentUser?['deviceId'] == 'new' ||
+          userModel.currentUser?['deviceId'] == null) {
         showDialog(
           context: context,
           barrierDismissible: false, // User cannot dismiss by tapping outside
