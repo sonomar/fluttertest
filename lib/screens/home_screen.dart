@@ -399,6 +399,21 @@ class HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                 ),
+                Padding(
+                    padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
+                    child: Text(
+                      getTranslatedString(
+                          context,
+                          displayCollectibleTemplate != null
+                              ? displayCollectibleTemplate['name']
+                              : 'Kloppocar'),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w300,
+                        color: Colors.black,
+                        fontFamily: 'ChakraPetch',
+                        fontSize: 24,
+                      ),
+                    )),
                 getLatestActiveMission(context, missions, missionUsers),
               ])),
           communityChallengeWidget(_formatTime(_remainingTime), context,
