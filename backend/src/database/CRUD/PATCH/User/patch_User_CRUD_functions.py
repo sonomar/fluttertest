@@ -49,12 +49,12 @@ def updateUserByUserId(
     update_data = user_update_data.model_dump(exclude_unset=True) # Use model_dump to get dictionary, exclude unset fields
 
     # Handle specific fields that might need conversion or special logic
-    if 'userType' in update_data and update_data['userType'] is not None:
+    #if 'userType' in update_data and update_data['userType'] is not None:
         # If using Python Enum for userType in model, convert string input to Enum member
-        try:
-            update_data['userType'] = UserTypeEnum(update_data['userType'])
-        except ValueError:
-            raise BadRequestException(detail=f"Invalid userType value: {update_data['userType']}")
+    #    try:
+    #        update_data['userType'] = UserTypeEnum(update_data['userType'])
+    #    except ValueError:
+    #        raise BadRequestException(detail=f"Invalid userType value: {update_data['userType']}")
 
     for field, value in update_data.items():
         # Check if the attribute exists on the model before setting

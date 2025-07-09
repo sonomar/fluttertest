@@ -175,7 +175,10 @@ class User(Base):
     profileImg: Mapped[Optional[str]] = mapped_column(String(255))
     authToken: Mapped[Optional[str]] = mapped_column(Text)
     deviceId: Mapped[Optional[str]] = mapped_column(String(255))
-    userType: Mapped[Optional['UserTypeEnum']] = mapped_column(Enum('unregistered', 'username', 'email', 'admin', 'onboarding', name='userType'), server_default=text("'onboarding'"))
+    userType: Mapped[Optional[UserTypeEnum]] = mapped_column(
+        Enum(UserTypeEnum),  # Pass the Enum class itself
+        server_default=text("'onboarding'")
+    )
     lastLoggedIn: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP)
     score: Mapped[Optional[int]] = mapped_column(Integer)
     cognitoUsername: Mapped[Optional[str]] = mapped_column(String(255))
@@ -494,7 +497,10 @@ class Distribution(Base):
     projectId: Mapped[int] = mapped_column(BIGINT)
     collectionId: Mapped[Optional[int]] = mapped_column(BIGINT)
     name: Mapped[dict] = mapped_column(JSON)
-    type: Mapped['DistributionTypeEnum'] = mapped_column(Enum('voucher', 'coupon', 'deal', 'scan', 'internal', 'admin', name='distributionType'), server_default=text("'internal'"))
+    type: Mapped[DistributionTypeEnum] = mapped_column(
+        Enum(DistributionTypeEnum), # Pass the Enum class itself
+        server_default=text("'internal'")
+    )
     description: Mapped[Optional[dict]] = mapped_column(JSON)
     isTimed: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
     isLimited: Mapped[bool] = mapped_column(Boolean, server_default=text("'0'"))
