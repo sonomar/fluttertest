@@ -272,5 +272,13 @@
   "collectible_details_trade_err_general": "Failed to initiate transfer.",
   "award_screen_build_no_awards": "You have not earned any awards yet.\nComplete missions to see them here!",
   "home_screen_build_no_user": "User data not available.",
-  "home_screen_build_no_collectibles": "You don't own any collectibles yet. Scan a collectible to get started!"
+  "home_screen_build_no_collectibles": "You don't own any collectibles yet. Scan a collectible to get started!",
+  "dist_model_random_nocollection": "This random distribution is not linked to a collection.",
+  "dist_model_get_collectible_fail": "Could not retrieve details for the awarded collectible.",
+  "dist_model_max_uses": "This code has reached its maximum number of uses.",
+  "dist_model_no_mints": "No available mints for this collectible.",
+  "dist_model_transfer_nolink_instance": "Transfer code is not linked to a collectible instance.",
+  "dist_model_reward_nodetails": "Could not verify the mission's reward details.",
+  "dist_model_reward_nocollection": "This random mission reward is not linked to a collection.",
+  "dist_model_reward_get_collectible_fail": "Could not retrieve details for the awarded collectible."
 }
