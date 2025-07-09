@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
@@ -427,63 +428,154 @@ class AuthService {
 
   Future<bool> signInWithEmailCode(String email) async {
     _internalErrorMessage = null;
-    _cognitoUser = CognitoUser(email, _userPool);
+    final prefs = await SharedPreferences.getInstance();
+
+    // Manually construct and send the request to Cognito's InitiateAuth endpoint
+    final cognitoEndpoint =
+        'https://cognito-idp.${_userPool.getRegion()}.amazonaws.com/';
+    final clientId = _userPool.getClientId();
 
     try {
-      // This call will trigger your 'Define Auth Challenge' Lambda.
-      await _cognitoUser!.initiateAuth(AuthenticationDetails(username: email));
-      return true;
-    } on CognitoUserCustomChallengeException {
-      // This is the expected successful outcome. It means Cognito is asking for the code.
-      return true;
+      final response = await http.post(
+        Uri.parse(cognitoEndpoint),
+        headers: {
+          'Content-Type': 'application/x-amz-json-1.1',
+          'X-Amz-Target': 'AWSCognitoIdentityProviderService.InitiateAuth',
+        },
+        body: jsonEncode({
+          'AuthFlow': 'CUSTOM_AUTH', // Specify the custom authentication flow
+          'ClientId': clientId,
+          'AuthParameters': {
+            'USERNAME': email,
+          },
+        }),
+      );
+
+      final responseBody = jsonDecode(response.body);
+
+      // A successful initiation will return a 200 OK and a session string
+      if (response.statusCode == 200 && responseBody['Session'] != null) {
+        // THIS IS THE KEY: We have captured the session.
+        // Persist the email and the session string immediately.
+        await prefs.setString('email', email);
+        await prefs.setString('emailForAuthChallenge', email);
+        await prefs.setString(
+            'cognitoChallengeSession', responseBody['Session']);
+
+        print('Custom challenge initiated via direct API call. Session saved.');
+        return true; // Success, we are ready for the user to enter the code.
+      } else {
+        // Handle errors from Cognito
+        _internalErrorMessage =
+            responseBody['message'] ?? 'Failed to initiate login.';
+        return false;
+      }
     } catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.toString());
+      _internalErrorMessage =
+          'An unexpected network error occurred: ${e.toString()}';
       return false;
     }
   }
 
   Future<bool> answerEmailCodeChallenge(String email, String answer) async {
     _internalErrorMessage = null;
-    if (_cognitoUser == null || _cognitoUser!.username != email) {
-      _cognitoUser = CognitoUser(email, _userPool);
+    final prefs = await SharedPreferences.getInstance();
+
+    final savedEmail = prefs.getString('emailForAuthChallenge');
+    final savedSession = prefs.getString('cognitoChallengeSession');
+
+    if (savedEmail == null || savedSession == null || savedEmail != email) {
+      _internalErrorMessage = 'Your session has expired. Please try again.';
+      return false;
     }
 
-    try {
-      _session = await _cognitoUser!.sendCustomChallengeAnswer(answer);
-      if (_session?.isValid() ?? false) {
-        await _cognitoUser!.cacheTokens();
-        final prefs = await SharedPreferences.getInstance();
-        if (_cognitoUser!.username != null) {
-          prefs.setString('email', _cognitoUser!.username!);
-        }
+    final cognitoEndpoint =
+        'https://cognito-idp.${_userPool.getRegion()}.amazonaws.com/';
+    final clientId = _userPool.getClientId();
 
+    try {
+      final response = await http.post(
+        Uri.parse(cognitoEndpoint),
+        headers: {
+          'Content-Type': 'application/x-amz-json-1.1',
+          'X-Amz-Target':
+              'AWSCognitoIdentityProviderService.RespondToAuthChallenge',
+        },
+        body: jsonEncode({
+          'ClientId': clientId,
+          'ChallengeName': 'CUSTOM_CHALLENGE',
+          'Session': savedSession,
+          'ChallengeResponses': {
+            'USERNAME': email,
+            'ANSWER': answer,
+          },
+        }),
+      );
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode == 200 &&
+          responseBody['AuthenticationResult'] != null) {
+        final authResult = responseBody['AuthenticationResult'];
+        final idToken = CognitoIdToken(authResult['IdToken']);
+        final accessToken = CognitoAccessToken(authResult['AccessToken']);
+        final refreshToken = CognitoRefreshToken(authResult['RefreshToken']);
+
+        _session = CognitoUserSession(idToken, accessToken,
+            refreshToken: refreshToken);
+        _cognitoUser =
+            CognitoUser(email, _userPool, signInUserSession: _session);
+
+        await _cognitoUser!.cacheTokens();
+
+        // *** START: THIS IS THE FINAL FIX ***
+        // Manually save the JWTs for your API helper to use.
         final token = _session?.getAccessToken().getJwtToken();
-        final idToken = _session?.getIdToken().getJwtToken();
+        final idTokenString = _session?.getIdToken().getJwtToken();
         if (token != null) {
-          prefs.setString('jwtCode', token);
+          await prefs.setString('jwtCode', token);
+          print('AuthService: Access Token saved to SharedPreferences.');
         }
-        if (idToken != null) {
-          prefs.setString('jwtIdCode', idToken);
+        if (idTokenString != null) {
+          await prefs.setString('jwtIdCode', idTokenString);
+          print('AuthService: ID Token saved to SharedPreferences.');
         }
+        // *** END: THIS IS THE FINAL FIX ***
+
+        await prefs.setString('email', email);
+        print('AuthService: Saved email to SharedPreferences.');
 
         final attributes = await _cognitoUser!.getUserAttributes();
         final userIdAttr = attributes?.firstWhere(
             (attr) => attr.getName() == 'custom:userId',
             orElse: () =>
                 CognitoUserAttribute(name: 'custom:userId', value: null));
+
         if (userIdAttr?.getValue() != null) {
           await prefs.setString('userId', userIdAttr!.getValue()!);
+          print('AuthService: Saved userId to SharedPreferences.');
         }
 
+        await prefs.remove('emailForAuthChallenge');
+        await prefs.remove('cognitoChallengeSession');
+
+        print('Successfully answered challenge and created session.');
         return true;
       } else {
-        _internalErrorMessage = 'Login session expired. Please try again.';
-        print(
-            'AuthService: answerEmailCodeChallenge succeeded but the session is not valid.');
+        _internalErrorMessage = responseBody['message'] ??
+            'The code you entered is incorrect. Please try again.';
+        if (responseBody['__type']?.contains('NotAuthorizedException') ??
+            false) {
+          await prefs.remove('emailForAuthChallenge');
+          await prefs.remove('cognitoChallengeSession');
+          _internalErrorMessage =
+              'Your session has expired. Please start the login process again.';
+        }
         return false;
       }
     } catch (e) {
-      _internalErrorMessage = "The code provided is incorrect or has expired.";
+      _internalErrorMessage =
+          'An unexpected network error occurred: ${e.toString()}';
       return false;
     }
   }
