@@ -6,6 +6,7 @@ import '../models/user_model.dart';
 import '../models/collectible_model.dart';
 import '../models/mission_model.dart';
 import '../models/distribution_model.dart';
+import '../models/locale_provider.dart';
 import '../helpers/localization_helper.dart';
 import './subscreens/missions/award_screen.dart';
 import './subscreens/profile/language_page.dart';
@@ -20,11 +21,18 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = context.watch<LocaleProvider>();
     final userModel = context.watch<UserModel>();
     final currentUser = userModel.currentUser;
     final userPic = currentUser?['profileImg'];
     final username = currentUser?['username'] ??
         translate("profile_screen_build_default_user", context);
+
+    final currentLangKey = localeProvider.locale?.languageCode == 'de'
+        ? "lang_page_build_german"
+        : "lang_page_build_english";
+    final languageButtonText =
+        '${translate("profile_language_label_prefix", context)}: ${translate(currentLangKey, context)}';
 
     return Scaffold(
       backgroundColor:
@@ -96,7 +104,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           ProfileMenuItem(
             icon: Icons.language_outlined,
-            title: translate('profile_language_label', context),
+            title: languageButtonText,
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const LanguagePage()),
