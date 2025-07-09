@@ -26,10 +26,22 @@ class MissionModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  MissionModel(this._appAuthProvider, this._userModel);
+  MissionModel(this._appAuthProvider, this._userModel) {
+    _userModel.addListener(_onUserChanged);
+  }
 
-  MissionSortBy _missionSortBy = MissionSortBy.publicationDate;
-  MissionSortBy get missionSortBy => _missionSortBy;
+  @override
+  void dispose() {
+    _userModel.removeListener(_onUserChanged);
+    super.dispose();
+  }
+
+  void _onUserChanged() {
+    if (_userModel.currentUser == null) {
+      print("MissionModel: User changed/logged out. Clearing data.");
+      clearData();
+    }
+  }
 
   void clearData() {
     _missions = [];
@@ -39,6 +51,9 @@ class MissionModel extends ChangeNotifier {
     notifyListeners();
     print("MissionModel: Data cleared.");
   }
+
+  MissionSortBy _missionSortBy = MissionSortBy.publicationDate;
+  MissionSortBy get missionSortBy => _missionSortBy;
 
   void update(AppAuthProvider authProvider, UserModel userModel) {
     _appAuthProvider = authProvider;

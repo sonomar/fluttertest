@@ -25,7 +25,24 @@ class CollectibleModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get sortByName => _sortByName;
   String? get errorMessage => _errorMessage;
-  CollectibleModel(this._appAuthProvider, this.userModel);
+  CollectibleModel(this._appAuthProvider, this.userModel) {
+    // This listener will trigger whenever UserModel calls notifyListeners()
+    userModel.addListener(_onUserChanged);
+  }
+
+  @override
+  void dispose() {
+    userModel.removeListener(_onUserChanged);
+    super.dispose();
+  }
+
+  void _onUserChanged() {
+    // If the user in UserModel is null (logged out), clear this model's data
+    if (userModel.currentUser == null) {
+      print("CollectibleModel: User changed/logged out. Clearing data.");
+      clearData();
+    }
+  }
 
   void clearData() {
     _collectionCollectibles = [];

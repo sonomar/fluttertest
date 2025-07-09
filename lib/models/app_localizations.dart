@@ -17,6 +17,8 @@ class AppLocalizations {
 
   Map<String, String> _localizedStrings = {};
 
+  bool _isLoaded = false;
+
   Future<void> _loadFromAssets() async {
     try {
       print(
@@ -35,6 +37,7 @@ class AppLocalizations {
   }
 
   Future<void> load() async {
+    if (_isLoaded) return;
     const String baseUrl = "https://deins.s3.eu-central-1.amazonaws.com/l10n/";
     final Uri url = Uri.parse('$baseUrl${locale.languageCode}.json');
 
@@ -62,6 +65,9 @@ class AppLocalizations {
       print('Error loading localization file from $url: $e');
       // Fallback for when the request fails.
       await _loadFromAssets();
+    } finally {
+      // MODIFICATION: Set the flag to true after the attempt.
+      _isLoaded = true;
     }
   }
 
@@ -86,5 +92,5 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool shouldReload(_AppLocalizationsDelegate old) => true;
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
 }

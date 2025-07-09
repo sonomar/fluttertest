@@ -1,60 +1,49 @@
 String simplifyAuthError(String? rawError) {
   // Default message for unknown or null errors
   if (rawError == null) {
-    return 'An unknown error occurred.';
+    return 'auth_error_helper_simplify_unknown';
   }
 
   // Convert the error to lowercase for case-insensitive matching
   final error = rawError.toLowerCase();
 
-  // --- Common Sign-In and Sign-Up Errors ---
-  if (error.contains('user not found') ||
-      error.contains('user does not exist')) {
-    return 'User with this email not found.';
+  // --- Start with the most specific exception codes ---
+
+  // MODIFICATION: Added a check for the JSON error from the email code challenge.
+  if (error.contains('"challengename":"custom_challenge"')) {
+    return 'auth_error_helper_simplify_wrongcode';
   }
-  if (error.contains('incorrect username or password')) {
-    return 'Incorrect email or password.';
+  if (error.contains('invalid verification code')) {
+    return 'auth_error_helper_simplify_wrongcode';
   }
-  if (error.contains('user already exists') ||
-      error.contains('usernameexistsexception')) {
-    return 'This email is already registered.';
+  if (error.contains('codemismatchexception')) {
+    return 'auth_error_helper_simplify_wrongcode';
+  }
+  if (error.contains('notauthorizedexception')) {
+    return 'auth_error_helper_simplify_wrongpass';
+  }
+  if (error.contains('invalidparameterexception')) {
+    return 'auth_error_helper_simplify_invalidparam';
+  }
+  if (error.contains('usernameexistsexception')) {
+    return 'auth_error_helper_simplify_emailexists';
+  }
+  if (error.contains('user not found')) {
+    return 'auth_error_helper_simplify_usernotfound';
   }
   if (error.contains('user is not confirmed')) {
-    return 'Account has not been confirmed.';
+    return 'auth_error_helper_simplify_notconfirmed';
+  }
+  if (error.contains('limit exceeded')) {
+    return 'auth_error_helper_simplify_limitexceeded';
   }
 
-  // --- Password Errors ---
-  if (error.contains('password did not conform')) {
-    return 'Password format is invalid.';
-  }
-  // This can happen during passwordless sign-in if the session is invalid
-  if (error.contains('not authorized')) {
-    return 'Incorrect code or session expired.';
+  // --- Check for message text as a fallback ---
+  if (error.contains('incorrect username or password')) {
+    return 'auth_error_helper_simplify_wrongpass';
   }
 
-  // --- Verification Code Errors (for Sign-up, Passwordless, and Forgot Password) ---
-  if (error.contains('code mismatch') ||
-      error.contains('invalid verification code')) {
-    return 'Incorrect verification code.';
-  }
-  if (error.contains('expired code')) {
-    return 'Verification code has expired.';
-  }
-  // A more generic code error for passwordless sign-in
-  if (error.contains('failed to verify code')) {
-    return 'Incorrect code or it has expired.';
-  }
-
-  // --- General & Throttling Errors ---
-  if (error.contains('limit exceeded') ||
-      error.contains('attempt limit exceeded')) {
-    return 'Too many attempts. Try again later.';
-  }
-  if (error.contains('invalid parameter')) {
-    return 'Invalid email or password format.';
-  }
-
-  // Fallback for any other errors not specifically handled
+  // --- Final fallback ---
   print('Unhandled Auth Error: $rawError');
-  return 'An unexpected error occurred.';
+  return 'auth_error_helper_simplify_unexpected';
 }
