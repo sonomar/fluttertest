@@ -48,55 +48,32 @@ class _CodeProcessingScreenState extends State<CodeProcessingScreen>
   /// Main logic router.
   Future<void> _processCode(String code) async {
     if (!mounted) return;
+    final distributionModel = context.read<DistributionModel>();
 
-    // Use the DistributionModel for all processing logic.
-    final distributionModel =
-        Provider.of<DistributionModel>(context, listen: false);
-
+    bool success = false;
     if (_isTransferCode(code)) {
-      await _processTransfer(distributionModel, code);
+      final result = await distributionModel.completeTransfer(code, context);
+      success = result != null;
     } else {
-      await _processCollectibleRedemption(distributionModel, code);
+      final result = await distributionModel.redeemScannedCode(code, context);
+      success = result != null;
     }
-  }
 
-  /// Processes a standard collectible redemption code.
-  Future<void> _processCollectibleRedemption(
-      DistributionModel model, String code) async {
-    final String? awardedCollectibleId =
-        await model.redeemScannedCode(code, context);
+    if (!mounted) return;
 
-    if (awardedCollectibleId != null) {
+    // After the operation, check the model's state.
+    if (success) {
       _handleSuccess(code);
     } else {
-      _handleError(
-          model,
-          model.errorMessage ??
-              translate("code_proc_redeem_invalidfallback", context));
+      _handleError(distributionModel);
     }
   }
 
-  /// Processes a collectible transfer code.
-  Future<void> _processTransfer(DistributionModel model, String code) async {
-    // This logic can be updated later to also call the mission helper if needed
-    final Map<String, String>? tradeResult =
-        await model.completeTransfer(code, context);
-
-    if (tradeResult != null) {
-      _handleSuccess(code);
-    } else {
-      _handleError(
-          model,
-          model.errorMessage ??
-              translate("code_proc_transfer_failfallback", context));
-    }
-  }
-
-  void _handleError(DistributionModel model, String message) async {
-    debugPrint(message);
+  void _handleError(DistributionModel model) async {
     if (!mounted) return;
     setState(() {
-      _errorMessage = message; // Store the message
+      final errorKey = model.errorMessage ?? "code_proc_redeem_invalidfallback";
+      _errorMessage = translate(errorKey, context);
       _currentScanState = ScanState.error;
     });
     await Future.delayed(const Duration(seconds: 3));

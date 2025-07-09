@@ -85,9 +85,8 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
       BuildContext context, Map<String, dynamic> mintToTrade) async {
     const String transferDistributionId = "1";
 
-    final distributionModel =
-        Provider.of<DistributionModel>(context, listen: false);
-    final userModel = Provider.of<UserModel>(context, listen: false);
+    final distributionModel = context.read<DistributionModel>();
+    final userModel = context.read<UserModel>();
 
     final userCollectibleId = mintToTrade['userCollectibleId']?.toString();
     final ownerId = mintToTrade['ownerId']?.toString();
@@ -183,10 +182,12 @@ class _CollectibleDetailsState extends State<CollectibleDetails> {
       );
       // --- END: MODIFIED LOGIC ---
     } else {
+      final errorKey = distributionModel.errorMessage ??
+          "collectible_details_trade_err_general";
+      final translatedError = translate(errorKey, context);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(distributionModel.errorMessage ??
-                "Failed to initiate transfer.")),
+        SnackBar(content: Text(translatedError)),
       );
     }
   }

@@ -53,7 +53,7 @@ class UserModel extends ChangeNotifier {
         return true;
       } else {
         // Handle cases where the API call fails or returns an error.
-        _errorMessage = "user_model_updateuser_fail";
+        _errorMessage = "failed to update user account";
         _isLoading = false;
         notifyListeners();
         return false;
@@ -61,7 +61,7 @@ class UserModel extends ChangeNotifier {
     } catch (e) {
       // If the API throws an exception (e.g., for duplicate username), catch it.
       if (e.toString().toLowerCase().contains('duplicate')) {
-        _errorMessage = 'onboarding_form_duplicateuser';
+        _errorMessage = 'Duplicate user found, choose another username.';
       } else {
         _errorMessage = "An error occurred: ${e.toString()}";
       }
@@ -73,7 +73,7 @@ class UserModel extends ChangeNotifier {
 
   Future<bool> updateUserProfileImg(String newProfileImgUrl) async {
     if (currentUser == null) {
-      _errorMessage = "user_model_updateimg_null";
+      _errorMessage = "The image update failed and returned null";
       notifyListeners();
       return false;
     }
@@ -96,7 +96,7 @@ class UserModel extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _errorMessage = "user_model_updateimg_fail";
+        _errorMessage = "The image update failed.";
         _isLoading = false;
         notifyListeners();
         return false;
