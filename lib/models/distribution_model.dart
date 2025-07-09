@@ -266,7 +266,9 @@ class DistributionModel extends ChangeNotifier {
       _setState(isLoading: false);
       return newCode;
     } catch (e) {
-      _setState(isLoading: false, error: "dist_model_inittransfer_fail");
+      final errorKey = e.toString().replaceFirst('Exception: ', '');
+      print("Failed to create transfer code: $errorKey");
+      _setState(isLoading: false, error: errorKey);
       return null;
     }
   }
@@ -488,6 +490,7 @@ class DistributionModel extends ChangeNotifier {
       return true;
     } catch (e) {
       final errorKey = e.toString().replaceFirst('Exception: ', '');
+      print("Failed to claim reward: $errorKey");
       _setState(isLoading: false, error: errorKey);
       return false;
     }
