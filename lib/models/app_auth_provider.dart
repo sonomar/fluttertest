@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import '../auth/auth_service.dart';
 
@@ -257,6 +258,9 @@ class AppAuthProvider with ChangeNotifier {
 
     if (result == 'success') {
       _emailForConfirmation = email; // Store email
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('emailForRegistrationConfirmation', email);
+      print('AppAuthProvider: Saved email for registration confirmation.');
       _status = AuthStatus.confirming; // Move to confirmation state
       isNewUser = true;
     } else {
@@ -273,6 +277,23 @@ class AppAuthProvider with ChangeNotifier {
   }) async {
     _errorMessage = null; // Clear previous UI error
     notifyListeners();
+    String emailToConfirm = email;
+    if (_emailForConfirmation == null) {
+      print(
+          'AppAuthProvider: In-memory email is null. Attempting to restore from SharedPreferences.');
+      final prefs = await SharedPreferences.getInstance();
+      final savedEmail = prefs.getString('emailForRegistrationConfirmation');
+      if (savedEmail != null) {
+        emailToConfirm = savedEmail;
+        _emailForConfirmation = savedEmail; // Restore it to memory
+        print('AppAuthProvider: Successfully restored email for confirmation.');
+      } else {
+        _errorMessage =
+            "Your session has expired. Please try signing up again.";
+        notifyListeners();
+        return false;
+      }
+    }
     final success = await _authService.confirmSignUp(
         email: email, confirmationCode: confirmationCode);
     if (success) {
