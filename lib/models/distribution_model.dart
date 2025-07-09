@@ -243,7 +243,8 @@ class DistributionModel extends ChangeNotifier {
       _setState(isLoading: false, loadingMessage: "dist_model_redeem_success");
       return collectibleToAwardId;
     } catch (e) {
-      _setState(isLoading: false, error: e.toString());
+      final errorKey = e.toString().replaceFirst('Exception: ', '');
+      _setState(isLoading: false, error: errorKey);
       return null;
     }
   }
@@ -486,7 +487,8 @@ class DistributionModel extends ChangeNotifier {
           isLoading: false, loadingMessage: "dist_model_redeemreward_success");
       return true;
     } catch (e) {
-      _setState(isLoading: false, error: "dist_model_redeemreward_fail");
+      final errorKey = e.toString().replaceFirst('Exception: ', '');
+      _setState(isLoading: false, error: errorKey);
       return false;
     }
   }
