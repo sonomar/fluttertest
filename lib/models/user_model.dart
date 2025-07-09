@@ -38,11 +38,9 @@ class UserModel extends ChangeNotifier {
         "userId": userId.toString(),
         "username": newUsername
       };
-      print('mah update body: $userUpdateBody');
 
       // Call the API function from api/user.dart
       final result = await updateUserByUserId(userUpdateBody, _appAuthProvider);
-      print('mah result: $result');
       // Your API should ideally return a clear success/error state.
       // We'll assume a non-null response indicates success for now.
       if (result != null) {

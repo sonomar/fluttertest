@@ -99,7 +99,7 @@ class AuthService {
   final CognitoUserPool _userPool;
   CognitoUser? _cognitoUser;
   CognitoUserSession? _session; // Internal storage for the current session
-  String? _internalErrorMessage;
+  String? errorMessage;
   AppAuthProvider? _appAuthProvider;
 
   AuthService(this._appAuthProvider)
@@ -146,11 +146,8 @@ class AuthService {
   // Expose the current valid session for AppAuthProvider to use
   CognitoUserSession? get session => _session;
 
-  // Expose internal error messages
-  String? get errorMessage => _internalErrorMessage;
-
   Future<void> launchSignInWithProvider(String provider) async {
-    _internalErrorMessage = null;
+    errorMessage = null;
     final String providerName =
         (provider.toLowerCase() == 'google') ? 'Google' : 'SignInWithApple';
 
@@ -163,12 +160,12 @@ class AuthService {
       // Use launchInBrowser for better handling on simulators and devices
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      _internalErrorMessage = 'Could not launch login page.';
+      errorMessage = 'Could not launch login page.';
     }
   }
 
   Future<bool> handleRedirect(Uri uri) async {
-    _internalErrorMessage = null;
+    errorMessage = null;
     try {
       final fragment = uri.fragment;
       final params = Uri.splitQueryString(fragment);
@@ -177,7 +174,7 @@ class AuthService {
       final accessTokenString = params['access_token'];
 
       if (idTokenString == null || accessTokenString == null) {
-        _internalErrorMessage = 'Login failed. Tokens not found in redirect.';
+        errorMessage = 'Login failed. Tokens not found in redirect.';
         return false;
       }
 
@@ -189,7 +186,7 @@ class AuthService {
       final claims = idToken.decodePayload();
       final userEmail = claims['email'];
       if (userEmail == null) {
-        _internalErrorMessage = 'Email not found in token.';
+        errorMessage = 'Email not found in token.';
         return false;
       }
       _cognitoUser = CognitoUser(userEmail, _userPool);
@@ -206,7 +203,7 @@ class AuthService {
       print('Successfully handled redirect and created session.');
       return true;
     } catch (e) {
-      _internalErrorMessage = 'Error handling redirect: ${e.toString()}';
+      errorMessage = 'Error handling redirect: ${e.toString()}';
       return false;
     }
   }
@@ -215,7 +212,7 @@ class AuthService {
       {required String email,
       required String password,
       required Map customAttributes}) async {
-    _internalErrorMessage = null;
+    errorMessage = null;
     final List<AttributeArg> userAttributes = [
       // Always include the email as a standard attribute.
       AttributeArg(name: 'email', value: email),
@@ -232,19 +229,14 @@ class AuthService {
           'AuthService: SignUp successful for $email. Awaiting confirmation.');
       return 'success'; // Return 'success' on success
     } on CognitoClientException catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.message);
-      print('AuthService: SignUp Error: $_internalErrorMessage');
-
-      // MODIFICATION: Check for the specific exception and return it
+      errorMessage = simplifyAuthError(e.toString());
       if (e.name == 'UsernameExistsException') {
-        print(
-            "AuthService: User already exists but may be unconfirmed. Resending confirmation code.");
         await resendConfirmationCode(email);
-        return 'success'; // Return 'success' to proceed to the confirmation view
+        return 'success';
       }
       return 'failed'; // Return 'failed' for other errors
     } catch (e) {
-      _internalErrorMessage = 'app_auth_provider_signup_unexpected';
+      errorMessage = 'app_auth_provider_signup_unexpected';
       print('AuthService: SignUp Error: $e');
       return 'failed'; // Return 'failed' for unexpected errors
     }
@@ -265,7 +257,7 @@ class AuthService {
     required String email,
     required String confirmationCode,
   }) async {
-    _internalErrorMessage = null; // Clear previous errors
+    errorMessage = null; // Clear previous errors
     final cognitoUser = CognitoUser(email, _userPool);
     try {
       // The `confirmRegistration` method returns a bool indicating success.
@@ -273,21 +265,15 @@ class AuthService {
           await cognitoUser.confirmRegistration(confirmationCode);
       print('AuthService: Confirmation for $email successful: $isConfirmed');
       return isConfirmed;
-    } on CognitoClientException catch (e) {
-      // Handle known Cognito errors, e.g., CodeMismatchException
-      _internalErrorMessage =
-          _internalErrorMessage = simplifyAuthError(e.message);
-      print('AuthService: Confirmation Error: $_internalErrorMessage');
-      return false;
     } catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.toString());
-      print('AuthService: Confirmation Error: $e');
+      errorMessage = simplifyAuthError(e.toString());
+      print('AuthService: Confirmation Error: $errorMessage');
       return false;
     }
   }
 
   Future<bool> checkCurrentSessionStatus() async {
-    _internalErrorMessage = null; // Clear previous error
+    errorMessage = null; // Clear previous error
     // If we already have a valid session in memory, return true immediately
     if (_session != null && _session!.isValid()) {
       print('AuthService: In-memory session is valid.');
@@ -320,24 +306,17 @@ class AuthService {
         await _forceSignOutAndClearLocal(); // Call the consolidated sign-out
         return false;
       }
-    } on CognitoClientException catch (e) {
-      _internalErrorMessage =
-          _internalErrorMessage = simplifyAuthError(e.message);
-      print('AuthService: $_internalErrorMessage');
-      _session = null; // Clear internal session
-      await _forceSignOutAndClearLocal(); // Call the consolidated sign-out
-      return false;
-    } on Exception catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.toString());
-      _session = null; // Clear internal session
-      await _forceSignOutAndClearLocal(); // Call the consolidated sign-out
+    } catch (e) {
+      errorMessage = simplifyAuthError(e.toString());
+      _session = null;
+      await _forceSignOutAndClearLocal();
       return false;
     }
   }
 
   Future<bool> signIn(String email, String password,
       {bool isRegister = false}) async {
-    _internalErrorMessage = null; // Clear any previous error message
+    errorMessage = null; // Clear any previous error message
     final cognitoUser = CognitoUser(email, _userPool);
 
     final authDetails = AuthenticationDetails(
@@ -375,59 +354,50 @@ class AuthService {
           'AuthService: User $email signed in successfully. Session valid: ${_session!.isValid()}');
       return true; // Successfully authenticated and cached
     } on CognitoUserNewPasswordRequiredException catch (e) {
-      _internalErrorMessage = 'New Password Required: ${e.message}';
-      print('AuthService Sign-in Error: $_internalErrorMessage');
+      errorMessage = 'New Password Required: ${e.message}';
+      print('AuthService Sign-in Error: $errorMessage');
       _session = null; // Clear session on specific failure
       return false; // No retry for user action required
     } on CognitoUserMfaRequiredException catch (e) {
-      _internalErrorMessage = 'MFA Required: ${e.message}';
-      print('AuthService Sign-in Error: $_internalErrorMessage');
+      errorMessage = 'MFA Required: ${e.message}';
+      print('AuthService Sign-in Error: $errorMessage');
       _session = null; // Clear session on specific failure
       return false; // No retry for user action required
     } on CognitoUserSelectMfaTypeException catch (e) {
-      _internalErrorMessage = 'Select MFA Type: ${e.message}';
-      print('AuthService Sign-in Error: $_internalErrorMessage');
+      errorMessage = 'Select MFA Type: ${e.message}';
+      print('AuthService Sign-in Error: $errorMessage');
       _session = null; // Clear session on specific failure
       return false; // No retry for user action required
     } on CognitoUserMfaSetupException catch (e) {
-      _internalErrorMessage = 'MFA Setup: ${e.message}';
-      print('AuthService Sign-in Error: $_internalErrorMessage');
+      errorMessage = 'MFA Setup: ${e.message}';
+      print('AuthService Sign-in Error: $errorMessage');
       _session = null; // Clear session on specific failure
       return false; // No retry for user action required
     } on CognitoUserTotpRequiredException catch (e) {
-      _internalErrorMessage = 'TOTP Required: ${e.message}';
-      print('AuthService Sign-in Error: $_internalErrorMessage');
+      errorMessage = 'TOTP Required: ${e.message}';
+      print('AuthService Sign-in Error: $errorMessage');
       _session = null; // Clear session on specific failure
       return false; // No retry for user action required
     } on CognitoUserCustomChallengeException catch (e) {
-      _internalErrorMessage = 'Custom Challenge: ${e.message}';
-      print('AuthService Sign-in Error: $_internalErrorMessage');
+      errorMessage = 'Custom Challenge: ${e.message}';
+      print('AuthService Sign-in Error: $errorMessage');
       _session = null; // Clear session on specific failure
       return false; // No retry for user action required
     } on CognitoUserConfirmationNecessaryException catch (e) {
-      _internalErrorMessage = 'Confirmation Necessary: ${e.message}';
-      print('AuthService Sign-in Error: $_internalErrorMessage');
+      print('AuthService Sign-in Error: $errorMessage');
       await resendConfirmationCode(email);
       throw UserNotConfirmedException('Please confirm your account.');
-    } on CognitoClientException catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.message);
-      _session = null; // Clear session on this type of failure
-      // All attempts exhausted for this type of error
-      print(
-          'AuthService: attempt failed for user $email due to CognitoClientException. Signing out.');
-      await _forceSignOutAndClearLocal(); // Call the consolidated sign-out
-      return false;
     } catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.toString());
-      print(
-          'AuthService: Attempt failed for user $email due to unexpected error. Signing out.');
-      await _forceSignOutAndClearLocal(); // Call the consolidated sign-out
+      errorMessage = simplifyAuthError(e.toString());
+      print('--- AuthService Sign-In ERROR, Key: $errorMessage ---');
+      _session = null;
+      await _forceSignOutAndClearLocal();
       return false;
     }
   }
 
   Future<bool> signInWithEmailCode(String email) async {
-    _internalErrorMessage = null;
+    errorMessage = null;
     final prefs = await SharedPreferences.getInstance();
 
     // Manually construct and send the request to Cognito's InitiateAuth endpoint
@@ -466,26 +436,24 @@ class AuthService {
         return true; // Success, we are ready for the user to enter the code.
       } else {
         // Handle errors from Cognito
-        _internalErrorMessage =
-            responseBody['message'] ?? 'Failed to initiate login.';
+        errorMessage = responseBody['message'] ?? 'Failed to initiate login.';
         return false;
       }
     } catch (e) {
-      _internalErrorMessage =
-          'An unexpected network error occurred: ${e.toString()}';
+      errorMessage = 'An unexpected network error occurred: ${e.toString()}';
       return false;
     }
   }
 
   Future<bool> answerEmailCodeChallenge(String email, String answer) async {
-    _internalErrorMessage = null;
+    errorMessage = null;
     final prefs = await SharedPreferences.getInstance();
 
     final savedEmail = prefs.getString('emailForAuthChallenge');
     final savedSession = prefs.getString('cognitoChallengeSession');
 
     if (savedEmail == null || savedSession == null || savedEmail != email) {
-      _internalErrorMessage = 'Your session has expired. Please try again.';
+      errorMessage = 'Your session has expired. Please try again.';
       return false;
     }
 
@@ -562,20 +530,13 @@ class AuthService {
         print('Successfully answered challenge and created session.');
         return true;
       } else {
-        _internalErrorMessage = responseBody['message'] ??
-            'The code you entered is incorrect. Please try again.';
-        if (responseBody['__type']?.contains('NotAuthorizedException') ??
-            false) {
-          await prefs.remove('emailForAuthChallenge');
-          await prefs.remove('cognitoChallengeSession');
-          _internalErrorMessage =
-              'Your session has expired. Please start the login process again.';
-        }
-        return false;
+        errorMessage = simplifyAuthError(response.body);
+        await prefs.remove('emailForAuthChallenge');
+        await prefs.remove('cognitoChallengeSession');
       }
+      return false;
     } catch (e) {
-      _internalErrorMessage =
-          'An unexpected network error occurred: ${e.toString()}';
+      errorMessage = 'An unexpected network error occurred: ${e.toString()}';
       return false;
     }
   }
@@ -592,7 +553,7 @@ class AuthService {
     _cognitoUser = null; // Clear internal CognitoUser object
     print(
         'AuthService: User signed out and all relevant local data cleared. _cognitoUser is now $_cognitoUser.');
-    _internalErrorMessage = null; // Clear error message on sign out
+    errorMessage = null; // Clear error message on sign out
     print('AuthService: User signed out and all relevant local data cleared.');
   }
 
@@ -620,7 +581,6 @@ class AuthService {
     await _clearSharedPreferences(); // Always clear shared preferences
     _session = null;
     _cognitoUser = null;
-    _internalErrorMessage = null;
     print('AuthService: Forced sign-out and local data cleared.');
   }
 
@@ -628,10 +588,10 @@ class AuthService {
     required String oldPassword,
     required String newPassword,
   }) async {
-    _internalErrorMessage = null;
+    errorMessage = null;
     // First, ensure we have a valid session and user object.
     if (_cognitoUser == null || _session == null || !_session!.isValid()) {
-      _internalErrorMessage = 'You must be logged in to change your password.';
+      errorMessage = 'You must be logged in to change your password.';
       return false;
     }
 
@@ -640,19 +600,18 @@ class AuthService {
       print('AuthService: Password changed successfully.');
       return true;
     } on CognitoClientException catch (e) {
-      _internalErrorMessage =
-          _internalErrorMessage = simplifyAuthError(e.message);
-      print('AuthService: ChangePassword Error: $_internalErrorMessage');
+      errorMessage = errorMessage = simplifyAuthError(e.message);
+      print('AuthService: ChangePassword Error: $errorMessage');
       return false;
     } catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.toString());
+      errorMessage = simplifyAuthError(e.toString());
       print('AuthService: ChangePassword Error: $e');
       return false;
     }
   }
 
   Future<bool> forgotPassword(String email) async {
-    _internalErrorMessage = null;
+    errorMessage = null;
     final cognitoUser = CognitoUser(email, _userPool);
     try {
       await cognitoUser.forgotPassword();
@@ -661,11 +620,11 @@ class AuthService {
       print('AuthService: Forgot password process initiated for $email.');
       return true;
     } on CognitoClientException catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.message);
-      print('AuthService: ForgotPassword Error: $_internalErrorMessage');
+      errorMessage = simplifyAuthError(e.message);
+      print('AuthService: ForgotPassword Error: $errorMessage');
       return false;
     } catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.toString());
+      errorMessage = simplifyAuthError(e.toString());
       print('AuthService: ForgotPassword Error: $e');
       return false;
     }
@@ -676,7 +635,7 @@ class AuthService {
     required String confirmationCode,
     required String newPassword,
   }) async {
-    _internalErrorMessage = null;
+    errorMessage = null;
     // Use the stored user from the previous step, or create a new one.
     final cognitoUser = _cognitoUser ?? CognitoUser(email, _userPool);
 
@@ -684,20 +643,14 @@ class AuthService {
       final bool passwordConfirmed =
           await cognitoUser.confirmPassword(confirmationCode, newPassword);
       if (!passwordConfirmed) {
-        _internalErrorMessage =
+        errorMessage =
             'Password could not be confirmed. The code may be incorrect or expired.l';
         return false;
       }
       print('AuthService: Password confirmed successfully for $email.');
       return true;
-    } on CognitoClientException catch (e) {
-      _internalErrorMessage =
-          _internalErrorMessage = simplifyAuthError(e.message);
-      print(
-          'AuthService: Cognito ConfirmPassword Error: $_internalErrorMessage');
-      return false;
     } catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.toString());
+      errorMessage = simplifyAuthError(e.toString());
       print('AuthService: Internal ConfirmPassword Error: $e');
       return false;
     }
@@ -708,9 +661,9 @@ class AuthService {
   Future<bool> updateUserEmail({
     required String newEmail,
   }) async {
-    _internalErrorMessage = null;
+    errorMessage = null;
     if (_cognitoUser == null || _session == null || !_session!.isValid()) {
-      _internalErrorMessage = 'You must be logged in to change your email.';
+      errorMessage = 'You must be logged in to change your email.';
       return false;
     }
 
@@ -723,12 +676,11 @@ class AuthService {
           'AuthService: Update email initiated. Verification code sent to $newEmail.');
       return true;
     } on CognitoClientException catch (e) {
-      _internalErrorMessage =
-          _internalErrorMessage = simplifyAuthError(e.message);
-      print('AuthService: UpdateEmail Error: $_internalErrorMessage');
+      errorMessage = errorMessage = simplifyAuthError(e.message);
+      print('AuthService: UpdateEmail Error: $errorMessage');
       return false;
     } catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.toString());
+      errorMessage = simplifyAuthError(e.toString());
       print('AuthService: UpdateEmail Error: $e');
       return false;
     }
@@ -738,9 +690,9 @@ class AuthService {
   Future<bool> verifyUserEmail({
     required String verificationCode,
   }) async {
-    _internalErrorMessage = null;
+    errorMessage = null;
     if (_cognitoUser == null) {
-      _internalErrorMessage = 'You must be logged in to change your email.';
+      errorMessage = 'You must be logged in to change your email.';
       return false;
     }
 
@@ -751,21 +703,21 @@ class AuthService {
       // to ensure the user's session tokens are updated with the new email.
       return true;
     } on CognitoClientException catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.message);
-      print('AuthService: VerifyEmail Error: $_internalErrorMessage');
+      errorMessage = simplifyAuthError(e.message);
+      print('AuthService: VerifyEmail Error: $errorMessage');
       return false;
     } catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.toString());
+      errorMessage = simplifyAuthError(e.toString());
       print('AuthService: VerifyEmail Error: $e');
       return false;
     }
   }
 
   Future<bool> deleteAccount({required String userId}) async {
-    _internalErrorMessage = null;
+    errorMessage = null;
     // Ensure we have a valid, authenticated user to delete.
     if (_cognitoUser == null || _session == null || !_session!.isValid()) {
-      _internalErrorMessage = 'You must be logged in to delete your account.';
+      errorMessage = 'You must be logged in to delete your account.';
       return false;
     }
 
@@ -786,12 +738,11 @@ class AuthService {
 
       return true;
     } on CognitoClientException catch (e) {
-      _internalErrorMessage =
-          _internalErrorMessage = simplifyAuthError(e.message);
-      print('AuthService: DeleteAccount Error: $_internalErrorMessage');
+      errorMessage = errorMessage = simplifyAuthError(e.message);
+      print('AuthService: DeleteAccount Error: $errorMessage');
       return false;
     } catch (e) {
-      _internalErrorMessage = simplifyAuthError(e.toString());
+      errorMessage = simplifyAuthError(e.toString());
       print('AuthService: DeleteAccount Error: $e');
       return false;
     }

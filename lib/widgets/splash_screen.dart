@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import '../helpers/localization_helper.dart';
+import '../models/app_localizations.dart';
 import '../models/app_auth_provider.dart';
 import '../models/asset_provider.dart';
 import '../models/user_model.dart';
@@ -29,6 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
   /// MODIFIED: This function now handles the case where user data fails to load for an authenticated user.
   Future<void> _initializeApp() async {
     try {
+      await AppLocalizations.of(context)!.load();
       await _requestInitialPermissions();
 
       final authProvider = context.read<AppAuthProvider>();

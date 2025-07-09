@@ -173,7 +173,8 @@ class AppAuthProvider with ChangeNotifier {
           return false;
         }
       } else {
-        _errorMessage = _authService.errorMessage;
+        _errorMessage = _authService.errorMessage ??
+            'auth_error_helper_simplify_unexpected';
         _status = AuthStatus.unauthenticated;
         _userSession = null;
         print(
@@ -191,7 +192,10 @@ class AppAuthProvider with ChangeNotifier {
       notifyListeners();
       return false; // Login did not complete, but we are handling the flow.
     } catch (e) {
-      _errorMessage = _authService.errorMessage;
+      // --- MODIFICATION: Add a fallback error key ---
+      // This ensures _errorMessage is never null on failure.
+      _errorMessage =
+          _authService.errorMessage ?? 'auth_error_helper_simplify_unexpected';
       print('AppAuthProvider: $_errorMessage');
       _status = AuthStatus.unauthenticated;
       _userSession = null;

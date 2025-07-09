@@ -91,7 +91,8 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _handleBackPress() async {
     final bool confirmed = await _showCancelConfirmationDialog();
     if (confirmed && mounted) {
-      Provider.of<AppAuthProvider>(context, listen: false).clearErrorMessage();
+      Provider.of<AppAuthProvider>(context, listen: false)
+          .setErrorMessage(null);
       setState(() {
         _formKey.currentState?.reset();
         _clearControllers();
@@ -131,6 +132,16 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
+    if (_formType == AuthFormType.register &&
+        _passwordController.text != _confirmPasswordController.text) {
+      setState(() {
+        // Set the specific "Passwords do not match" error and stop.
+        _uiErrorMessage =
+            translate("register_reenter_password_validator", context);
+      });
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
     });
@@ -141,106 +152,78 @@ class _LoginPageState extends State<LoginPage> {
     bool success = false;
     bool shouldNavigateToSplash = false;
 
-    switch (_formType) {
-      case AuthFormType.loginWithPassword:
-        success = await authProvider.signIn(email, password);
-        if (success) {
-          shouldNavigateToSplash = true;
-        } else {
-          setState(() {
-            _uiErrorMessage = authProvider.errorMessage ??
-                translate("login_page_submit_loginfallback", context);
-            _isSubmitting = false;
-          });
-          return;
-        }
-        break;
-      case AuthFormType.loginWithEmailCode:
-        success = await authProvider
-            .answerEmailCodeChallenge(_loginCodeController.text.trim());
-        if (success) {
-          shouldNavigateToSplash = true;
-        } else {
-          setState(() {
-            _uiErrorMessage = authProvider.errorMessage ??
-                "The code provided is incorrect or has expired.";
-            _isSubmitting = false;
-          });
-          return;
-        }
-        break;
-      case AuthFormType.register:
-        final String result = await authProvider.signUp(
-          email: email,
-          password: password,
-          customAttributes: {
-            'passwordHashed': encryptPassword(password),
-            'appUsername': 'test'
-          },
-        );
-        if (result == 'success' && mounted) {
-          setState(() {
-            _formType = AuthFormType.confirm;
-            _isSubmitting = false;
-          });
-          return;
-        }
-        if (result == 'UsernameExistsException' && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content:
-                  Text(translate("login_page_submit_emailexists", context)),
-              backgroundColor: Colors.orange,
-            ),
-          );
-          setState(() {
-            _formType = AuthFormType.loginInitial;
-            _isSubmitting = false;
-            _passwordController.clear();
-            _confirmPasswordController.clear();
-          });
-          return;
-        }
-        setState(() {
-          _uiErrorMessage = authProvider.errorMessage ??
-              translate("login_page_submit_regfallback", context);
-          _isSubmitting = false;
-        });
-        return;
-      case AuthFormType.confirm:
-        success = await authProvider.confirmSignUp(
-            email: email, confirmationCode: _loginCodeController.text.trim());
-        if (success) {
-          success =
-              await authProvider.signIn(email, password, isRegister: true);
+    try {
+      switch (_formType) {
+        case AuthFormType.loginWithPassword:
+          success = await authProvider.signIn(email, password);
           if (success) {
             shouldNavigateToSplash = true;
-          } else {
-            setState(() {
-              _uiErrorMessage = authProvider.errorMessage ??
-                  translate("login_page_submit_signinfail", context);
-              _isSubmitting = false;
-            });
-            return;
           }
-        } else {
-          setState(() {
-            _uiErrorMessage = authProvider.errorMessage ??
-                translate("login_page_submit_confirmfail", context);
-            _isSubmitting = false;
-          });
-          return;
-        }
-        break;
-      default:
-        break;
+          break;
+
+        case AuthFormType.loginWithEmailCode:
+          success = await authProvider
+              .answerEmailCodeChallenge(_loginCodeController.text.trim());
+          if (success) {
+            shouldNavigateToSplash = true;
+          }
+          break;
+
+        case AuthFormType.register:
+          final String result = await authProvider.signUp(
+            email: email,
+            password: password,
+            customAttributes: {
+              'passwordHashed': encryptPassword(password),
+              'appUsername': 'test'
+            },
+          );
+          if (result == 'success' && mounted) {
+            // On success, we don't navigate yet, just change the form.
+            _formType = AuthFormType.confirm;
+          } else if (result == 'UsernameExistsException' && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content:
+                    Text(translate("login_page_submit_emailexists", context)),
+                backgroundColor: Colors.orange,
+              ),
+            );
+            _formType = AuthFormType.loginInitial;
+            _passwordController.clear();
+            _confirmPasswordController.clear();
+          }
+          // For other errors, the provider has already notified listeners.
+          break;
+
+        case AuthFormType.confirm:
+          success = await authProvider.confirmSignUp(
+              email: email, confirmationCode: _loginCodeController.text.trim());
+          if (success) {
+            success =
+                await authProvider.signIn(email, password, isRegister: true);
+            if (success) {
+              shouldNavigateToSplash = true;
+            }
+          }
+          break;
+        default:
+          break;
+      }
+    } finally {
+      // MODIFICATION: This `finally` block ensures that no matter what happens
+      // (success or failure), the loading spinner is turned off.
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
 
     if (shouldNavigateToSplash && mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const SplashScreen()),
       );
-      return;
     }
   }
 
@@ -353,9 +336,17 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AppAuthProvider>(context);
-    final providerErrorMessage = authProvider.errorMessage;
+    final String? errorKey = authProvider.errorMessage;
+    String? displayError;
     final bool showBackButton = _formType != AuthFormType.loginInitial &&
         _formType != AuthFormType.register;
+    if (errorKey != null) {
+      // If an error key exists in the provider, translate it.
+      displayError = translate(errorKey, context);
+    } else if (_uiErrorMessage.isNotEmpty) {
+      // Otherwise, use the local error message for form validation.
+      displayError = _uiErrorMessage;
+    }
     return PopScope(
       canPop: !showBackButton,
       onPopInvokedWithResult: (bool didPop, dynamic _) {
@@ -416,12 +407,11 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(height: 40),
                         ..._buildFormFields(),
                         const SizedBox(height: 20),
-                        if (providerErrorMessage != null ||
-                            _uiErrorMessage.isNotEmpty)
+                        if (displayError != null)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 10),
                             child: Text(
-                              providerErrorMessage ?? _uiErrorMessage,
+                              displayError,
                               style: const TextStyle(
                                   color: Colors.red, fontSize: 14),
                               textAlign: TextAlign.center,
@@ -710,7 +700,7 @@ class _LoginPageState extends State<LoginPage> {
                     translate("register_reenter_password_label", context),
                 border: const OutlineInputBorder()),
             obscureText: true,
-            validator: (value) => value != _passwordController.text
+            validator: (value) => (value?.isEmpty ?? true)
                 ? translate("register_reenter_password_validator", context)
                 : null,
           ),
