@@ -13,6 +13,8 @@ class UserModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   UserModel(this._appAuthProvider);
+  bool get isUserLoaded =>
+      !_isLoading && (_currentUser != null || _errorMessage != null);
   bool get needsOnboarding =>
       _currentUser != null && _currentUser['userType'] == 'onboarding';
 

@@ -227,20 +227,35 @@ class _MyHomePageState extends State<MyHomePage> {
       Missions(key: PageStorageKey('mission'), userData: widget.userData),
       const ProfileScreen(key: PageStorageKey('profile')),
     ];
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    final userModel = context.read<UserModel>();
+
+    // This function contains the logic to show the dialog
+    void showOnboardingIfNeeded() {
+      userModel.removeListener(showOnboardingIfNeeded);
+
       final authProvider = context.read<AppAuthProvider>();
-      final userModel = context.read<UserModel>();
+
       if (authProvider.shouldShowOnboardingForNewUser ||
           userModel.needsOnboarding) {
         showDialog(
           context: context,
-          barrierDismissible: false, // User cannot dismiss by tapping outside
+          barrierDismissible: false,
           builder: (BuildContext context) {
             return const Onboarding();
           },
         );
       }
-    });
+    }
+
+    if (userModel.isUserLoaded) {
+      // Use a post-frame callback to safely show a dialog after the build.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showOnboardingIfNeeded();
+      });
+    } else {
+      // Otherwise, add a listener that will call our function once the user data is loaded.
+      userModel.addListener(showOnboardingIfNeeded);
+    }
   }
 
   @override

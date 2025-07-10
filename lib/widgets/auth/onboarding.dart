@@ -16,65 +16,55 @@ class _OnboardingState extends State<Onboarding> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
 
-  bool _isSuccess = false;
-
   @override
   void dispose() {
     _usernameController.dispose();
     super.dispose();
   }
 
-  Future<void> _submitUsername() async {
+  Future<void> _submitAndFinish() async {
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
 
     final userModel = context.read<UserModel>();
+    final authProvider = context.read<AppAuthProvider>();
     final newUsername = _usernameController.text.trim().toLowerCase();
 
+    // This attempts to update the username and the userType in one API call.
     final success = await userModel.updateUsername(newUsername);
 
+    // Ensure the widget is still mounted before interacting with context.
     if (mounted && success) {
-      setState(() {
-        _isSuccess = true;
-      });
-    }
-  }
+      // THIS IS THE KEY STEP:
+      // If the user was a "new user", this resets the flag.
+      authProvider.completeNewUserOnboarding();
 
-  void _finishOnboarding() {
-    context.read<AppAuthProvider>().completeNewUserOnboarding();
-    Navigator.of(context).pop();
+      // Close the onboarding dialog.
+      Navigator.of(context).pop();
+    }
+    // If it fails, the error message will automatically appear in the form
+    // thanks to the Consumer widget listening to UserModel.
   }
+  // --- END: MODIFIED SUBMISSION LOGIC ---
 
   @override
   Widget build(BuildContext context) {
+    // Prevent the user from backing out of the onboarding.
     return PopScope(
-      canPop: false, // This prevents the pop gesture.
+      canPop: false,
       onPopInvokedWithResult: (bool didPop, dynamic result) {
         return;
       },
       child: AlertDialog(
-        title: Text(
-          _isSuccess
-              ? translate("onboarding_build_welcometitle", context)
-              : translate("onboarding_build_createtitle", context),
-        ),
+        title: Text(translate("onboarding_build_createtitle", context)),
         content: Consumer<UserModel>(
           builder: (context, userModel, _) {
-            return _isSuccess
-                ? _buildSuccessView(userModel)
-                : _buildFormView(userModel);
+            // The view is now simpler and only needs to show the form.
+            return _buildFormView(userModel);
           },
         ),
-        actions: _isSuccess
-            ? [
-                TextButton(
-                  onPressed: _finishOnboarding,
-                  child:
-                      Text(translate("onboarding_build_startbutton", context)),
-                ),
-              ]
-            : [],
+        // Actions are now part of the form itself.
       ),
     );
   }
@@ -93,7 +83,7 @@ class _OnboardingState extends State<Onboarding> {
               controller: _usernameController,
               decoration: InputDecoration(
                 labelText: translate("onboarding_form_usernamelabel", context),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
@@ -105,7 +95,6 @@ class _OnboardingState extends State<Onboarding> {
                 if (value.length < 5) {
                   return translate("onboarding_form_uservalidator2", context);
                 }
-                // 4. Add a validation rule to double-check the format
                 if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(value)) {
                   return translate("onboarding_form_uservalidator3", context);
                 }
@@ -116,9 +105,8 @@ class _OnboardingState extends State<Onboarding> {
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
-                  userModel.errorMessage!.contains('duplicate')
-                      ? translate("onboarding_form_duplicateuser", context)
-                      : userModel.errorMessage!,
+                  // Use the helper to translate known error keys
+                  translate(userModel.errorMessage!, context),
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
@@ -129,7 +117,8 @@ class _OnboardingState extends State<Onboarding> {
               Align(
                 alignment: Alignment.centerRight,
                 child: FilledButton(
-                  onPressed: _submitUsername,
+                  // The button now calls the combined submit and finish function.
+                  onPressed: _submitAndFinish,
                   child:
                       Text(translate("onboarding_form_submitbutton", context)),
                 ),
@@ -138,10 +127,5 @@ class _OnboardingState extends State<Onboarding> {
         ),
       ),
     );
-  }
-
-  Widget _buildSuccessView(UserModel userModel) {
-    final username = userModel.currentUser?['username'] ?? 'Explorer';
-    return Text('${translate("onboarding_success_body", context)} $username');
   }
 }
