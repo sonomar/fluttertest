@@ -49,6 +49,7 @@ def createUser(
         username=user.username, # Optional fields from schema
         deviceId=user.deviceId,
         authToken=user.authToken,
+        cognitoUsername=user.cognitoUsername
         # active, createdDt, updatedDt will use server defaults from models
         # userRank, profileImg, authToken, lastLoggedIn are Optional/nullable and default to None
     )
