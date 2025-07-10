@@ -15,6 +15,36 @@ Future<void> updateMissionProgress({
   // Use read to get providers without listening
   final missionModel = context.read<MissionModel>();
   final collectibleModel = context.read<CollectibleModel>();
+  await collectibleModel.loadCollectibles();
+  final List<dynamic> userCollectibles = collectibleModel.userCollectibles;
+  bool shouldUpdate = false;
+
+  if (operation == MissionProgressOperation.increment) {
+    // Check if this will be the FIRST instance of this collectible.
+    final count = userCollectibles
+        .where((uc) => uc['collectibleId'].toString() == collectibleId)
+        .length;
+    if (count == 0) {
+      shouldUpdate = true;
+    }
+  } else if (operation == MissionProgressOperation.decrement) {
+    // Check if this is the LAST instance of this collectible.
+    final count = userCollectibles
+        .where((uc) => uc['collectibleId'].toString() == collectibleId)
+        .length;
+    if (count == 1) {
+      shouldUpdate = true;
+    }
+  }
+
+  if (!shouldUpdate) {
+    print(
+        "MissionHelper: Collectible change is not unique. Skipping progress update.");
+    return;
+  }
+
+  print(
+      "MissionHelper: Collectible change is unique. Proceeding to find relevant missions.");
 
   // Find the collectible's template to get its collectionId
   dynamic collectibleTemplate;

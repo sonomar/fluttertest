@@ -230,15 +230,15 @@ class DistributionModel extends ChangeNotifier {
         }, _appAuthProvider);
       }
 
-      await createUserCollectible(
-          userId, collectibleToAwardId, newMint, _appAuthProvider);
-
       await updateMissionProgress(
         userId: userId,
         collectibleId: collectibleToAwardId,
         operation: MissionProgressOperation.increment,
         context: context,
       );
+
+      await createUserCollectible(
+          userId, collectibleToAwardId, newMint, _appAuthProvider);
 
       _setState(isLoading: false, loadingMessage: "dist_model_redeem_success");
       return collectibleToAwardId;
@@ -352,13 +352,6 @@ class DistributionModel extends ChangeNotifier {
         "collectibleReceived": collectibleReceivedJson
       }, _appAuthProvider);
 
-      await updateUserCollectibleByUserCollectibleId({
-        "userCollectibleId": userCollectibleId,
-        "ownerId": newOwnerId,
-        "previousOwnerId": giverId,
-        "lastTransferredDt": DateTime.now().toIso8601String(),
-      }, _appAuthProvider);
-
       await updateMissionProgress(
         userId: newOwnerId, // The user receiving the collectible
         collectibleId: collectibleId,
@@ -371,6 +364,13 @@ class DistributionModel extends ChangeNotifier {
         operation: MissionProgressOperation.decrement,
         context: context,
       );
+
+      await updateUserCollectibleByUserCollectibleId({
+        "userCollectibleId": userCollectibleId,
+        "ownerId": newOwnerId,
+        "previousOwnerId": giverId,
+        "lastTransferredDt": DateTime.now().toIso8601String(),
+      }, _appAuthProvider);
 
       _setState(
           isLoading: false,
@@ -475,15 +475,15 @@ class DistributionModel extends ChangeNotifier {
         "collectibleReceived": collectibleReceivedJson
       }, _appAuthProvider);
 
-      await createUserCollectible(
-          userId, collectibleToAwardId, newMint, _appAuthProvider);
-
       await updateMissionProgress(
         userId: userId,
         collectibleId: collectibleToAwardId,
         operation: MissionProgressOperation.increment,
         context: context,
       );
+
+      await createUserCollectible(
+          userId, collectibleToAwardId, newMint, _appAuthProvider);
 
       _setState(
           isLoading: false, loadingMessage: "dist_model_redeemreward_success");

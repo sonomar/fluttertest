@@ -214,8 +214,8 @@ class MissionModel extends ChangeNotifier {
     print("--- DEBUG: Attempting to reset mission progress ---");
     try {
       final body = {
-        "missionUserId": 4, // Targeting missionUser with ID 1
-        "progress": 13,
+        "missionUserId": 1, // Targeting missionUser with ID 1
+        "progress": 0,
         "completed": false,
         "rewardClaimed": false, // Assuming this field exists in your API
       };
