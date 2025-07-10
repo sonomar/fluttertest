@@ -3,7 +3,6 @@ import '../models/app_auth_provider.dart';
 import '../models/user_model.dart';
 import '../api/mission.dart';
 import '../api/mission_user.dart';
-import '../helpers/sort_data.dart';
 
 enum MissionSortBy {
   title,
@@ -114,7 +113,7 @@ class MissionModel extends ChangeNotifier {
   Future<bool> updateMissionProgress(
       dynamic missionUser, int newProgress) async {
     if (missionUser == null || missionUser['missionUserId'] == null) {
-      _errorMessage = "mission_model_updateprog_invaliddata";
+      _errorMessage = "Mission progress not updated.";
       notifyListeners();
       return false;
     }
@@ -130,7 +129,7 @@ class MissionModel extends ChangeNotifier {
       _missionUsers[index]['progress'] = newProgress;
       notifyListeners();
     } else {
-      _errorMessage = "mission_model_updateprog_nocache";
+      _errorMessage = "No cache found for mission progress.";
       notifyListeners();
       return false;
     }
@@ -146,7 +145,7 @@ class MissionModel extends ChangeNotifier {
       if (result != null) {
         return true;
       } else {
-        _errorMessage = "mission_model_updateprog_savefail";
+        _errorMessage = "failed to save mission model save progress";
         if (originalProgress != null) {
           _missionUsers[index]['progress'] = originalProgress;
         }
@@ -154,7 +153,7 @@ class MissionModel extends ChangeNotifier {
         return false;
       }
     } catch (e) {
-      _errorMessage = "${"mission_model_updateprog_error"}$e";
+      _errorMessage = "${"error updating mission model progress"}$e";
       if (originalProgress != null) {
         _missionUsers[index]['progress'] = originalProgress;
       }
@@ -165,7 +164,7 @@ class MissionModel extends ChangeNotifier {
 
   Future<bool> updateMissionCompletion(dynamic missionUser) async {
     if (missionUser == null || missionUser['missionUserId'] == null) {
-      _errorMessage = "mission_model_updatecomp_invaliddata";
+      _errorMessage = "Invalid data while updating mission completion.";
       notifyListeners();
       return false;
     }
@@ -179,7 +178,7 @@ class MissionModel extends ChangeNotifier {
       _missionUsers[index]['dateCompleted'] = DateTime.now().toIso8601String();
       notifyListeners();
     } else {
-      _errorMessage = "mission_model_updatecomp_nocache";
+      _errorMessage = "no cache found for mission completion.";
       notifyListeners();
       return false;
     }
@@ -196,14 +195,14 @@ class MissionModel extends ChangeNotifier {
       if (result != null) {
         return true;
       } else {
-        _errorMessage = "mission_model_updatecomp_savefail";
+        _errorMessage = "save failed for mission model update completion";
         _missionUsers[index]['completed'] = false;
         _missionUsers[index]['dateCompleted'] = null;
         notifyListeners();
         return false;
       }
     } catch (e) {
-      _errorMessage = "${"mission_model_updatecomp_error"}$e";
+      _errorMessage = "${"error updating mission completion status"}$e";
       _missionUsers[index]['completed'] = false;
       _missionUsers[index]['dateCompleted'] = null;
       notifyListeners();
@@ -215,8 +214,8 @@ class MissionModel extends ChangeNotifier {
     print("--- DEBUG: Attempting to reset mission progress ---");
     try {
       final body = {
-        "missionUserId": 4, // Targeting missionUser with ID 1
-        "progress": 13,
+        "missionUserId": 1, // Targeting missionUser with ID 1
+        "progress": 0,
         "completed": false,
         "rewardClaimed": false, // Assuming this field exists in your API
       };

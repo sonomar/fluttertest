@@ -309,9 +309,7 @@ class _CollectionScreenState extends State<CollectionScreen>
                         const CircularProgressIndicator(),
                         const SizedBox(height: 16),
                         Text(
-                          collectibleModel.loadingMessage ??
-                              translate("collection_screen_build_loading_init",
-                                  context),
+                          translate("collectible_model_load_loading", context),
                           textAlign: TextAlign.center,
                           style:
                               const TextStyle(fontSize: 16, color: Colors.grey),

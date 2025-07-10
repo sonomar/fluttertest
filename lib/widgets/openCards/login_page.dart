@@ -580,7 +580,7 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(color: Colors.white)),
               TextButton(
                   onPressed: _isSubmitting ? null : _switchFormType,
-                  child: Text(translate("register_button_label", context))),
+                  child: Text(translate("login_button_label", context))),
             ],
           )
         ];

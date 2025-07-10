@@ -13,6 +13,8 @@ class UserModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   UserModel(this._appAuthProvider);
+  bool get needsOnboarding =>
+      _currentUser != null && _currentUser['userType'] == 'onboarding';
 
   void clearUser() {
     _currentUser = null;
@@ -34,34 +36,41 @@ class UserModel extends ChangeNotifier {
 
     try {
       final userId = _currentUser['userId'];
-      final userUpdateBody = {
+
+      // Start building the update body
+      final Map<String, dynamic> userUpdateBody = {
         "userId": userId.toString(),
         "username": newUsername
       };
 
-      // Call the API function from api/user.dart
+      // If the user is currently in the onboarding state,
+      // add the userType update to the same API call.
+      if (needsOnboarding) {
+        userUpdateBody["userType"] = "email";
+      }
+
       final result = await updateUserByUserId(userUpdateBody, _appAuthProvider);
-      // Your API should ideally return a clear success/error state.
-      // We'll assume a non-null response indicates success for now.
+
       if (result != null) {
-        // --- OPTIMISTIC UPDATE ---
-        // Instead of calling loadUser() and causing a race condition,
-        // we update the local user object directly.
+        // Optimistically update the local user object for instant UI feedback.
         _currentUser['username'] = newUsername;
+        // Also update the userType locally if it was changed.
+        if (needsOnboarding) {
+          _currentUser['userType'] = 'email';
+        }
+
         _isLoading = false;
-        notifyListeners(); // Notify the UI of the updated username.
+        notifyListeners();
         return true;
       } else {
-        // Handle cases where the API call fails or returns an error.
-        _errorMessage = "user_model_updateuser_fail";
+        _errorMessage = "failed to update user account";
         _isLoading = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
-      // If the API throws an exception (e.g., for duplicate username), catch it.
       if (e.toString().toLowerCase().contains('duplicate')) {
-        _errorMessage = 'onboarding_form_duplicateuser';
+        _errorMessage = 'Duplicate user found, choose another username.';
       } else {
         _errorMessage = "An error occurred: ${e.toString()}";
       }
@@ -73,7 +82,7 @@ class UserModel extends ChangeNotifier {
 
   Future<bool> updateUserProfileImg(String newProfileImgUrl) async {
     if (currentUser == null) {
-      _errorMessage = "user_model_updateimg_null";
+      _errorMessage = "The image update failed and returned null";
       notifyListeners();
       return false;
     }
@@ -96,7 +105,7 @@ class UserModel extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _errorMessage = "user_model_updateimg_fail";
+        _errorMessage = "The image update failed.";
         _isLoading = false;
         notifyListeners();
         return false;

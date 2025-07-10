@@ -64,18 +64,19 @@ class DistributionModel extends ChangeNotifier {
   }
 
   Future<String?> redeemScannedCode(String code, BuildContext context) async {
-    _setState(isLoading: true, loadingMessage: "Verifying code...");
+    _setState(isLoading: true, loadingMessage: "dist_model_redeem_verifying");
     final String? userId = userModel.currentUser?['userId']?.toString();
 
     try {
-      if (userId == null) throw Exception("User ID not available.");
+      if (userId == null) throw Exception("dist_model_redeem_nouser");
 
       await loadUserRedeemedCodes(forceReload: true);
 
       dynamic rawDistributionCode =
           await getDistributionCodeByCode(code, _appAuthProvider);
       if (rawDistributionCode is List) {
-        if (rawDistributionCode.isEmpty) throw Exception("Invalid code.");
+        if (rawDistributionCode.isEmpty)
+          throw Exception("dist_model_redeem_invalid");
         rawDistributionCode = rawDistributionCode.first;
       }
       if (rawDistributionCode == null ||
@@ -91,7 +92,7 @@ class DistributionModel extends ChangeNotifier {
       final distribution = await getDistributionByDistributionId(
           distributionId, _appAuthProvider);
       if (distribution == null) {
-        throw Exception("Could not verify the code's campaign details.");
+        throw Exception("dist_model_redeem_nocampaign");
       }
 
       List<dynamic> collectiblePool = [];
@@ -100,8 +101,7 @@ class DistributionModel extends ChangeNotifier {
       if (isRandom) {
         final collectionId = distribution['collectionId']?.toString();
         if (collectionId == null) {
-          throw Exception(
-              "This random distribution is not linked to a collection.");
+          throw Exception("dist_model_random_nocollection");
         }
         final result =
             await getCollectiblesByCollectionId(collectionId, _appAuthProvider);
@@ -117,7 +117,7 @@ class DistributionModel extends ChangeNotifier {
       }
 
       if (collectiblePool.isEmpty) {
-        throw Exception("No collectibles are associated with this code.");
+        throw Exception("dist_model_redeem_nocollectibles");
       }
 
       final randomItemFromPool =
@@ -139,14 +139,13 @@ class DistributionModel extends ChangeNotifier {
         dynamic fetchedCollectible = await getCollectibleByCollectibleId(
             collectibleToAwardId, _appAuthProvider);
         if (fetchedCollectible == null) {
-          throw Exception(
-              "Could not retrieve details for the awarded collectible.");
+          throw Exception("dist_model_get_collectible_fail");
         }
         // Handle API potentially returning a list
         if (fetchedCollectible is List) {
-          if (fetchedCollectible.isEmpty)
-            throw Exception(
-                "Could not retrieve details for the awarded collectible.");
+          if (fetchedCollectible.isEmpty) {
+            throw Exception("dist_model_get_collectible_fail");
+          }
           collectibleForMinting = fetchedCollectible.first;
         } else {
           collectibleForMinting = fetchedCollectible;
@@ -163,14 +162,13 @@ class DistributionModel extends ChangeNotifier {
 
       if (!isMultiUseCode) {
         if (redemptionCount >= 1) {
-          throw Exception("This code has already been used.");
+          throw Exception("dist_model_redeem_alreadyredeemed");
         }
       } else {
         final int? multiUseQty = distributionCode['multiUseQty'];
         if (multiUseQty != null && multiUseQty > 0) {
           if (redemptionCount >= multiUseQty) {
-            throw Exception(
-                "This code has reached its maximum number of uses.");
+            throw Exception("dist_model_max_uses");
           }
         }
       }
@@ -182,14 +180,14 @@ class DistributionModel extends ChangeNotifier {
       if (startDateString != null && startDateString.isNotEmpty) {
         final startDate = DateTime.parse(startDateString);
         if (now.isBefore(startDate)) {
-          throw Exception("This promotion has not started yet.");
+          throw Exception("dist_model_redeem_notstarted");
         }
       }
 
       if (endDateString != null && endDateString.isNotEmpty) {
         final endDate = DateTime.parse(endDateString);
         if (now.isAfter(endDate)) {
-          throw Exception("This promotion has expired.");
+          throw Exception("dist_model_redeem_expired");
         }
       }
       final userRedemptionRecord = _userDistributionCodeUsers.firstWhere(
@@ -199,14 +197,14 @@ class DistributionModel extends ChangeNotifier {
       if (userRedemptionRecord != null &&
           (userRedemptionRecord['redeemed'] == true ||
               userRedemptionRecord['redeemed'] == 1)) {
-        throw Exception("You have already redeemed this code.");
+        throw Exception("dist_model_redeem_alreadyredeemed");
       }
       final allUserCollectibles =
           await getUserCollectiblesByOwnerId(userId, _appAuthProvider);
       final int? newMint =
           generateRandomMint(collectibleForMinting, allUserCollectibles);
       if (newMint == null) {
-        throw Exception("No available mints for this collectible.");
+        throw Exception("dist_model_no_mints");
       }
       final collectibleReceivedJson = {'collectibleId': collectibleToAwardId};
 
@@ -232,9 +230,6 @@ class DistributionModel extends ChangeNotifier {
         }, _appAuthProvider);
       }
 
-      await createUserCollectible(
-          userId, collectibleToAwardId, newMint, _appAuthProvider);
-
       await updateMissionProgress(
         userId: userId,
         collectibleId: collectibleToAwardId,
@@ -242,11 +237,14 @@ class DistributionModel extends ChangeNotifier {
         context: context,
       );
 
-      _setState(
-          isLoading: false, loadingMessage: "Success! Collectible added.");
+      await createUserCollectible(
+          userId, collectibleToAwardId, newMint, _appAuthProvider);
+
+      _setState(isLoading: false, loadingMessage: "dist_model_redeem_success");
       return collectibleToAwardId;
     } catch (e) {
-      _setState(isLoading: false, error: e.toString());
+      final errorKey = e.toString().replaceFirst('Exception: ', '');
+      _setState(isLoading: false, error: errorKey);
       return null;
     }
   }
@@ -254,7 +252,8 @@ class DistributionModel extends ChangeNotifier {
   Future<Map<String, dynamic>?> initiateTransfer(
       String userCollectibleId, String transferDistributionId) async {
     final qrCodeJson = {'userCollectibleId': userCollectibleId};
-    _setState(isLoading: true, loadingMessage: "Generating transfer code...");
+    _setState(
+        isLoading: true, loadingMessage: "dist_model_inittransfer_generating");
     try {
       final Map<String, dynamic> body = {
         "distributionId": transferDistributionId,
@@ -267,31 +266,36 @@ class DistributionModel extends ChangeNotifier {
       _setState(isLoading: false);
       return newCode;
     } catch (e) {
-      _setState(
-          isLoading: false,
-          error: "Failed to create transfer code: ${e.toString()}");
+      final errorKey = e.toString().replaceFirst('Exception: ', '');
+      print("Failed to create transfer code: $errorKey");
+      _setState(isLoading: false, error: errorKey);
       return null;
     }
   }
 
   Future<Map<String, String>?> completeTransfer(
       String code, BuildContext context) async {
-    _setState(isLoading: true, loadingMessage: "Completing transfer...");
+    _setState(
+        isLoading: true,
+        loadingMessage: "dist_model_completetransfer_completing");
     final String? newOwnerId = userModel.currentUser?['userId']?.toString();
 
     try {
-      if (newOwnerId == null) throw Exception("Current user not found.");
+      if (newOwnerId == null) {
+        throw Exception("dist_model_completetransfer_nouser");
+      }
 
       dynamic rawDistributionCode =
           await getDistributionCodeByCode(code, _appAuthProvider);
       if (rawDistributionCode is List) {
-        if (rawDistributionCode.isEmpty)
-          throw Exception("Invalid transfer code.");
+        if (rawDistributionCode.isEmpty) {
+          throw Exception("dist_model_completetransfer_invalid");
+        }
         rawDistributionCode = rawDistributionCode.first;
       }
       if (rawDistributionCode == null ||
           rawDistributionCode is! Map<String, dynamic>) {
-        throw Exception("Invalid transfer code.");
+        throw Exception("dist_model_completetransfer_invalid");
       }
       final Map<String, dynamic> distributionCode = rawDistributionCode;
 
@@ -302,17 +306,17 @@ class DistributionModel extends ChangeNotifier {
           await getDistributionCodeUsersByDistributionCodeId(
               distributionCodeId, _appAuthProvider);
       if (existingRedemptions is List && existingRedemptions.isNotEmpty) {
-        throw Exception("This transfer code has already been used.");
+        throw Exception("dist_model_completetransfer_used");
       }
 
       final qrCodeData = distributionCode['qrCode'] as Map<String, dynamic>?;
       if (qrCodeData == null) {
-        throw Exception(
-            "Transfer code is not linked to a collectible instance.");
+        throw Exception("dist_model_transfer_nolink_instance");
       }
       final userCollectibleId = qrCodeData['userCollectibleId']?.toString();
-      if (userCollectibleId == null)
-        throw Exception("Transfer code is not linked to a collectible.");
+      if (userCollectibleId == null) {
+        throw Exception("dist_model_completetransfer_nolink");
+      }
 
       final tradedInstanceDataResponse =
           await getUserCollectibleByUserCollectibleId(
@@ -328,7 +332,7 @@ class DistributionModel extends ChangeNotifier {
         tradedInstanceData = tradedInstanceDataResponse;
       }
       if (tradedInstanceData == null) {
-        throw Exception("Could not find collectible to be traded.");
+        throw Exception("dist_model_completetransfer_notfound");
       }
 
       final String giverId = tradedInstanceData['ownerId'].toString();
@@ -336,7 +340,7 @@ class DistributionModel extends ChangeNotifier {
           tradedInstanceData['collectibleId'].toString();
 
       if (newOwnerId == giverId) {
-        throw Exception("Cannot trade a collectible to yourself.");
+        throw Exception("dist_model_completetransfer_selftrade");
       }
       final collectibleReceivedJson = {'collectibleId': collectibleId};
 
@@ -346,13 +350,6 @@ class DistributionModel extends ChangeNotifier {
         "redeemed": true,
         "redeemedDate": DateTime.now().toIso8601String(),
         "collectibleReceived": collectibleReceivedJson
-      }, _appAuthProvider);
-
-      await updateUserCollectibleByUserCollectibleId({
-        "userCollectibleId": userCollectibleId,
-        "ownerId": newOwnerId,
-        "previousOwnerId": giverId,
-        "lastTransferredDt": DateTime.now().toIso8601String(),
       }, _appAuthProvider);
 
       await updateMissionProgress(
@@ -368,7 +365,16 @@ class DistributionModel extends ChangeNotifier {
         context: context,
       );
 
-      _setState(isLoading: false, loadingMessage: "Transfer complete!");
+      await updateUserCollectibleByUserCollectibleId({
+        "userCollectibleId": userCollectibleId,
+        "ownerId": newOwnerId,
+        "previousOwnerId": giverId,
+        "lastTransferredDt": DateTime.now().toIso8601String(),
+      }, _appAuthProvider);
+
+      _setState(
+          isLoading: false,
+          loadingMessage: "dist_model_completetransfer_success");
       return {'collectibleId': collectibleId, 'giverId': giverId};
     } catch (e) {
       _setState(isLoading: false, error: e.toString());
@@ -379,16 +385,17 @@ class DistributionModel extends ChangeNotifier {
   Future<bool> redeemMissionReward(
       {required String missionDistributionId,
       required BuildContext context}) async {
-    _setState(isLoading: true, loadingMessage: "Claiming mission reward...");
+    _setState(
+        isLoading: true, loadingMessage: "dist_model_redeemreward_claiming");
     final String? userId = userModel.currentUser?['userId']?.toString();
 
     try {
-      if (userId == null) throw Exception("User not found.");
+      if (userId == null) throw Exception("dist_model_redeemreward_nouser");
 
       final distribution = await getDistributionByDistributionId(
           missionDistributionId, _appAuthProvider);
       if (distribution == null) {
-        throw Exception("Could not verify the mission's reward details.");
+        throw Exception("dist_model_reward_nodetails");
       }
 
       // Apply the same isRandom logic for mission rewards
@@ -398,8 +405,7 @@ class DistributionModel extends ChangeNotifier {
       if (isRandom) {
         final collectionId = distribution['collectionId']?.toString();
         if (collectionId == null) {
-          throw Exception(
-              "This random mission reward is not linked to a collection.");
+          throw Exception("dist_model_reward_nocollection");
         }
         final result =
             await getCollectiblesByCollectionId(collectionId, _appAuthProvider);
@@ -415,7 +421,7 @@ class DistributionModel extends ChangeNotifier {
       }
 
       if (collectiblePool.isEmpty) {
-        throw Exception("No rewards are associated with this mission.");
+        throw Exception("dist_model_redeemreward_norewards");
       }
 
       Map<String, dynamic> collectibleForMinting;
@@ -433,13 +439,12 @@ class DistributionModel extends ChangeNotifier {
         dynamic fetchedCollectible = await getCollectibleByCollectibleId(
             collectibleToAwardId, _appAuthProvider);
         if (fetchedCollectible == null) {
-          throw Exception(
-              "Could not retrieve details for the awarded collectible.");
+          throw Exception("dist_model_reward_get_collectible_fail");
         }
         if (fetchedCollectible is List) {
-          if (fetchedCollectible.isEmpty)
-            throw Exception(
-                "Could not retrieve details for the awarded collectible.");
+          if (fetchedCollectible.isEmpty) {
+            throw Exception("dist_model_reward_get_collectible_fail");
+          }
           collectibleForMinting = fetchedCollectible.first;
         } else {
           collectibleForMinting = fetchedCollectible;
@@ -451,7 +456,7 @@ class DistributionModel extends ChangeNotifier {
       final int? newMint =
           generateRandomMint(collectibleForMinting, allUserCollectibles);
       if (newMint == null) {
-        throw Exception("No available mints for this collectible.");
+        throw Exception("dist_model_no_mints");
       }
       final newCode = await createDistributionCode({
         "distributionId": missionDistributionId,
@@ -470,9 +475,6 @@ class DistributionModel extends ChangeNotifier {
         "collectibleReceived": collectibleReceivedJson
       }, _appAuthProvider);
 
-      await createUserCollectible(
-          userId, collectibleToAwardId, newMint, _appAuthProvider);
-
       await updateMissionProgress(
         userId: userId,
         collectibleId: collectibleToAwardId,
@@ -480,11 +482,16 @@ class DistributionModel extends ChangeNotifier {
         context: context,
       );
 
-      _setState(isLoading: false, loadingMessage: "Reward collected!");
+      await createUserCollectible(
+          userId, collectibleToAwardId, newMint, _appAuthProvider);
+
+      _setState(
+          isLoading: false, loadingMessage: "dist_model_redeemreward_success");
       return true;
     } catch (e) {
-      _setState(
-          isLoading: false, error: "Failed to claim reward: ${e.toString()}");
+      final errorKey = e.toString().replaceFirst('Exception: ', '');
+      print("Failed to claim reward: $errorKey");
+      _setState(isLoading: false, error: errorKey);
       return false;
     }
   }

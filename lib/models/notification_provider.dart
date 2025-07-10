@@ -54,7 +54,7 @@ class NotificationProvider with ChangeNotifier {
   Future<void> loadUserNotifications() async {
     final String? userId = _userModel.currentUser?['userId']?.toString();
     if (userId == null) {
-      _errorMessage = "notif_provider_load_notloggedin";
+      _errorMessage = "Notification error: User not logged in";
       _isLoading = false;
       _notificationsWithDetails = [];
       _unreadNotificationCount = 0;
@@ -74,7 +74,7 @@ class NotificationProvider with ChangeNotifier {
           await getNotificationUsersByUserId(userId, _appAuthProvider);
 
       if (userNotificationsRaw == null) {
-        _errorMessage = "notif_provider_load_apinull";
+        _errorMessage = "notifications api returned null";
         _notificationsWithDetails = [];
         _unreadNotificationCount = 0;
         _isLoading = false;
@@ -145,7 +145,7 @@ class NotificationProvider with ChangeNotifier {
   Future<bool> _updateUserNotificationStatus(
       int userNotificationId, Map<String, dynamic> updates) async {
     if (_appAuthProvider.status != AuthStatus.authenticated) {
-      _errorMessage = "notif_provider_update_notauth";
+      _errorMessage = "No authProvider found to update UserNotification status";
       notifyListeners();
       return false;
     }
