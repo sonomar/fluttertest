@@ -67,13 +67,13 @@ Future<dynamic> apiGetRequest(
     return null;
   }
 
-  final userSub = authProvider.authService.currentUserSub;
-  if (userSub == null) {
-    print('API Call failed: Could not retrieve userSub.');
-    return null;
-  }
-  paramsContent['username'] = userSub;
-  paramsContent['sub'] = userSub;
+  // final userSub = authProvider.authService.currentUserSub;
+  // if (userSub == null) {
+  //   print('API Call failed: Could not retrieve userSub.');
+  //   return null;
+  // }
+  // paramsContent['username'] = userSub;
+  // paramsContent['sub'] = userSub;
 
   await credentials.getAwsCredentials(currentIdToken);
   print(credentials.accessKeyId);
@@ -152,13 +152,13 @@ Future<dynamic> apiPatchRequest(
     return null;
   }
 
-  final userSub = authProvider.authService.currentUserSub;
-  if (userSub == null) {
-    print('API Call failed: Could not retrieve userSub.');
-    return null;
-  }
-  bodyContent['username'] = userSub;
-  bodyContent['sub'] = userSub;
+  // final userSub = authProvider.authService.currentUserSub;
+  // if (userSub == null) {
+  //   print('API Call failed: Could not retrieve userSub.');
+  //   return null;
+  // }
+  // bodyContent['username'] = userSub;
+  // bodyContent['sub'] = userSub;
 
   await credentials.getAwsCredentials(currentIdToken);
   print(credentials.accessKeyId);
@@ -217,13 +217,13 @@ Future<dynamic> apiPostRequest(
     return null;
   }
 
-  final userSub = authProvider.authService.currentUserSub;
-  if (userSub == null) {
-    print('API Call failed: Could not retrieve userSub.');
-    return null;
-  }
-  bodyContent['username'] = userSub;
-  bodyContent['sub'] = userSub;
+  // final userSub = authProvider.authService.currentUserSub;
+  // if (userSub == null) {
+  //   print('API Call failed: Could not retrieve userSub.');
+  //   return null;
+  // }
+  // bodyContent['username'] = userSub;
+  // bodyContent['sub'] = userSub;
 
   await credentials.getAwsCredentials(currentIdToken);
   print(credentials.accessKeyId);
@@ -281,13 +281,13 @@ apiDeleteRequest(
     return null;
   }
 
-  final userSub = authProvider.authService.currentUserSub;
-  if (userSub == null) {
-    print('API Call failed: Could not retrieve userSub.');
-    return null;
-  }
-  paramsContent['username'] = userSub;
-  paramsContent['sub'] = userSub;
+  // final userSub = authProvider.authService.currentUserSub;
+  // if (userSub == null) {
+  //   print('API Call failed: Could not retrieve userSub.');
+  //   return null;
+  // }
+  // paramsContent['username'] = userSub;
+  // paramsContent['sub'] = userSub;
 
   await credentials.getAwsCredentials(currentIdToken);
   print(credentials.accessKeyId);
