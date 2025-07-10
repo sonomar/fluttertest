@@ -19,6 +19,7 @@ class AppAuthProvider with ChangeNotifier {
   String? _errorMessage;
   bool isNewUser = false; // Error message for the UI
   String? _emailForConfirmation;
+  bool get shouldShowOnboardingForNewUser => isNewUser;
 
   AppAuthProvider(this._authService) {
     checkCurrentUser();
