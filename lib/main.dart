@@ -212,24 +212,12 @@ class _MyHomePageState extends State<MyHomePage> {
   final _appLinks = AppLinks();
   StreamSubscription? _linkSubscription;
 
-  final PageStorageBucket bucket = PageStorageBucket();
-
-  // var _username = 'Guest';
-
   @override
   void initState() {
     super.initState();
     _initAppLinks();
-    _screens = [
-      HomeScreen(key: const PageStorageKey('home'), qrcode: widget.qrcode),
-      const CollectionScreen(key: PageStorageKey('collection')),
-      ScanScreen(key: const PageStorageKey('scan'), userData: widget.userData),
-      Missions(key: PageStorageKey('mission'), userData: widget.userData),
-      const ProfileScreen(key: PageStorageKey('profile')),
-    ];
     final userModel = context.read<UserModel>();
 
-    // This function contains the logic to show the dialog
     void showOnboardingIfNeeded() {
       userModel.removeListener(showOnboardingIfNeeded);
 
@@ -255,6 +243,27 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       // Otherwise, add a listener that will call our function once the user data is loaded.
       userModel.addListener(showOnboardingIfNeeded);
+    }
+  }
+
+  Widget _buildCurrentPage(int index) {
+    switch (index) {
+      case 0:
+        return HomeScreen(
+            key: const PageStorageKey('home'), qrcode: widget.qrcode);
+      case 1:
+        return const CollectionScreen(key: PageStorageKey('collection'));
+      case 2:
+        return ScanScreen(
+            key: const PageStorageKey('scan'), userData: widget.userData);
+      case 3:
+        return Missions(
+            key: const PageStorageKey('mission'), userData: widget.userData);
+      case 4:
+        return const ProfileScreen(key: PageStorageKey('profile'));
+      default:
+        return HomeScreen(
+            key: const PageStorageKey('home'), qrcode: widget.qrcode);
     }
   }
 
@@ -310,10 +319,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final missionModel = Provider.of<MissionModel>(context, listen: false);
     return Scaffold(
         backgroundColor: Colors.white,
-        body: PageStorage(
-          bucket: bucket,
-          child: _screens[_currentIndex],
-        ),
+        body: _buildCurrentPage(_currentIndex),
         bottomNavigationBar: Container(
           color: Colors.white,
           padding: EdgeInsets.symmetric(horizontal: 20),

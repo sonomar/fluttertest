@@ -47,9 +47,12 @@ class DistributionModel extends ChangeNotifier {
   }
 
   Future<void> loadUserRedeemedCodes({bool forceReload = false}) async {
-    if (_hasLoadedUserCodes && !forceReload) return;
+    if (_isLoading) return;
     final String? userId = userModel.currentUser?['userId']?.toString();
-    if (userId == null) return;
+    if (userId == null) {
+      _isLoading = false; // Reset loading state
+      return;
+    }
 
     try {
       final codes =
@@ -60,6 +63,9 @@ class DistributionModel extends ChangeNotifier {
       }
     } catch (e) {
       print("Could not load user's redeemed codes: ${e.toString()}");
+    } finally {
+      _isLoading = false; // Always reset loading state
+      // notifyListeners(); // Optional: uncomment if a screen needs to react to this load.
     }
   }
 
@@ -70,7 +76,7 @@ class DistributionModel extends ChangeNotifier {
     try {
       if (userId == null) throw Exception("dist_model_redeem_nouser");
 
-      await loadUserRedeemedCodes(forceReload: true);
+      await loadUserRedeemedCodes();
 
       dynamic rawDistributionCode =
           await getDistributionCodeByCode(code, _appAuthProvider);

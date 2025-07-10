@@ -73,7 +73,6 @@ class CollectibleModel extends ChangeNotifier {
   Future<void> loadCollectibles(
       {bool forceClear = false, String? languageCode}) async {
     if (_isLoading) return;
-    if (_hasLoaded && !forceClear) return;
 
     _isLoading = true;
     _errorMessage = null;

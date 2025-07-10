@@ -259,7 +259,7 @@ class HomeScreenState extends State<HomeScreen>
                       child: Padding(
                           padding: const EdgeInsets.only(left: 10.0),
                           child: getUserPic(userPic,
-                              'assets/images/kloppocarIcon.png', 18.0)),
+                              'assets/images/kloppocarIcon.jpg', 18.0)),
                     ),
                     Padding(
                         padding: const EdgeInsets.only(left: 10.0),

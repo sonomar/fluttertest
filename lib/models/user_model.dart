@@ -121,19 +121,8 @@ class UserModel extends ChangeNotifier {
   }
 
   Future<void> loadUser() async {
-    print(
-        '>>> UserModel: ENTERING loadUser() method at ${DateTime.now()} <<<'); // Should be the very first print inside loadUser()
-
-    if (_isLoading) {
-      print(
-          'UserModel: loadUser() called but already loading. Returning. at ${DateTime.now()}');
-      return;
-    }
-
     _isLoading = true;
     _errorMessage = null; // Clear any previous error
-    print(
-        'UserModel: Setting _isLoading to true and calling notifyListeners() at ${DateTime.now()}');
     notifyListeners(); // This should cause AuthLoadingScreen to re-render with isLoading=true
 
     try {

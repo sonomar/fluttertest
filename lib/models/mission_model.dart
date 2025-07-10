@@ -63,7 +63,6 @@ class MissionModel extends ChangeNotifier {
   Future<void> loadMissions({bool forceClear = false}) async {
     // Prevent re-fetching if already loading or if data has loaded and not forced.
     if (_isLoading) return;
-    if (_hasLoaded && !forceClear) return;
     print("MissionModel: loadMissions called with forceClear = $forceClear");
     _isLoading = true;
     _errorMessage = null;
