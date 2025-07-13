@@ -1,4 +1,6 @@
-# deins_app
+# DEINS - FEATURING KLOPPOCAR
+
+## deins_mobile_core
 
 "YOU NEVER WALK ALONE."
 Kloppocar is an art project that makes use of the last car in Germany owned by world renown athlete Jürgen Klopp before he left for his trainer job in Liverpool. The art on the Kloppocar depicts his life, and also historical moments in football history, famous signatures, and more. The overall goal of this project is to collect donations for groups that take care of kids in need.
