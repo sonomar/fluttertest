@@ -77,8 +77,11 @@ if not SQLALCHEMY_DATABASE_URL:
 # It is created once per application lifetime
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
-    pool_pre_ping=True # Helps prevent "MySQL server has gone away" issues
-    # Other options like pool_size, max_overflow may be needed depending on load
+    pool_size=20,  # Increase pool size for higher concurrency
+    max_overflow=40,  # Allow more connections to be created if needed
+    pool_timeout=30,  # Timeout for getting a connection from the pool
+    pool_recycle=3600,  # Recycle connections every hour to avoid stale connections
+    pool_pre_ping=True,  # Helps with MySQL "server gone away" issues
 )
 
 # SessionLocal is a factory to create Session objects

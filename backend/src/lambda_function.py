@@ -15,7 +15,7 @@ def get_db_session():
     try:
         yield db
     finally:
-        next(db_gen, None)  # Properly close the generator
+        db.close()  # Properly close the session
 
 def lambda_handler(event, context):
     """
@@ -49,7 +49,7 @@ def lambda_handler(event, context):
             cognito_password = user_attributes.get('custom:passwordHashed')
             if not cognito_password:
                 cognito_password = "COGNITO_MANAGED_USER"
-            
+
             user_create_payload = UserCreate(
                 email=email,
                 passwordHashed=cognito_password,  # Placeholder for required field

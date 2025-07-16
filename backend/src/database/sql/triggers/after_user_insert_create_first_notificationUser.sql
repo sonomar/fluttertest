@@ -2,13 +2,11 @@ CREATE TRIGGER after_user_insert_create_first_notificationUser
 AFTER INSERT ON `User`
 FOR EACH ROW
 BEGIN
-    DECLARE new_notification_id BIGINT;
-
-    -- Set the notification ID (you may generate this dynamically if needed)
-    SET new_notification_id = 1;
-
-    -- Link the new notification to the new user
+    -- Link the initial notifications (ID 1 and 2) to the new user.
+    -- This uses a single, efficient INSERT statement to add both records.
     INSERT INTO NotificationUser (notificationId, userId, markRead, archived, deleted, pushNotification)
-    VALUES (new_notification_id, NEW.userId, FALSE, FALSE, FALSE, FALSE);
+    VALUES
+        (1, NEW.userId, FALSE, FALSE, FALSE, FALSE),
+        (2, NEW.userId, FALSE, FALSE, FALSE, FALSE);
 
 END;
