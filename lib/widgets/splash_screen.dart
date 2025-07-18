@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../helpers/localization_helper.dart';
 import '../models/app_localizations.dart';
 import '../models/app_auth_provider.dart';
 import '../models/asset_provider.dart';
 import '../models/user_model.dart';
-import '../main.dart'; // For MyHomePage
-import './openCards/login_page.dart'; // For LoginPage
+import '../main.dart';
+import './openCards/login_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -93,6 +94,28 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _requestInitialPermissions() async {
     await Permission.camera.request();
     await Permission.locationWhenInUse.request();
+    NotificationSettings settings =
+        await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission for push notifications.');
+    } else if (settings.authorizationStatus == AuthorizationStatus.denied) {
+      print('User denied permission for push notifications.');
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.notDetermined) {
+      print('User has not yet chosen notification permissions.');
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
+      print('User granted provisional permission for push notifications.');
+    }
   }
 
   @override
