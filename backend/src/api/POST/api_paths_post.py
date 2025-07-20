@@ -22,6 +22,9 @@ from database.schema.GET.DistributionCode.distributionCode_schema import Distrib
 from database.schema.GET.DistributionCodeUser.distributionCodeUser_schema import DistributionCodeUserResponse
 from database.schema.GET.DistributionCollectible.distributionCollectible_schema import DistributionCollectibleResponse
 from database.schema.GET.MissionType.missionType_schema import MissionTypeResponse
+from database.schema.GET.Purchase.purchase_schema import PurchaseResponse
+from database.schema.GET.PurchaseItem.purchaseItem_schema import PurchaseItemResponse
+
 
 # Import the modules containing your refactored POST handler functions
 import database.CRUD.POST.User.post_User_CRUD_functions as UserPOSTFunctions
@@ -46,6 +49,8 @@ import database.CRUD.POST.DistributionCode.post_DistributionCode_CRUD_functions 
 import database.CRUD.POST.DistributionCodeUser.post_DistributionCodeUser_CRUD_functions as DistributionCodeUserPOSTFunctions
 import database.CRUD.POST.DistributionCollectible.post_DistributionCollectible_CRUD_functions as DistributionCollectiblePOSTFunctions
 import database.CRUD.POST.MissionType.post_MissionType_CRUD_functions as MissionTypePOSTFunctions
+import database.CRUD.POST.Purchase.post_Purchase_CRUD_functions as PurchasePOSTFunctions
+import database.CRUD.POST.PurchaseItem.post_PurchaseItem_CRUD_functions as PurchaseItemPOSTFunctions
 
 
 API_PATHS_POST = {
@@ -193,7 +198,7 @@ API_PATHS_POST = {
             "response_model": UserCollectibleResponse
         }
     },
-    "Distribution": {
+    Distribution_table: {
         "createDistribution": {
             "path": "/createDistribution",
             "active": True,
@@ -201,7 +206,7 @@ API_PATHS_POST = {
             "response_model": DistributionResponse
         }
     },
-    "DistributionCode": {
+    DistributionCode_table: {
         "createDistributionCode": {
             "path": "/createDistributionCode",
             "active": True,
@@ -209,7 +214,7 @@ API_PATHS_POST = {
             "response_model": DistributionCodeResponse
         }
     },
-    "DistributionCodeUser": {
+    DistributionCodeUser_table: {
         "createDistributionCodeUser": {
             "path": "/createDistributionCodeUser",
             "active": True,
@@ -217,12 +222,28 @@ API_PATHS_POST = {
             "response_model": DistributionCodeUserResponse
         }
     },
-    "DistributionCollectible": {
+    DistributionCollectible_table: {
         "createDistributionCollectible": {
             "path": "/createDistributionCollectible",
             "active": True,
             "handler": DistributionCollectiblePOSTFunctions.createDistributionCollectible,
             "response_model": DistributionCollectibleResponse
+        }
+    },
+    Purchase_table: {
+        "createPurchase": {
+            "path": "/createPurchase",
+            "active": True,
+            "handler": PurchasePOSTFunctions.createPurchase,
+            "response_model": PurchaseResponse
+        }
+    },
+    PurchaseItem_table: {
+        "createPurchaseItem": {
+            "path": "/createPurchaseItem",
+            "active": True,
+            "handler": PurchaseItemPOSTFunctions.createPurchaseItem,
+            "response_model": PurchaseItemResponse
         }
     }
 }

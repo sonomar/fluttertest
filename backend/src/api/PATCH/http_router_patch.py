@@ -23,7 +23,8 @@ import api.PATCH.DistributionCode.patch_DistributionCode_table as DistributionCo
 import api.PATCH.DistributionCodeUser.patch_DistributionCodeUser_table as DistributionCodeUserfunctions
 import api.PATCH.DistributionCollectible.patch_DistributionCollectible_table as DistributionCollectiblefunctions
 import api.PATCH.MissionType.patch_MissionType_table as MissionType_table_functions
-
+import api.PATCH.Purchase.patch_Purchase_table as Purchase_table_functions
+import api.PATCH.PurchaseItem.patch_PurchaseItem_table as PurchaseItem_table_functions
 
 def http_router_patch(event):
     
@@ -113,5 +114,11 @@ def http_router_patch(event):
     
     elif tableName == table.DistributionCollectible_table:
         returnString = DistributionCollectiblefunctions.call_DistributionCollectible_function(raw_path, event)
+
+    elif tableName == table.Purchase_table:
+        returnString = Purchase_table_functions.call_Purchase_function(raw_path, event)
+
+    elif tableName == table.PurchaseItem_table:
+        returnString = PurchaseItem_table_functions.call_PurchaseItem_function(raw_path, event)
 
     return returnString

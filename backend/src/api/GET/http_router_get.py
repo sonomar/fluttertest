@@ -27,6 +27,8 @@ import api.GET.DistributionCode.get_DistributionCode_table as DistributionCodefu
 import api.GET.DistributionCodeUser.get_DistributionCodeUser_table as DistributionCodeUserfunctions
 import api.GET.DistributionCollectible.get_DistributionCollectible_table as DistributionCollectiblefunctions
 import api.GET.MissionType.get_MissionType_table as MissionTypefunctions
+import api.GET.Purchase.get_Purchase_table as Purchasefunctions
+import api.GET.PurchaseItem.get_PurchaseItem_table as PurchaseItemfunctions
 
 
 def http_router_get(event):
@@ -119,6 +121,12 @@ def http_router_get(event):
     
     elif tableName == table.DistributionCollectible_table:
         returnString = DistributionCollectiblefunctions.call_DistributionCollectible_function(raw_path, event)
+    
+    elif tableName == table.Purchase_table:
+        returnString = Purchasefunctions.call_Purchase_function(raw_path, event)
+
+    elif tableName == table.PurchaseItem_table:
+        returnString = PurchaseItemfunctions.call_PurchaseItem_function(raw_path, event)
 
     # If the table name does not match any known tables, the initial
     # 'Invalid Function Path Call' message will be returned.

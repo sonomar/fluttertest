@@ -25,6 +25,8 @@ import database.CRUD.DELETE.DistributionCode.delete_DistributionCode_CRUD_functi
 import database.CRUD.DELETE.DistributionCodeUser.delete_DistributionCodeUser_CRUD_functions as DistributionCodeUserDELETEFunctions
 import database.CRUD.DELETE.DistributionCollectible.delete_DistributionCollectible_CRUD_functions as DistributionCollectibleDELETEFunctions
 import database.CRUD.DELETE.MissionType.delete_MissionType_CRUD_functions as MissionTypeDELETEFunctions
+import database.CRUD.DELETE.Purchase.delete_Purchase_CRUD_functions as PurchaseDELETEFunctions
+import database.CRUD.DELETE.PurchaseItem.delete_PurchaseItem_CRUD_functions as PurchaseItemDELETEFunctions
 
 # ... import other DELETE function modules
 
@@ -259,6 +261,24 @@ API_PATHS_DELETE = {
             "pathLocal": "/deleteDistributionCollectibleByDistributionCollectibleId/{distributionCollectibleId}",
             "active": True,
             "handler": DistributionCollectibleDELETEFunctions.deleteDistributionCollectibleByDistributionCollectibleId,
+            "response_model": Dict[str, str]
+        }
+    },
+    Purchase_table: {
+        "deletePurchaseByPurchaseId": {
+            "path": "/deletePurchaseByPurchaseId",
+            "pathLocal": "/deletePurchaseByPurchaseId/{purchaseId}",
+            "active": True,
+            "handler": PurchaseDELETEFunctions.deletePurchaseByPurchaseId,
+            "response_model": Dict[str, str]
+        }
+    },
+    PurchaseItem_table: {
+        "deletePurchaseItemByPurchaseItemId": {
+            "path": "/deletePurchaseItemByPurchaseItemId",
+            "pathLocal": "/deletePurchaseItemByPurchaseItemId/{purchaseItemId}",
+            "active": True,
+            "handler": PurchaseItemDELETEFunctions.deletePurchaseItemByPurchaseItemId,
             "response_model": Dict[str, str]
         }
     }

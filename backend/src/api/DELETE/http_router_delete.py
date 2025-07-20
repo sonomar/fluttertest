@@ -22,6 +22,8 @@ import api.DELETE.DistributionCode.delete_DistributionCode_table as Distribution
 import api.DELETE.DistributionCodeUser.delete_DistributionCodeUser_table as DistributionCodeUserfunctions
 import api.DELETE.DistributionCollectible.delete_DistributionCollectible_table as DistributionCollectiblefunctions
 import api.DELETE.MissionType.delete_MissionType_table as MissionType_table_functions
+import api.DELETE.Purchase.delete_Purchase_table as Purchase_table_functions
+import api.DELETE.PurchaseItem.delete_PurchaseItem_table as PurchaseItem_table_functions
 
 
 def http_router_delete(event):
@@ -112,5 +114,11 @@ def http_router_delete(event):
     
     elif tableName == table.DistributionCollectible_table:
         returnString = DistributionCollectiblefunctions.call_DistributionCollectible_function(raw_path, event)
+
+    elif tableName == table.Purchase_table:
+        returnString = Purchase_table_functions.call_Purchase_function(raw_path, event)
+        
+    elif tableName == table.PurchaseItem_table:
+        returnString = PurchaseItem_table_functions.call_PurchaseItem_function(raw_path, event)
 
     return returnString

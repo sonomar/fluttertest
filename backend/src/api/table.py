@@ -20,3 +20,5 @@ DistributionCode_table = "DistributionCode"
 DistributionCodeUser_table = "DistributionCodeUser"
 DistributionCollectible_table = "DistributionCollectible"
 MissionType_table = "MissionType"
+Purchase_table = 'Purchase'
+PurchaseItem_table = 'PurchaseItem'
