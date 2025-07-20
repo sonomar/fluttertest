@@ -28,7 +28,9 @@ def createNotification(event):
         vidRef=data.get("vidRef"),
         qrRef=data.get("qrRef"),
         embedRef=data.get("embedRef"),
-        active=data.get("active") # Schema default is True if not provided
+        active=data.get("active"), # Schema default is True if not provided
+        publishDt=data.get("publishDt"), # New field
+        notifyData=data.get("notifyData") # New field
     )
 
     # Call the CRUD function with the Pydantic model and DB session

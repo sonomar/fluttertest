@@ -131,6 +131,8 @@ class Notification(Base):
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
     qrRef: Mapped[Optional[dict]] = mapped_column(JSON)
     embedRef: Mapped[Optional[dict]] = mapped_column(JSON)
+    publishDt: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP) # New column
+    notifyData: Mapped[Optional[dict]] = mapped_column(JSON) # New column
 
     NotificationUser: Mapped[List['NotificationUser']] = relationship('NotificationUser', back_populates='Notification_')
 

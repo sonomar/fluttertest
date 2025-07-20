@@ -17,6 +17,8 @@ class NotificationResponse(BaseModel):
     active: Optional[bool] = True
     createdDt: datetime.datetime
     updatedDt: datetime.datetime
+    publishDt: Optional[datetime.datetime] = None # New field
+    notifyData: Optional[Dict[str, Any]] = None # New field
 
     class Config:
         from_attributes = True

@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, Union, List
+import datetime
 
 # --- Notification Schemas ---
 class NotificationUpdate(BaseModel):
@@ -12,3 +13,5 @@ class NotificationUpdate(BaseModel):
     vidRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     qrRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
     embedRef: Optional[Union[Dict[str, Any], str, List[str]]] = None
+    publishDt: Optional[datetime.datetime] = None # New field
+    notifyData: Optional[Dict[str, Any]] = None # New field

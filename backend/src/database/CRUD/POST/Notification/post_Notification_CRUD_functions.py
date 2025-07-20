@@ -26,7 +26,9 @@ def createNotification(
         vidRef=notification.vidRef,
         qrRef=notification.qrRef,
         embedRef=notification.embedRef,
-        active=notification.active
+        active=notification.active,
+        publishDt=notification.publishDt, # New field
+        notifyData=notification.notifyData # New field
     )
 
     try:
