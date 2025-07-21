@@ -1,4 +1,3 @@
-// lib/widgets/profile/permissions_widgets.dart
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../helpers/localization_helper.dart'; // Adjust import path if your AppLocalizations is elsewhere
