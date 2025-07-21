@@ -22,7 +22,8 @@ import api.POST.DistributionCode.post_DistributionCode_table as DistributionCode
 import api.POST.DistributionCodeUser.post_DistributionCodeUser_table as DistributionCodeUser_table_functions
 import api.POST.DistributionCollectible.post_DistributionCollectible_table as DistributionCollectible_table_functions
 import api.POST.MissionType.post_MissionType_table as MissionType_table_functions
-
+import api.POST.Purchase.post_Purchase_table as Purchase_table_functions
+import api.POST.PurchaseItem.post_PurchaseItem_table as PurchaseItem_table_functions
 
 def http_router_post(event):
     
@@ -116,5 +117,11 @@ def http_router_post(event):
     ## DistributionCollectible
     elif tableName == table.DistributionCollectible_table:
         returnString = DistributionCollectible_table_functions.call_DistributionCollectible_function(raw_path, event)
+    
+    elif tableName == table.Purchase_table:
+        returnString = Purchase_table_functions.call_Purchase_function(raw_path, event)
+
+    elif tableName == table.PurchaseItem_table:
+        returnString = PurchaseItem_table_functions.call_PurchaseItem_function(raw_path, event)
 
     return returnString

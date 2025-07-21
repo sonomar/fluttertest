@@ -23,6 +23,10 @@ def NotificationDataCheck(notification: NotificationUpdate, data: any):
         notification.embedRef = data["embedRef"]
     if "active" in data:
         notification.active = data["active"]
+    if "publishDt" in data:
+        notification.publishDt = data["publishDt"]
+    if "notifyData" in data:
+        notification.notifyData = data["notifyData"]
     return notification
 
 def updateNotificationByNotificationId(event):

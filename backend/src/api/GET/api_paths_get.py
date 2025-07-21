@@ -20,12 +20,13 @@ from database.schema.GET.NotificationUser.notificationUser_schema import Notific
 from database.schema.GET.Project.project_schema import ProjectResponse
 from database.schema.GET.Sponsor.sponsor_schema import SponsorResponse
 from database.schema.GET.UserCollectible.userCollectible_schema import UserCollectibleResponse
-
 from database.schema.GET.Distribution.distribution_schema import DistributionResponse
 from database.schema.GET.DistributionCode.distributionCode_schema import DistributionCodeResponse
 from database.schema.GET.DistributionCodeUser.distributionCodeUser_schema import DistributionCodeUserResponse
 from database.schema.GET.DistributionCollectible.distributionCollectible_schema import DistributionCollectibleResponse
 from database.schema.GET.MissionType.missionType_schema import MissionTypeResponse
+from database.schema.GET.Purchase.purchase_schema import PurchaseResponse
+from database.schema.GET.PurchaseItem.purchaseItem_schema import PurchaseItemResponse
 
 
 # Import the modules containing your refactored GET handler functions
@@ -51,6 +52,8 @@ import database.CRUD.GET.DistributionCode.get_DistributionCode_CRUD_functions as
 import database.CRUD.GET.DistributionCodeUser.get_DistributionCodeUser_CRUD_functions as DistributionCodeUserGETFunctions
 import database.CRUD.GET.DistributionCollectible.get_DistributionCollectible_CRUD_functions as DistributionCollectibleGETFunctions
 import database.CRUD.GET.MissionType.get_MissionType_CRUD_functions as MissionTypeGETFunctions
+import database.CRUD.GET.Purchase.get_Purchase_CRUD_functions as PurchaseGETFunctions
+import database.CRUD.GET.PurchaseItem.get_PurchaseItem_CRUD_functions as PurchaseItemGETFunctions
 
 
 
@@ -530,6 +533,28 @@ API_PATHS_GET = {
             "active": True,
             "handler": DistributionCollectibleGETFunctions.getDistributionCollectiblesByDistributionId,
             "response_model": List[DistributionCollectibleResponse]
+        }
+    },
+    Purchase_table: {
+        "getPurchaseByPurchaseId": {
+            "path": "/getPurchaseByPurchaseId",
+            "active": True,
+            "handler": PurchaseGETFunctions.getPurchaseByPurchaseId,
+            "response_model": PurchaseResponse
+        },
+        "getPurchasesByUserId": {
+            "path": "/getPurchasesByUserId",
+            "active": True,
+            "handler": PurchaseGETFunctions.getPurchasesByUserId,
+            "response_model": List[PurchaseResponse]
+        }
+    },
+    PurchaseItem_table: {
+        "getPurchaseItemsByPurchaseId": {
+            "path": "/getPurchaseItemsByPurchaseId",
+            "active": True,
+            "handler": PurchaseItemGETFunctions.getPurchaseItemsByPurchaseId,
+            "response_model": List[PurchaseItemResponse]
         }
     }
 }

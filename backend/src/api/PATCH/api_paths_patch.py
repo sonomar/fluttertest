@@ -21,6 +21,9 @@ from database.schema.GET.DistributionCode.distributionCode_schema import Distrib
 from database.schema.GET.DistributionCodeUser.distributionCodeUser_schema import DistributionCodeUserResponse # Import schemas
 from database.schema.GET.DistributionCollectible.distributionCollectible_schema import DistributionCollectibleResponse # Import schemas
 from database.schema.GET.MissionType.missionType_schema import MissionTypeResponse
+from database.schema.GET.Purchase.purchase_schema import PurchaseResponse
+from database.schema.GET.PurchaseItem.purchaseItem_schema import PurchaseItemResponse
+
 
 
 # Import the modules containing your refactored PATCH handler functions
@@ -46,7 +49,8 @@ import database.CRUD.PATCH.DistributionCode.patch_DistributionCode_CRUD_function
 import database.CRUD.PATCH.DistributionCodeUser.patch_DistributionCodeUser_CRUD_functions as DistributionCodeUserPATCHFunctions
 import database.CRUD.PATCH.DistributionCollectible.patch_DistributionCollectible_CRUD_functions as DistributionCollectiblePATCHFunctions
 import database.CRUD.PATCH.MissionType.patch_MissionType_CRUD_functions as MissionTypePATCHFunctions
-
+import database.CRUD.PATCH.Purchase.patch_Purchase_CRUD_functions as PurchasePATCHFunctions
+import database.CRUD.PATCH.PurchaseItem.patch_PurchaseItem_CRUD_functions as PurchaseItemPATCHFunctions
 
 # ... import other PATCH function modules
 
@@ -290,6 +294,24 @@ API_PATHS_PATCH = {
             "active": True,
             "handler": DistributionCollectiblePATCHFunctions.updateDistributionCollectibleByDistributionCollectibleId,
             "response_model": DistributionCollectibleResponse
+        }
+    },
+    Purchase_table: {
+        "updatePurchaseByPurchaseId": {
+            "path": "/updatePurchaseByPurchaseId",
+            "pathLocal": "/updatePurchaseByPurchaseId/{purchaseId}",
+            "active": True,
+            "handler": PurchasePATCHFunctions.updatePurchaseByPurchaseId,
+            "response_model": PurchaseResponse
+        }
+    },
+    PurchaseItem_table: {
+        "updatePurchaseItemByPurchaseItemId": {
+            "path": "/updatePurchaseItemByPurchaseItemId",
+            "pathLocal": "/updatePurchaseItemByPurchaseItemId/{purchaseItemId}",
+            "active": True,
+            "handler": PurchaseItemPATCHFunctions.updatePurchaseItemByPurchaseItemId,
+            "response_model": PurchaseItemResponse
         }
     }
     # Add entries for other tables

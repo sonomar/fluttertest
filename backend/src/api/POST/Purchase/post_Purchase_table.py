@@ -1,14 +1,13 @@
 # Ankit TBD
-# import api.POST.Project.post_Project_functions as project
-# from api.POST.api_paths_post import API_PATHS_POST
+import api.POST.Purchase.post_Purchase_functions as purchase
+from api.POST.api_paths_post import API_PATHS_POST
 
-# def call_Project_function(raw_path, event):
-    
-#     returnString = 'Invalid Function Call'
-#     Project_Path = API_PATHS_POST['Project']
+def call_Purchase_function(raw_path, event):
 
-#     ## Project
-#     if raw_path == Project_Path['createProject']['path']:
-#         returnString = project.createProject(event)
+    returnString = 'Invalid Function Call'
+    Purchase_Path = API_PATHS_POST['Purchase']
 
-#     return returnString
+    if raw_path == Purchase_Path['createPurchase']['path']:
+        returnString = purchase.createPurchase(event)
+
+    return returnString

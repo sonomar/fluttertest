@@ -28,6 +28,32 @@ class DistributionTypeEnum(enum.Enum):
     internal = "internal"
     admin = "admin"
 
+class PurchaseCurrencyEnum(enum.Enum):
+    FIAT = "FIAT"
+    STRIPE = "STRIPE"
+    PAYPAL = "PAYPAL"
+    CRYPTO = "CRYPTO"
+    POINTS = "POINTS"
+    FREE = "FREE"
+    COUPON = "COUPON"
+
+class PurchaseStatusEnum(enum.Enum):
+    NOTSTARTED = "NOTSTARTED"
+    STARTED = "STARTED"
+    PROCESSING = "PROCESSING"
+    COMPLETE = "COMPLETE"
+    DECLINED = "DECLINED"
+    CANCELLED = "CANCELLED"
+    ERROR = "ERROR"
+    INCOMPLETE = "INCOMPLETE"
+
+class ItemTableEnum(enum.Enum):
+    COLLECTIBLE = "COLLECTIBLE"
+    PACK = "PACK"
+    BUNDLE = "BUNDLE"
+    PRODUCT = "PRODUCT"
+
+
 class Category(Base):
     __tablename__ = 'Category'
     __table_args__ = (
@@ -105,6 +131,8 @@ class Notification(Base):
     vidRef: Mapped[Optional[dict]] = mapped_column(JSON)
     qrRef: Mapped[Optional[dict]] = mapped_column(JSON)
     embedRef: Mapped[Optional[dict]] = mapped_column(JSON)
+    publishDt: Mapped[Optional[datetime.datetime]] = mapped_column(TIMESTAMP) # New column
+    notifyData: Mapped[Optional[dict]] = mapped_column(JSON) # New column
 
     NotificationUser: Mapped[List['NotificationUser']] = relationship('NotificationUser', back_populates='Notification_')
 
@@ -194,7 +222,7 @@ class User(Base):
     UserCollectible_: Mapped[List['UserCollectible']] = relationship('UserCollectible', foreign_keys='[UserCollectible.previousOwnerId]', back_populates='User1')
     DistributionCodeUser: Mapped[List['DistributionCodeUser']] = relationship('DistributionCodeUser', foreign_keys='[DistributionCodeUser.userId]', back_populates='User_')
     DistributionCodeUser_: Mapped[List['DistributionCodeUser']] = relationship('DistributionCodeUser', foreign_keys='[DistributionCodeUser.previousOwnerId]', back_populates='User1')
-
+    Purchase: Mapped[List['Purchase']] = relationship('Purchase', back_populates='User_')
 
 class Collection(Base):
     __tablename__ = 'Collection'
@@ -583,3 +611,40 @@ class DistributionCollectible(Base):
 
     Distribution_: Mapped['Distribution'] = relationship('Distribution', back_populates='DistributionCollectible')
     Collectible_: Mapped['Collectible'] = relationship('Collectible', back_populates='DistributionCollectible')
+
+class Purchase(Base):
+    __tablename__ = 'Purchase'
+    __table_args__ = (
+        Index('purchaseId', 'purchaseId', unique=True),
+        ForeignKeyConstraint(['userId'], ['User.userId'], ondelete='CASCADE', onupdate='CASCADE', name='purchase_ibfk_1'),
+    )
+
+    purchaseId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    userId: Mapped[int] = mapped_column(BIGINT)
+    currency: Mapped[PurchaseCurrencyEnum] = mapped_column(Enum(PurchaseCurrencyEnum), nullable=False, default=PurchaseCurrencyEnum.FIAT)
+    status: Mapped[PurchaseStatusEnum] = mapped_column(Enum(PurchaseStatusEnum), nullable=False, default=PurchaseStatusEnum.NOTSTARTED)
+    messages: Mapped[Optional[dict]] = mapped_column(JSON)
+    purchaseData: Mapped[Optional[dict]] = mapped_column(JSON)
+    blockchainPaymentData: Mapped[Optional[dict]] = mapped_column(JSON)
+    createdDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    updatedDt: Mapped[datetime.datetime] = mapped_column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+
+    User_: Mapped['User'] = relationship('User', back_populates='Purchase')
+    items: Mapped[List['PurchaseItem']] = relationship('PurchaseItem', back_populates='Purchase_')
+
+
+class PurchaseItem(Base):
+    __tablename__ = 'PurchaseItem'
+    __table_args__ = (
+        Index('purchaseItemId', 'purchaseItemId', unique=True),
+        ForeignKeyConstraint(['purchaseId'], ['Purchase.purchaseId'], ondelete='CASCADE', onupdate='CASCADE', name='purchaseitem_ibfk_1'),
+    )
+
+    purchaseItemId: Mapped[int] = mapped_column(BIGINT, primary_key=True)
+    purchaseId: Mapped[int] = mapped_column(BIGINT)
+    itemTable: Mapped[ItemTableEnum] = mapped_column(Enum(ItemTableEnum), nullable=False, default=ItemTableEnum.COLLECTIBLE)
+    itemId: Mapped[int] = mapped_column(Integer, nullable=False)
+    blockchainData: Mapped[Optional[dict]] = mapped_column(JSON)
+    purchasedUserItemId: Mapped[Optional[int]] = mapped_column(Integer)
+
+    Purchase_: Mapped['Purchase'] = relationship('Purchase', back_populates='items')
