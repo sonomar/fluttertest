@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../models/app_auth_provider.dart';
 import '../../../models/user_model.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../widgets/profile/permissions_widgets.dart';
 
 class AccountSettingsScreen extends StatelessWidget {
   const AccountSettingsScreen({super.key});
@@ -117,6 +118,38 @@ class AccountSettingsScreen extends StatelessWidget {
               const ChangePasswordForm(),
               const SizedBox(height: 24),
               const ChangeEmailForm(),
+              const SizedBox(height: 40), // Spacing before new section
+              // New Permissions Section
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      translate('permissions_header', context) ?? 'Permissions',
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                    ),
+                    const Divider(height: 20, thickness: 1),
+                    const CameraPermissionSwitch(),
+                    const PushNotificationPermissionSwitch(),
+                  ],
+                ),
+              ),
               const SizedBox(height: 40),
               Center(
                   child: InkWell(
