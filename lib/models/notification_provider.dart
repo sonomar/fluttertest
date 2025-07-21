@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:deins_app/api/notification.dart';
 import 'package:deins_app/api/notification_user.dart';
+import 'package:deins_app/api/user.dart' as api_user;
 import 'package:deins_app/models/app_auth_provider.dart';
 import 'package:deins_app/models/user_model.dart';
 import 'package:deins_app/screens/subscreens/notifications/notification_models.dart';
-import 'package:firebase_messaging/firebase_messaging.dart'; // Import Firebase Messaging
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:io' show Platform;
 
 class NotificationProvider with ChangeNotifier {
@@ -148,11 +149,15 @@ class NotificationProvider with ChangeNotifier {
   /// This should be called once the user is authenticated and their ID is available.
   Future<void> _initializePushNotifications(String userId) async {
     try {
-      // Get the FCM token for this device.
+      // Get the current FCM token.
       String? fcmToken = await FirebaseMessaging.instance.getToken();
-      print('FCM Token: $fcmToken');
+      print('FCM Token (from _initializePushNotifications): $fcmToken');
 
-      if (fcmToken != null) {
+      // Compare with the token stored in the user model (if available)
+      // or send if the user model doesn't have it yet.
+      if (fcmToken != null &&
+          _userModel.currentUser?.fcmDeviceToken != fcmToken) {
+        print('FCM Token changed or not yet stored. Sending to backend.');
         // Send the FCM token to your backend using the API layer
         await registerFcmToken(
           userId,
@@ -160,8 +165,15 @@ class NotificationProvider with ChangeNotifier {
           Platform.isAndroid ? 'android' : 'ios',
           _appAuthProvider, // Pass the provider for authentication headers
         );
-      } else {
+        // Update the user model locally after successful update
+        _userModel.currentUser?.fcmDeviceToken = fcmToken;
+        _userModel
+            .notifyListeners(); // Notify UserModel listeners about the change
+      } else if (fcmToken == null) {
         print('FCM Token is null. Cannot send to backend.');
+      } else {
+        print(
+            'FCM Token is already up-to-date in user model. No need to send.');
       }
 
       // Set up foreground message handling (optional, if you want to show in-app alerts)
@@ -200,11 +212,10 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
-  /// Sends the FCM device token to your AWS backend.
-  /// This function now calls the registerFcmToken from api/notification.dart.
+  /// This function is now only responsible for sending the token to the backend
+  /// if it changes or needs to be refreshed. The initial registration is at sign-up.
+  /// It calls the registerFcmToken from api/notification.dart.
   Future<void> _sendTokenToBackend(String userId, String token) async {
-    // This function is now just a wrapper for the API call.
-    // The actual HTTP request logic is in api/notification.dart.
     try {
       await registerFcmToken(
         userId,
@@ -218,6 +229,49 @@ class NotificationProvider with ChangeNotifier {
       // You might want to set an error message here if the API call fails
       // _errorMessage = "Failed to register push token: ${e.toString()}";
       // notifyListeners();
+    }
+  }
+
+  /// Updates the user's preference for push notifications in the backend.
+  /// This will update the 'push_notifications_enabled' column in the User table.
+  Future<void> updatePushNotificationPreference(bool enabled) async {
+    final String? userId = _userModel.currentUser?.userId?.toString();
+    if (userId == null) {
+      print(
+          "Error: Cannot update push notification preference, user not logged in.");
+      _errorMessage = "User not logged in to update push preference.";
+      notifyListeners();
+      return;
+    }
+
+    try {
+      await api_user.updateUserByUserId(
+        // Use existing updateUserByUserId
+        {
+          'userId': userId,
+          'authData': {
+            'pushEnabled': enabled ? '1' : '0' // Store as string '1' or '0'
+          }
+        },
+        _appAuthProvider,
+      );
+      // Update the local user model after successful API call
+      if (_userModel.currentUser != null) {
+        if (_userModel.currentUser!.authData == null) {
+          _userModel.currentUser!.authData = {};
+        }
+        _userModel.currentUser!.authData!['pushEnabled'] = enabled ? '1' : '0';
+        _userModel
+            .notifyListeners(); // Notify UserModel listeners about the change
+      }
+      print(
+          "Push notification preference updated to: $enabled for user $userId");
+      notifyListeners(); // Notify NotificationProvider listeners about potential error message clear
+    } catch (e) {
+      print("Error updating push notification preference: $e");
+      _errorMessage =
+          "Failed to update push notification preference: ${e.toString()}";
+      notifyListeners();
     }
   }
 
