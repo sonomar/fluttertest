@@ -1,3 +1,4 @@
+from api.cronCheckAll import cron_router_all
 from api.routeCheckAll import http_router_all
 from database.db import get_db
 from fastapi.encoders import jsonable_encoder
@@ -99,6 +100,10 @@ def lambda_handler(event, context):
 
     elif event.get('triggerSource') == 'CRON' and event.get('scheduler-name'):
         print("CRON trigger received.")
+        print(event)
+        event['db_session'] = db
+        returnString = cron_router_all(event)
+        return jsonable_encoder(returnString)
 
     # 2. Handle API Gateway / HTTP Call
     else:

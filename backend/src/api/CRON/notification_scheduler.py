@@ -1,8 +1,9 @@
 import json
-import os
 import boto3
 from botocore.exceptions import ClientError
 from datetime import datetime, timezone
+
+from fastapi.encoders import jsonable_encoder
 
 # Import SessionLocal directly from your database.db file
 # from database.db import SessionLocal
@@ -13,7 +14,8 @@ from datetime import datetime, timezone
 import database.CRUD.GET.Notification.get_Notification_CRUD_functions as NotificationGET
 import database.CRUD.PATCH.Notification.patch_Notification_CRUD_functions as NotificationPATCH
 import database.CRUD.GET.User.get_User_CRUD_functions as UserGET
-import database.CRUD.POST.NotificationUser.post_Notification_User_CRUD_functions as NotificationUserPOST
+import database.CRUD.POST.NotificationUser.post_NotificationUser_CRUD_functions as NotificationUserPOST
+import database.CRUD.GET.NotificationUser.get_NotificationUser_CRUD_functions as NotificationUserGET
 
 from database.schema.PATCH.Notification.notification_schema import NotificationUpdate
 from database.schema.POST.NotificationUser.notificationUser_schema import NotificationUserCreate
@@ -22,8 +24,8 @@ from database.schema.GET.User.user_schema import UserResponse # For parsing GET 
 
 # SNS Platform Application ARN (get this from your SNS console after creation)
 # SNS_PLATFORM_APPLICATION_ARN = os.environ.get('SNS_PLATFORM_APPLICATION_ARN')
- from tools.prod.prodTools import get_secrets # Adjust import path if necessary
-        parameters = get_secrets() # This will fetch from Secrets Manager in prod
+from tools.prod.prodTools import extractData, get_secrets # Adjust import path if necessary
+parameters = get_secrets() # This will fetch from Secrets Manager in prod
 # Initialize clients
 sns_client = boto3.client('sns')
 
@@ -62,15 +64,15 @@ def notificationScheduler(event):
         # This assumes getAllNotifications returns all necessary fields (publishDt, active, notifyData).
         # RECOMMENDATION: For large datasets, a specific GET CRUD function that filters at the DB level
         # (as in the previous direct SQL query) is more efficient.
-        data = extractData(event)
+        #data = extractData(event)
         # update the function below to be more specific
         all_notifications_response = NotificationGET.getAllNotifications(skip=0, limit=99999, db=db_session) # Assuming this function exists
+        #print(jsonable_encoder(all_notifications_response))
 
-        if all_notifications_response.get('statusCode') != 200:
-            print(f"Failed to fetch all notifications: {all_notifications_response.get('body', 'Unknown error')}")
-            raise Exception("Failed to retrieve notification data for processing.")
         
-        all_notifications_raw = json.loads(all_notifications_response['body'])
+        all_notifications_raw = jsonable_encoder(all_notifications_response)
+        print("lawson")
+        print(all_notifications_raw)
         
         notifications_to_process_raw = []
         now_utc_dt = datetime.now(timezone.utc)
@@ -122,13 +124,14 @@ def notificationScheduler(event):
         #     db_session,
         #     data={"lastLoggedInAfter": "1970-01-01T00:00:00Z", "skip": 0, "limit": 100000} # Large limit to fetch all
         # )
-        all_users_response = UserGET.getUsersByLastLoggedIn("lastLoggedInAfter": "1970-01-01T00:00:00Z", "skip": 0, "limit": 100000, db=db_session)
+        # 
+        all_users_response = UserGET.getUsersByLastLoggedIn(lastLoggedInAfter= "1970-01-01T00:00:00Z", skip= 0, limit= 100000, db=db_session)
         
-        if all_users_response.get('statusCode') != 200:
-            print(f"Failed to fetch all users: {all_users_response.get('body', 'Unknown error')}")
-            raise Exception("Failed to retrieve user data for notification processing.")
+        #if all_users_response.get('statusCode') != 200:
+        #    print(f"Failed to fetch all users: {all_users_response.get('body', 'Unknown error')}")
+        #    raise Exception("Failed to retrieve user data for notification processing.")
         
-        all_users_data = json.loads(all_users_response['body']) 
+        all_users_data = jsonable_encoder(all_users_response) 
         
         users_for_notification_user_creation = [user['userId'] for user in all_users_data]
         users_for_push_notification = [
@@ -157,7 +160,7 @@ def notificationScheduler(event):
                 #     db_session,
                 #     data={"notificationId": notification_id, "active": True}
                 # )
-                patch_result = NotificationPATCH.updateNotificationByNotificationId("notificationId": notification_id, "active": True, db=db_session)
+                patch_result = NotificationPATCH.updateNotificationByNotificationId(notificationId = notification_id, active = True, db=db_session)
                 if patch_result.get('statusCode') != 200:
                     print(f"Failed to activate notification {notification_id}: {patch_result.get('body')}")
                     continue # Skip to next notification if activation fails
@@ -173,10 +176,10 @@ def notificationScheduler(event):
                     #     db_session,
                     #     data={"notificationId": notification_id, "userId": user_id}
                     # )
-                    existing_notif_user_response = NotificationUserGET.getNotificationUsersByNotificationIdAndUserId("notificationId": notification_id, "userId": user_id, db=db_session)
+                    existing_notif_user_response = NotificationUserGET.getNotificationUsersByNotificationIdAndUserId(notificationId = notification_id, userId = user_id, db=db_session)
                     
                     # Assuming getNotificationUsersByNotificationIdAndUserId returns a list in its body
-                    if existing_notif_user_response.get('statusCode') == 200 and not json.loads(existing_notif_user_response['body']):
+                    if  not jsonable_encoder(existing_notif_user_response):
                         # Create Pydantic model for new entry
                         notification_user_create_payload = NotificationUserCreate(
                             notificationId=notification_id,
@@ -225,7 +228,8 @@ def notificationScheduler(event):
                                 })
                             }
 
-                            account_id = context.invoked_function_arn.split(':')[4]
+                            #account_id = context.invoked_function_arn.split(':')[4]
+                            account_id = "125e3123625"
                             region = parameters['AWS_REGION']
                             platform_app_name = parameters["SNS_PLATFORM_APPLICATION_ARN"].split('/')[-1]
 
@@ -262,12 +266,12 @@ def notificationScheduler(event):
                 # RECOMMENDATION: Implement NotificationGET.getNotificationByNotificationId(event)
                 # to return a parsed Pydantic model or directly the notifyData dict.
                 current_notification_response = NotificationGET.getNotificationByNotificationId(
-                    "notificationId": notif_id, db=db_session
+                    notificationId = notif_id, db=db_session
                 )
                 current_notify_data = {}
-                if current_notification_response.get('statusCode') == 200:
-                    current_notification_obj = json.loads(current_notification_response['body'])
-                    current_notify_data = current_notification_obj.get('notifyData', {}) or {} # Ensure it's a dict
+                #if current_notification_response.get('statusCode') == 200:
+                #    current_notification_obj = json.loads(current_notification_response['body'])
+                #    current_notify_data = current_notification_obj.get('notifyData', {}) or {} # Ensure it's a dict
 
                 # Update the processedForPush key
                 current_notify_data['processedForPush'] = current_processing_dt_iso
@@ -278,7 +282,7 @@ def notificationScheduler(event):
                 #     db_session,
                 #     data={"notificationId": notif_id, "notifyData": current_notify_data}
                 # )
-                patch_result = NotificationPATCH.updateNotificationByNotificationId("notificationId": notif_id, "notifyData": current_notify_data, db=db_session)
+                patch_result = NotificationPATCH.updateNotificationByNotificationId(notificationId = notif_id, notification_update_data = notification_update_payload, db=db_session)
                 if patch_result.get('statusCode') != 200:
                     print(f"Failed to mark notification {notif_id} as processed: {patch_result.get('body')}")
             db_session.commit()
