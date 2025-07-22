@@ -5,8 +5,8 @@ from botocore.exceptions import ClientError
 from datetime import datetime, timezone
 
 # Import SessionLocal directly from your database.db file
-from database.db import SessionLocal
-from sqlalchemy.orm import Session # Import Session for type hinting
+# from database.db import SessionLocal
+# from sqlalchemy.orm import Session # Import Session for type hinting
 # Removed: from sqlalchemy import text # No longer needed for initial query
 
 # Import CRUD functions and schemas
@@ -21,26 +21,27 @@ from database.schema.GET.Notification.notification_schema import NotificationRes
 from database.schema.GET.User.user_schema import UserResponse # For parsing GET results
 
 # SNS Platform Application ARN (get this from your SNS console after creation)
-SNS_PLATFORM_APPLICATION_ARN = os.environ.get('SNS_PLATFORM_APPLICATION_ARN')
-
+# SNS_PLATFORM_APPLICATION_ARN = os.environ.get('SNS_PLATFORM_APPLICATION_ARN')
+ from tools.prod.prodTools import get_secrets # Adjust import path if necessary
+        parameters = get_secrets() # This will fetch from Secrets Manager in prod
 # Initialize clients
 sns_client = boto3.client('sns')
 
-def _create_mock_event(db_session: Session, data: dict = None, path_params: dict = None):
-    """
-    Creates a mock event dictionary that mimics the structure expected by
-    your existing API functions (which use extractData and expect db_session).
-    This is necessary when calling CRUD functions internally from a Lambda
-    that doesn't receive an API Gateway event.
-    """
-    mock_event = {
-        'body': json.dumps(data) if data is not None else '{}',
-        'pathParameters': path_params if path_params is not None else {},
-        'db_session': db_session # Inject the SQLAlchemy session
-    }
-    return mock_event
+# def _create_mock_event(db_session: Session, data: dict = None, path_params: dict = None):
+#     """
+#     Creates a mock event dictionary that mimics the structure expected by
+#     your existing API functions (which use extractData and expect db_session).
+#     This is necessary when calling CRUD functions internally from a Lambda
+#     that doesn't receive an API Gateway event.
+#     """
+#     mock_event = {
+#         'body': json.dumps(data) if data is not None else '{}',
+#         'pathParameters': path_params if path_params is not None else {},
+#         'db_session': db_session # Inject the SQLAlchemy session
+#     }
+#     return mock_event
 
-def lambda_handler(event, context):
+def notificationScheduler(event):
     """
     Lambda function to process notifications based on their active status or publish date.
     It identifies notifications that need to be published (create notificationUser entries
@@ -49,18 +50,21 @@ def lambda_handler(event, context):
     This function is intended to be triggered by an EventBridge (CloudWatch Events) schedule.
     It now uses your existing CRUD functions and Pydantic schemas where applicable.
     """
-    db_session: Session = None # Initialize session to None
+    # db_session: Session = None # Initialize session to None
+    db_session = event.get('db_session')
+    if db_session is None:
+        print("Error: db_session not found.")
     try:
         print(f"Scheduler Lambda triggered at: {datetime.now(timezone.utc)}")
-        db_session = SessionLocal()
 
         # --- Step 1: Fetch all notifications and filter them in Python ---
         # Using getAllNotifications and then filtering in Python.
         # This assumes getAllNotifications returns all necessary fields (publishDt, active, notifyData).
         # RECOMMENDATION: For large datasets, a specific GET CRUD function that filters at the DB level
         # (as in the previous direct SQL query) is more efficient.
-        mock_get_all_notifications_event = _create_mock_event(db_session)
-        all_notifications_response = NotificationGET.getAllNotifications(mock_get_all_notifications_event) # Assuming this function exists
+        data = extractData(event)
+        # update the function below to be more specific
+        all_notifications_response = NotificationGET.getAllNotifications(skip=0, limit=99999, db=db_session) # Assuming this function exists
 
         if all_notifications_response.get('statusCode') != 200:
             print(f"Failed to fetch all notifications: {all_notifications_response.get('body', 'Unknown error')}")
@@ -114,11 +118,11 @@ def lambda_handler(event, context):
         # Fetch all users once using CRUD function
         # RECOMMENDATION: Ideally, your UserGET CRUD would have a specific `getAllUsers` function.
         # Using `getUsersByLastLoggedIn` with a very old date and large limit as a workaround.
-        mock_get_all_users_event = _create_mock_event(
-            db_session,
-            data={"lastLoggedInAfter": "1970-01-01T00:00:00Z", "skip": 0, "limit": 100000} # Large limit to fetch all
-        )
-        all_users_response = UserGET.getUsersByLastLoggedIn(mock_get_all_users_event)
+        # mock_get_all_users_event = _create_mock_event(
+        #     db_session,
+        #     data={"lastLoggedInAfter": "1970-01-01T00:00:00Z", "skip": 0, "limit": 100000} # Large limit to fetch all
+        # )
+        all_users_response = UserGET.getUsersByLastLoggedIn("lastLoggedInAfter": "1970-01-01T00:00:00Z", "skip": 0, "limit": 100000, db=db_session)
         
         if all_users_response.get('statusCode') != 200:
             print(f"Failed to fetch all users: {all_users_response.get('body', 'Unknown error')}")
@@ -149,11 +153,11 @@ def lambda_handler(event, context):
                 # Prepare data for PATCH using Pydantic schema
                 # Only send 'active' field for update
                 notification_update_data = NotificationUpdate(active=True)
-                mock_patch_event = _create_mock_event(
-                    db_session,
-                    data={"notificationId": notification_id, "active": True}
-                )
-                patch_result = NotificationPATCH.updateNotificationByNotificationId(mock_patch_event)
+                # mock_patch_event = _create_mock_event(
+                #     db_session,
+                #     data={"notificationId": notification_id, "active": True}
+                # )
+                patch_result = NotificationPATCH.updateNotificationByNotificationId("notificationId": notification_id, "active": True, db=db_session)
                 if patch_result.get('statusCode') != 200:
                     print(f"Failed to activate notification {notification_id}: {patch_result.get('body')}")
                     continue # Skip to next notification if activation fails
@@ -165,11 +169,11 @@ def lambda_handler(event, context):
                     # Check if notificationUser entry already exists to prevent duplicates
                     # RECOMMENDATION: Implement NotificationUserGET.getNotificationUsersByNotificationIdAndUserId(event)
                     # If not, a direct query is needed here.
-                    mock_get_notif_user_event = _create_mock_event(
-                        db_session,
-                        data={"notificationId": notification_id, "userId": user_id}
-                    )
-                    existing_notif_user_response = NotificationUserGET.getNotificationUsersByNotificationIdAndUserId(mock_get_notif_user_event)
+                    # mock_get_notif_user_event = _create_mock_event(
+                    #     db_session,
+                    #     data={"notificationId": notification_id, "userId": user_id}
+                    # )
+                    existing_notif_user_response = NotificationUserGET.getNotificationUsersByNotificationIdAndUserId("notificationId": notification_id, "userId": user_id, db=db_session)
                     
                     # Assuming getNotificationUsersByNotificationIdAndUserId returns a list in its body
                     if existing_notif_user_response.get('statusCode') == 200 and not json.loads(existing_notif_user_response['body']):
@@ -190,8 +194,8 @@ def lambda_handler(event, context):
                     # Loop and call createNotificationUser individually.
                     # RECOMMENDATION: Implement NotificationUserPOST.createNotificationUserBatch(list_of_schemas, db_session)
                     for nu_payload in notification_user_data_for_insert:
-                        mock_post_event = _create_mock_event(db_session, data=nu_payload.model_dump()) # Pydantic v2 .model_dump()
-                        post_result = NotificationUserPOST.createNotificationUser(mock_post_event)
+                        # mock_post_event = _create_mock_event(db_session, data=nu_payload.model_dump()) # Pydantic v2 .model_dump()
+                        post_result = NotificationUserPOST.createNotificationUser(nu_payload.model_dump(), db=db_session)
                         if post_result.get('statusCode') != 201: # Assuming 201 for creation
                             print(f"Failed to create notificationUser for user {nu_payload.userId}: {post_result.get('body')}")
                     print(f"Attempted to create {len(notification_user_data_for_insert)} notificationUser entries for notification {notification_id}.")
@@ -222,8 +226,8 @@ def lambda_handler(event, context):
                             }
 
                             account_id = context.invoked_function_arn.split(':')[4]
-                            region = os.environ['AWS_REGION']
-                            platform_app_name = SNS_PLATFORM_APPLICATION_ARN.split('/')[-1]
+                            region = parameters['AWS_REGION']
+                            platform_app_name = parameters["SNS_PLATFORM_APPLICATION_ARN"].split('/')[-1]
 
                             target_arn = (
                                 f"arn:aws:sns:{region}:{account_id}:"
@@ -258,7 +262,7 @@ def lambda_handler(event, context):
                 # RECOMMENDATION: Implement NotificationGET.getNotificationByNotificationId(event)
                 # to return a parsed Pydantic model or directly the notifyData dict.
                 current_notification_response = NotificationGET.getNotificationByNotificationId(
-                    _create_mock_event(db_session, data={"notificationId": notif_id})
+                    "notificationId": notif_id, db=db_session
                 )
                 current_notify_data = {}
                 if current_notification_response.get('statusCode') == 200:
@@ -270,11 +274,11 @@ def lambda_handler(event, context):
 
                 # Prepare data for PATCH using Pydantic schema
                 notification_update_payload = NotificationUpdate(notifyData=current_notify_data)
-                mock_patch_event = _create_mock_event(
-                    db_session,
-                    data={"notificationId": notif_id, "notifyData": current_notify_data}
-                )
-                patch_result = NotificationPATCH.updateNotificationByNotificationId(mock_patch_event)
+                # mock_patch_event = _create_mock_event(
+                #     db_session,
+                #     data={"notificationId": notif_id, "notifyData": current_notify_data}
+                # )
+                patch_result = NotificationPATCH.updateNotificationByNotificationId("notificationId": notif_id, "notifyData": current_notify_data, db=db_session)
                 if patch_result.get('statusCode') != 200:
                     print(f"Failed to mark notification {notif_id} as processed: {patch_result.get('body')}")
             db_session.commit()
@@ -297,6 +301,3 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': json.dumps({'message': f'Internal server error: {str(e)}'})
         }
-    finally:
-        if db_session:
-            db_session.close() # Always close the session

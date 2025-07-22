@@ -7,7 +7,6 @@ from database.schema.POST.User.user_schema import UserCreate
 from database.models import User # Assuming User model is defined here
 import json
 from sqlalchemy.exc import IntegrityError
-from datetime import datetime # For current timestamp if needed
 
 # It's better to manage the session within the handler to ensure it's fresh for each invocation.
 def get_db_session():
@@ -51,9 +50,9 @@ def lambda_handler(event, context):
             # Add other initial auth-related data to auth_data if needed
 
             if not email or not cognito_sub:
-            error_msg = f"Email or Cognito sub not found in event. Email: {email}, Sub: {cognito_sub}."
-            print(error_msg)
-            raise ValueError(error_msg)
+                error_msg = f"Email or Cognito sub not found in event. Email: {email}, Sub: {cognito_sub}."
+                print(error_msg)
+                raise ValueError(error_msg)
 
             # Check if the user already exists in the database to avoid duplicate insertions
             existing_user = db.query(User).filter(User.email == email).first()
@@ -97,6 +96,9 @@ def lambda_handler(event, context):
                  print(f"Validation errors: {json.dumps(error_details)}")
                  raise Exception(f"Validation Error creating user from Cognito: {json.dumps(error_details)}")
             raise e
+
+    elif event.get('triggerSource') == 'CRON' and event.get('scheduler-name'):
+        print("CRON trigger received.")
 
     # 2. Handle API Gateway / HTTP Call
     else:
