@@ -258,6 +258,12 @@ API_PATHS_GET = {
             "handler": NotificationGETFunctions.getNotificationByNotificationId,
             "response_model": NotificationResponse
         },
+         "getAllNotifications": {
+            "path": "/getAllNotifications",
+            "active": True,
+            "handler": NotificationGETFunctions.getAllNotifications,
+            "response_model": List[NotificationResponse]
+        },
         "getNotificationsByDate": {
             "path": "/getNotificationsByDate",
             "active": True,

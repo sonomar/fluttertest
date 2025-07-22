@@ -2,6 +2,38 @@
 from tools.prod.prodTools import extractData
 import database.CRUD.GET.Notification.get_Notification_CRUD_functions as crudFunctions
 
+def getAllNotifications(event):
+    """
+    Retrieves all notifications.
+    """
+    data = extractData(event)
+    skip = 0
+    limit = 100
+
+    if data is not None:
+        if "skip" in data:
+            try:
+                skip_param = data.get("skip")
+                if skip_param is not None: 
+                    skip = int(skip_param)
+            except (ValueError, TypeError):
+                print(f"Warning: Invalid 'skip' parameter value: {data.get('skip')}. Using default {skip}.")
+        if "limit" in data:
+            try:
+                limit_param = data.get("limit")
+                if limit_param is not None:
+                    limit = int(limit_param)
+            except (ValueError, TypeError):
+                print(f"Warning: Invalid 'limit' parameter value: {data.get('limit')}. Using default {limit}.")
+    else:
+        print("Debug: No query parameters ('skip', 'limit') found for getAllNotifications. Using defaults.")
+
+    db_session = event.get('db_session')
+    if db_session is None:
+        print("Error: db_session not found in event for getAllNotifications.")
+
+    return crudFunctions.getAllNotifications(skip=skip, limit=limit, db=db_session)
+
 def getNotificationByNotificationId(event):
     """
     Retrieves a notification by its notificationId.

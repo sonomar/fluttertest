@@ -9,6 +9,9 @@ def call_Notification_function(raw_path, event):
     ## Notification
     if raw_path == Notification_Path['getNotificationByNotificationId']['path']:
         returnString = notification.getNotificationByNotificationId(event)
+    
+    elif raw_path == Notification_Path['getAllNotifications']['path']:
+        returnString = notification.getAllNotifications(event)
 
     elif raw_path == Notification_Path['getNotificationsByDate']['path']:
         returnString = notification.getNotificationsByDate(event)

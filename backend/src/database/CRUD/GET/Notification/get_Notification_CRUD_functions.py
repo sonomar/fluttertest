@@ -18,6 +18,17 @@ def getNotificationByNotificationId(
         raise NotFoundException(detail=f"Notification with ID {notificationId} not found")
     return db_notification
 
+def getAllNotifications(
+    skip: int = Query(0, description="Skip this many items"),
+    limit: int = Query(100, description="Limit results to this many items"),
+    db: Session = Depends(get_db)
+) -> List[NotificationResponse]:
+    """
+    Retrieves all collectibles with pagination.
+    """
+    notifications = db.query(Notification).offset(skip).limit(limit).all()
+    return notifications
+
 def getNotificationsByDate(
     createdDtAfter: datetime.datetime = Query(..., description="Timestamp to retrieve notifications created after"),
     skip: int = Query(0, description="Skip this many items"),

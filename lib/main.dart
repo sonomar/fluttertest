@@ -5,13 +5,13 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/services.dart' as services;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './models/app_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'screens/home_screen.dart';
 import './widgets/auth/onboarding.dart';
 import 'screens/collection_screen.dart';
 import 'screens/scan_screen.dart';
-// import 'screens/community_screen.dart';
 import 'screens/profile_screen.dart';
-// import 'screens/game_screen.dart';
 import 'screens/subscreens/missions/missions.dart';
 import './models/collectible_model.dart';
 import './models/notification_provider.dart';
@@ -30,9 +30,25 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import './app_lifefycle_observer.dart';
 
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // When the app is in the background or terminated, Firebase needs to be
+  // re-initialized to ensure it has access to necessary resources.
+  // This is crucial for handling background messages.
+  await Firebase.initializeApp();
+  print('Handling a background message: ${message.messageId}');
+  print('Notification: ${message.notification?.title}');
+  print('Data: ${message.data}');
+  // You can perform heavy lifting here, e.g., show local notification
+  // or update app state via shared preferences. Avoid direct UI updates.
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   runApp(
     MultiProvider(providers: [
       ChangeNotifierProvider<LocaleProvider>(
